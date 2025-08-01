@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, MessageSquare } from 'lucide-react';
+import { Eye, EyeOff, MessageSquare, Github } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +56,7 @@ export default function Auth() {
     const username = formData.get('username') as string;
 
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -83,6 +84,31 @@ export default function Auth() {
     setIsLoading(false);
   };
 
+  const handleSignInGitHub = async () => {
+    setIsLoading(true);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`, // trang sẽ được redirect về sau khi đăng nhập thành công
+      },
+    });
+
+    if (error) {
+      toast({
+        title: "Lỗi đăng nhập",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+
+    // không cần toast thành công vì Supabase sẽ tự redirect người dùng
+    setIsLoading(false);
+  };
+
+
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--chat-background))] p-4">
       <Card className="w-full max-w-md bg-sidebar border-sidebar-border">
@@ -101,7 +127,7 @@ export default function Auth() {
               <TabsTrigger value="signin" className="text-sidebar-foreground">Đăng nhập</TabsTrigger>
               <TabsTrigger value="signup" className="text-sidebar-foreground">Đăng ký</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -145,6 +171,10 @@ export default function Auth() {
                   {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
                 </Button>
               </form>
+              <Button onClick={handleSignInGitHub} className="w-full bg-white text-black mt-3 hover:bg-slate-200" disabled={isLoading}>
+                <Github />
+                {isLoading ? "Đang đăng nhập với github..." : "Đăng nhập với github"}
+              </Button>
             </TabsContent>
 
             <TabsContent value="signup">

@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signInWithGitHub: () => Promise<void>;
   signUp: (email: string, password: string, username: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
@@ -73,11 +74,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error: 'Có lỗi xảy ra khi đăng nhập' };
     }
   };
+  const signInWithGitHub = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+    });
+
+    if (error) {
+      console.error('Lỗi đăng nhập GitHub:', error);
+      toast({
+        title: 'Đăng nhập GitHub thất bại',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
 
   const signUp = async (email: string, password: string, username: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -118,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session,
       loading,
       signIn,
+      signInWithGitHub,
       signUp,
       signOut,
     }}>
