@@ -19,6 +19,10 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import SidebarLayout from './SidebarLayout';
+import { ChannelHeader } from './blocks/ChannelHeader';
+import { MessageList } from './blocks/MessageList';
+import { MessageInput } from './blocks/MessageInput';
 
 interface Channel {
   id: string;
@@ -181,26 +185,7 @@ export default function ChatLayout() {
   return (
     <div className="h-screen flex bg-[hsl(var(--chat-background))]">
       {/* Sidebar */}
-      <div className="w-60 bg-sidebar border-r border-sidebar-border flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-sidebar-border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <MessageSquare className="h-6 w-6 text-primary" />
-              <h1 className="font-semibold text-sidebar-foreground">CodeSync</h1>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={signOut}
-              className="text-sidebar-foreground hover:bg-sidebar-accent"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Search */}
+      <SidebarLayout>
         <div className="p-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sidebar-foreground/50" />
@@ -275,117 +260,19 @@ export default function ChatLayout() {
             ))}
           </div>
         </ScrollArea>
-
-        {/* User Info */}
-        <div className="p-3 border-t border-sidebar-border">
-          <div className="flex items-center space-x-2">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {user?.email?.[0]?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user?.email?.split('@')[0] || 'User'}
-              </p>
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-[hsl(var(--online-status))] rounded-full mr-1" />
-                <p className="text-xs text-sidebar-foreground/70">Online</p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-sidebar-foreground/50 hover:text-sidebar-foreground"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+      </SidebarLayout>
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {selectedChannel ? (
           <>
             {/* Chat Header */}
-            <div className="h-14 border-b border-border bg-card px-6 flex items-center">
-              <Hash className="h-5 w-5 text-muted-foreground mr-2" />
-              <h2 className="font-semibold text-foreground">{selectedChannel.name}</h2>
-              {selectedChannel.description && (
-                <>
-                  <Separator orientation="vertical" className="mx-3 h-4" />
-                  <p className="text-sm text-muted-foreground">{selectedChannel.description}</p>
-                </>
-              )}
-              <div className="ml-auto flex items-center space-x-2">
-                <Button variant="ghost" size="sm">
-                  <Users className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <ChannelHeader selectedChannel={selectedChannel} />
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div key={message.id} className="flex space-x-3">
-                    <Avatar className="h-8 w-8 flex-shrink-0">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                        {message.username?.[0]?.toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline space-x-2">
-                        <p className="text-sm font-medium text-white ">
-                          {message.username || 'User'}
-                        </p>
-                        <p className="text-xs text-muted-white ">
-                          {new Date(message.created_at).toLocaleTimeString('vi-VN', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                      <div className="text-sm text-white  mt-1 message-content">
-                        {renderMessageContent(message.content)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-
+            <MessageList messages={messages} />
             {/* Message Input */}
-            <div className="p-4 border-t border-border">
-              <div className="flex space-x-2">
-                <div className="flex-1 relative">
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder={`Nhắn tin đến #${selectedChannel.name}...`}
-                    className="pr-10 bg-[hsl(var(--chat-input))] border-border text-white"
-                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  />
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                    >
-                      <Code className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <Button onClick={sendMessage} size="sm" className="flex-shrink-0">
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Sử dụng <kbd className="px-1 py-0.5 text-xs bg-muted rounded">```</kbd> để chia sẻ code,{' '}
-                <kbd className="px-1 py-0.5 text-xs bg-muted rounded">/create</kbd> để tạo kênh mới
-              </p>
-            </div>
+            <MessageInput newMessage={newMessage} sendMessage={sendMessage} selectedChannel={selectedChannel} setNewMessage={setNewMessage} />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
