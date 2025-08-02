@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ import { ChannelHeader } from './blocks/ChannelHeader';
 import { MessageList } from './blocks/MessageList';
 import { MessageInput } from './blocks/MessageInput';
 
+
 interface Channel {
   id: string;
   name: string;
@@ -28,6 +29,7 @@ interface Channel {
 interface Message {
   id: string;
   content: string;
+  type: string;
   user_id: string;
   created_at: string;
   username?: string;
@@ -41,6 +43,7 @@ export default function ChatLayout() {
   const [newChannelName, setNewChannelName] = useState('');
   const [showCreateChannel, setShowCreateChannel] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -78,13 +81,16 @@ export default function ChatLayout() {
       setSelectedChannel(defaultChannels[0]);
     }
   };
-
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
   const loadMessages = async (channelId: string) => {
     // Mock messages for demo
     const mockMessages = [
       {
         id: '1',
         content: 'Chào mọi người! 👋',
+        type: 'text',
         user_id: 'user1',
         created_at: new Date().toISOString(),
         username: 'alice'
@@ -92,6 +98,7 @@ export default function ChatLayout() {
       {
         id: '2',
         content: 'Có ai đang làm việc với React Query không?',
+        type: 'text',
         user_id: 'user2',
         created_at: new Date().toISOString(),
         username: 'bob'
@@ -99,7 +106,16 @@ export default function ChatLayout() {
       {
         id: '3',
         content: '```typescript\nconst useData = () => {\n  return useQuery({\n    queryKey: [\"data\"],\n    queryFn: fetchData\n  });\n};\n```',
+        type: 'code',
         user_id: null,
+        created_at: new Date().toISOString(),
+        username: 'charlie'
+      },
+      {
+        id: '4',
+        content: '```typescript\nconst useData = () => {\n  return useQuery({\n    queryKey: [\"data\"],\n    queryFn: fetchData\n  });\n};\n```',
+        type: 'code',
+        user_id: 'user2',
         created_at: new Date().toISOString(),
         username: 'charlie'
       }
@@ -118,13 +134,15 @@ export default function ChatLayout() {
     const message = {
       id: Date.now().toString(),
       content: newMessage,
-      user_id: user.id,
+      type: 'text',
+      user_id: null,
       created_at: new Date().toISOString(),
       username: user.email?.split('@')[0] || 'user'
     };
 
     setMessages(prev => [...prev, message]);
     setNewMessage('');
+
   };
 
   const createChannel = async () => {
@@ -149,31 +167,33 @@ export default function ChatLayout() {
     });
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
-  };
 
-  const renderMessageContent = (content: string) => {
-    if (content.includes('```')) {
-      const parts = content.split('```');
-      return (
-        <div>
-          {parts.map((part, index) => {
-            if (index % 2 === 1) {
-              return (
-                <pre key={index} className="code-block my-2">
-                  <code>{part}</code>
-                </pre>
-              );
-            }
-            return <span key={index}>{part}</span>;
-          })}
-        </div>
-      );
-    }
-    return <span>{content}</span>;
-  };
+
+  // const renderMessageContent = (content: string) => {
+  //   if (content.includes('```')) {
+  //     const parts = content.split('```');
+  //     return (
+  //       <div>
+  //         {parts.map((part, index) => {
+  //           if (index % 2 === 1) {
+  //             return (
+  //               <pre key={index} className="code-block my-2">
+  //                 <code>{part}</code>
+  //               </pre>
+  //             );
+  //           }
+  //           return <span key={index}>{part}</span>;
+  //         })}
+  //       </div>
+  //     );
+  //   }
+  //   return <span>{content}</span>;
+  // };
+
+
+
+
+
 
   return (
     <div className="h-screen flex bg-[hsl(var(--chat-background))]">
