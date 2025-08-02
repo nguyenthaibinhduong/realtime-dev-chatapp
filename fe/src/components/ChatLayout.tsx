@@ -3,18 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   Hash,
   Plus,
   Search,
-  Settings,
-  LogOut,
-  Send,
-  Code,
-  Users,
   MessageSquare
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
