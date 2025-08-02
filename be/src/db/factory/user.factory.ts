@@ -15,8 +15,8 @@ export class UserFactory {
       role:
         role ??
         faker.helpers.arrayElement([
-          UserRole.STUDENT,
-          UserRole.TEACHER,
+          UserRole.USER,
+          UserRole.MODERATOR,
           UserRole.ADMIN,
         ]),
       created_at: new Date(),
@@ -27,8 +27,8 @@ export class UserFactory {
 
   static async createMany(count: number): Promise<Partial<User>[]> {
     const roles = [
-      ...Array(5).fill(UserRole.STUDENT),
-      ...Array(5).fill(UserRole.TEACHER),
+      ...Array(5).fill(UserRole.USER),
+      ...Array(5).fill(UserRole.MODERATOR),
       ...Array(count - 10).fill(UserRole.ADMIN),
     ];
     return Promise.all(roles.map((role) => this.create(role)));

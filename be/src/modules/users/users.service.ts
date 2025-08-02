@@ -235,11 +235,6 @@ export class UsersService extends BaseService<User> {
   async getUserDetails(user: any): Promise<any> {
     const userData = await this.userRepository.findOne({
       where: { id: user.id, active: true },
-      relations: {
-        teacher: user.role === 'teacher' ? { department: true } : false,
-        student:
-          user.role === 'student' ? { department: true, major: true } : false,
-      },
     });
     if (userData) delete userData.password;
     return userData;

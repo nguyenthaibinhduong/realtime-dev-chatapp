@@ -7,22 +7,6 @@ import { UsersModule } from './modules/users/users.module';
 import { User } from './entities/user.entity';
 import { DataSource } from 'typeorm';
 import { AppDataSource } from './db/data-source';
-import { StudentsModule } from './modules/students/students.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { TeachersModule } from './modules/teachers/teachers.module';
-import { MajorsModule } from './modules/majors/majors.module';
-import { PositionsModule } from './modules/positions/positions.module';
-import { DepartmentModule } from './modules/department/department.module';
-import { CoursesModule } from './modules/courses/courses.module';
-import { EnrollmentSessionModule } from './modules/enrollment_session/enrollment_session.module';
-import { ProjectsModule } from './modules/projects/projects.module';
-import { UploadModule } from './modules/upload/upload.module';
-import { EvaluationFormModule } from './modules/evaluation_form/evaluation_form.module';
-import { ScoreModule } from './modules/score/score.module';
-import { CommitteesModule } from './modules/committees/committees.module';
-import { GroupsModule } from './modules/groups/groups.module';
-import { CriteriaModule } from './modules/criteria/criteria.module';
-import { AnalystModule } from './modules/analyst/analyst.module';
 
 @Module({
   imports: [
@@ -33,22 +17,6 @@ import { AnalystModule } from './modules/analyst/analyst.module';
     TypeOrmModule.forRoot(AppDataSource.options),
     TypeOrmModule.forFeature([User]),
     UsersModule,
-    StudentsModule,
-    AuthModule,
-    TeachersModule,
-    MajorsModule,
-    PositionsModule,
-    DepartmentModule,
-    CoursesModule,
-    EnrollmentSessionModule,
-    ProjectsModule,
-    UploadModule,
-    EvaluationFormModule,
-    ScoreModule,
-    CommitteesModule,
-    GroupsModule,
-    CriteriaModule,
-    AnalystModule,
   ],
   controllers: [AppController],
   providers: [AppService],
