@@ -8,6 +8,9 @@ import { User } from './entities/user.entity';
 import { DataSource } from 'typeorm';
 import { AppDataSource } from './db/data-source';
 import { AuthModule } from './modules/auth/auth.module';
+import { PostgresModule } from './db/postgres.module';
+import { MongoDBModule } from './db/mongodb.module';
+import { RedisModule } from './db/redis.module';
 
 @Module({
   imports: [
@@ -15,7 +18,12 @@ import { AuthModule } from './modules/auth/auth.module';
       isGlobal: true, // Làm cho config có sẵn toàn bộ ứng dụng
       envFilePath: '.env', // Đường dẫn đến tệp .env
     }),
-    TypeOrmModule.forRoot(AppDataSource.options),
+    //Postgres
+    // TypeOrmModule.forRoot(AppDataSource.options),
+    PostgresModule,
+    MongoDBModule,
+    RedisModule,
+
     TypeOrmModule.forFeature([User]),
     UsersModule,
     AuthModule,
