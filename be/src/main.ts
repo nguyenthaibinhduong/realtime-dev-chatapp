@@ -12,11 +12,14 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get('APP_PORT');
   app.use(cookieParser());
-  app.enableCors({ origin: configService.get('APP_FRONTEND_URL'), credentials: true });
+  app.enableCors({
+    origin: configService.get('APP_FRONTEND_URL'),
+    credentials: true,
+  });
   const jwtUtilityService = app.get(JwtUtilityService); // Lấy từ DI container
   app.useGlobalInterceptors(new EncryptIdInterceptor(jwtUtilityService));
   app.setGlobalPrefix('api/v1', { exclude: [''] });
-  app.use(new ApiKeyMiddleware().use);
+  // app.use(new ApiKeyMiddleware().use);
   await app.listen(port);
   console.log(`Server is running on Port :${port}`);
 }

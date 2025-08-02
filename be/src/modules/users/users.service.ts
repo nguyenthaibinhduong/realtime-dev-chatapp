@@ -107,11 +107,11 @@ export class UsersService extends BaseService<User> {
     ipAddress: string,
     captchaResponse: string,
   ) {
-    if (!captchaResponse) throw new Error('Chưa xác minh không phải robot');
-    const isCaptchaValid = await this.verifyCaptcha(captchaResponse);
-    if (!isCaptchaValid) {
-      throw new Error('CAPTCHA không hợp lệ. Vui lòng thử lại.');
-    }
+    // if (!captchaResponse) throw new Error('Chưa xác minh không phải robot');
+    // const isCaptchaValid = await this.verifyCaptcha(captchaResponse);
+    // if (!isCaptchaValid) {
+    //   throw new Error('CAPTCHA không hợp lệ. Vui lòng thử lại.');
+    // }
     // Lấy thông tin về các lần đăng nhập của người dùng từ cơ sở dữ liệu
     const loginAttempt = await this.getLoginAttempt(username, ipAddress);
 

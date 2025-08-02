@@ -7,6 +7,7 @@ import { UsersModule } from './modules/users/users.module';
 import { User } from './entities/user.entity';
 import { DataSource } from 'typeorm';
 import { AppDataSource } from './db/data-source';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AppDataSource } from './db/data-source';
     TypeOrmModule.forRoot(AppDataSource.options),
     TypeOrmModule.forFeature([User]),
     UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
