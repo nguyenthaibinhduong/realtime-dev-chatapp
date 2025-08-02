@@ -18,7 +18,7 @@ import { RedisModule } from './db/redis.module';
       isGlobal: true, // Làm cho config có sẵn toàn bộ ứng dụng
       envFilePath: '.env', // Đường dẫn đến tệp .env
     }),
-    //Postgres
+    //Database
     // TypeOrmModule.forRoot(AppDataSource.options),
     PostgresModule,
     MongoDBModule,
