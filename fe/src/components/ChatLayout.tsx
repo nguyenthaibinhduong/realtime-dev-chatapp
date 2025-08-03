@@ -49,6 +49,8 @@ export default function ChatLayout() {
   const [privateChannelName, setPrivateChannelName] = useState('');
   const [privateMemberIds, setPrivateMemberIds] = useState<string>('');
   const [showCreateChannel, setShowCreateChannel] = useState(false);
+  const [searchChannel, setSearchChannel] = useState('');
+  const [publicChannels, setPublicChannels] = useState<Channel[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
   const { user } = useAuth()
@@ -67,6 +69,39 @@ export default function ChatLayout() {
   }, [selectedChannel]);
 
 
+
+
+  const searchPublicChannels = async (keyword: string) => {
+    const { data, error } = await supabase
+      .from('channels')
+      .select('*')
+      .eq('is_private', false)
+      .ilike('name', `%${keyword}%`);
+    if (!error && data) setPublicChannels(data);
+  };
+
+
+  useEffect(() => {
+    if (searchChannel.trim()) {
+      searchPublicChannels(searchChannel);
+    } else {
+      setPublicChannels([]);
+    }
+  }, [searchChannel]);
+
+  const joinChannel = async (channel: Channel) => {
+    await supabase
+      .from('channel_members')
+      .insert([{ channel_id: channel.id, user_id: user.id }]);
+    await loadChannels();
+    setSelectedChannel(channel);
+    setSearchChannel('');
+    setPublicChannels([]);
+    toast({
+      title: "Tham gia kênh thành công",
+      description: `Bạn đã tham gia kênh #${channel.name}`,
+    });
+  };
 
   const loadChannels = async () => {
     // Lấy các kênh do user tạo
@@ -107,10 +142,19 @@ export default function ChatLayout() {
   const loadMessages = async (channelId: string) => {
     const { data, error } = await supabase
       .from('messages')
-      .select('*')
+      .select('id, content, created_at, user_id')
       .eq('channel_id', channelId)
       .order('created_at', { ascending: true });
-    if (!error && data) setMessages(data);
+
+    if (!error && data) {
+      // Map lại dữ liệu để lấy username và email từ users
+      const messagesWithUser = data.map((msg: any) => ({
+        ...msg,
+        username: msg.users?.username,
+        email: msg.users?.email,
+      }));
+      setMessages(messagesWithUser);
+    }
   };
 
   // ...existing code...
@@ -264,11 +308,34 @@ export default function ChatLayout() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sidebar-foreground/50" />
             <Input
-              placeholder="Tìm kiếm..."
+              value={searchChannel}
+              onChange={e => setSearchChannel(e.target.value)}
+              placeholder="Tìm kiếm kênh public..."
               className="pl-9 bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
             />
+
           </div>
+          {searchChannel.trim() && (
+            <div className="mt-2 space-y-2">
+              {publicChannels.length === 0 && (
+                <div className="text-xs text-gray-400 px-2">Không tìm thấy kênh phù hợp.</div>
+              )}
+              {publicChannels.map(channel => (
+                <div key={channel.id} className="flex items-center justify-between px-2 py-1 bg-gray-800 rounded">
+                  <span className="text-white">{channel.name}</span>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => joinChannel(channel)}
+                  >
+                    join
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
 
         {/* Channels */}
         <ScrollArea className="flex-1 px-3">

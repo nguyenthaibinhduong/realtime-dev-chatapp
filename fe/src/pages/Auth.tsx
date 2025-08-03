@@ -57,7 +57,7 @@ export default function Auth() {
 
     const redirectUrl = `${window.location.origin}/`;
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -71,10 +71,11 @@ export default function Auth() {
     if (error) {
       toast({
         title: "Lỗi đăng ký",
-        description: error.message,
+        description: error?.message,
         variant: "destructive",
       });
     } else {
+
       toast({
         title: "Đăng ký thành công",
         description: "Vui lòng kiểm tra email để xác nhận tài khoản.",
