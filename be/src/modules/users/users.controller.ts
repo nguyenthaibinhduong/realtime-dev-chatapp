@@ -3,88 +3,130 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Query,
+  Put,
+  ValidationPipe,
   UseGuards,
-  ClassSerializerInterceptor,
-  UseInterceptors,
+  HttpException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { User } from 'src/entities/user.entity';
+import { Response } from 'src/common/globalClass';
+import { HttpStatus, Message } from 'src/common/globalEnum';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RoleGuard } from 'src/common/guards/role.guard';
+import { Roles } from 'src/common/decorators/roles.decorators';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles, UserRole } from '../../common/decorators/roles.decorator';
-import { GetUser } from '../../common/decorators/get-user.decorator';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
-@ApiTags('Users')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
-@UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly jwtUtilityService: JwtUtilityService,
+  ) {}
 
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiResponse({ status: 201, description: 'User created successfully', type: User })
-  @ApiResponse({ status: 409, description: 'User already exists' })
-  @Roles(UserRole.ADMIN)
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(
+    @Body(new ValidationPipe()) user: CreateAccountDto,
+  ): Promise<Response<User>> {
+    try {
+      const newUser = await this.userService.create(user as any);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
   }
 
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({ status: 200, description: 'Users retrieved successfully', type: [User] })
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll(
+    @Query('role') role?: string,
+    @Query('search') search?: string,
+    @Query('limit') limit?: number,
+    @Query('page') page?: number,
+  ): Promise<
+    Response<{ items: any; total: number; limit?: number; page?: number }>
+  > {
+    try {
+      const users = await this.userService.getAllUser(
+        role,
+        search,
+        limit,
+        page,
+      );
+      const usersWithoutPassword = users.items.map((user) => {
+        const { password, ...userWithoutPassword } = user; // Tách password khỏi user
+        return userWithoutPassword; // Trả về user không có password
+      });
+      return new Response(
+        {
+          items: usersWithoutPassword, // Dữ liệu người dùng đã loại bỏ mật khẩu
+          total: users.total, // Tổng số người dùng
+          limit, // Giới hạn số lượng
+          page, // Trang hiện tại
+        },
+        HttpStatus.SUCCESS,
+        Message.SUCCESS,
+      );
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
   }
 
-  @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'User profile retrieved successfully', type: User })
-  @Get('profile')
-  getProfile(@GetUser() user: User) {
-    return user;
-  }
-
-  @ApiOperation({ summary: 'Get user by ID' })
-  @ApiResponse({ status: 200, description: 'User retrieved successfully', type: User })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiParam({ name: 'id', description: 'User ID' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@DecodedId(["params"]) id: number): Promise<Response<User>> {
+    try {
+      const user = await this.userService.findByID(id);
+      return user
+        ? new Response(user, HttpStatus.SUCCESS, Message.SUCCESS)
+        : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
   }
 
-  @ApiOperation({ summary: 'Update current user profile' })
-  @ApiResponse({ status: 200, description: 'User updated successfully', type: User })
-  @Patch('profile')
-  updateProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(user.id, updateUserDto);
+  @Put(':id')
+  async update(
+    @DecodedId(["params"]) id: number,
+    @Body(new ValidationPipe()) user: any,
+  ): Promise<Response<void>> {
+    try {
+      const updatedUser = await this.userService.updateAccount(user,id);
+      return new Response(updatedUser, HttpStatus.SUCCESS, Message.SUCCESS)
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
   }
 
-  @ApiOperation({ summary: 'Update user by ID' })
-  @ApiResponse({ status: 200, description: 'User updated successfully', type: User })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiParam({ name: 'id', description: 'User ID' })
-  @Roles(UserRole.ADMIN)
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
-  }
-
-  @ApiOperation({ summary: 'Delete user by ID' })
-  @ApiResponse({ status: 200, description: 'User deleted successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiParam({ name: 'id', description: 'User ID' })
-  @Roles(UserRole.ADMIN)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
+    try {
+      await this.userService.delete(id,true);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
   }
 }

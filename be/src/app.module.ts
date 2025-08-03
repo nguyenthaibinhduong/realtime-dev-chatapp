@@ -1,52 +1,44 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
-import { ChannelsModule } from './modules/channels/channels.module';
-import { MessagesModule } from './modules/messages/messages.module';
-import { SearchModule } from './modules/search/search.module';
-import { GitHubIntegrationModule } from './modules/github-integration/github-integration.module';
-import { PostgresConfig } from './config/database/postgres.config';
-import { MongoConfig } from './config/database/mongo.config';
-import { AppConfiguration } from './config/app.config';
-import { SharedModule } from './shared/shared.module';
-import { CommonModule } from './common/common.module';
+import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from './modules/users/users.module';
+import { User } from './entities/user.entity';
+import { DataSource } from 'typeorm';
+import { AppDataSource } from './db/data-source';
+import { AuthModule } from './modules/auth/auth.module';
+import { PostgresModule } from './db/postgres.module';
+import { MongoDBModule } from './db/mongodb.module';
+import { RedisModule } from './db/redis.module';
 
 @Module({
   imports: [
-    // Configuration Module
     ConfigModule.forRoot({
-      isGlobal: true,
-      load: [AppConfiguration],
-      envFilePath: ['.env.local', '.env'],
+      isGlobal: true, // Làm cho config có sẵn toàn bộ ứng dụng
+      envFilePath: '.env', // Đường dẫn đến tệp .env
     }),
+    //Database
+    // TypeOrmModule.forRoot(AppDataSource.options),
+    PostgresModule,
+    MongoDBModule,
+    RedisModule,
 
-    // PostgreSQL Database
-    TypeOrmModule.forRootAsync({
-      useClass: PostgresConfig,
-    }),
-
-    // MongoDB Database
-    MongooseModule.forRootAsync({
-      useClass: MongoConfig,
-    }),
-
-    // Shared Modules
-    SharedModule,
-    CommonModule,
-
-    // Feature Modules
-    AuthModule,
+    TypeOrmModule.forFeature([User]),
     UsersModule,
-    ChannelsModule,
-    MessagesModule,
-    SearchModule,
-    GitHubIntegrationModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationBootstrap {
+  constructor(private readonly dataSource: DataSource) {}
+
+  async onApplicationBootstrap() {
+    if (this.dataSource.isInitialized) {
+      console.log('Kết nối cơ sở dữ liệu thành công!'); // Thông báo khi kết nối thành công
+    } else {
+      console.error('Không thể kết nối tới cơ sở dữ liệu!');
+    }
+  }
+}

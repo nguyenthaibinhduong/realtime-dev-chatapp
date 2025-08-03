@@ -1,25 +1,49 @@
-import { IsEmail, IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateUserDto {
-  @ApiProperty({ description: 'Username', minLength: 3, maxLength: 50 })
-  @IsString()
-  @MinLength(3)
-  @MaxLength(50)
-  username: string;
+import {
+    IsString,
+    IsNotEmpty,
+    IsDateString,
+    Validate,
+    ValidationArguments,
+    ValidatorConstraint,
+    ValidatorConstraintInterface,
+    IsEmail,
+  } from 'class-validator';
+  
+  // Custom validator kiểm tra > 18 tuổi
+  @ValidatorConstraint({ name: 'IsAdult', async: false })
+  export class IsAdultConstraint implements ValidatorConstraintInterface {
+    validate(date: string) {
+      const birthDate = new Date(date);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      const dayDiff = today.getDate() - birthDate.getDate();
+  
+      return (
+        age > 18 ||
+        (age === 18 && (monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0)))
+      );
+    }
+  
+    defaultMessage(args: ValidationArguments) {
+      return 'Người dùng phải từ 18 tuổi trở lên';
+    }
+  }
+  
+  export class CreateUserDto {
+    @IsString({ message: 'Họ tên phải là chuỗi' })
+    @IsNotEmpty({ message: 'Họ tên không được để trống' })
+    fullname: string;
+  
+    @IsDateString({}, { message: 'Ngày sinh phải đúng định dạng ISO (YYYY-MM-DD)' })
+    @IsNotEmpty({ message: 'Ngày sinh không được để trống' })
+    @Validate(IsAdultConstraint)
+    birth_date: string;
+    
 
-  @ApiProperty({ description: 'Email address' })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({ description: 'Password', minLength: 8 })
-  @IsString()
-  @MinLength(8)
-  password: string;
-
-  @ApiPropertyOptional({ description: 'Display name', maxLength: 100 })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  displayName?: string;
-}
+    @IsEmail({}, { message: 'Email không hợp lệ' })
+    @IsNotEmpty({ message: 'Email không được để trống' })
+    email: string;
+  }
+  

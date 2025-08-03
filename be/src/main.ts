@@ -1,61 +1,26 @@
+declare const module: any;
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { SecurityConfig } from './config/security.config';
+import * as cookieParser from 'cookie-parser';
+import { JwtUtilityService } from './common/jwtUtility.service';
+import { EncryptIdInterceptor } from './common/intercepters/encrypt-id.interceptor';
+import { ApiKeyMiddleware } from './common/middleware/api-key.middleware';
 
 async function bootstrap() {
-  const logger = new Logger('Bootstrap');
-
-  const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
-  });
-
+  const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT', 3000);
-
-  // Security Configuration
-  SecurityConfig.configure(app);
-
-  // Global Validation Pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      disableErrorMessages: false,
-    }),
-  );
-
-  // Socket.IO Adapter
-  app.useWebSocketAdapter(new IoAdapter(app));
-
-  // API Documentation with Swagger
-  const config = new DocumentBuilder()
-    .setTitle('Developer Chat API')
-    .setDescription('Enterprise Developer Chat Application API Documentation')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .addTag('Authentication', 'User authentication and authorization')
-    .addTag('Users', 'User management operations')
-    .addTag('Channels', 'Channel management operations')
-    .addTag('Messages', 'Message operations')
-    .addTag('Search', 'Advanced search functionality')
-    .addTag('GitHub Integration', 'GitHub webhook integration')
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
-
+  const port = configService.get('APP_PORT');
+  app.use(cookieParser());
+  app.enableCors({
+    origin: configService.get('APP_FRONTEND_URL'),
+    credentials: true,
+  });
+  const jwtUtilityService = app.get(JwtUtilityService); // Lấy từ DI container
+  app.useGlobalInterceptors(new EncryptIdInterceptor(jwtUtilityService));
+  app.setGlobalPrefix('api/v1', { exclude: [''] });
+  // app.use(new ApiKeyMiddleware().use);
   await app.listen(port);
-
-  logger.log(`🚀 Application is running on: http://localhost:${port}`);
-  logger.log(`📚 API Documentation available at: http://localhost:${port}/api/docs`);
+  console.log(`Server is running on Port :${port}`);
 }
-
-bootstrap().catch((error) => {
-  console.error('Application failed to start:', error);
-  process.exit(1);
-});
+bootstrap();

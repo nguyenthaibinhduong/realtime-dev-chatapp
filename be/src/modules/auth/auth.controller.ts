@@ -1,99 +1,119 @@
 import {
-  Controller,
-  Post,
+  BadRequestException,
   Body,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Req,
+  Request,
+  Res,
+  UnauthorizedException,
   UseGuards,
-  HttpCode,
-  HttpStatus,
-  ClassSerializerInterceptor,
-  UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AuthService, AuthResponse, TwoFactorSetup } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { Verify2FADto } from './dto/verify-2fa.dto';
-import { User } from '../users/entities/user.entity';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { GetUser } from '../../common/decorators/get-user.decorator';
-import { Public } from '../../common/decorators/public.decorator';
+import { AuthService } from './auth.service';
+import { UsersService } from '../users/users.service';
+import { LocalAuthGuard } from 'src/common/guards/local-auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Request as Require, Response } from 'express';
 
-@ApiTags('Authentication')
-@UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+  ) {}
+  // @Post('/register')
+  // register(@Body() userData: any) {
+  //   return this.userService.register(userData);
+  // }
+  // @UseGuards(LocalAuthGuard)
+  @Post('/login')
+  async login(@Body() body: { username: string; password: string ,captcha: string }, @Req() req: Require, @Res() res: Response) {
+     try {
+      
+      const ip = req.ip;
+      const ipv4 = ip.includes('::1') ? '127.0.0.1' : ip;  // Thay ::1 bằng 127.0.0.1 nếu cần
 
-  @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User registered successfully', type: User })
-  @ApiResponse({ status: 409, description: 'User already exists' })
-  @Public()
-  @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<User> {
-    return this.authService.register(registerDto);
+      const user = await this.userService.validateUser(body.username,body.password,ipv4,body.captcha);
+      if (!user) {
+            throw new UnauthorizedException('Thông tin đăng nhập không đúng');
+      }
+      return this.authService.login(user, res);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+    
   }
-
-  @ApiOperation({ summary: 'Login user' })
-  @ApiResponse({ status: 200, description: 'User logged in successfully' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @Post('login')
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponse> {
-    return this.authService.login(loginDto);
-  }
-
-  @ApiOperation({ summary: 'Generate 2FA secret and QR code' })
-  @ApiResponse({ status: 200, description: '2FA setup initiated successfully' })
-  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('2fa/generate')
-  async generate2FA(@GetUser() user: User): Promise<TwoFactorSetup> {
-    return this.authService.generate2FASecret(user);
+  @Get('me')
+  getProfile(@Request() request: any) {
+    return this.userService.getUserDetails(request.user);
   }
-
-  @ApiOperation({ summary: 'Verify and enable 2FA' })
-  @ApiResponse({ status: 200, description: '2FA enabled successfully' })
-  @ApiResponse({ status: 401, description: 'Invalid 2FA token' })
-  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @Post('2fa/verify')
-  async verify2FA(
-    @GetUser() user: User,
-    @Body() verify2FADto: Verify2FADto,
-  ): Promise<AuthResponse> {
-    return this.authService.enable2FA(user, verify2FADto.token);
+  @Put('change-password')
+  async updatePassword(
+    @Request() request: any,
+    @Body() data: { oldPassword: string; newPassword: string },
+  ) {
+    try {
+      const userId = request.user.id;
+      const { oldPassword, newPassword } = data;
+      return await this.userService.updatePassword(
+        userId,
+        oldPassword,
+        newPassword,
+      );
+    } catch (error) {
+      console.error('Error in updatePassword:', error);
+      throw error;
+    }
   }
 
-  @ApiOperation({ summary: 'Disable 2FA' })
-  @ApiResponse({ status: 200, description: '2FA disabled successfully' })
-  @ApiBearerAuth()
+  @Post('refresh-token')
+  async refreshToken(@Req() req: Require) {
+    const refreshToken = req.cookies['refresh_token'];
+    if (!refreshToken) {
+      throw new BadRequestException('No refresh token provided');
+    }
+    const newToken = await this.authService.verifyRefreshToken(refreshToken);
+    if (!newToken) {
+      throw new BadRequestException('Invalid refresh token');
+    }
+    return {
+      access_token: newToken,
+    };
+  }
+
+  @Post('verify-token')
+  async VerifyToken(@Body() data: any) {
+    const tokenCheck = data.token;
+    if (!tokenCheck) {
+      throw new BadRequestException('No token provided');
+    }
+    const newToken = await this.authService.verifyToken(tokenCheck);
+    if (!newToken) {
+      throw new BadRequestException('Invalid refresh token');
+    }
+    return {
+      'Token verified': newToken,
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @Post('2fa/disable')
-  async disable2FA(@GetUser() user: User): Promise<{ message: string }> {
-    await this.authService.disable2FA(user);
-    return { message: '2FA disabled successfully' };
-  }
-
-  @ApiOperation({ summary: 'Login with 2FA' })
-  @ApiResponse({ status: 200, description: 'User logged in successfully with 2FA' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials or 2FA token' })
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @Post('login/2fa')
-  async loginWith2FA(@Body() body: LoginDto & Verify2FADto): Promise<AuthResponse> {
-    return this.authService.loginWith2FA(body.email, body.password, body.token);
-  }
-
-  @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
-  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @Post('refresh')
-  async refreshToken(@Body() body: { refresh_token: string }): Promise<AuthResponse> {
-    return this.authService.refreshTokens(body.refresh_token);
+  @Post('logout')
+  async logout(@Request() request: any, @Res() res: Response) {
+    try {
+      const userId = request.user.id;
+      await this.userService.deleteRefreshToken(userId);
+      res.clearCookie('refresh_token', {
+        httpOnly: true,
+        // secure: true, // Chỉ dùng khi HTTPS
+        // sameSite: 'None', // Nếu frontend & backend khác domain
+      });
+      return res.json({ message: 'Logout successfully' });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
