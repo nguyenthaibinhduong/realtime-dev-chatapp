@@ -26,11 +26,6 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         setUser(session.user);
     };
 
-    const signOut = async () => {
-        await supabase.auth.signOut();
-        navigate("/auth");
-    };
-
     return (
         <div className="h-screen flex bg-[hsl(var(--chat-background))]">
             {/* Sidebar */}
@@ -42,14 +37,6 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                             <MessageSquare className="h-6 w-6 text-primary" />
                             <h1 className="font-semibold text-sidebar-foreground">CodeSync</h1>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={signOut}
-                            className="text-sidebar-foreground hover:bg-sidebar-accent"
-                        >
-                            <LogOut className="h-4 w-4" />
-                        </Button>
                     </div>
                 </div>
 

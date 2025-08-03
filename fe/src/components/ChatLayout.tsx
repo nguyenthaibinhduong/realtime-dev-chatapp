@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,6 +15,9 @@ import SidebarLayout from './SidebarLayout';
 import { ChannelHeader } from './blocks/ChannelHeader';
 import { MessageList } from './blocks/MessageList';
 import { MessageInput } from './blocks/MessageInput';
+import { useAuth } from '@/hooks/useAuth';
+import MenubarLayout from './MenubarLayout';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 
 
 interface Channel {
@@ -41,16 +43,21 @@ export default function ChatLayout() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [newChannelName, setNewChannelName] = useState('');
+  const [channelType, setChannelType] = useState<'public' | 'private'>('public');
+  const [showPrivateDialog, setShowPrivateDialog] = useState(false);
+  const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
+  const [privateChannelName, setPrivateChannelName] = useState('');
+  const [privateMemberIds, setPrivateMemberIds] = useState<string>('');
   const [showCreateChannel, setShowCreateChannel] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth()
+
 
   useEffect(() => {
-    checkAuth();
-    loadChannels();
+    loadChannels()
   }, []);
+
 
   useEffect(() => {
     if (selectedChannel) {
@@ -59,136 +66,189 @@ export default function ChatLayout() {
     }
   }, [selectedChannel]);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/auth');
-      return;
-    }
-    setUser(session.user);
-  };
+
 
   const loadChannels = async () => {
-    // For now, create some default channels
-    const defaultChannels = [
-      { id: '1', name: 'general', description: 'Thảo luận chung', type: 'text', member_count: 12 },
-      { id: '2', name: 'frontend', description: 'Frontend development', type: 'text', member_count: 8 },
-      { id: '3', name: 'backend', description: 'Backend development', type: 'text', member_count: 6 },
-      { id: '4', name: 'bug-reports', description: 'Báo cáo lỗi', type: 'text', member_count: 15 }
-    ];
-    setChannels(defaultChannels);
-    if (defaultChannels.length > 0) {
-      setSelectedChannel(defaultChannels[0]);
+    // Lấy các kênh do user tạo
+    const { data: createdChannels, error: createdError } = await supabase
+      .from('channels')
+      .select('*')
+      .eq('created_by', user?.id);
+
+    // Lấy các kênh user là thành viên
+    const { data: memberChannels, error: memberError } = await supabase
+      .from('channel_members')
+      .select('channel_id, channels(*)')
+      .eq('user_id', user?.id);
+
+    // Gộp danh sách kênh
+    let channels: Channel[] = [];
+    if (createdChannels) channels = [...channels, ...createdChannels];
+    if (memberChannels) {
+      const memberChannelList = memberChannels
+        .map((item: any) => item.channels)
+        .filter((ch: any) => ch); // loại bỏ null
+      channels = [...channels, ...memberChannelList];
+    }
+
+    // Loại bỏ kênh trùng lặp theo id
+    const uniqueChannels = channels.filter(
+      (ch, idx, arr) => arr.findIndex(c => c.id === ch.id) === idx
+    );
+
+    setChannels(uniqueChannels);
+    if (uniqueChannels.length > 0) {
+      setSelectedChannel(uniqueChannels[0]);
     }
   };
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   const loadMessages = async (channelId: string) => {
-    // Mock messages for demo
-    const mockMessages = [
-      {
-        id: '1',
-        content: 'Chào mọi người! 👋',
-        type: 'text',
-        user_id: 'user1',
-        created_at: new Date().toISOString(),
-        username: 'alice'
-      },
-      {
-        id: '2',
-        content: 'Có ai đang làm việc với React Query không?',
-        type: 'text',
-        user_id: 'user2',
-        created_at: new Date().toISOString(),
-        username: 'bob'
-      },
-      {
-        id: '3',
-        content: '```typescript\nconst useData = () => {\n  return useQuery({\n    queryKey: [\"data\"],\n    queryFn: fetchData\n  });\n};\n```',
-        type: 'code',
-        user_id: null,
-        created_at: new Date().toISOString(),
-        username: 'charlie'
-      },
-      {
-        id: '4',
-        content: '```typescript\nconst useData = () => {\n  return useQuery({\n    queryKey: [\"data\"],\n    queryFn: fetchData\n  });\n};\n```',
-        type: 'code',
-        user_id: 'user2',
-        created_at: new Date().toISOString(),
-        username: 'charlie'
-      }
-    ];
-    setMessages(mockMessages);
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('channel_id', channelId)
+      .order('created_at', { ascending: true });
+    if (!error && data) setMessages(data);
   };
 
+  // ...existing code...
+
   const subscribeToMessages = (channelId: string) => {
-    // Real-time subscription will be implemented when types are ready
-    console.log('Subscribing to channel:', channelId);
+    // Unsubscribe previous subscription if needed
+    if ((window as any).messageSubscription) {
+      (window as any).messageSubscription.unsubscribe();
+    }
+    const subscription = supabase
+      .channel('public:messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `channel_id=eq.${channelId}`,
+        },
+        (payload) => {
+          setMessages((prev: any) => [...prev, payload.new]);
+          scrollToBottom();
+        }
+      )
+      .subscribe();
+    (window as any).messageSubscription = subscription;
   };
+
+  // Hủy đăng ký khi unmount hoặc đổi channel
+  useEffect(() => {
+    return () => {
+      if ((window as any).messageSubscription) {
+        (window as any).messageSubscription.unsubscribe();
+      }
+    };
+  }, [selectedChannel]);
+
+  // ...existing code...
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedChannel || !user) return;
 
     const message = {
-      id: Date.now().toString(),
       content: newMessage,
-      type: 'text',
-      user_id: null,
+      message_type: 'text',
+      user_id: user.id,
+      channel_id: selectedChannel.id,
       created_at: new Date().toISOString(),
-      username: user.email?.split('@')[0] || 'user'
     };
 
-    setMessages(prev => [...prev, message]);
-    setNewMessage('');
+    // Thêm tin nhắn vào Supabase
+    const { error } = await supabase
+      .from('messages')
+      .insert([message]);
 
+    if (error) {
+      toast({
+        title: "Lỗi",
+        description: error.message || "Không thể gửi tin nhắn!",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setNewMessage('');
   };
 
-  const createChannel = async () => {
-    if (!newChannelName.trim()) return;
+
+
+  const createChannel = async (name: string, type: 'public' | 'private', memberIds?: string[]) => {
+    if (!name.trim() || !user) return;
 
     const newChannel = {
-      id: Date.now().toString(),
-      name: newChannelName.toLowerCase().replace(/\s+/g, '-'),
-      description: `Channel ${newChannelName}`,
+      name: name.toLowerCase().replace(/\s+/g, '-'),
+      description: `Channel ${name}`,
       type: 'text',
-      member_count: 1
+      is_private: type === 'private',
+      created_by: user.id,
     };
 
-    setChannels(prev => [...prev, newChannel]);
+    const { data, error } = await supabase
+      .from('channels')
+      .insert([newChannel])
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Lỗi",
+        description: error?.message || "Không thể tạo kênh mới!",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Thêm user vào bảng channel_members
+    const members = memberIds && memberIds.length > 0
+      ? [...memberIds, user.id]
+      : [user.id];
+
+    await supabase
+      .from('channel_members')
+      .insert(members.map(id => ({ channel_id: data.id, user_id: id })));
+
     setNewChannelName('');
     setShowCreateChannel(false);
-    setSelectedChannel(newChannel);
+    setShowPrivateDialog(false);
+    setPrivateChannelName('');
+    setPrivateMemberIds('');
+    await loadChannels();
+    setSelectedChannel(data);
 
     toast({
       title: "Tạo kênh thành công",
-      description: `Kênh #${newChannel.name} đã được tạo!`,
+      description: `Kênh #${data.name} đã được tạo!`,
     });
+  };
+
+  const handleShowChannelTypeMenu = () => {
+    setShowChannelTypeMenu(true);
+  };
+
+  // Mở popup tạo kênh public
+  const handleCreatePublicChannel = () => {
+    setChannelType('public');
+    setShowChannelTypeMenu(false);
+    setShowCreateChannel(true);
+  };
+
+  // Mở popup tạo kênh private
+  const handleCreatePrivateChannel = () => {
+    setChannelType('private');
+    setShowChannelTypeMenu(false);
+    setShowPrivateDialog(true);
   };
 
 
 
-  // const renderMessageContent = (content: string) => {
-  //   if (content.includes('```')) {
-  //     const parts = content.split('```');
-  //     return (
-  //       <div>
-  //         {parts.map((part, index) => {
-  //           if (index % 2 === 1) {
-  //             return (
-  //               <pre key={index} className="code-block my-2">
-  //                 <code>{part}</code>
-  //               </pre>
-  //             );
-  //           }
-  //           return <span key={index}>{part}</span>;
-  //         })}
-  //       </div>
-  //     );
-  //   }
-  //   return <span>{content}</span>;
-  // };
 
 
 
@@ -197,6 +257,7 @@ export default function ChatLayout() {
 
   return (
     <div className="h-screen flex bg-[hsl(var(--chat-background))]">
+      <MenubarLayout />
       {/* Sidebar */}
       <SidebarLayout>
         <div className="p-3">
@@ -216,41 +277,102 @@ export default function ChatLayout() {
               <h3 className="text-sm font-medium text-sidebar-foreground/70 uppercase tracking-wide">
                 Kênh chat
               </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowCreateChannel(!showCreateChannel)}
-                className="h-6 w-6 p-0 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:text-black"
-              >
-                <Plus className="h-4 w-4 " />
-              </Button>
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleShowChannelTypeMenu}
+                  className="h-6 w-6 p-0 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:text-black"
+                >
+                  <Plus className="h-4 w-4 " />
+                </Button>
+                {showChannelTypeMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded shadow z-50 border border-gray-700">
+                    <button
+                      className="w-full px-4 py-2 text-left hover:bg-gray-800"
+                      onClick={handleCreatePublicChannel}
+                    >
+                      Tạo kênh Public
+                    </button>
+                    <button
+                      className="w-full px-4 py-2 text-left hover:bg-gray-800"
+                      onClick={handleCreatePrivateChannel}
+                    >
+                      Tạo kênh Private
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {showCreateChannel && (
-              <div className="mb-2 space-y-2">
+            {/* Popup tạo kênh Public */}
+            <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
+              <DialogContent className="bg-gray-900 text-white border border-gray-700">
+                <DialogHeader>
+                  <DialogTitle>Tạo kênh Public</DialogTitle>
+                </DialogHeader>
                 <Input
                   value={newChannelName}
                   onChange={(e) => setNewChannelName(e.target.value)}
-                  placeholder="tên-kênh-mới"
-
-                  className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground z-10 w-[98%] mx-auto"
-                  onKeyPress={(e) => e.key === 'Enter' && createChannel()}
+                  placeholder="Tên kênh public"
+                  className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
                 />
-                <div className="flex justify-end gap-2 py-2">
-                  <Button size="sm" onClick={createChannel}>
+                <DialogFooter>
+                  <Button
+                    size="sm"
+                    onClick={() => createChannel(newChannelName, 'public')}
+                  >
                     Tạo
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-white hover:text-gray-800"
                     onClick={() => setShowCreateChannel(false)}
                   >
                     Hủy
                   </Button>
-                </div>
-              </div>
-            )}
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Popup tạo kênh Private */}
+            <Dialog open={showPrivateDialog} onOpenChange={setShowPrivateDialog}>
+              <DialogContent className="bg-gray-900 text-white border border-gray-700">
+                <DialogHeader>
+                  <DialogTitle>Tạo kênh Private</DialogTitle>
+                </DialogHeader>
+                <Input
+                  value={privateChannelName}
+                  onChange={(e) => setPrivateChannelName(e.target.value)}
+                  placeholder="Tên kênh private"
+                  className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
+                />
+                <Input
+                  value={privateMemberIds}
+                  onChange={(e) => setPrivateMemberIds(e.target.value)}
+                  placeholder="Nhập các user_id, phân cách bằng dấu phẩy"
+                  className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
+                />
+                <DialogFooter>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const ids = privateMemberIds.split(',').map(id => id.trim()).filter(Boolean);
+                      createChannel(privateChannelName, 'private', ids);
+                    }}
+                  >
+                    OK
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowPrivateDialog(false)}
+                  >
+                    Hủy
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             {channels.map((channel) => (
               <Button
@@ -291,7 +413,7 @@ export default function ChatLayout() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">
+              <h3 className="text-lg font-medium text-white mb-2">
                 Chọn một kênh để bắt đầu trò chuyện
               </h3>
               <p className="text-muted-foreground">

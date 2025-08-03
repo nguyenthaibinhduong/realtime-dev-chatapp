@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { Message } from "./Message";
@@ -15,14 +16,14 @@ interface MessageListProps {
 }
 
 export const MessageList = ({ messages }: MessageListProps) => {
-
+    const { user } = useAuth()
 
 
     return (
         <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
                 {messages.map((message) => {
-                    const isMe = message.user_id === null;
+                    const isMe = message.user_id === user?.id;
 
                     return (
                         <div
