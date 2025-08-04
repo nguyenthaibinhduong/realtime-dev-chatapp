@@ -23,6 +23,8 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import MenubarLayout from './MenubarLayout';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import MasterLayout from './MasterLayout';
+import { ChannelSearch } from './blocks/ChannelSearch';
 
 
 interface Channel {
@@ -305,41 +307,16 @@ export default function ChatLayout() {
 
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-screen w-full bg-[hsl(var(--chat-background))]">
-      <MenubarLayout />
-      <ResizablePanel defaultSize={22} minSize={14} maxSize={40} className="flex flex-col">
+    <MasterLayout
+      menu={<MenubarLayout />}
+      sidebar={
         <SidebarLayout>
-          <div className="p-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sidebar-foreground/50" />
-              <Input
-                value={searchChannel}
-                onChange={e => setSearchChannel(e.target.value)}
-                placeholder="Tìm kiếm kênh public..."
-                className="pl-9 bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
-              />
-
-            </div>
-            {searchChannel.trim() && (
-              <div className="mt-2 space-y-2">
-                {publicChannels.length === 0 && (
-                  <div className="text-xs text-gray-400 px-2">Không tìm thấy kênh phù hợp.</div>
-                )}
-                {publicChannels.map(channel => (
-                  <div key={channel.id} className="flex items-center justify-between px-2 py-1 bg-gray-800 rounded">
-                    <span className="text-white">{channel.name}</span>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => joinChannel(channel)}
-                    >
-                      join
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ChannelSearch
+            searchChannel={searchChannel}
+            setSearchChannel={setSearchChannel}
+            publicChannels={publicChannels}
+            joinChannel={joinChannel}
+          />
 
 
           {/* Channels */}
@@ -468,36 +445,33 @@ export default function ChatLayout() {
             </div>
           </ScrollArea>
         </SidebarLayout>
-      </ResizablePanel>
-      <ResizableHandle withHandle className="opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-      <ResizablePanel minSize={60} className="flex-1 flex flex-col">
-        {/* Main Chat Area */}
-        {selectedChannel ? (
-          <>
-            <ChannelHeader selectedChannel={selectedChannel} />
-            <MessageList messages={messages} />
-            <MessageInput
-              newMessage={newMessage}
-              sendMessage={sendMessage}
-              selectedChannel={selectedChannel}
-              setNewMessage={setNewMessage}
-            />
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">
-                Chọn một kênh để bắt đầu trò chuyện
-              </h3>
-              <p className="text-muted-foreground">
-                Chọn kênh từ sidebar hoặc tạo kênh mới
-              </p>
-            </div>
+      }
+    >
+      {selectedChannel ? (
+        <>
+          <ChannelHeader selectedChannel={selectedChannel} />
+          <MessageList messages={messages} />
+          <MessageInput
+            newMessage={newMessage}
+            sendMessage={sendMessage}
+            selectedChannel={selectedChannel}
+            setNewMessage={setNewMessage}
+          />
+        </>
+      ) : (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">
+              Chọn một kênh để bắt đầu trò chuyện
+            </h3>
+            <p className="text-muted-foreground">
+              Chọn kênh từ sidebar hoặc tạo kênh mới
+            </p>
           </div>
-        )}
-      </ResizablePanel>
-    </ResizablePanelGroup>
+        </div>
+      )}
+    </MasterLayout>
   );
 }
 
