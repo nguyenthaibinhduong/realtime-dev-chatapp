@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, MessageSquare, Settings } from "lucide-react";
+import { MessageSquare, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SidebarLayoutProps {
@@ -27,9 +27,10 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     };
 
     return (
-        <div className="h-screen flex bg-[hsl(var(--chat-background))]">
+
+        <div className="h-screen w-full flex bg-[hsl(var(--chat-background))]">
             {/* Sidebar */}
-            <div className="w-60 bg-sidebar border-r border-sidebar-border flex flex-col">
+            <div className="w-full bg-sidebar border-r border-sidebar-border flex flex-col">
                 {/* Header */}
                 <div className="p-4 border-b border-sidebar-border">
                     <div className="flex items-center justify-between">

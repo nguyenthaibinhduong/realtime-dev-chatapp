@@ -54,7 +54,7 @@ All colors MUST be HSL.
     --chat-selected: 214 100% 48%;
     --online-status: 142 71% 45%;
     --offline-status: 215.4 16.3% 46.9%;
-    
+
     /* Code highlighting */
     --code-bg: 240 4% 16%;
     --code-border: 240 3.7% 15.9%;
@@ -88,7 +88,7 @@ All colors MUST be HSL.
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    
+
     --sidebar-background: 240 6% 12%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 214 100% 48%;
@@ -104,7 +104,7 @@ All colors MUST be HSL.
     --chat-selected: 214 100% 48%;
     --online-status: 142 71% 45%;
     --offline-status: 215.4 16.3% 46.9%;
-    
+
     --code-bg: 240 4% 16%;
     --code-border: 240 3.7% 15.9%;
   }
@@ -148,4 +148,27 @@ All colors MUST be HSL.
   .message-content code {
     @apply bg-[hsl(var(--code-bg))] px-1 py-0.5 rounded text-sm font-mono;
   }
+}
+
+/* SplitPane required styles */
+.SplitPane {
+  position: relative !important;
+}
+
+.Pane {
+  overflow: hidden;
+}
+
+.Resizer {
+  background: #ddd;
+  width: 4px;
+  cursor: col-resize;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.Resizer:hover {
+  background: #aaa;
 }

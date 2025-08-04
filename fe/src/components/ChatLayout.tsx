@@ -15,6 +15,11 @@ import SidebarLayout from './SidebarLayout';
 import { ChannelHeader } from './blocks/ChannelHeader';
 import { MessageList } from './blocks/MessageList';
 import { MessageInput } from './blocks/MessageInput';
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 import { useAuth } from '@/hooks/useAuth';
 import MenubarLayout from './MenubarLayout';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
@@ -300,181 +305,183 @@ export default function ChatLayout() {
 
 
   return (
-    <div className="h-screen flex bg-[hsl(var(--chat-background))]">
+    <ResizablePanelGroup direction="horizontal" className="h-screen w-full bg-[hsl(var(--chat-background))]">
       <MenubarLayout />
-      {/* Sidebar */}
-      <SidebarLayout>
-        <div className="p-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sidebar-foreground/50" />
-            <Input
-              value={searchChannel}
-              onChange={e => setSearchChannel(e.target.value)}
-              placeholder="Tìm kiếm kênh public..."
-              className="pl-9 bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
-            />
+      <ResizablePanel defaultSize={22} minSize={14} maxSize={40} className="flex flex-col">
+        <SidebarLayout>
+          <div className="p-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sidebar-foreground/50" />
+              <Input
+                value={searchChannel}
+                onChange={e => setSearchChannel(e.target.value)}
+                placeholder="Tìm kiếm kênh public..."
+                className="pl-9 bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
+              />
 
+            </div>
+            {searchChannel.trim() && (
+              <div className="mt-2 space-y-2">
+                {publicChannels.length === 0 && (
+                  <div className="text-xs text-gray-400 px-2">Không tìm thấy kênh phù hợp.</div>
+                )}
+                {publicChannels.map(channel => (
+                  <div key={channel.id} className="flex items-center justify-between px-2 py-1 bg-gray-800 rounded">
+                    <span className="text-white">{channel.name}</span>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => joinChannel(channel)}
+                    >
+                      join
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {searchChannel.trim() && (
-            <div className="mt-2 space-y-2">
-              {publicChannels.length === 0 && (
-                <div className="text-xs text-gray-400 px-2">Không tìm thấy kênh phù hợp.</div>
-              )}
-              {publicChannels.map(channel => (
-                <div key={channel.id} className="flex items-center justify-between px-2 py-1 bg-gray-800 rounded">
-                  <span className="text-white">{channel.name}</span>
+
+
+          {/* Channels */}
+          <ScrollArea className="flex-1 px-3">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between py-2">
+                <h3 className="text-sm font-medium text-sidebar-foreground/70 uppercase tracking-wide">
+                  Kênh chat
+                </h3>
+                <div className="relative">
                   <Button
+                    variant="ghost"
                     size="sm"
-                    variant="secondary"
-                    onClick={() => joinChannel(channel)}
+                    onClick={handleShowChannelTypeMenu}
+                    className="h-6 w-6 p-0 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:text-black"
                   >
-                    join
+                    <Plus className="h-4 w-4 " />
                   </Button>
+                  {showChannelTypeMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded shadow z-50 border border-gray-700">
+                      <button
+                        className="w-full px-4 py-2 text-left hover:bg-gray-800"
+                        onClick={handleCreatePublicChannel}
+                      >
+                        Tạo kênh Public
+                      </button>
+                      <button
+                        className="w-full px-4 py-2 text-left hover:bg-gray-800"
+                        onClick={handleCreatePrivateChannel}
+                      >
+                        Tạo kênh Private
+                      </button>
+                    </div>
+                  )}
                 </div>
+              </div>
+
+              {/* Popup tạo kênh Public */}
+              <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
+                <DialogContent className="bg-gray-900 text-white border border-gray-700">
+                  <DialogHeader>
+                    <DialogTitle>Tạo kênh Public</DialogTitle>
+                  </DialogHeader>
+                  <Input
+                    value={newChannelName}
+                    onChange={(e) => setNewChannelName(e.target.value)}
+                    placeholder="Tên kênh public"
+                    className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
+                  />
+                  <DialogFooter>
+                    <Button
+                      size="sm"
+                      onClick={() => createChannel(newChannelName, 'public')}
+                    >
+                      Tạo
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowCreateChannel(false)}
+                    >
+                      Hủy
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {/* Popup tạo kênh Private */}
+              <Dialog open={showPrivateDialog} onOpenChange={setShowPrivateDialog}>
+                <DialogContent className="bg-gray-900 text-white border border-gray-700">
+                  <DialogHeader>
+                    <DialogTitle>Tạo kênh Private</DialogTitle>
+                  </DialogHeader>
+                  <Input
+                    value={privateChannelName}
+                    onChange={(e) => setPrivateChannelName(e.target.value)}
+                    placeholder="Tên kênh private"
+                    className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
+                  />
+                  <Input
+                    value={privateMemberIds}
+                    onChange={(e) => setPrivateMemberIds(e.target.value)}
+                    placeholder="Nhập các user_id, phân cách bằng dấu phẩy"
+                    className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
+                  />
+                  <DialogFooter>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const ids = privateMemberIds.split(',').map(id => id.trim()).filter(Boolean);
+                        createChannel(privateChannelName, 'private', ids);
+                      }}
+                    >
+                      OK
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowPrivateDialog(false)}
+                    >
+                      Hủy
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {channels.map((channel) => (
+                <Button
+                  key={channel.id}
+                  variant="ghost"
+                  className={`w-full justify-start px-2 py-1.5 h-auto font-normal ${selectedChannel?.id === channel.id
+                    ? 'bg-[hsl(var(--chat-selected))] text-white'
+                    : 'text-sidebar-foreground hover:text-white hover:bg-[hsl(var(--chat-selected))]'
+                    }`}
+                  onClick={() => setSelectedChannel(channel)}
+                >
+                  <Hash className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">{channel.name}</span>
+                  {channel.member_count && (
+                    <Badge variant="secondary" className="ml-auto text-xs">
+                      {channel.member_count}
+                    </Badge>
+                  )}
+                </Button>
               ))}
             </div>
-          )}
-        </div>
-
-
-        {/* Channels */}
-        <ScrollArea className="flex-1 px-3">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between py-2">
-              <h3 className="text-sm font-medium text-sidebar-foreground/70 uppercase tracking-wide">
-                Kênh chat
-              </h3>
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleShowChannelTypeMenu}
-                  className="h-6 w-6 p-0 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:text-black"
-                >
-                  <Plus className="h-4 w-4 " />
-                </Button>
-                {showChannelTypeMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded shadow z-50 border border-gray-700">
-                    <button
-                      className="w-full px-4 py-2 text-left hover:bg-gray-800"
-                      onClick={handleCreatePublicChannel}
-                    >
-                      Tạo kênh Public
-                    </button>
-                    <button
-                      className="w-full px-4 py-2 text-left hover:bg-gray-800"
-                      onClick={handleCreatePrivateChannel}
-                    >
-                      Tạo kênh Private
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Popup tạo kênh Public */}
-            <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
-              <DialogContent className="bg-gray-900 text-white border border-gray-700">
-                <DialogHeader>
-                  <DialogTitle>Tạo kênh Public</DialogTitle>
-                </DialogHeader>
-                <Input
-                  value={newChannelName}
-                  onChange={(e) => setNewChannelName(e.target.value)}
-                  placeholder="Tên kênh public"
-                  className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
-                />
-                <DialogFooter>
-                  <Button
-                    size="sm"
-                    onClick={() => createChannel(newChannelName, 'public')}
-                  >
-                    Tạo
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setShowCreateChannel(false)}
-                  >
-                    Hủy
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {/* Popup tạo kênh Private */}
-            <Dialog open={showPrivateDialog} onOpenChange={setShowPrivateDialog}>
-              <DialogContent className="bg-gray-900 text-white border border-gray-700">
-                <DialogHeader>
-                  <DialogTitle>Tạo kênh Private</DialogTitle>
-                </DialogHeader>
-                <Input
-                  value={privateChannelName}
-                  onChange={(e) => setPrivateChannelName(e.target.value)}
-                  placeholder="Tên kênh private"
-                  className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
-                />
-                <Input
-                  value={privateMemberIds}
-                  onChange={(e) => setPrivateMemberIds(e.target.value)}
-                  placeholder="Nhập các user_id, phân cách bằng dấu phẩy"
-                  className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
-                />
-                <DialogFooter>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      const ids = privateMemberIds.split(',').map(id => id.trim()).filter(Boolean);
-                      createChannel(privateChannelName, 'private', ids);
-                    }}
-                  >
-                    OK
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setShowPrivateDialog(false)}
-                  >
-                    Hủy
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {channels.map((channel) => (
-              <Button
-                key={channel.id}
-                variant="ghost"
-                className={`w-full justify-start px-2 py-1.5 h-auto font-normal ${selectedChannel?.id === channel.id
-                  ? 'bg-[hsl(var(--chat-selected))] text-white'
-                  : 'text-sidebar-foreground hover:text-white hover:bg-[hsl(var(--chat-selected))]'
-                  }`}
-                onClick={() => setSelectedChannel(channel)}
-              >
-                <Hash className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">{channel.name}</span>
-                {channel.member_count && (
-                  <Badge variant="secondary" className="ml-auto text-xs">
-                    {channel.member_count}
-                  </Badge>
-                )}
-              </Button>
-            ))}
-          </div>
-        </ScrollArea>
-      </SidebarLayout>
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+          </ScrollArea>
+        </SidebarLayout>
+      </ResizablePanel>
+      <ResizableHandle withHandle className="opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+      <ResizablePanel minSize={60} className="flex-1 flex flex-col">
+        {/* Main Chat Area */}
         {selectedChannel ? (
           <>
-            {/* Chat Header */}
             <ChannelHeader selectedChannel={selectedChannel} />
-
-            {/* Messages */}
             <MessageList messages={messages} />
-            {/* Message Input */}
-            <MessageInput newMessage={newMessage} sendMessage={sendMessage} selectedChannel={selectedChannel} setNewMessage={setNewMessage} />
+            <MessageInput
+              newMessage={newMessage}
+              sendMessage={sendMessage}
+              selectedChannel={selectedChannel}
+              setNewMessage={setNewMessage}
+            />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
@@ -489,7 +496,10 @@ export default function ChatLayout() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
+
+// ...existing imports and code...
+
