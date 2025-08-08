@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { ScrollArea } from "../ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message } from "./Message";
 import React from "react";
 

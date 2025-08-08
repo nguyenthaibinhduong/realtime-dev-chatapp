@@ -1,5 +1,5 @@
 import { Hash } from "lucide-react";
-import { Separator } from "../ui/separator";
+import { Separator } from "../../ui/separator";
 
 
 interface Channel {

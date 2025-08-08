@@ -1,30 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import {
-  Hash,
-  Plus,
-  Search,
-  MessageSquare
-} from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SidebarLayout from './SidebarLayout';
-import { ChannelHeader } from './blocks/ChannelHeader';
-import { MessageList } from './blocks/MessageList';
-import { MessageInput } from './blocks/MessageInput';
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
+import { ChannelHeader } from './blocks/channels/ChannelHeader';
+import { MessageList } from './blocks/messages/MessageList';
+import { MessageInput } from './blocks/messages/MessageInput';
 import { useAuth } from '@/hooks/useAuth';
 import MenubarLayout from './MenubarLayout';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import MasterLayout from './MasterLayout';
-import { ChannelSearch } from './blocks/ChannelSearch';
+import { ChannelSearch } from './blocks/channels/ChannelSearch';
+import { ChannelSection } from './blocks/channels/ChannelSection';
+import { ChannelDialog } from './blocks/channels/ChannelDialog';
 
 
 interface Channel {
@@ -62,22 +50,10 @@ export default function ChatLayout() {
   const { toast } = useToast();
   const { user } = useAuth()
 
+  // ==================================LOGIC CHO TRANG TIN NHẮN CHAT========================================
 
-  useEffect(() => {
-    loadChannels()
-  }, []);
-
-
-  useEffect(() => {
-    if (selectedChannel) {
-      loadMessages(selectedChannel.id);
-      subscribeToMessages(selectedChannel.id);
-    }
-  }, [selectedChannel]);
-
-
-
-
+  // Tìm kiếm kênh public theo từ khóa
+  // Sử dụng ilike để tìm kiếm không phân biệt chữ hoa chữ thường 
   const searchPublicChannels = async (keyword: string) => {
     const { data, error } = await supabase
       .from('channels')
@@ -88,14 +64,10 @@ export default function ChatLayout() {
   };
 
 
-  useEffect(() => {
-    if (searchChannel.trim()) {
-      searchPublicChannels(searchChannel);
-    } else {
-      setPublicChannels([]);
-    }
-  }, [searchChannel]);
-
+  // Tham gia kênh
+  // Thêm user vào kênh nếu chưa là thành viên
+  // Nếu đã là thành viên thì chỉ cần chọn kênh đó
+  // Cập nhật kênh đã chọn
   const joinChannel = async (channel: Channel) => {
     await supabase
       .from('channel_members')
@@ -110,6 +82,9 @@ export default function ChatLayout() {
     });
   };
 
+  // Lấy danh sách kênh từ Supabase
+  // Kết hợp các kênh do user tạo và các kênh mà user là thành viên
+  // Loại bỏ kênh trùng lặp 
   const loadChannels = async () => {
     // Lấy các kênh do user tạo
     const { data: createdChannels, error: createdError } = await supabase
@@ -143,9 +118,13 @@ export default function ChatLayout() {
       setSelectedChannel(uniqueChannels[0]);
     }
   };
+  // Tự động cuộn xuống cuối danh sách tin nhắn khi có tin nhắn mới
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Tải danh sách tin nhắn khi chọn kênh
+  // Lấy tin nhắn từ Supabase theo kênh đã chọn
   const loadMessages = async (channelId: string) => {
     const { data, error } = await supabase
       .from('messages')
@@ -164,10 +143,11 @@ export default function ChatLayout() {
     }
   };
 
-  // ...existing code...
+  // Đăng ký lắng nghe sự kiện tin nhắn mới
 
   const subscribeToMessages = (channelId: string) => {
-    // Unsubscribe previous subscription if needed
+    // Dọn dẹp subscription cũ nếu có
+    // Để tránh lặp lại khi chọn kênh khác
     if ((window as any).messageSubscription) {
       (window as any).messageSubscription.unsubscribe();
     }
@@ -187,19 +167,14 @@ export default function ChatLayout() {
         }
       )
       .subscribe();
+    // Lưu subscription vào window để có thể dọn dẹp sau này
     (window as any).messageSubscription = subscription;
   };
 
-  // Hủy đăng ký khi unmount hoặc đổi channel
-  useEffect(() => {
-    return () => {
-      if ((window as any).messageSubscription) {
-        (window as any).messageSubscription.unsubscribe();
-      }
-    };
-  }, [selectedChannel]);
 
-  // ...existing code...
+  // Gửi tin nhắn mới
+  // Kiểm tra xem có kênh đã chọn và người dùng đã đăng nhập hay chưa
+  // Nếu có thì thêm tin nhắn vào Supabase
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedChannel || !user) return;
@@ -231,6 +206,7 @@ export default function ChatLayout() {
 
 
 
+  // Tạo kênh mới
   const createChannel = async (name: string, type: 'public' | 'private', memberIds?: string[]) => {
     if (!name.trim() || !user) return;
 
@@ -257,7 +233,7 @@ export default function ChatLayout() {
       return;
     }
 
-    // Thêm user vào bảng channel_members
+
     const members = memberIds && memberIds.length > 0
       ? [...memberIds, user.id]
       : [user.id];
@@ -280,6 +256,7 @@ export default function ChatLayout() {
     });
   };
 
+  // Hiển thị menu tạo kênh
   const handleShowChannelTypeMenu = () => {
     setShowChannelTypeMenu(true);
   };
@@ -298,19 +275,50 @@ export default function ChatLayout() {
     setShowPrivateDialog(true);
   };
 
+  // Tìm kiếm kênh khi người dùng nhập vào ô tìm kiếm
+  useEffect(() => {
+    if (searchChannel.trim()) {
+      searchPublicChannels(searchChannel);
+    } else {
+      setPublicChannels([]);
+    }
+  }, [searchChannel]);
 
 
 
+  // Tải danh sách kênh khi component mount
+  // Lấy kênh đã tạo và kênh mà user là thành viên
+  useEffect(() => {
+    loadChannels()
+  }, []);
 
+  // Tự động cuộn xuống cuối danh sách tin nhắn khi có tin nhắn mới
+
+  useEffect(() => {
+    if (selectedChannel) {
+      loadMessages(selectedChannel.id);
+      subscribeToMessages(selectedChannel.id);
+    }
+  }, [selectedChannel]);
+  // Dọn dẹp subscription khi component unmount
+  useEffect(() => {
+    return () => {
+      if ((window as any).messageSubscription) {
+        (window as any).messageSubscription.unsubscribe();
+      }
+    };
+  }, [selectedChannel]);
 
 
 
 
   return (
+    // Layout cấu hình menu  , sidebar và nội dung chính
     <MasterLayout
       menu={<MenubarLayout />}
       sidebar={
         <SidebarLayout>
+          {/* Tìm kiếm kênh */}
           <ChannelSearch
             searchChannel={searchChannel}
             setSearchChannel={setSearchChannel}
@@ -318,137 +326,49 @@ export default function ChatLayout() {
             joinChannel={joinChannel}
           />
 
+          {/* Dialog tạo kênh mới */}
+          <ChannelDialog
+            open={showCreateChannel}
+            onOpenChange={setShowCreateChannel}
+            type="public"
+            channelName={newChannelName}
+            setChannelName={setNewChannelName}
+            onCreate={() => createChannel(newChannelName, "public")}
+          />
+          <ChannelDialog
+            open={showPrivateDialog}
+            onOpenChange={setShowPrivateDialog}
+            type="private"
+            channelName={privateChannelName}
+            setChannelName={setPrivateChannelName}
+            memberIds={privateMemberIds}
+            setMemberIds={setPrivateMemberIds}
+            onCreate={() => {
+              const ids = privateMemberIds.split(',').map(id => id.trim()).filter(Boolean);
+              createChannel(privateChannelName, "private", ids);
+            }}
+          />
 
-          {/* Channels */}
+
+          {/* Danh sách kênh */}
           <ScrollArea className="flex-1 px-3">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between py-2">
-                <h3 className="text-sm font-medium text-sidebar-foreground/70 uppercase tracking-wide">
-                  Kênh chat
-                </h3>
-                <div className="relative">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleShowChannelTypeMenu}
-                    className="h-6 w-6 p-0 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:text-black"
-                  >
-                    <Plus className="h-4 w-4 " />
-                  </Button>
-                  {showChannelTypeMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded shadow z-50 border border-gray-700">
-                      <button
-                        className="w-full px-4 py-2 text-left hover:bg-gray-800"
-                        onClick={handleCreatePublicChannel}
-                      >
-                        Tạo kênh Public
-                      </button>
-                      <button
-                        className="w-full px-4 py-2 text-left hover:bg-gray-800"
-                        onClick={handleCreatePrivateChannel}
-                      >
-                        Tạo kênh Private
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Popup tạo kênh Public */}
-              <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
-                <DialogContent className="bg-gray-900 text-white border border-gray-700">
-                  <DialogHeader>
-                    <DialogTitle>Tạo kênh Public</DialogTitle>
-                  </DialogHeader>
-                  <Input
-                    value={newChannelName}
-                    onChange={(e) => setNewChannelName(e.target.value)}
-                    placeholder="Tên kênh public"
-                    className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
-                  />
-                  <DialogFooter>
-                    <Button
-                      size="sm"
-                      onClick={() => createChannel(newChannelName, 'public')}
-                    >
-                      Tạo
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowCreateChannel(false)}
-                    >
-                      Hủy
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-
-              {/* Popup tạo kênh Private */}
-              <Dialog open={showPrivateDialog} onOpenChange={setShowPrivateDialog}>
-                <DialogContent className="bg-gray-900 text-white border border-gray-700">
-                  <DialogHeader>
-                    <DialogTitle>Tạo kênh Private</DialogTitle>
-                  </DialogHeader>
-                  <Input
-                    value={privateChannelName}
-                    onChange={(e) => setPrivateChannelName(e.target.value)}
-                    placeholder="Tên kênh private"
-                    className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
-                  />
-                  <Input
-                    value={privateMemberIds}
-                    onChange={(e) => setPrivateMemberIds(e.target.value)}
-                    placeholder="Nhập các user_id, phân cách bằng dấu phẩy"
-                    className="mb-2 bg-gray-800 text-white border-gray-700 placeholder:text-gray-400"
-                  />
-                  <DialogFooter>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        const ids = privateMemberIds.split(',').map(id => id.trim()).filter(Boolean);
-                        createChannel(privateChannelName, 'private', ids);
-                      }}
-                    >
-                      OK
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowPrivateDialog(false)}
-                    >
-                      Hủy
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-
-              {channels.map((channel) => (
-                <Button
-                  key={channel.id}
-                  variant="ghost"
-                  className={`w-full justify-start px-2 py-1.5 h-auto font-normal ${selectedChannel?.id === channel.id
-                    ? 'bg-[hsl(var(--chat-selected))] text-white'
-                    : 'text-sidebar-foreground hover:text-white hover:bg-[hsl(var(--chat-selected))]'
-                    }`}
-                  onClick={() => setSelectedChannel(channel)}
-                >
-                  <Hash className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">{channel.name}</span>
-                  {channel.member_count && (
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      {channel.member_count}
-                    </Badge>
-                  )}
-                </Button>
-              ))}
-            </div>
+            <ChannelSection
+              channels={channels}
+              selectedChannel={selectedChannel}
+              onSelectChannel={setSelectedChannel}
+              onShowChannelTypeMenu={handleShowChannelTypeMenu}
+              showChannelTypeMenu={showChannelTypeMenu}
+              onCreatePublic={handleCreatePublicChannel}
+              onCreatePrivate={handleCreatePrivateChannel}
+            />
           </ScrollArea>
         </SidebarLayout>
       }
     >
+      {/* Nội dung chính của khung chat */}
       {selectedChannel ? (
         <>
+          {/* Tên kênh trogn khung chat*/}
           <ChannelHeader selectedChannel={selectedChannel} />
           <MessageList messages={messages} />
           <MessageInput
@@ -459,6 +379,7 @@ export default function ChatLayout() {
           />
         </>
       ) : (
+        // Hiển thị thông báo nếu chưa chọn kênh
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -475,5 +396,4 @@ export default function ChatLayout() {
   );
 }
 
-// ...existing imports and code...
 
