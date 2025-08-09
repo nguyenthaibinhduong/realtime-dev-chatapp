@@ -258,7 +258,7 @@ export default function ChatLayout() {
 
   // Hiển thị menu tạo kênh
   const handleShowChannelTypeMenu = () => {
-    setShowChannelTypeMenu(true);
+    setShowChannelTypeMenu(!showChannelTypeMenu);
   };
 
   // Mở popup tạo kênh public
