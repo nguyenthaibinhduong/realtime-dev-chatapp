@@ -36,7 +36,7 @@ export default function ChatLayout() {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState<any>('');
   const [newChannelName, setNewChannelName] = useState('');
   const [channelType, setChannelType] = useState<'public' | 'private'>('public');
   const [showPrivateDialog, setShowPrivateDialog] = useState(false);
@@ -376,6 +376,9 @@ export default function ChatLayout() {
             sendMessage={sendMessage}
             selectedChannel={selectedChannel}
             setNewMessage={setNewMessage}
+            createChannel={createChannel}
+            userId={user?.id}
+            toast={toast}
           />
         </>
       ) : (
