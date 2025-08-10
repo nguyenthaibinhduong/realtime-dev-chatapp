@@ -18,7 +18,7 @@ export function useNotifications() {
         avatar: "https://example.com/avatar1.png",
         username: "John Doe",
         channel: "all-dev-chat",
-        timestamp: new Date("2024-01-01T21:06:00"),
+        timestamp: new Date("2025-08-08T21:06:00"),
         isRead: false,
       },
     ];

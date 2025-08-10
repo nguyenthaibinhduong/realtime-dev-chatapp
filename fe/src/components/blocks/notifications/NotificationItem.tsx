@@ -43,40 +43,46 @@ export default function NotificationItem({
       )}
       onClick={handleClick}
     >
-      <div className="relative">
+      <div className="relative flex-shrink-0">
         <Avatar className="w-8 h-8">
           <AvatarImage src={notification.avatar} />
           <AvatarFallback className="text-xs">
             {notification.username.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <div className="absolute -bottom-1 -right-1 bg-sidebar text-xs w-4 h-4 rounded-full flex items-center justify-center border border-sidebar-border">
+        <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center border border-blue-500">
           {getNotificationIcon()}
         </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">{getNotificationIcon()}</span>
-          <span className="text-muted-foreground">{notification.title}</span>
-          <span className="text-xs text-muted-foreground ml-auto">
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex items-center gap-1 text-sm min-w-0">
+          <span className="text-muted-foreground flex-shrink-0">
+            {getNotificationIcon()}
+          </span>
+          <span className="text-white truncate flex-1 min-w-0">
+            {notification.title}
+          </span>
+          <span className="text-xs text-muted-foreground flex-shrink-0 ml-auto">
             {formatDistanceToNow(notification.timestamp, { addSuffix: true })}
           </span>
         </div>
 
-        <div className="flex items-center gap-2 mt-1">
-          <span className="font-medium text-sm">{notification.username}</span>
-          <span className="text-yellow-500 text-sm">
+        <div className="flex items-center gap-2 mt-1 min-w-0">
+          <span className="font-medium text-sm flex-shrink-0 text-blue-500">
+            {notification.username}
+          </span>
+          <span className="text-yellow-500 text-sm flex-shrink-0">
             @{notification.username.split(" ")[0]}
           </span>
-          <span className="text-muted-foreground text-sm">
+          <span className="text-white text-sm truncate min-w-0 flex-1">
             {notification.message}
           </span>
         </div>
       </div>
 
       {!notification.isRead && (
-        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
+        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
       )}
     </div>
   );

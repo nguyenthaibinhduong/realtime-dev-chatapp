@@ -13,6 +13,7 @@ import {
   Mail,
   MessageSquare,
   X,
+  ExternalLink,
 } from "lucide-react";
 
 interface NotificationDetailProps {
@@ -28,12 +29,14 @@ export default function NotificationDetail({
 }: NotificationDetailProps) {
   if (!notification) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-8">
-        <div className="w-20 h-20 bg-sidebar-accent rounded-full flex items-center justify-center mb-6">
+      <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-background">
+        <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mb-6">
           <Bell className="w-8 h-8 text-muted-foreground" />
         </div>
-        <h2 className="text-xl font-semibold mb-2">Select a notification</h2>
-        <p className="text-muted-foreground max-w-md">
+        <h2 className="text-xl font-semibold mb-2 text-foreground">
+          Select a notification
+        </h2>
+        <p className="text-muted-foreground max-w-md leading-relaxed">
           Choose a notification from the sidebar to view its details here.
         </p>
       </div>
@@ -81,17 +84,24 @@ export default function NotificationDetail({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-background/50">
+      <div className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           {getNotificationIcon()}
-          <h1 className="text-lg font-semibold">Notification Details</h1>
+          <h1 className="text-lg font-semibold text-foreground">
+            Notification Details
+          </h1>
           {getNotificationTypeBadge()}
         </div>
         <div className="flex items-center gap-2">
           {!notification.isRead && (
-            <Button variant="outline" size="sm" onClick={handleMarkAsRead}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkAsRead}
+              className="text-sm"
+            >
               Mark as read
             </Button>
           )}
@@ -105,18 +115,20 @@ export default function NotificationDetail({
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        <Card className="max-w-2xl mx-auto">
+        <Card className="max-w-2xl mx-auto border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader className="pb-4">
             <div className="flex items-start gap-4">
-              <Avatar className="w-12 h-12">
+              <Avatar className="w-12 h-12 border border-border">
                 <AvatarImage src={notification.avatar} />
-                <AvatarFallback>
+                <AvatarFallback className="bg-muted text-muted-foreground font-medium">
                   {notification.username.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold">{notification.username}</h3>
+                  <h3 className="font-semibold text-foreground">
+                    {notification.username}
+                  </h3>
                   <span className="text-sm text-muted-foreground">
                     in #{notification.channel}
                   </span>
@@ -137,26 +149,34 @@ export default function NotificationDetail({
             </div>
           </CardHeader>
 
-          <Separator />
+          <Separator className="bg-border/50" />
 
           <CardContent className="pt-6">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <h4 className="font-medium mb-2">Notification Title</h4>
-                <p className="text-muted-foreground">{notification.title}</p>
+                <h4 className="font-medium mb-3 text-foreground">
+                  Notification Title
+                </h4>
+                <p className="text-muted-foreground leading-relaxed">
+                  {notification.title}
+                </p>
               </div>
 
               <div>
-                <h4 className="font-medium mb-2">Message</h4>
-                <div className="bg-sidebar/50 rounded-lg p-4 border">
-                  <p>{notification.message}</p>
+                <h4 className="font-medium mb-3 text-foreground">Message</h4>
+                <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
+                  <p className="text-foreground leading-relaxed">
+                    {notification.message}
+                  </p>
                 </div>
               </div>
 
               {notification.type === "mention" && (
-                <div>
-                  <h4 className="font-medium mb-2">Context</h4>
-                  <p className="text-sm text-muted-foreground">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                  <h4 className="font-medium mb-2 text-blue-600">
+                    Mention Context
+                  </h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     You were mentioned in the #{notification.channel} channel.
                     Click to view the full conversation.
                   </p>
@@ -164,9 +184,11 @@ export default function NotificationDetail({
               )}
 
               {notification.type === "reaction" && (
-                <div>
-                  <h4 className="font-medium mb-2">Reaction Details</h4>
-                  <p className="text-sm text-muted-foreground">
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                  <h4 className="font-medium mb-2 text-yellow-600">
+                    Reaction Details
+                  </h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {notification.username} reacted to your message with 👍
                   </p>
                 </div>
@@ -176,8 +198,11 @@ export default function NotificationDetail({
         </Card>
 
         {/* Action Buttons */}
-        <div className="flex justify-center gap-3 mt-6">
-          <Button variant="default">View in Channel</Button>
+        <div className="flex flex-wrap justify-center gap-3 mt-8">
+          <Button variant="default" className="flex items-center gap-2">
+            <ExternalLink className="w-4 h-4" />
+            View in Channel
+          </Button>
           <Button variant="outline">Reply</Button>
           <Button variant="ghost">Dismiss</Button>
         </div>

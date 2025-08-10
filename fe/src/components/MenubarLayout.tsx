@@ -57,9 +57,12 @@ export default function MenubarLayout({
     {
       key: "notifications",
       icon: (
-        <div className="relative">
+        <div className="relative flex items-center justify-center w-10 h-10">
           <Bell className="h-5 w-5" />
-          <NotificationBadge count={unreadCount} />
+          <NotificationBadge
+            count={unreadCount}
+            className="absolute top-0 right-0"
+          />
         </div>
       ),
       label: "Notifications",
