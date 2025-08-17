@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNotifications } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 import { Notification } from "@/types/notifications";
 import { formatDistanceToNow } from "date-fns";
@@ -12,10 +13,15 @@ export default function NotificationItem({
   notification,
   onMarkAsRead,
 }: NotificationItemProps) {
+
+  const { getNotificationById } = useNotifications();
   const handleClick = () => {
     if (!notification.isRead) {
       onMarkAsRead(notification.id);
     }
+    const notificationDetails = getNotificationById(notification.id);
+
+    console.log(notification.id);
   };
 
   const getNotificationIcon = () => {

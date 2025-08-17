@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Notification, NotificationFilter } from "@/types/notifications";
+import { set } from "date-fns";
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [filter, setFilter] = useState<NotificationFilter>("all");
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -55,15 +57,24 @@ export function useNotifications() {
     );
   };
 
+  const getNotificationById = (id: string): void => {
+      const notification = notifications.find((notification) => notification.id === id);
+      setSelectedNotification(notification);
+    };
+
+
+
   return {
     notifications: filteredNotifications,
     filter,
+    selectedNotification,
     setFilter,
     showUnreadOnly,
     setShowUnreadOnly,
     unreadCount,
     markAsRead,
     markAllAsRead,
+    getNotificationById,
     loading,
   };
 }
