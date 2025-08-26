@@ -1,29 +1,36 @@
-import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Loading from './blocks/Loading';
+import { ReactNode, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import Loading from "./blocks/Loading";
+import { useAuth } from "@/hooks/useAuth";
 
-const AuthGuard = ({ children }) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+const AuthGuard = ({ children, roles }: { children: ReactNode; roles?: string[] }) => {
+    const { user, token, refreshToken, loading } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
-        const checkAuth = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                setIsAuthenticated(true);
-            } else {
-                navigate('/auth');
+        if (!loading) {
+            // chưa login
+            if (!user || !token || !refreshToken) {
+                navigate("/auth", { replace: true, state: { from: location } });
+                return;
             }
-            setIsLoading(false);
-        };
 
-        checkAuth();
-    }, []);
+            // có roles thì kiểm tra quyền
+            if (roles?.length) {
+                const { role, is_master } = user;
+                const isAllowed =
+                    roles.includes(role) || (roles.includes("master-admin") && is_master);
 
-    if (isLoading) return <Loading />;
-    if (!isAuthenticated) return null; // tránh render sớm trong lúc redirect
+                if (!isAllowed) {
+                    navigate("/not-found", { replace: true });
+                }
+            }
+        }
+    }, [loading, user, token, refreshToken, roles, navigate, location]);
+
+    if (loading) return <Loading />; // chờ verify xong mới render
+    if (!user || !token) return null;
 
     return <>{children}</>;
 };

@@ -1,141 +1,132 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import AuthAPI from '@/api/api';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
+  user: any;
+  token: string | null;
+  refreshToken: string | null;
+  loading: boolean; // <- loading toàn cục (đang verify)
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signInWithGitHub: () => Promise<void>;
   signUp: (email: string, password: string, username: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [refreshToken, setRefreshToken] = useState<string | null>(localStorage.getItem("refreshToken"));
+  const [loading, setLoading] = useState(true); // <- true ngay từ đầu
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-
-        // Create profile if user signs up
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            checkAndCreateProfile(session.user);
-          }, 0);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkAndCreateProfile = async (user: User) => {
-    // Skip profile creation for now until types are regenerated
-    console.log('User signed in:', user.email);
-  };
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return { error: error.message };
-      }
-
-      toast({
-        title: "Đăng nhập thành công",
-        description: "Chào mừng bạn quay trở lại!",
-      });
-
-      return { error: null };
-    } catch (error) {
-      return { error: 'Có lỗi xảy ra khi đăng nhập' };
-    }
-  };
-  const signInWithGitHub = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-    });
-
-    if (error) {
-      console.error('Lỗi đăng nhập GitHub:', error);
-      toast({
-        title: 'Đăng nhập GitHub thất bại',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const signUp = async (email: string, password: string, username: string) => {
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            username: username,
+    const verify = async () => {
+      if (token) {
+        try {
+          const res = await AuthAPI.verifyToken(token);
+          if (res?.id) {
+            setUser(res);
+          } else {
+            clearAuth();
           }
+        } catch (err) {
+          clearAuth();
         }
-      });
-
-      if (error) {
-        return { error: error.message };
       }
+      setLoading(false); // kết thúc verify (dù thành công hay thất bại)
+    };
 
-      toast({
-        title: "Đăng ký thành công",
-        description: "Vui lòng kiểm tra email để xác nhận tài khoản.",
-      });
+    const clearAuth = () => {
+      setUser(null);
+      setToken(null);
+      setRefreshToken(null);
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+    };
 
-      return { error: null };
-    } catch (error) {
-      return { error: 'Có lỗi xảy ra khi đăng ký' };
+    verify();
+  }, [token]);
+
+
+  // Đăng nhập
+  const signIn = async (email: string, password: string) => {
+    setLoading(true);
+    try {
+      const res = await AuthAPI.login({ email, password });
+      if (res?.access_token && res?.refresh_token && res?.user) {
+        setToken(res.access_token);
+        setRefreshToken(res.refresh_token);
+        localStorage.setItem("token", res.access_token);
+        localStorage.setItem("refreshToken", res.refresh_token);
+        setUser(res.user);
+        toast({ title: "Đăng nhập thành công", description: "Chào mừng bạn quay trở lại!" });
+        return { error: null };
+      }
+      return { error: res?.error || "Đăng nhập thất bại" };
+    } catch (err: any) {
+      return { error: err?.message || "Đăng nhập thất bại" };
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Đăng ký
+  const signUp = async (email: string, password: string, username: string) => {
+    setLoading(true);
+    try {
+      const res = await AuthAPI.register({ email, password, username });
+      if (res?.success) {
+        toast({ title: "Đăng ký thành công", description: "Vui lòng kiểm tra email để xác nhận tài khoản." });
+        return { error: null };
+      }
+      return { error: res?.error || "Đăng ký thất bại" };
+    } catch (err: any) {
+      return { error: err?.message || "Đăng ký thất bại" };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Quên mật khẩu
+  const forgotPassword = async (email: string) => {
+    setLoading(true);
+    try {
+      const res = await AuthAPI.forgotPassword(email);
+      if (res?.success) {
+        toast({ title: "Yêu cầu thành công", description: "Vui lòng kiểm tra email để đặt lại mật khẩu." });
+        return { error: null };
+      }
+      return { error: res?.error || "Yêu cầu thất bại" };
+    } catch (err: any) {
+      return { error: err?.message || "Yêu cầu thất bại" };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Đăng xuất
   const signOut = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Đăng xuất thành công",
-      description: "Hẹn gặp lại bạn!",
-    });
+    setUser(null);
+    setToken(null);
+    setRefreshToken(null);
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("token");
+    toast({ title: "Đăng xuất thành công", description: "Hẹn gặp lại bạn!" });
   };
 
   return (
     <AuthContext.Provider value={{
       user,
-      session,
+      token,
       loading,
+      refreshToken,
       signIn,
-      signInWithGitHub,
       signUp,
       signOut,
+      forgotPassword,
     }}>
       {children}
     </AuthContext.Provider>

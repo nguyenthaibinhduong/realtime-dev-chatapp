@@ -82,41 +82,16 @@ export default function ChatLayout() {
     });
   };
 
-  // Lấy danh sách kênh từ Supabase
-  // Kết hợp các kênh do user tạo và các kênh mà user là thành viên
-  // Loại bỏ kênh trùng lặp 
+  // Lấy danh sách kênh từ data tĩnh, không gọi API
+  const STATIC_CHANNELS: Channel[] = [
+    { id: "1", name: "general", description: "Kênh chung", type: "text", member_count: 10 },
+    { id: "2", name: "random", description: "Kênh giải trí", type: "text", member_count: 5 },
+    { id: "3", name: "dev", description: "Kênh lập trình", type: "text", member_count: 8 },
+  ];
+
   const loadChannels = async () => {
-    // Lấy các kênh do user tạo
-    const { data: createdChannels, error: createdError } = await supabase
-      .from('channels')
-      .select('*')
-      .eq('created_by', user?.id);
-
-    // Lấy các kênh user là thành viên
-    const { data: memberChannels, error: memberError } = await supabase
-      .from('channel_members')
-      .select('channel_id, channels(*)')
-      .eq('user_id', user?.id);
-
-    // Gộp danh sách kênh
-    let channels: Channel[] = [];
-    if (createdChannels) channels = [...channels, ...createdChannels];
-    if (memberChannels) {
-      const memberChannelList = memberChannels
-        .map((item: any) => item.channels)
-        .filter((ch: any) => ch); // loại bỏ null
-      channels = [...channels, ...memberChannelList];
-    }
-
-    // Loại bỏ kênh trùng lặp theo id
-    const uniqueChannels = channels.filter(
-      (ch, idx, arr) => arr.findIndex(c => c.id === ch.id) === idx
-    );
-
-    setChannels(uniqueChannels);
-    if (uniqueChannels.length > 0) {
-      setSelectedChannel(uniqueChannels[0]);
-    }
+    setChannels(STATIC_CHANNELS);
+    setSelectedChannel(STATIC_CHANNELS[0]);
   };
   // Tự động cuộn xuống cuối danh sách tin nhắn khi có tin nhắn mới
   const scrollToBottom = () => {
@@ -125,22 +100,15 @@ export default function ChatLayout() {
 
   // Tải danh sách tin nhắn khi chọn kênh
   // Lấy tin nhắn từ Supabase theo kênh đã chọn
-  const loadMessages = async (channelId: string) => {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('id, content, created_at, user_id')
-      .eq('channel_id', channelId)
-      .order('created_at', { ascending: true });
+  const STATIC_MESSAGES: Message[] = [
+    { id: "m1", content: "Chào mừng đến với kênh general!", type: "text", user_id: "1", created_at: "2025-08-26T08:00:00Z", username: "admin" },
+    { id: "m2", content: "Hello mọi người!", type: "text", user_id: "2", created_at: "2025-08-26T08:01:00Z", username: "alice" },
+    { id: "m3", content: "Ai thích code không?", type: "text", user_id: "3", created_at: "2025-08-26T08:02:00Z", username: "bob" },
+  ];
 
-    if (!error && data) {
-      // Map lại dữ liệu để lấy username và email từ users
-      const messagesWithUser = data.map((msg: any) => ({
-        ...msg,
-        username: msg.users?.username,
-        email: msg.users?.email,
-      }));
-      setMessages(messagesWithUser);
-    }
+  const loadMessages = async (channelId: string) => {
+    // Lấy tin nhắn từ mảng tĩnh, lọc theo channelId nếu muốn
+    setMessages(STATIC_MESSAGES);
   };
 
   // Đăng ký lắng nghe sự kiện tin nhắn mới
