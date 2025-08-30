@@ -1,142 +1,190 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from "react";
+import { authService, User } from "@/services/authService";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<{ error: string | null }>;
   signInWithGitHub: () => Promise<void>;
-  signUp: (email: string, password: string, username: string) => Promise<{ error: string | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    username: string
+  ) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  isAuthenticated: () => boolean;
+  refreshToken: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    const initializeAuth = async () => {
+      try {
+        // Check if user is authenticated
+        if (authService.isAuthenticated()) {
+          // Check if token is expired
+          if (authService.isTokenExpired()) {
+            try {
+              // Try to refresh token
+              await authService.refreshToken();
+            } catch (error) {
+              // If refresh fails, logout
+              authService.logout();
+              setLoading(false);
+              return;
+            }
+          }
 
-        // Create profile if user signs up
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            checkAndCreateProfile(session.user);
-          }, 0);
+          // Get user info from token or profile
+          const userFromToken = authService.getUserFromToken();
+          if (userFromToken) {
+            setUser(userFromToken);
+          } else {
+            // Fallback: get profile from API
+            try {
+              const profileResponse = await authService.getProfile();
+              if (profileResponse.status && profileResponse.data) {
+                setUser(profileResponse.data);
+              }
+            } catch (error) {
+              console.error("Failed to get profile:", error);
+              authService.logout();
+            }
+          }
         }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+      } finally {
+        setLoading(false);
       }
-    );
+    };
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    initializeAuth();
   }, []);
-
-  const checkAndCreateProfile = async (user: User) => {
-    // Skip profile creation for now until types are regenerated
-    console.log('User signed in:', user.email);
-  };
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      setLoading(true);
+      const response = await authService.login({ email, password });
 
-      if (error) {
-        return { error: error.message };
+      if (response.status && response.data) {
+        setUser(response.data.user);
+        
+        toast({
+          title: "Đăng nhập thành công",
+          description: "Chào mừng bạn quay trở lại!",
+        });
+
+        return { error: null };
+      } else {
+        return { error: response.msg || "Đăng nhập thất bại" };
       }
-
-      toast({
-        title: "Đăng nhập thành công",
-        description: "Chào mừng bạn quay trở lại!",
-      });
-
-      return { error: null };
-    } catch (error) {
-      return { error: 'Có lỗi xảy ra khi đăng nhập' };
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.msg || error.message || "Có lỗi xảy ra khi đăng nhập";
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
-  const signInWithGitHub = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-    });
 
-    if (error) {
-      console.error('Lỗi đăng nhập GitHub:', error);
+  const signInWithGitHub = async () => {
+    try {
+      await authService.loginWithGitHub();
+    } catch (error: any) {
+      console.error("Lỗi đăng nhập GitHub:", error);
       toast({
-        title: 'Đăng nhập GitHub thất bại',
-        description: error.message,
-        variant: 'destructive',
+        title: "Đăng nhập GitHub thất bại",
+        description: error.message || "Có lỗi xảy ra",
+        variant: "destructive",
       });
     }
   };
 
   const signUp = async (email: string, password: string, username: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
-
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            username: username,
-          }
-        }
+      setLoading(true);
+      const response = await authService.register({ 
+        email, 
+        password, 
+        name: username 
       });
 
-      if (error) {
-        return { error: error.message };
+      if (response.status && response.data) {
+        setUser(response.data.user);
+        
+        toast({
+          title: "Đăng ký thành công",
+          description: "Chào mừng bạn đến với ứng dụng!",
+        });
+
+        return { error: null };
+      } else {
+        return { error: response.msg || "Đăng ký thất bại" };
       }
-
-      toast({
-        title: "Đăng ký thành công",
-        description: "Vui lòng kiểm tra email để xác nhận tài khoản.",
-      });
-
-      return { error: null };
-    } catch (error) {
-      return { error: 'Có lỗi xảy ra khi đăng ký' };
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.msg || error.message || "Có lỗi xảy ra khi đăng ký";
+      return { error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    setUser(null);
+    authService.logout();
     toast({
       title: "Đăng xuất thành công",
       description: "Hẹn gặp lại bạn!",
     });
   };
 
+  const refreshToken = async () => {
+    try {
+      await authService.refreshToken();
+      // Update user info after refresh
+      const userFromToken = authService.getUserFromToken();
+      if (userFromToken) {
+        setUser(userFromToken);
+      }
+    } catch (error) {
+      console.error("Refresh token failed:", error);
+      signOut();
+    }
+  };
+
+  const isAuthenticated = () => {
+    return authService.isAuthenticated() && !authService.isTokenExpired();
+  };
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      loading,
-      signIn,
-      signInWithGitHub,
-      signUp,
-      signOut,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signIn,
+        signInWithGitHub,
+        signUp,
+        signOut,
+        isAuthenticated,
+        refreshToken,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -145,7 +193,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

@@ -7,7 +7,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Tooltip,
@@ -27,10 +27,10 @@ export default function MenubarLayout({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { signOut } = useAuth();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+    await signOut();
   };
 
   const { unreadCount } = useNotifications();

@@ -1,30 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageSquare, Settings } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarLayoutProps {
     children: React.ReactNode;
 }
 
 export default function SidebarLayout({ children }: SidebarLayoutProps) {
-    const [user, setUser] = useState<any>(null);
     const navigate = useNavigate();
+    const { user, isAuthenticated } = useAuth();
 
     useEffect(() => {
-        checkAuth();
-    }, []);
-
-    const checkAuth = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
+        // Check if user is authenticated, if not redirect to auth page
+        if (!isAuthenticated()) {
             navigate("/auth");
-            return;
         }
-        setUser(session.user);
-    };
+    }, [isAuthenticated, navigate]);
 
     return (
 
@@ -54,7 +48,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                         </Avatar>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-sidebar-foreground truncate">
-                                {user?.email?.split("@")[0] || "User"}
+                                {user?.name || user?.email?.split("@")[0] || "User"}
                             </p>
                             <div className="flex items-center">
                                 <div className="w-2 h-2 bg-[hsl(var(--online-status))] rounded-full mr-1" />

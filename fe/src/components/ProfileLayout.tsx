@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Navigate, useNavigate } from "react-router-dom";
 import React from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import SidebarLayout from "./SidebarLayout";
 interface Options {
     id: string;
@@ -17,20 +17,19 @@ interface Options {
 const ProfileLayout = () => {
     const [options, setOptions] = React.useState<Options[]>([]);
     const [selectedOptions, setSelectedOptions] = React.useState<Options | null>(null);
-    const [user, setUser] = React.useState<any>(null);
     const navigate = useNavigate();
+    const { user, isAuthenticated } = useAuth();
+    
     React.useEffect(() => {
         checkAuth();
         loadOptions();
     }, []);
 
     const checkAuth = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
+        if (!isAuthenticated()) {
             navigate('/auth');
             return;
         }
-        setUser(session.user);
     };
 
     const loadOptions = async () => {

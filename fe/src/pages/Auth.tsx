@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, MessageSquare, Github } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,6 +14,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn, signUp, signInWithGitHub } = useAuth();
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,22 +24,15 @@ export default function Auth() {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await signIn(email, password);
 
     if (error) {
       toast({
         title: "Lỗi đăng nhập",
-        description: error.message,
+        description: error,
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Đăng nhập thành công",
-        description: "Chào mừng bạn quay trở lại!",
-      });
       navigate('/');
     }
 
@@ -55,31 +48,16 @@ export default function Auth() {
     const password = formData.get('password') as string;
     const username = formData.get('username') as string;
 
-    const redirectUrl = `${window.location.origin}/`;
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          username: username,
-        }
-      }
-    });
+    const { error } = await signUp(email, password, username);
 
     if (error) {
       toast({
         title: "Lỗi đăng ký",
-        description: error?.message,
+        description: error,
         variant: "destructive",
       });
     } else {
-
-      toast({
-        title: "Đăng ký thành công",
-        description: "Vui lòng kiểm tra email để xác nhận tài khoản.",
-      });
+      navigate('/');
     }
 
     setIsLoading(false);
@@ -87,24 +65,14 @@ export default function Auth() {
 
   const handleSignInGitHub = async () => {
     setIsLoading(true);
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`, // trang sẽ được redirect về sau khi đăng nhập thành công
-      },
-    });
-
-    if (error) {
-      toast({
-        title: "Lỗi đăng nhập",
-        description: error.message,
-        variant: "destructive",
-      });
+    
+    try {
+      await signInWithGitHub();
+    } catch (error) {
+      // Error được handle trong useAuth hook
+    } finally {
+      setIsLoading(false);
     }
-
-    // không cần toast thành công vì Supabase sẽ tự redirect người dùng
-    setIsLoading(false);
   };
 
 
