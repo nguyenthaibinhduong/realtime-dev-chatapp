@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.status && response.data) {
         setUser(response.data.user);
-        
+
         toast({
           title: "Đăng nhập thành công",
           description: "Chào mừng bạn quay trở lại!",
@@ -96,7 +96,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error: response.msg || "Đăng nhập thất bại" };
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.msg || error.message || "Có lỗi xảy ra khi đăng nhập";
+      const errorMessage =
+        error.response?.data?.msg ||
+        error.message ||
+        "Có lỗi xảy ra khi đăng nhập";
       return { error: errorMessage };
     } finally {
       setLoading(false);
@@ -119,15 +122,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signUp = async (email: string, password: string, username: string) => {
     try {
       setLoading(true);
-      const response = await authService.register({ 
-        email, 
-        password, 
-        name: username 
+      const response = await authService.register({
+        email,
+        password,
+        name: username,
       });
 
       if (response.status && response.data) {
         setUser(response.data.user);
-        
+
         toast({
           title: "Đăng ký thành công",
           description: "Chào mừng bạn đến với ứng dụng!",
@@ -138,7 +141,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error: response.msg || "Đăng ký thất bại" };
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.msg || error.message || "Có lỗi xảy ra khi đăng ký";
+      const errorMessage =
+        error.response?.data?.msg ||
+        error.message ||
+        "Có lỗi xảy ra khi đăng ký";
       return { error: errorMessage };
     } finally {
       setLoading(false);

@@ -1,18 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import SidebarLayout from './SidebarLayout';
-import { ChannelHeader } from './blocks/channels/ChannelHeader';
-import { MessageList } from './blocks/messages/MessageList';
-import { MessageInput } from './blocks/messages/MessageInput';
-import { useAuth } from '@/hooks/useAuth';
-import MenubarLayout from './MenubarLayout';
-import MasterLayout from './MasterLayout';
-import { ChannelSearch } from './blocks/channels/ChannelSearch';
-import { ChannelSection } from './blocks/channels/ChannelSection';
-import { ChannelDialog } from './blocks/channels/ChannelDialog';
-
+import { useState, useEffect, useRef } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MessageSquare } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import SidebarLayout from "./SidebarLayout";
+import { ChannelHeader } from "./blocks/channels/ChannelHeader";
+import { MessageList } from "./blocks/messages/MessageList";
+import { MessageInput } from "./blocks/messages/MessageInput";
+import { useAuth } from "@/hooks/useAuth";
+import MenubarLayout from "./MenubarLayout";
+import MasterLayout from "./MasterLayout";
+import { ChannelSearch } from "./blocks/channels/ChannelSearch";
+import { ChannelSection } from "./blocks/channels/ChannelSection";
+import { ChannelDialog } from "./blocks/channels/ChannelDialog";
 
 interface Channel {
   id: string;
@@ -66,5 +65,3 @@ export default function ChatLayout() {
     </MasterLayout>
   );
 }
-
-

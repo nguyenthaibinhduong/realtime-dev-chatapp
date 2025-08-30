@@ -1,13 +1,19 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, MessageSquare, Github } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { Eye, EyeOff, MessageSquare, Github } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,8 +27,8 @@ export default function Auth() {
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     const { error } = await signIn(email, password);
 
@@ -33,7 +39,7 @@ export default function Auth() {
         variant: "destructive",
       });
     } else {
-      navigate('/');
+      navigate("/");
     }
 
     setIsLoading(false);
@@ -44,9 +50,9 @@ export default function Auth() {
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const username = formData.get('username') as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const username = formData.get("username") as string;
 
     const { error } = await signUp(email, password, username);
 
@@ -57,7 +63,7 @@ export default function Auth() {
         variant: "destructive",
       });
     } else {
-      navigate('/');
+      navigate("/");
     }
 
     setIsLoading(false);
@@ -65,7 +71,7 @@ export default function Auth() {
 
   const handleSignInGitHub = async () => {
     setIsLoading(true);
-    
+
     try {
       await signInWithGitHub();
     } catch (error) {
@@ -75,16 +81,15 @@ export default function Auth() {
     }
   };
 
-
-
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--chat-background))] p-4">
       <Card className="w-full max-w-md bg-sidebar border-sidebar-border">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <MessageSquare className="h-8 w-8 text-primary mr-2" />
-            <CardTitle className="text-2xl font-bold text-sidebar-foreground">CodeSync Chat</CardTitle>
+            <CardTitle className="text-2xl font-bold text-sidebar-foreground">
+              CodeSync Chat
+            </CardTitle>
           </div>
           <CardDescription className="text-sidebar-foreground/80">
             Ứng dụng nhắn tin chuyên sâu cho lập trình viên
@@ -93,14 +98,20 @@ export default function Auth() {
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-sidebar-accent">
-              <TabsTrigger value="signin" className="text-sidebar-foreground">Đăng nhập</TabsTrigger>
-              <TabsTrigger value="signup" className="text-sidebar-foreground">Đăng ký</TabsTrigger>
+              <TabsTrigger value="signin" className="text-sidebar-foreground">
+                Đăng nhập
+              </TabsTrigger>
+              <TabsTrigger value="signup" className="text-sidebar-foreground">
+                Đăng ký
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sidebar-foreground">Email</Label>
+                  <Label htmlFor="email" className="text-sidebar-foreground">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     name="email"
@@ -111,7 +122,9 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sidebar-foreground">Mật khẩu</Label>
+                  <Label htmlFor="password" className="text-sidebar-foreground">
+                    Mật khẩu
+                  </Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -140,16 +153,24 @@ export default function Auth() {
                   {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
                 </Button>
               </form>
-              <Button onClick={handleSignInGitHub} className="w-full bg-white text-black mt-3 hover:bg-slate-200" disabled={isLoading}>
+              <Button
+                onClick={handleSignInGitHub}
+                className="w-full bg-white text-black mt-3 hover:bg-slate-200"
+                disabled={isLoading}
+              >
                 <Github />
-                {isLoading ? "Đang đăng nhập với github..." : "Đăng nhập với github"}
+                {isLoading
+                  ? "Đang đăng nhập với github..."
+                  : "Đăng nhập với github"}
               </Button>
             </TabsContent>
 
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username" className="text-sidebar-foreground">Tên người dùng</Label>
+                  <Label htmlFor="username" className="text-sidebar-foreground">
+                    Tên người dùng
+                  </Label>
                   <Input
                     id="username"
                     name="username"
@@ -160,7 +181,12 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-sidebar-foreground">Email</Label>
+                  <Label
+                    htmlFor="signup-email"
+                    className="text-sidebar-foreground"
+                  >
+                    Email
+                  </Label>
                   <Input
                     id="signup-email"
                     name="email"
@@ -171,7 +197,12 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-sidebar-foreground">Mật khẩu</Label>
+                  <Label
+                    htmlFor="signup-password"
+                    className="text-sidebar-foreground"
+                  >
+                    Mật khẩu
+                  </Label>
                   <div className="relative">
                     <Input
                       id="signup-password"
