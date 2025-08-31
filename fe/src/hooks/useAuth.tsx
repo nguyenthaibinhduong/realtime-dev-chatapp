@@ -80,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    setLoading(true);
     try {
       setLoading(true);
       const response = await authService.login({ email, password });
@@ -127,6 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, username: string) => {
+    setLoading(true);
     try {
       setLoading(true);
       const response = await authService.register({
@@ -158,6 +160,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Đăng xuất
   const signOut = async () => {
     setUser(null);
     authService.logout();

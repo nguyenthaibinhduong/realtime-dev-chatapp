@@ -18,6 +18,7 @@ const AuthGuard = ({ children }) => {
     }
   }, [loading, isAuthenticated, navigate]);
 
+  if (loading) return <Loading />; // chờ verify xong mới render
   if (loading || isLoading) return <Loading />;
   if (!isAuthenticated()) return null; // tránh render sớm trong lúc redirect
 

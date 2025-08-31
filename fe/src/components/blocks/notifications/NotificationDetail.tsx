@@ -29,11 +29,11 @@ export default function NotificationDetail({
 }: NotificationDetailProps) {
   if (!notification) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-background">
-        <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mb-6">
+      <div className="flex flex-col items-center justify-center h-full text-center p-8">
+        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6">
           <Bell className="w-8 h-8 text-muted-foreground" />
         </div>
-        <h2 className="text-xl font-semibold mb-2 text-foreground">
+        <h2 className="text-xl font-semibold mb-2 text-white">
           Select a notification
         </h2>
         <p className="text-muted-foreground max-w-md leading-relaxed">
