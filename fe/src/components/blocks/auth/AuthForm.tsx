@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, MessageSquare, Github } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function AuthForm() {
@@ -14,7 +14,7 @@ export default function AuthForm() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
-    const { signIn, signUp, forgotPassword } = useAuth();
+    const { signIn, signUp } = useAuth();
 
     const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,6 +29,7 @@ export default function AuthForm() {
         }
         const res = await signIn(email, password);
         if (res.error) {
+            // Hiển thị lỗi cụ thể từ response
             toast({ title: "Lỗi đăng nhập", description: res.error, variant: "destructive" });
             setIsLoading(false);
             return;
@@ -47,6 +48,7 @@ export default function AuthForm() {
         const username = formData.get('username') as string;
         const res = await signUp(email, password, username);
         if (res.error) {
+            // Hiển thị lỗi cụ thể từ response
             toast({ title: "Lỗi đăng ký", description: res.error, variant: "destructive" });
             setIsLoading(false);
             return;
@@ -56,16 +58,16 @@ export default function AuthForm() {
     };
 
     const handleForgotPassword = async () => {
-        const email = prompt("Nhập email để lấy lại mật khẩu:");
-        if (!email) return;
-        setIsLoading(true);
-        const res = await forgotPassword(email);
-        if (res.error) {
-            toast({ title: "Lỗi", description: res.error, variant: "destructive" });
-        } else {
-            toast({ title: "Thành công", description: "Vui lòng kiểm tra email để đặt lại mật khẩu." });
-        }
-        setIsLoading(false);
+        // const email = prompt("Nhập email để lấy lại mật khẩu:");
+        // if (!email) return;
+        // setIsLoading(true);
+        // const res = await forgotPassword(email);
+        // if (res.error) {
+        //     toast({ title: "Lỗi", description: res.error, variant: "destructive" });
+        // } else {
+        //     toast({ title: "Thành công", description: "Vui lòng kiểm tra email để đặt lại mật khẩu." });
+        // }
+        // setIsLoading(false);
     };
 
     return (

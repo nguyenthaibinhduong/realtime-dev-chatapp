@@ -11,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// Interceptor request -> luôn đính kèm token
+// Interceptor request: luôn đính kèm token từ localStorage nếu có
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -23,34 +23,71 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor response -> handle lỗi và refresh token
+// Interceptor response: nếu lỗi 409 (token hết hạn), tự động refresh và retry
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError<any>) => {
-    if (error.response?.status === 409) {
+    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+
+    // Nếu lỗi là 409 (token hết hạn) và chưa retry
+    if (error.response?.status === 409 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Nếu đang refresh -> push vào queue chờ
+        return new Promise(function (resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (originalRequest.headers)
+              originalRequest.headers.Authorization = "Bearer " + token;
+            return api(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        if (refreshToken) {
-          const refreshRes = await axios.post(
-            `${API_URL}/auth/refresh-token`,
-            { refresh_token: refreshToken }
-          );
-          if (refreshRes.status === 201 && refreshRes.data.access_token) {
-            localStorage.setItem("token", refreshRes.data.access_token);
-            // gắn lại token vào header request cũ
-            if (error.config?.headers) {
-              error.config.headers.Authorization = `Bearer ${refreshRes.data.access_token}`;
-            }
-            // gọi lại request bị fail
-            return api.request(error.config!);
-          }
-        }
-      } catch (refreshError) {
+        const refreshRes = await axios.post(
+          `${API_URL}/auth/refresh-token`,
+          { refresh_token: refreshToken }
+        );
+
+        const newToken = refreshRes.data.access_token;
+        localStorage.setItem("token", newToken);
+
+        api.defaults.headers.Authorization = `Bearer ${newToken}`;
+        processQueue(null, newToken);
+
+        if (originalRequest.headers)
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
-        window.location.href = "/auth"; // đẩy về login
+        window.location.href = "/auth";
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
   }
 );
@@ -72,55 +109,35 @@ function handleError(error: AxiosError) {
   }
 }
 
-// Hàm GET không cần auth
+// Hàm GET (không cần truyền token, interceptor sẽ tự động gắn nếu có)
 export async function get<T = any>(
   url: string,
   config?: AxiosRequestConfig
 ): Promise<T> {
-  try {
-    const res: AxiosResponse<T> = await api.get(url, config);
-    return res.data;
-  } catch (error) {
-    return handleError(error as AxiosError);
-  }
+  const res: AxiosResponse<T> = await api.get(url, config);
+  return res.data;
 }
 
-// Hàm POST không cần auth
+// Hàm POST (không cần truyền token, interceptor sẽ tự động gắn nếu có)
 export async function post<T = any>(
   url: string,
   data?: any,
   config?: AxiosRequestConfig
 ): Promise<T> {
-  try {
-    const res: AxiosResponse<T> = await api.post(url, data, config);
-    return res.data;
-  } catch (error) {
-    return handleError(error as AxiosError);
-  }
+  const res: AxiosResponse<T> = await api.post(url, data, config);
+  return res.data;
 }
 
-// Hàm GET cần auth (thêm tham số token)
+// Hàm GET cần auth (không cần truyền token, interceptor sẽ tự động gắn nếu có)
 export async function apiget<T = any>(
   url: string,
-  token: string,
   config?: AxiosRequestConfig
 ): Promise<T> {
-  const authConfig = {
-    ...config,
-    headers: {
-      ...(config?.headers || {}),
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  try {
-    const res: AxiosResponse<T> = await api.get(url, authConfig);
-    return res.data;
-  } catch (error) {
-    return handleError(error as AxiosError);
-  }
+  const res: AxiosResponse<T> = await api.get(url, config);
+  return res.data;
 }
 
-// Hàm POST cần auth (thêm tham số token)
+// Hàm POST cần truyền token thủ công (nếu muốn override)
 export async function apipost<T = any>(
   url: string,
   token?: string,
@@ -134,12 +151,8 @@ export async function apipost<T = any>(
       Authorization: token ? `Bearer ${token}` : "",
     },
   };
-  try {
-    const res: AxiosResponse<T> = await api.post(url, data, authConfig);
-    return res.data;
-  } catch (error) {
-    return handleError(error as AxiosError);
-  }
+  const res: AxiosResponse<T> = await api.post(url, data, authConfig);
+  return res.data;
 }
 
 // Có thể thêm các hàm PUT, DELETE tương tự nếu cần

@@ -1,26 +1,22 @@
-import { get, post, apiget, apipost } from "./Http";
+import  {  post, apiget, apipost } from "./Http";
 
-const AuthAPI = {
+export const AuthAPI = {
   // Không cần auth
-   login: async(data: any) => post("/auth/login", data),
+  login: async(data: any) => post("/auth/login", data),
   register: async(data: any) => post("/auth/register", data),
-  forgotPassword: async(email: string) => post("/auth/forgot-password", { email }),
-  verifyToken: async(token: string) => post("/auth/verify-token", { token }),
-
-  // Cần auth
-  fetchUserProfile: async({ token,userId }) => apiget(`/users/${userId}`, token),
-  fetchUsers: async({ token, params }) => apiget("/users", token, { params }),
-  changePassword: async({ token, data }) => apipost("/auth/change-password", token, data),
-  updateProfile: async({ token, data }) => apipost("/users/update-profile", token, data),
-  logout: async({ token }) => apipost("/auth/logout", token),
-  refreshToken: async({ token }) => apipost("/auth/refresh-token", token),
+  forgotPassword: async(data: any) => post("/auth/forgot-password", { data }),
+  verifyToken: async(data: any) => post("/auth/verify-token", { data }),
+  fetchUserProfile: async(id: string) => apiget(`/users/${id}`),
+  changePassword: async(data: any) => apipost("/auth/change-password", data),
+  updateProfile: async(data: any) => apipost("/users/update-profile", data),
+  logout: async() => apipost("/auth/logout"),
+  refreshToken: async (data: any) => apipost("/auth/refresh-token", data),
+  githubLogin: async(data:any) => apipost("/auth/github-oauth", data),
 };
 
 
-const ChatAPI = {
-  fetchChannel: async({token,channelId }) => apiget(`chat/channels/${channelId}`, token),
-
-  
+export const ChatAPI = {
+  fetchChannel: async(id: string) => apiget(`chat/channels/${id}`),
 };
 
-export default AuthAPI;
+ 

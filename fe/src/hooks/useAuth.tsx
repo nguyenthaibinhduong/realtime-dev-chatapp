@@ -5,8 +5,9 @@ import {
   useContext,
   ReactNode,
 } from "react";
-import { authService, User } from "@/services/authService";
-import { useToast } from "@/hooks/use-toast";
+import authService from "@/services/authService";
+import { useToast } from "@/hooks/useToast";
+import { User } from "@/types/auth";
 
 interface AuthContextType {
   user: User | null;

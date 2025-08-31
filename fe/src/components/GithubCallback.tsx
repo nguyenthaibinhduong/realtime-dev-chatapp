@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
 import { authService } from "@/services/authService";
 
 export const GitHubCallback = () => {
@@ -41,9 +41,8 @@ export const GitHubCallback = () => {
         if (response.status && response.data) {
           toast({
             title: "Đăng nhập GitHub thành công",
-            description: `Chào mừng ${
-              response.data.user.name || response.data.user.email
-            }!`,
+            description: `Chào mừng ${response.data.user.name || response.data.user.email
+              }!`,
           });
 
           // Reload page để AuthProvider cập nhật user state

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
 import SidebarLayout from "./SidebarLayout";
 import { ChannelHeader } from "./blocks/channels/ChannelHeader";
 import { MessageList } from "./blocks/messages/MessageList";
