@@ -16,7 +16,7 @@ export const AuthAPI = {
 
 
 export const ChatAPI = {
-  fetchChannel: async(id: string) => apiget(`chat/channels/${id}`),
+  fetchChannel: async() => apiget(`channels/list-channels`),
 };
 
  

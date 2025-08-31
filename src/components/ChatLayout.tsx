@@ -12,6 +12,7 @@ import MasterLayout from "./MasterLayout";
 import { ChannelSearch } from "./blocks/channels/ChannelSearch";
 import { ChannelSection } from "./blocks/channels/ChannelSection";
 import { ChannelDialog } from "./blocks/channels/ChannelDialog";
+import { ChatAPI } from "@/api/api";
 
 interface Channel {
   id: string;
@@ -34,8 +35,41 @@ export default function ChatLayout() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // TODO: Implement chat logic with new authService and API
-  // This is a placeholder for now
+  // State cho danh sách kênh và kênh đang chọn
+  const [channels, setChannels] = useState<Channel[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+
+  // Các state cho menu và dialog (giữ nguyên logic cũ nếu có)
+  const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
+
+  // Hàm xử lý menu và tạo kênh (placeholder)
+  const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
+  const handleCreatePublicChannel = () => { };
+  const handleCreatePrivateChannel = () => { };
+
+  // Load danh sách kênh chat khi mount
+  useEffect(() => {
+    const loadChannels = async () => {
+      try {
+        const res = await ChatAPI.fetchChannel();
+        if (Array.isArray(res)) {
+          setChannels(res);
+          setSelectedChannel(res[0] || null);
+        } else if (res.data && Array.isArray(res.data)) {
+          setChannels(res.data);
+          setSelectedChannel(res.data[0] || null);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Lỗi tải kênh",
+          description:
+            error?.msg || error?.message || "Không thể tải danh sách kênh",
+          variant: "destructive",
+        });
+      }
+    };
+    loadChannels();
+  }, [toast]);
 
   return (
     <MasterLayout
@@ -47,6 +81,17 @@ export default function ChatLayout() {
             <p className="text-sm">Chat functionality will be</p>
             <p className="text-sm">implemented with new API</p>
           </div>
+          <ScrollArea className="flex-1 px-3">
+            <ChannelSection
+              channels={channels}
+              selectedChannel={selectedChannel}
+              onSelectChannel={setSelectedChannel}
+              onShowChannelTypeMenu={handleShowChannelTypeMenu}
+              showChannelTypeMenu={showChannelTypeMenu}
+              onCreatePublic={handleCreatePublicChannel}
+              onCreatePrivate={handleCreatePrivateChannel}
+            />
+          </ScrollArea>
         </SidebarLayout>
       }
     >
