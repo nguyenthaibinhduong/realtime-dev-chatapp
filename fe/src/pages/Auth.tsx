@@ -70,14 +70,10 @@ export default function Auth() {
   };
 
   const handleSignInGitHub = async () => {
-    setIsLoading(true);
-
     try {
-      await signInWithGitHub();
+      await signInWithGitHub(); // Sẽ redirect đến GitHub
     } catch (error) {
-      // Error được handle trong useAuth hook
-    } finally {
-      setIsLoading(false);
+      console.error("GitHub login error:", error);
     }
   };
 

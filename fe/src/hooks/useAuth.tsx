@@ -24,6 +24,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isAuthenticated: () => boolean;
   refreshToken: () => Promise<void>;
+  handleGitHubSuccess: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -108,6 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGitHub = async () => {
     try {
+      // Chỉ redirect đến GitHub OAuth
       await authService.loginWithGitHub();
     } catch (error: any) {
       console.error("Lỗi đăng nhập GitHub:", error);
@@ -117,6 +119,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleGitHubSuccess = (user: User) => {
+    setUser(user);
+    setLoading(false);
   };
 
   const signUp = async (email: string, password: string, username: string) => {
@@ -189,6 +196,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signOut,
         isAuthenticated,
         refreshToken,
+        handleGitHubSuccess, // Export method này nếu cần
       }}
     >
       {children}

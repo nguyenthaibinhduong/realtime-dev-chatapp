@@ -10,6 +10,14 @@ const AUTH_API = {
   GITHUB: {
     LOGIN: `${API_URL}/auth/github-oauth`,
   },
+
+  //Chat
+  CHAT: {
+    //Channel
+    GET_CHANNELS: `${API_URL}/channels/list-channels`,
+    CREATE_CHANNEL: `${API_URL}/channels`,
+    //Message
+  },
 };
 
 export { API_URL, AUTH_API };

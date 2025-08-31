@@ -185,11 +185,44 @@ class AuthService {
    * GitHub OAuth login
    */
   async loginWithGitHub(): Promise<void> {
+    // Redirect to GitHub OAuth
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+    const redirectUri = import.meta.env.VITE_GITHUB_CALLBACK_URL;
+    const scope = "user:email";
+
+    const githubOAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+
+    window.location.href = githubOAuthUrl;
+  }
+
+  async handleGitHubCallback(
+    code: string
+  ): Promise<ApiResponse<LoginResponse>> {
     try {
-      // Redirect to GitHub OAuth
-      window.location.href = AUTH_API.GITHUB.LOGIN;
-    } catch (error) {
-      console.error("GitHub login error:", error);
+      console.log("Sending GitHub code to backend:", code);
+      console.log("API endpoint:", AUTH_API.GITHUB.LOGIN);
+
+      // Sử dụng GET request với query parameter thay vì POST
+      const response = await axiosInstance.get<ApiResponse<LoginResponse>>(
+        `${AUTH_API.GITHUB.LOGIN}?code=${encodeURIComponent(code)}`
+      );
+
+      console.log("Backend response:", response.data);
+
+      if (response.data.status && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        this.saveTokens(access_token, refresh_token || "");
+        return response.data;
+      }
+
+      throw new Error(response.data.msg || "GitHub login failed");
+    } catch (error: any) {
+      console.error("GitHub callback error details:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+      });
       throw error;
     }
   }
