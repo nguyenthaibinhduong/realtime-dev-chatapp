@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, Filter } from "lucide-react";
+import { Search, Loader2, Filter, User, Users, Lock, Globe } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useSearchChats } from "@/hooks/useSearch";
 
@@ -12,14 +12,14 @@ interface Channel {
   member_count?: number;
 }
 
-interface User {
+interface UserType {
   id: number;
   username: string;
   email: string;
 }
 
 interface ChannelSearchProps {
-  onJoinChannel?: (channel: Channel) => void;
+  onJoinChannel?: (id: string, type: string) => void;
   onSelectChannel?: (channel: Channel) => void;
 }
 
@@ -53,36 +53,15 @@ export function ChannelSearch({
     const groupChats = searchData.channels?.group || [];
     const privateChats = searchData.channels?.private || [];
 
-    // Filter dựa trên selectedFilter
     switch (selectedFilter) {
       case "personal":
-        return {
-          users,
-          personalChats,
-          groupChats: [],
-          privateChats: [],
-        };
+        return { users, personalChats, groupChats: [], privateChats: [] };
       case "group":
-        return {
-          users: [],
-          personalChats: [],
-          groupChats,
-          privateChats: [],
-        };
+        return { users: [], personalChats: [], groupChats, privateChats: [] };
       case "group-private":
-        return {
-          users: [],
-          personalChats: [],
-          groupChats: [],
-          privateChats,
-        };
-      default: // "all"
-        return {
-          users,
-          personalChats,
-          groupChats,
-          privateChats,
-        };
+        return { users: [], personalChats: [], groupChats: [], privateChats };
+      default:
+        return { users, personalChats, groupChats, privateChats };
     }
   }, [searchData, selectedFilter]);
 
@@ -96,11 +75,11 @@ export function ChannelSearch({
     onSelectChannel?.(channel);
   };
 
-  const handleJoinChannel = (channel: Channel) => {
-    onJoinChannel?.(channel);
+  const handleJoinChannel = async (id: string, type: string) => {
+    await onJoinChannel?.(id, type);
   };
 
-  const handleUserClick = (user: User) => {
+  const handleUserClick = (user: UserType) => {
     const personalChannel: Channel = {
       id: user.id,
       name: user.username,
@@ -119,39 +98,41 @@ export function ChannelSearch({
   return (
     <div className="p-3">
       {/* Search Input */}
-      <div className="relative mb-3">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sidebar-foreground/50" />
+      <form
+        className="relative mb-3 flex items-center"
+        onSubmit={(e) => e.preventDefault()}
+        autoComplete="off"
+      >
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Tìm kiếm kênh, người dùng..."
-          className="pl-9 bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
+          className="pl-10 pr-10 bg-[#222] border-none text-white placeholder:text-white/60 rounded-lg shadow"
         />
         {isLoading && (
-          <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-sidebar-foreground/50" />
+          <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-primary" />
         )}
-      </div>
+      </form>
 
       {/* Filter Options */}
       <div className="mb-3">
-        <div className="flex items-center gap-1 mb-2">
-          <Filter className="h-3 w-3 text-sidebar-foreground/60" />
-          <span className="text-xs text-sidebar-foreground/60">
-            Lọc theo loại:
-          </span>
-        </div>
+        {/* <div className="flex items-center gap-1 mb-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Lọc theo loại:</span>
+        </div> */}
         <div className="flex gap-1 flex-wrap">
           {filterOptions.map((option) => (
             <Button
               key={option.value}
               size="sm"
               variant={selectedFilter === option.value ? "default" : "ghost"}
-              className={`h-6 px-2 text-xs ${
-                selectedFilter === option.value
-                  ? "bg-primary text-white"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
+              className={`h-7 px-3 text-xs rounded-full ${selectedFilter === option.value
+                ? "bg-primary text-white"
+                : "text-white/80 hover:text-white hover:bg-white/10"
+                }`}
               onClick={() => setSelectedFilter(option.value)}
+              type="button"
             >
               {option.label}
             </Button>
@@ -160,174 +141,146 @@ export function ChannelSearch({
       </div>
 
       {/* Search Results */}
-      {searchTerm.trim() && (
-        <div className="mt-3 space-y-3 max-h-64 overflow-y-auto">
-          {/* Loading State */}
-          {isLoading && (
-            <div className="text-xs text-sidebar-foreground/60 px-2 py-1">
-              Đang tìm kiếm...
-            </div>
-          )}
+      <div className="mt-3 space-y-4 max-h-80 overflow-y-auto">
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+            <span className="text-sm text-muted-foreground">Đang tìm kiếm...</span>
+          </div>
+        )}
 
-          {/* No Results */}
-          {!isLoading && !hasResults && (
-            <div className="text-xs text-sidebar-foreground/60 px-2 py-1">
+        {!isLoading && searchTerm.trim() && !hasResults && (
+          <div className="flex flex-col items-center justify-center py-8">
+            <Search className="h-8 w-8 text-muted-foreground mb-2" />
+            <span className="text-sm text-muted-foreground">
               Không tìm thấy kết quả phù hợp.
-            </div>
-          )}
+            </span>
+          </div>
+        )}
 
-          {/* Users */}
-          {filteredResults.users.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-sidebar-foreground/80 px-2 mb-1">
-                Người dùng
-              </div>
-              <div className="space-y-1">
-                {filteredResults.users.map((user) => (
-                  <div
-                    key={`user-${user.id}`}
-                    className="flex items-center justify-between px-2 py-1.5 bg-sidebar-accent/50 rounded hover:bg-sidebar-accent cursor-pointer"
-                    onClick={() => handleUserClick(user)}
+        {/* Users */}
+        {!isLoading && filteredResults.users.length > 0 && (
+          <div>
+            <div className="text-xs font-semibold text-muted-foreground mb-2 px-2">
+              Người dùng
+            </div>
+            <div className="space-y-2">
+              {filteredResults.users.map((user: any) => (
+                <div
+                  key={`user-${user.id}`}
+                  className="flex items-center justify-between px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition"
+                  onClick={() => handleUserClick(user)}
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5 text-blue-400" />
+                    <span className="font-medium text-white">{user.username}</span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      {user.email}
+                    </span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-3 text-xs text-white hover:text-white hover:bg-white/10 rounded-full"
+                    onClick={() => handleJoinChannel(user?.id, 'personal')}
                   >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
-                        {user.username.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-sidebar-foreground text-sm">
-                        {user.username}
+                    Chat
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Personal Chats */}
+        {!isLoading && filteredResults.personalChats.length > 0 && (
+          <div>
+            <div className="text-xs font-semibold text-muted-foreground mb-2 px-2">
+              Tin nhắn trực tiếp
+            </div>
+            <div className="space-y-2">
+              {filteredResults.personalChats.map((channel) => (
+                <div
+                  key={`personal-${channel.id}`}
+                  className="flex items-center px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition"
+                  onClick={() => handleChannelClick(channel)}
+                >
+                  <User className="h-5 w-5 text-green-400 mr-2" />
+                  <span className="font-medium text-white">{channel.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Group Chats */}
+        {!isLoading && filteredResults.groupChats.length > 0 && (
+          <div>
+            <div className="text-xs font-semibold text-muted-foreground mb-2 px-2">
+              Nhóm chat
+            </div>
+            <div className="space-y-2">
+              {filteredResults.groupChats.map((channel) => (
+                <div
+                  key={`group-${channel.id}`}
+                  className="flex items-center justify-between px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition"
+                  onClick={() => handleChannelClick(channel)}
+                >
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-blue-400" />
+                    <span className="font-medium text-white">{channel.name}</span>
+                    {channel.member_count && (
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {channel.member_count} thành viên
                       </span>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 px-2 text-xs text-white hover:text-white hover:bg-white/10"
-                    >
-                      Chat
-                    </Button>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Personal Chats */}
-          {filteredResults.personalChats.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-sidebar-foreground/80 px-2 mb-1">
-                Tin nhắn trực tiếp
-              </div>
-              <div className="space-y-1">
-                {filteredResults.personalChats.map((channel) => (
-                  <div
-                    key={`personal-${channel.id}`}
-                    className="flex items-center px-2 py-1.5 bg-sidebar-accent/50 rounded hover:bg-sidebar-accent cursor-pointer"
-                    onClick={() => handleChannelClick(channel)}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-3 text-xs text-white hover:text-white hover:bg-white/10 rounded-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleJoinChannel(channel?.id, 'group');
+                    }}
                   >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
-                        {channel.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-sidebar-foreground text-sm">
-                        {channel.name}
+                    Tham gia
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Private Chats */}
+        {!isLoading && filteredResults.privateChats.length > 0 && (
+          <div>
+            <div className="text-xs font-semibold text-muted-foreground mb-2 px-2">
+              Kênh riêng tư
+            </div>
+            <div className="space-y-2">
+              {filteredResults.privateChats.map((channel) => (
+                <div
+                  key={`private-${channel.id}`}
+                  className="flex items-center justify-between px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition"
+                  onClick={() => handleChannelClick(channel)}
+                >
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-5 w-5 text-purple-400" />
+                    <span className="font-medium text-white">{channel.name}</span>
+                    {channel.member_count && (
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {channel.member_count} thành viên
                       </span>
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* Group Chats */}
-          {filteredResults.groupChats.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-sidebar-foreground/80 px-2 mb-1">
-                Nhóm chat
-              </div>
-              <div className="space-y-1">
-                {filteredResults.groupChats.map((channel) => (
-                  <div
-                    key={`group-${channel.id}`}
-                    className="flex items-center justify-between px-2 py-1.5 bg-sidebar-accent/50 rounded hover:bg-sidebar-accent cursor-pointer"
-                    onClick={() => handleChannelClick(channel)}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
-                        {channel.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="text-sidebar-foreground text-sm">
-                          {channel.name}
-                        </div>
-                        {channel.member_count && (
-                          <div className="text-xs text-sidebar-foreground/60">
-                            {channel.member_count} thành viên
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 px-2 text-xs text-white hover:text-white hover:bg-white/10"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleJoinChannel(channel);
-                      }}
-                    >
-                      Tham gia
-                    </Button>
-                  </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
-
-          {/* Private Chats */}
-          {filteredResults.privateChats.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-sidebar-foreground/80 px-2 mb-1">
-                Kênh riêng tư
-              </div>
-              <div className="space-y-1">
-                {filteredResults.privateChats.map((channel) => (
-                  <div
-                    key={`private-${channel.id}`}
-                    className="flex items-center justify-between px-2 py-1.5 bg-sidebar-accent/50 rounded hover:bg-sidebar-accent cursor-pointer"
-                    onClick={() => handleChannelClick(channel)}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">
-                        🔒
-                      </div>
-                      <div>
-                        <div className="text-sidebar-foreground text-sm">
-                          {channel.name}
-                        </div>
-                        {channel.member_count && (
-                          <div className="text-xs text-sidebar-foreground/60">
-                            {channel.member_count} thành viên
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 px-2 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleJoinChannel(channel);
-                      }}
-                    >
-                      Tham gia
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

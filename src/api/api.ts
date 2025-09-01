@@ -1,3 +1,4 @@
+import { join } from "path";
 import { post, apiget, apipost } from "./Http";
 
 export const AuthAPI = {
@@ -18,6 +19,8 @@ export const ChatAPI = {
   fetchChannel: async () => apiget(`channels/list-channels`),
   fetchMessage: async (channelId: string) =>
     apiget(`channels/list-messages/${channelId}`),
+  createChannel: async (data: any) => apipost(`channels/create-channel`, data),
+  joinChannel: async (data: any) => apipost(`channels/join-channel`, data),
   //Tìm kiếm
   fetchSearchUser: async (key: string, limit: number) =>
     apiget(`users/search-user`, {
@@ -27,7 +30,4 @@ export const ChatAPI = {
     apiget(`channels/search-chat`, {
       params: { type, key, limit },
     }),
-
-  //Channels
-  createChannel: async (data: any) => apipost("channels/create-channel", data),
 };

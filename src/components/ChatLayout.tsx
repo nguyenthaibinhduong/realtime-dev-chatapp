@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Search } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import SidebarLayout from "./SidebarLayout";
 import { ChannelHeader } from "./blocks/channels/ChannelHeader";
@@ -13,34 +13,15 @@ import { ChannelSearch } from "./blocks/channels/ChannelSearch";
 import { ChannelSection } from "./blocks/channels/ChannelSection";
 import { ChannelDialog } from "./blocks/channels/ChannelDialog";
 import { ChatAPI } from "@/api/api";
-
-interface Channel {
-  id: string;
-  name: string;
-  description?: string;
-  type: string;
-  member_count?: number;
-}
-
-interface Message {
-  id: number;
-  text: string;
-  created_at: string;
-  updated_at: string;
-  sender: {
-    id: number;
-    username: string;
-    email: string;
-  };
-  isMine: boolean;
-}
-
-interface Member {
-  id: number;
-  username: string;
-  email: string;
-  isMine?: boolean;
-}
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Message } from "@/types/message";
+import { Channel, Member } from "@/types/channel";
 
 export default function ChatLayout() {
   const { toast } = useToast();
@@ -51,47 +32,46 @@ export default function ChatLayout() {
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-
-  // Các state cho menu và dialog (giữ nguyên logic cũ nếu có)
   const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
 
-  // Hàm xử lý menu và tạo kênh (placeholder)
+  // State cho modal tìm kiếm kênh
+  const [openSearchModal, setOpenSearchModal] = useState(false);
+
   const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
   const handleCreatePublicChannel = () => {};
   const handleCreatePrivateChannel = () => {};
-
-  // Load danh sách kênh chat khi mount
-  useEffect(() => {
-    const loadChannels = async () => {
-      try {
-        const res = await ChatAPI.fetchChannel();
-        let loadedChannels: Channel[] = [];
-        if (Array.isArray(res)) {
-          loadedChannels = res;
-        } else if (res.data && Array.isArray(res.data)) {
-          loadedChannels = res.data;
-        }
-        setChannels(loadedChannels);
-
-        // Lấy kênh đã chọn từ localStorage nếu có, nếu không thì lấy kênh đầu tiên
-        const savedChannelId = localStorage.getItem("selectedChannelId");
-        const foundChannel = loadedChannels.find(
-          (c) => String(c.id) === savedChannelId
-        );
-        setSelectedChannel(foundChannel || loadedChannels[0] || null);
-      } catch (error: any) {
-        toast({
-          title: "Lỗi tải kênh",
-          description:
-            error?.msg || error?.message || "Không thể tải danh sách kênh",
-          variant: "destructive",
-        });
+  // Sử dụng useCallback cho loadChannels
+  const loadChannels = useCallback(async () => {
+    try {
+      const res = await ChatAPI.fetchChannel();
+      let loadedChannels: Channel[] = [];
+      if (Array.isArray(res)) {
+        loadedChannels = res;
+      } else if (res.data && Array.isArray(res.data)) {
+        loadedChannels = res.data;
       }
-    };
-    loadChannels();
+      setChannels(loadedChannels);
+
+      // Lấy kênh đã chọn từ localStorage nếu có, nếu không thì lấy kênh đầu tiên
+      const savedChannelId = localStorage.getItem("selectedChannelId");
+      const foundChannel = loadedChannels.find(
+        (c) => String(c.id) === savedChannelId
+      );
+      setSelectedChannel(foundChannel || loadedChannels[0] || null);
+    } catch (error: any) {
+      toast({
+        title: "Lỗi tải kênh",
+        description:
+          error?.msg || error?.message || "Không thể tải danh sách kênh",
+        variant: "destructive",
+      });
+    }
   }, [toast]);
 
-  // Khi đổi kênh, lưu lại vào localStorage
+  useEffect(() => {
+    loadChannels();
+  }, [loadChannels]);
+
   const handleSelectChannel = (channel: Channel | null) => {
     setSelectedChannel(channel);
     if (channel) {
@@ -101,12 +81,10 @@ export default function ChatLayout() {
     }
   };
 
-  // useCallback để load message và member theo selectedChannel
   const loadMessages = useCallback(
     async (channelId: string) => {
       try {
         const res = await ChatAPI.fetchMessage(channelId);
-        // Đúng cấu trúc: lấy từ res.data.items và res.data.members
         if (res && res.data) {
           setMessages(Array.isArray(res.data.items) ? res.data.items : []);
           setMembers(Array.isArray(res.data.members) ? res.data.members : []);
@@ -124,10 +102,9 @@ export default function ChatLayout() {
         setMembers([]);
       }
     },
-    [toast]
+    [selectedChannel]
   );
 
-  // useEffect gọi loadMessages khi selectedChannel thay đổi
   useEffect(() => {
     if (selectedChannel?.id) {
       loadMessages(selectedChannel.id);
@@ -136,22 +113,91 @@ export default function ChatLayout() {
       setMembers([]);
     }
   }, [selectedChannel, loadMessages]);
-  const handleSelectChannelFromSearch = (channel: any) => {};
 
-  // Handle joining channel from search
-  const handleJoinChannelFromSearch = async (channel: any) => {};
+  const handleSelectChannelFromSearch = (channel: any) => {
+    handleSelectChannel(channel);
+    setOpenSearchModal(false);
+  };
+
+  const handleJoinChannelFromSearch = async (id: string, type: string) => {
+    try {
+      const res = await ChatAPI.joinChannel({ id, type });
+
+      if (res && res.status && [200, 201].includes(res.status) && res.data) {
+        // Đầu tiên set vào localStorage
+        localStorage.setItem("selectedChannelId", res.data.channelId);
+
+        // Sau đó mới gọi loadChannels để cập nhật lại danh sách và kênh đang chọn
+        await loadChannels();
+
+        setOpenSearchModal(false);
+        toast({
+          title: "Tham gia kênh thành công",
+          description: `${res.data.msg}`,
+        });
+      } else {
+        toast({
+          title: "Lỗi tham gia kênh",
+          description: res?.data?.msg || "Không thể tham gia kênh",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Lỗi tham gia kênh",
+        description: error?.msg || error?.message || "Không thể tham gia kênh",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <MasterLayout
       menu={<MenubarLayout />}
       sidebar={
         <SidebarLayout>
-          <ScrollArea className="px-3 pt-2">
-            <ChannelSearch
-              onSelectChannel={handleSelectChannelFromSearch}
-              onJoinChannel={handleJoinChannelFromSearch}
-            />
-          </ScrollArea>
+          <div className="flex items-center justify-between px-3 pt-2">
+            <Dialog open={openSearchModal} onOpenChange={setOpenSearchModal}>
+              <DialogTrigger asChild>
+                <div
+                  className="flex items-center w-full bg-[#222] rounded px-3 py-2 cursor-pointer hover:bg-[#333] transition"
+                  title="Tìm kiếm kênh"
+                  onClick={() => setOpenSearchModal(true)}
+                  style={{ minHeight: 40 }}
+                >
+                  <Search className="h-5 w-5 text-white mr-2" />
+                  <span className="text-white opacity-80 text-sm">
+                    Tìm kiếm ...
+                  </span>
+                </div>
+              </DialogTrigger>
+              <DialogContent
+                className="w-full max-w-2xl bg-[#18181b] text-white border-none"
+                style={{
+                  background: "#18181b",
+                  color: "#fff",
+                  height: "70vh",
+                  minHeight: "70vh",
+                  maxHeight: "70vh",
+                }}
+              >
+                <DialogHeader>
+                  <DialogTitle className="text-white">
+                    Tìm kiếm kênh , người dùng
+                  </DialogTitle>
+                </DialogHeader>
+                <div
+                  className="px-3 pt-2"
+                  style={{ height: "calc(70vh - 48px)" }}
+                >
+                  <ChannelSearch
+                    onSelectChannel={handleSelectChannelFromSearch}
+                    onJoinChannel={handleJoinChannelFromSearch}
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
           <ScrollArea className="flex-1 px-3">
             <ChannelSection
               channels={channels}
