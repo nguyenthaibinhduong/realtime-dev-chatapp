@@ -52,7 +52,7 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                     : 'bg-gray-700 text-white rounded-bl-none'
                                     }  ${message?.type == 'code' ? 'w-[80%] bg-transparent' : ''}`}
                             >
-                                <div className="flex items-baseline justify-start mb-1 items-center">
+                                <div className="flex  justify-start mb-1 items-center">
                                     {!isMe && (
                                         <p className="text-sm font-medium">
                                             {message.sender.username || message.sender.email || 'Thành viên kênh'}
