@@ -38,7 +38,6 @@ export default function ChatLayout() {
   const [openSearchModal, setOpenSearchModal] = useState(false);
 
   const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
-
   // Sử dụng useCallback cho loadChannels
   const loadChannels = useCallback(async () => {
     try {
@@ -175,9 +174,9 @@ export default function ChatLayout() {
                 style={{
                   background: "#18181b",
                   color: "#fff",
-                  height: "70vh",
-                  minHeight: "70vh",
-                  maxHeight: "70vh",
+                  height: "85vh",
+                  minHeight: "85vh",
+                  maxHeight: "85vh",
                 }}
               >
                 <DialogHeader>
@@ -185,10 +184,7 @@ export default function ChatLayout() {
                     Tìm kiếm kênh , người dùng
                   </DialogTitle>
                 </DialogHeader>
-                <div
-                  className="px-3 pt-2"
-                  style={{ height: "calc(70vh - 48px)" }}
-                >
+                <div className="px-3 pt-2 h-[70vh]">
                   <ChannelSearch
                     onSelectChannel={handleSelectChannelFromSearch}
                     onJoinChannel={handleJoinChannelFromSearch}
