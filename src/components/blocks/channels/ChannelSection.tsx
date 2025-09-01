@@ -18,8 +18,7 @@ interface ChannelSectionProps {
   onSelectChannel: (channel: Channel) => void;
   onShowChannelTypeMenu: () => void;
   showChannelTypeMenu: boolean;
-  onCreatePublic: () => void;
-  onCreatePrivate: () => void;
+  onChannelCreated: () => void;
 }
 
 export const ChannelSection = ({
@@ -28,8 +27,7 @@ export const ChannelSection = ({
   onSelectChannel,
   onShowChannelTypeMenu,
   showChannelTypeMenu,
-  onCreatePublic,
-  onCreatePrivate,
+  onChannelCreated, // Nhận callback chung
 }: ChannelSectionProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +39,7 @@ export const ChannelSection = ({
     if (!showChannelTypeMenu) return;
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        onShowChannelTypeMenu(); // đóng menu
+        onShowChannelTypeMenu();
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -52,13 +50,18 @@ export const ChannelSection = ({
   const handleCreatePublic = () => {
     setDialogType("public");
     setIsDialogOpen(true);
-    onShowChannelTypeMenu(); // Đóng menu dropdown
+    onShowChannelTypeMenu(); // Đóng menu
   };
 
   const handleCreatePrivate = () => {
     setDialogType("private");
     setIsDialogOpen(true);
-    onShowChannelTypeMenu(); // Đóng menu dropdown
+    onShowChannelTypeMenu(); // Đóng menu
+  };
+
+  // Handle dialog success - sử dụng callback chung
+  const handleDialogSuccess = () => {
+    onChannelCreated(); // Gọi callback chung cho cả public và private
   };
 
   return (
@@ -101,11 +104,12 @@ export const ChannelSection = ({
         onSelectChannel={onSelectChannel}
       />
 
-      {/* Channel Dialog */}
+      {/* Channel Dialog với callback */}
       <ChannelDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         type={dialogType}
+        onSuccess={handleDialogSuccess}
       />
     </div>
   );

@@ -38,8 +38,7 @@ export default function ChatLayout() {
   const [openSearchModal, setOpenSearchModal] = useState(false);
 
   const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
-  const handleCreatePublicChannel = () => {};
-  const handleCreatePrivateChannel = () => {};
+
   // Sử dụng useCallback cho loadChannels
   const loadChannels = useCallback(async () => {
     try {
@@ -205,8 +204,7 @@ export default function ChatLayout() {
               onSelectChannel={handleSelectChannel}
               onShowChannelTypeMenu={handleShowChannelTypeMenu}
               showChannelTypeMenu={showChannelTypeMenu}
-              onCreatePublic={handleCreatePublicChannel}
-              onCreatePrivate={handleCreatePrivateChannel}
+              onChannelCreated={loadChannels}
             />
           </ScrollArea>
         </SidebarLayout>

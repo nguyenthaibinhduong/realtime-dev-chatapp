@@ -38,12 +38,14 @@ interface ChannelDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   type: "public" | "private";
+  onSuccess?: () => void; // Thêm callback success
 }
 
 export function ChannelDialog({
   open,
   onOpenChange,
   type,
+  onSuccess, // Nhận callback
 }: ChannelDialogProps) {
   const [channelName, setChannelName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,7 +86,7 @@ export function ChannelDialog({
   const handleAddUser = (user: User) => {
     if (!selectedUsers.find((u) => u.id === user.id)) {
       setSelectedUsers((prev) => [...prev, user]);
-      setSearchTerm(""); // Clear search after selecting
+      setSearchTerm("");
     }
   };
 
@@ -106,10 +108,8 @@ export function ChannelDialog({
       const userIds = selectedUsers.map((user) => user.id);
 
       if (type === "public") {
-        // Tạo kênh công khai
-        createGroupChat(userIds, channelName.trim());
+        await createGroupChat(userIds, channelName.trim());
       } else {
-        // Tạo kênh riêng tư - cần ít nhất 1 thành viên
         if (selectedUsers.length === 0) {
           toast({
             title: "Lỗi",
@@ -120,10 +120,10 @@ export function ChannelDialog({
           return;
         }
 
-        createPrivateChannel(userIds, channelName.trim());
+        await createPrivateChannel(userIds, channelName.trim());
       }
 
-      // Thành công thì đóng dialog
+      // Thành công
       toast({
         title: "Thành công",
         description: `Tạo kênh ${
@@ -131,7 +131,14 @@ export function ChannelDialog({
         } thành công`,
         variant: "default",
       });
+
+      // Đóng dialog
       onOpenChange(false);
+
+      // Gọi callback để refetch channels
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (err: any) {
       toast({
         title: "Lỗi",
@@ -149,8 +156,8 @@ export function ChannelDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900 text-white border border-gray-700 max-w-lg">
-        <DialogHeader>
+      <DialogContent className="bg-gray-900 text-white border border-gray-700 w-full max-w-lg h-[600px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-lg">
             {type === "public" ? (
               <>
@@ -166,7 +173,8 @@ export function ChannelDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto py-4 space-y-4">
           {/* Channel Name Input */}
           <div className="space-y-2">
             <Label
@@ -195,29 +203,31 @@ export function ChannelDialog({
                 : "Thành viên (tùy chọn)"}
             </Label>
 
-            {/* Selected Users */}
-            {selectedUsers.length > 0 && (
-              <div className="flex flex-wrap gap-1 p-2 bg-gray-800 rounded-md border border-gray-600">
-                {selectedUsers.map((user) => (
-                  <Badge
-                    key={user.id}
-                    variant="secondary"
-                    className="bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-1"
-                  >
-                    <User className="h-3 w-3" />
-                    {user.username}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-4 w-4 p-0 hover:bg-blue-800"
-                      onClick={() => handleRemoveUser(user.id)}
+            {/* Selected Users - Fixed Height */}
+            <div className="min-h-[40px]">
+              {selectedUsers.length > 0 && (
+                <div className="flex flex-wrap gap-1 p-2 bg-gray-800 rounded-md border border-gray-600">
+                  {selectedUsers.map((user) => (
+                    <Badge
+                      key={user.id}
+                      variant="secondary"
+                      className="bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-1"
                     >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-            )}
+                      <User className="h-3 w-3" />
+                      {user.username}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-4 w-4 p-0 hover:bg-blue-800"
+                        onClick={() => handleRemoveUser(user.id)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* User Search Input */}
             <div className="relative">
@@ -234,48 +244,60 @@ export function ChannelDialog({
               )}
             </div>
 
-            {/* Search Results */}
-            {searchTerm.trim() && filteredSearchResults.length > 0 && (
-              <ScrollArea className="h-32 border border-gray-600 rounded-md bg-gray-800">
-                <div className="p-2 space-y-1">
-                  {filteredSearchResults.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between p-2 hover:bg-gray-700 rounded cursor-pointer"
-                      onClick={() => handleAddUser(user)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
-                          {user.username.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-white">
-                            {user.username}
-                          </p>
-                          <p className="text-xs text-gray-400">{user.email}</p>
-                        </div>
+            {/* Search Results - Fixed Height Container */}
+            <div className="h-32">
+              {searchTerm.trim() && (
+                <>
+                  {filteredSearchResults.length > 0 && (
+                    <ScrollArea className="h-full border border-gray-600 rounded-md bg-gray-800">
+                      <div className="p-2 space-y-1">
+                        {filteredSearchResults.map((user) => (
+                          <div
+                            key={user.id}
+                            className="flex items-center justify-between p-2 hover:bg-gray-700 rounded cursor-pointer"
+                            onClick={() => handleAddUser(user)}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
+                                {user.username.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-white">
+                                  {user.username}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {user.email}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300"
+                            >
+                              Thêm
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300"
-                      >
-                        Thêm
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
+                    </ScrollArea>
+                  )}
 
-            {/* No search results */}
-            {searchTerm.trim() &&
-              !isSearching &&
-              filteredSearchResults.length === 0 && (
-                <div className="p-4 text-center text-gray-400 text-sm bg-gray-800 rounded-md border border-gray-600">
-                  Không tìm thấy người dùng nào
-                </div>
+                  {!isSearching && filteredSearchResults.length === 0 && (
+                    <div className="h-full flex items-center justify-center text-gray-400 text-sm bg-gray-800 rounded-md border border-gray-600">
+                      Không tìm thấy người dùng nào
+                    </div>
+                  )}
+
+                  {isSearching && (
+                    <div className="h-full flex items-center justify-center text-gray-400 text-sm bg-gray-800 rounded-md border border-gray-600">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Đang tìm kiếm...
+                    </div>
+                  )}
+                </>
               )}
+            </div>
           </div>
 
           {/* Channel Type Info */}
@@ -318,7 +340,8 @@ export function ChannelDialog({
           )}
         </div>
 
-        <DialogFooter className="flex gap-2">
+        {/* Fixed Footer */}
+        <DialogFooter className="flex-shrink-0 flex gap-2 pt-4 border-t border-gray-700">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
