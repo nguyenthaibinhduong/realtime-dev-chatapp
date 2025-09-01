@@ -57,8 +57,8 @@ export default function ChatLayout() {
 
   // Hàm xử lý menu và tạo kênh (placeholder)
   const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
-  const handleCreatePublicChannel = () => { };
-  const handleCreatePrivateChannel = () => { };
+  const handleCreatePublicChannel = () => {};
+  const handleCreatePrivateChannel = () => {};
 
   // Load danh sách kênh chat khi mount
   useEffect(() => {
@@ -75,7 +75,9 @@ export default function ChatLayout() {
 
         // Lấy kênh đã chọn từ localStorage nếu có, nếu không thì lấy kênh đầu tiên
         const savedChannelId = localStorage.getItem("selectedChannelId");
-        const foundChannel = loadedChannels.find(c => String(c.id) === savedChannelId);
+        const foundChannel = loadedChannels.find(
+          (c) => String(c.id) === savedChannelId
+        );
         setSelectedChannel(foundChannel || loadedChannels[0] || null);
       } catch (error: any) {
         toast({
@@ -100,27 +102,30 @@ export default function ChatLayout() {
   };
 
   // useCallback để load message và member theo selectedChannel
-  const loadMessages = useCallback(async (channelId: string) => {
-    try {
-      const res = await ChatAPI.fetchMessage(channelId);
-      // Đúng cấu trúc: lấy từ res.data.items và res.data.members
-      if (res && res.data) {
-        setMessages(Array.isArray(res.data.items) ? res.data.items : []);
-        setMembers(Array.isArray(res.data.members) ? res.data.members : []);
-      } else {
+  const loadMessages = useCallback(
+    async (channelId: string) => {
+      try {
+        const res = await ChatAPI.fetchMessage(channelId);
+        // Đúng cấu trúc: lấy từ res.data.items và res.data.members
+        if (res && res.data) {
+          setMessages(Array.isArray(res.data.items) ? res.data.items : []);
+          setMembers(Array.isArray(res.data.members) ? res.data.members : []);
+        } else {
+          setMessages([]);
+          setMembers([]);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Lỗi tải tin nhắn",
+          description: error?.msg || error?.message || "Không thể tải tin nhắn",
+          variant: "destructive",
+        });
         setMessages([]);
         setMembers([]);
       }
-    } catch (error: any) {
-      toast({
-        title: "Lỗi tải tin nhắn",
-        description: error?.msg || error?.message || "Không thể tải tin nhắn",
-        variant: "destructive",
-      });
-      setMessages([]);
-      setMembers([]);
-    }
-  }, [toast]);
+    },
+    [toast]
+  );
 
   // useEffect gọi loadMessages khi selectedChannel thay đổi
   useEffect(() => {
@@ -131,10 +136,10 @@ export default function ChatLayout() {
       setMembers([]);
     }
   }, [selectedChannel, loadMessages]);
-  const handleSelectChannelFromSearch = (channel: any) => { };
+  const handleSelectChannelFromSearch = (channel: any) => {};
 
   // Handle joining channel from search
-  const handleJoinChannelFromSearch = async (channel: any) => { };
+  const handleJoinChannelFromSearch = async (channel: any) => {};
 
   return (
     <MasterLayout
@@ -181,9 +186,7 @@ export default function ChatLayout() {
             <MessageList messages={messages} />
           )}
         </div>
-        {selectedChannel && (
-          <MessageInput channelId={selectedChannel.id} />
-        )}
+        {selectedChannel && <MessageInput channelId={selectedChannel.id} />}
       </div>
     </MasterLayout>
   );
