@@ -11,6 +11,14 @@ const api = axios.create({
   },
 });
 
+const noAuthApi = axios.create({
+  baseURL: API_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 // Interceptor request: luôn đính kèm token từ localStorage nếu có
 api.interceptors.request.use(
   (config) => {
@@ -114,7 +122,7 @@ export async function get<T = any>(
   url: string,
   config?: AxiosRequestConfig
 ): Promise<T> {
-  const res: AxiosResponse<T> = await axios.get(url, config);
+  const res: AxiosResponse<T> = await noAuthApi.get(url, config);
   return res.data;
 }
 
@@ -124,7 +132,7 @@ export async function post<T = any>(
   data?: any,
   config?: AxiosRequestConfig
 ): Promise<T> {
-  const res: AxiosResponse<T> = await axios.post(url, data, config);
+  const res: AxiosResponse<T> = await noAuthApi.post(url, data, config);
   return res.data;
 }
 
