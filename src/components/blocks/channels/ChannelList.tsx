@@ -73,11 +73,11 @@ export const ChannelList = ({ channels, selectedChannel, onSelectChannel }: Chan
                             >
                                 {getChannelIcon(channel.type)}
                                 <span className="truncate">{channel.name}</span>
-                                {channel.member_count && (
+                                {/* {channel.member_count && (
                                     <Badge variant="secondary" className="ml-auto text-xs">
                                         {channel.member_count}
                                     </Badge>
-                                )}
+                                )} */}
                             </Button>
                         ))}
                     </div>
