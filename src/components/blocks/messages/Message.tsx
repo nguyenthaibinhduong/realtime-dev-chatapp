@@ -60,13 +60,13 @@ const parseCodeBlock = (raw: string) => {
 };
 
 interface MessageRendererProps {
-    content: string;
+    text: string;
 }
 
 // ✅ Component chính: xử lý cả đoạn văn bản thường và code block
-export const Message = ({ content }: MessageRendererProps) => {
-    if (content.includes('```')) {
-        const parts = content.split('```');
+export const Message = ({ text }: MessageRendererProps) => {
+    if (text.includes('```')) {
+        const parts = text.split('```');
 
         return (
             <div className="space-y-2">
@@ -85,5 +85,5 @@ export const Message = ({ content }: MessageRendererProps) => {
         );
     }
 
-    return <p className="whitespace-pre-wrap text-white">{content}</p>;
+    return <p className="whitespace-pre-wrap text-white">{text}</p>;
 };

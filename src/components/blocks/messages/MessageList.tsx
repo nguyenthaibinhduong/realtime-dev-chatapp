@@ -3,21 +3,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message } from "./Message";
 import React from "react";
+import { MessageListProps } from "@/types/message";
 
-interface Message {
-    id: string;
-    content: string;
-    type: string;
-    user_id: string;
-    created_at: string;
-    username?: string;
-}
-interface MessageListProps {
-    messages: Message[];
-}
+
 
 export const MessageList = ({ messages }: MessageListProps) => {
-    const { user } = useAuth();
     const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
     const [hoveredId, setHoveredId] = React.useState<string | null>(null);
 
@@ -29,8 +19,8 @@ export const MessageList = ({ messages }: MessageListProps) => {
     return (
         <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
-                {messages.map((message) => {
-                    const isMe = message.user_id === user?.id;
+                {messages.map((message: any) => {
+                    const isMe = message.isMine;
 
                     return (
                         <div
@@ -45,12 +35,12 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                         onMouseLeave={() => setHoveredId(null)}
                                     >
                                         <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                                            {message.username?.[0]?.toUpperCase() || 'U'}
+                                            {message.sender.username?.[0]?.toUpperCase() || 'U'}
                                         </AvatarFallback>
                                     </Avatar>
                                     {hoveredId == message.id && (
                                         <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
-                                            {message.username}
+                                            {message.sender.username}
                                         </div>
                                     )}
                                 </div>
@@ -62,13 +52,13 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                     : 'bg-gray-700 text-white rounded-bl-none'
                                     }  ${message?.type == 'code' ? 'w-[80%] bg-transparent' : ''}`}
                             >
-                                <div className="flex items-baseline justify-between mb-1">
+                                <div className="flex items-baseline justify-start mb-1 items-center">
                                     {!isMe && (
                                         <p className="text-sm font-medium">
-                                            {message.username || 'Thành viên kênh'}
+                                            {message.sender.username || message.sender.email || 'Thành viên kênh'}
                                         </p>
                                     )}
-                                    <p className="text-xs text-white/60 ml-2 whitespace-nowrap">
+                                    <p className={`text-xs text-white/60 ${isMe ? '' : 'ml-2'} whitespace-nowrap`}>
                                         {new Date(message.created_at).toLocaleTimeString('vi-VN', {
                                             hour: '2-digit',
                                             minute: '2-digit',
@@ -77,7 +67,7 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                 </div>
 
                                 <div className="text-sm whitespace-pre-wrap break-words">
-                                    <Message content={message.content} />
+                                    <Message text={message.text} />
                                 </div>
                             </div>
                         </div>
