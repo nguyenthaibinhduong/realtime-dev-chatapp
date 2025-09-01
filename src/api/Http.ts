@@ -114,7 +114,7 @@ export async function get<T = any>(
   url: string,
   config?: AxiosRequestConfig
 ): Promise<T> {
-  const res: AxiosResponse<T> = await api.get(url, config);
+  const res: AxiosResponse<T> = await axios.get(url, config);
   return res.data;
 }
 
@@ -124,7 +124,7 @@ export async function post<T = any>(
   data?: any,
   config?: AxiosRequestConfig
 ): Promise<T> {
-  const res: AxiosResponse<T> = await api.post(url, data, config);
+  const res: AxiosResponse<T> = await axios.post(url, data, config);
   return res.data;
 }
 
@@ -140,18 +140,10 @@ export async function apiget<T = any>(
 // Hàm POST cần truyền token thủ công (nếu muốn override)
 export async function apipost<T = any>(
   url: string,
-  token?: string,
   data?: any,
   config?: AxiosRequestConfig
 ): Promise<T> {
-  const authConfig = {
-    ...config,
-    headers: {
-      ...(config?.headers || {}),
-      Authorization: token ? `Bearer ${token}` : "",
-    },
-  };
-  const res: AxiosResponse<T> = await api.post(url, data, authConfig);
+  const res: AxiosResponse<T> = await api.post(url, data, config);
   return res.data;
 }
 
