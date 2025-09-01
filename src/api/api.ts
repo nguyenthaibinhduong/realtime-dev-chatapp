@@ -18,11 +18,11 @@ export const ChatAPI = {
   fetchChannel: async () => apiget(`channels/list-channels`),
   fetchMessage: async (channelId: string) => apiget(`channels/list-messages/${channelId}`),
   //Tìm kiếm
-  fetchSearchUser: async (key: string, limit: number = 5) =>
+  fetchSearchUser: async (key: string, limit: number) =>
     apiget(`users/search-user`, {
       params: { key, limit },
     }),
-  fetchSearchChat: async (type: string, key: string, limit: number = 5) =>
+  fetchSearchChat: async (key: string, limit: number, type?: string) =>
     apiget(`channels/search-chat`, {
       params: { type, key, limit },
     }),
