@@ -17,11 +17,11 @@ export const AuthAPI = {
 export const ChatAPI = {
   fetchChannel: async () => apiget(`channels/list-channels`),
   //Tìm kiếm
-  fetchSearchUser: async (key: string, limit: number = 5) =>
+  fetchSearchUser: async (key: string, limit: number) =>
     apiget(`users/search-user`, {
       params: { key, limit },
     }),
-  fetchSearchChat: async (type: string, key: string, limit: number = 5) =>
+  fetchSearchChat: async (key: string, limit: number, type?: string) =>
     apiget(`channels/search-chat`, {
       params: { type, key, limit },
     }),

@@ -44,8 +44,8 @@ export default function ChatLayout() {
 
   // Hàm xử lý menu và tạo kênh (placeholder)
   const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
-  const handleCreatePublicChannel = () => { };
-  const handleCreatePrivateChannel = () => { };
+  const handleCreatePublicChannel = () => {};
+  const handleCreatePrivateChannel = () => {};
 
   // Load danh sách kênh chat khi mount
   useEffect(() => {
@@ -71,16 +71,22 @@ export default function ChatLayout() {
     loadChannels();
   }, [toast]);
 
+  // Handle channel selection from search
+  const handleSelectChannelFromSearch = (channel: any) => {};
+
+  // Handle joining channel from search
+  const handleJoinChannelFromSearch = async (channel: any) => {};
   return (
     <MasterLayout
       menu={<MenubarLayout />}
       sidebar={
         <SidebarLayout>
-          <div className="p-4 text-center text-sidebar-foreground">
-            <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm">Chat functionality will be</p>
-            <p className="text-sm">implemented with new API</p>
-          </div>
+          <ScrollArea className="px-3 pt-2">
+            <ChannelSearch
+              onSelectChannel={handleSelectChannelFromSearch}
+              onJoinChannel={handleJoinChannelFromSearch}
+            />
+          </ScrollArea>
           <ScrollArea className="flex-1 px-3">
             <ChannelSection
               channels={channels}

@@ -1,30 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChatAPI } from "@/api/api";
 
-export const useSearchUsers = (searchTerm: string) => {
+//Search Users
+export const useSearchUsers = (key: string, limit: number) => {
   return useQuery({
-    queryKey: ["search-users", searchTerm],
+    queryKey: ["search-users", key],
     queryFn: async () => {
-      const response = await ChatAPI.fetchSearchUser(searchTerm, 10);
+      const response = await ChatAPI.fetchSearchUser(key, limit);
       return response.data || [];
     },
-    enabled: searchTerm.length >= 1,
+    enabled: key.length >= 1,
     staleTime: 30 * 1000,
   });
 };
 
-export const useSearchChats = (searchTerm: string) => {
+//Search Channels
+export const useSearchChats = (key: string, limit: number, type?: string) => {
   return useQuery({
-    queryKey: ["search-chats", searchTerm],
+    queryKey: ["search-chats", key, type],
     queryFn: async () => {
-      const response = await ChatAPI.fetchSearchChat(
-        "personal",
-        searchTerm,
-        10
-      );
+      const response = await ChatAPI.fetchSearchChat(key, limit, type);
       return response.data || [];
     },
-    enabled: searchTerm.length >= 1,
+    enabled: key.length >= 1,
     staleTime: 30 * 1000,
   });
 };
