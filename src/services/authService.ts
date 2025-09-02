@@ -1,5 +1,12 @@
 import { AuthAPI } from "@/api/api";
-import { LoginRequest, LoginResponse, RefreshTokenResponse, RegisterRequest, User, VerifyTokenResponse } from "@/types/auth";
+import {
+  LoginRequest,
+  LoginResponse,
+  RefreshTokenResponse,
+  RegisterRequest,
+  User,
+  VerifyTokenResponse,
+} from "@/types/auth";
 import { ApiResponse } from "@/types/response";
 import { chatSocketService } from "./chatSocketService";
 
@@ -8,7 +15,8 @@ class AuthService {
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
     try {
       const res = await AuthAPI.login(credentials);
-      if (res.status && res.data) this.saveTokens(res.data.access_token, res.data.refresh_token);
+      if (res.status && res.data)
+        this.saveTokens(res.data.access_token, res.data.refresh_token);
       return res;
     } catch (error) {
       console.error("Login error:", error);
@@ -20,7 +28,8 @@ class AuthService {
   async register(data: RegisterRequest): Promise<ApiResponse<LoginResponse>> {
     try {
       const res = await AuthAPI.register(data);
-      if (res.status && res.data) this.saveTokens(res.data.access_token, res.data.refresh_token);
+      if (res.status && res.data)
+        this.saveTokens(res.data.access_token, res.data.refresh_token);
       return res;
     } catch (error) {
       console.error("Register error:", error);
@@ -29,12 +38,15 @@ class AuthService {
   }
 
   // Làm mới token
-  async refreshToken(refreshToken?: string): Promise<ApiResponse<RefreshTokenResponse>> {
+  async refreshToken(
+    refreshToken?: string
+  ): Promise<ApiResponse<RefreshTokenResponse>> {
     try {
       const token = refreshToken || localStorage.getItem("refresh_token");
       if (!token) throw new Error("No refresh token available");
       const res = await AuthAPI.refreshToken({ refresh_token: token });
-      if (res.status && res.data) this.saveTokens(res.data.access_token, res.data.refresh_token);
+      if (res.status && res.data)
+        this.saveTokens(res.data.access_token, res.data.refresh_token);
       return res;
     } catch (error) {
       console.error("Refresh token error:", error);
@@ -73,10 +85,13 @@ class AuthService {
   }
 
   // Xử lý callback GitHub
-  async handleGitHubCallback(code: string): Promise<ApiResponse<LoginResponse>> {
+  async handleGitHubCallback(
+    code: string
+  ): Promise<ApiResponse<LoginResponse>> {
     try {
-      const res = await AuthAPI.githubLogin({ code });
-      if (res.status && res.data) this.saveTokens(res.data.access_token, res.data.refresh_token || "");
+      const res = await AuthAPI.githubLogin(code);
+      if (res.status && res.data)
+        this.saveTokens(res.data.access_token, res.data.refresh_token || "");
       return res;
     } catch (error: any) {
       console.error("GitHub callback error:", error);
