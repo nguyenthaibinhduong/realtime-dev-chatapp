@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, Search } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Message } from "@/types/message";
 import { Channel, Member } from "@/types/channel";
+import { chatSocketService } from "@/services/chatSocketService";
 
 export default function ChatLayout() {
   const { toast } = useToast();
@@ -69,6 +70,28 @@ export default function ChatLayout() {
   useEffect(() => {
     loadChannels();
   }, [loadChannels]);
+
+  // useCallback cho việc kết nối và tham gia kênh chat qua socket
+  const joinChannelSocket = useCallback(() => {
+    if (selectedChannel?.id) {
+      chatSocketService.joinRoom(selectedChannel.id);
+      chatSocketService.onMessage((msg) => {
+        console.log("Socket message received:", msg); // Log object msg ra console
+        setMessages((prev: any) => [...prev, msg]);
+      });
+    }
+    return () => {
+      chatSocketService.leaveRoom(selectedChannel?.id);
+      chatSocketService.offMessage();
+      // chatSocketService.disconnect();
+    };
+  }, [selectedChannel]);
+
+  useEffect(() => {
+    // Gọi lại mỗi khi selectedChannel?.id thay đổi
+    const cleanup = joinChannelSocket();
+    return cleanup;
+  }, [joinChannelSocket]);
 
   const handleSelectChannel = (channel: Channel | null) => {
     setSelectedChannel(channel);
@@ -149,6 +172,15 @@ export default function ChatLayout() {
     }
   };
 
+  // Hàm gửi tin nhắn qua socket
+  const sendMessage = useCallback(
+    (content: string) => {
+      if (!selectedChannel?.id || !content.trim()) return;
+      chatSocketService.sendMessage(selectedChannel.id, content.trim());
+    },
+    [selectedChannel]
+  );
+
   return (
     <MasterLayout
       menu={<MenubarLayout />}
@@ -226,7 +258,9 @@ export default function ChatLayout() {
             <MessageList messages={messages} />
           )}
         </div>
-        {selectedChannel && <MessageInput channelId={selectedChannel.id} />}
+        {selectedChannel && (
+          <MessageInput channelId={selectedChannel.id} onSend={sendMessage} />
+        )}
       </div>
     </MasterLayout>
   );

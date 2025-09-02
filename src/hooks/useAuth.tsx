@@ -8,6 +8,7 @@ import {
 import authService from "@/services/authService";
 import { useToast } from "@/hooks/useToast";
 import { User } from "@/types/auth";
+import { chatSocketService } from "@/services/chatSocketService";
 
 interface AuthContextType {
   user: User | null;
@@ -69,6 +70,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               authService.logout();
             }
           }
+
+          // Nếu xác thực thành công thì connect socket
+          chatSocketService.connect();
         }
       } catch (error) {
         console.error("Auth initialization error:", error);

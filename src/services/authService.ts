@@ -1,6 +1,7 @@
 import { AuthAPI } from "@/api/api";
 import { LoginRequest, LoginResponse, RefreshTokenResponse, RegisterRequest, User, VerifyTokenResponse } from "@/types/auth";
 import { ApiResponse } from "@/types/response";
+import { chatSocketService } from "./chatSocketService";
 
 class AuthService {
   // Đăng nhập
@@ -87,6 +88,7 @@ class AuthService {
   logout(): void {
     localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
+    chatSocketService.disconnect();
     window.location.href = "/auth";
   }
 

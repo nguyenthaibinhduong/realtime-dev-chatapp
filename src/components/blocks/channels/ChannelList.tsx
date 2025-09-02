@@ -1,6 +1,7 @@
 import { Hash, User, Globe, Lock } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 
 interface Channel {
     id: string;
@@ -9,6 +10,7 @@ interface Channel {
     type: string;
     member_count?: number;
     created_at?: string;
+    avatarUrl?: string; // Thêm nếu có url ảnh đại diện
 }
 
 interface ChannelListProps {
@@ -17,10 +19,26 @@ interface ChannelListProps {
     onSelectChannel: (channel: Channel) => void;
 }
 
-const getChannelIcon = (type: string) => {
-    if (type === "group-private") return <Lock className="h-4 w-4 mr-2 text-red-500" />;
-    if (type === "group") return <Globe className="h-4 w-4 mr-2 text-blue-500" />;
-    if (type === "personal") return <User className="h-4 w-4 mr-2 text-green-500" />;
+const getChannelIcon = (channel: Channel) => {
+    if (channel.type === "group-private") return <Lock className="h-4 w-4 mr-2 text-red-500" />;
+    if (channel.type === "group") return <Globe className="h-4 w-4 mr-2 text-blue-500" />;
+    if (channel.type === "personal") {
+        return (
+            <div className="relative mr-2">
+                <Avatar className="h-6 w-6">
+                    {channel.avatarUrl ? (
+                        <AvatarImage src={channel.avatarUrl} alt={channel.name} />
+                    ) : (
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                            {channel.name?.[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                    )}
+                </Avatar>
+                {/* Chấm online */}
+                <span className="absolute bottom-0 right-0 block w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-background" />
+            </div>
+        );
+    }
     return <Hash className="h-4 w-4 mr-2 text-muted-foreground" />;
 };
 
@@ -71,13 +89,8 @@ export const ChannelList = ({ channels, selectedChannel, onSelectChannel }: Chan
                                     }`}
                                 onClick={() => onSelectChannel(channel)}
                             >
-                                {getChannelIcon(channel.type)}
+                                {getChannelIcon(channel)}
                                 <span className="truncate">{channel.name}</span>
-                                {/* {channel.member_count && (
-                                    <Badge variant="secondary" className="ml-auto text-xs">
-                                        {channel.member_count}
-                                    </Badge>
-                                )} */}
                             </Button>
                         ))}
                     </div>

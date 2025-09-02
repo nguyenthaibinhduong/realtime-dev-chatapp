@@ -9,6 +9,7 @@ export interface Message {
         username: string;
         email: string;
     };
+    send_at: string;
     isMine: boolean;
 }
 

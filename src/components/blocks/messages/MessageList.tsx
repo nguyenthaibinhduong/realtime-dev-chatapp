@@ -10,17 +10,20 @@ import { MessageListProps } from "@/types/message";
 export const MessageList = ({ messages }: MessageListProps) => {
     const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
     const [hoveredId, setHoveredId] = React.useState<string | null>(null);
-
+    const { user } = useAuth();
 
     React.useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
     return (
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea
+            className="flex-1 p-4"
+            style={{ height: "75vh", minHeight: "75vh", maxHeight: "75vh" }}
+        >
             <div className="space-y-4">
                 {messages.map((message: any) => {
-                    const isMe = message.isMine;
+                    const isMe = message.sender.id === user?.id;
 
                     return (
                         <div
@@ -40,7 +43,7 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                     </Avatar>
                                     {hoveredId == message.id && (
                                         <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
-                                            {message.sender.username}
+                                            {message.sender.email}
                                         </div>
                                     )}
                                 </div>
@@ -55,14 +58,19 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                 <div className="flex  justify-start mb-1 items-center">
                                     {!isMe && (
                                         <p className="text-sm font-medium">
-                                            {message.sender.username || message.sender.email || 'Thành viên kênh'}
+                                            {message.sender.email}
                                         </p>
                                     )}
                                     <p className={`text-xs text-white/60 ${isMe ? '' : 'ml-2'} whitespace-nowrap`}>
-                                        {new Date(message.created_at).toLocaleTimeString('vi-VN', {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        })}
+                                        {message.send_at
+                                            ? new Date(message.send_at).toLocaleTimeString('vi-VN', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })
+                                            : new Date(message.created_at).toLocaleTimeString('vi-VN', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
                                     </p>
                                 </div>
 

@@ -3,6 +3,7 @@ import { Separator } from "../../ui/separator";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 
 interface Channel {
     id: string | number;
@@ -26,11 +27,24 @@ interface ChannelHeaderProps {
     members: Member[];
 }
 
-const getChannelIcon = (type: string) => {
-    if (type === "group")
+const getChannelIcon = (channel: Channel) => {
+    if (channel.type === "group")
         return <Globe className="h-5 w-5 text-blue-500 mr-2" />;
-    if (type === "private")
+    if (channel.type === "private")
         return <Lock className="h-5 w-5 text-red-500 mr-2" />;
+    if (channel.type === "personal") {
+        return (
+            <div className="relative mr-2">
+                <Avatar className="h-6 w-6">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                        {channel.name?.[0]?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                </Avatar>
+                {/* Chấm online */}
+                <span className="absolute bottom-0 right-0 block w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-background" />
+            </div>
+        );
+    }
     return <Hash className="h-5 w-5 text-muted-foreground mr-2" />;
 };
 
@@ -41,7 +55,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
     return (
         <div className="h-14 border-b border-border bg-card px-6 flex items-center justify-between">
             <div className="flex items-center">
-                {getChannelIcon(channel.type)}
+                {getChannelIcon(channel)}
                 <h2 className="font-semibold text-foreground">{channel.name}</h2>
                 {channel.member_count && (
                     <>
@@ -102,7 +116,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                             <TabsContent value="info">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        {getChannelIcon(channel.type)}
+                                        {getChannelIcon(channel)}
                                         <span className="font-semibold">{channel.name}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
