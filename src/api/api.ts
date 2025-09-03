@@ -12,7 +12,7 @@ export const AuthAPI = {
   updateProfile: async (data: any) => apipost("/users/update-profile", data),
   logout: async () => apipost("/auth/logout"),
   refreshToken: async (data: any) => apipost("/auth/refresh-token", data),
-  githubLogin: async (data: any) => apipost("/auth/github-oauth", data),
+  githubLogin: async (code: string) => post("/auth/github-oauth", { code }),
 };
 
 export const ChatAPI = {
