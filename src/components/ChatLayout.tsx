@@ -69,7 +69,7 @@ export default function ChatLayout() {
 
   useEffect(() => {
     loadChannels();
-  }, [loadChannels]);
+  }, []);
 
   // useCallback cho việc kết nối và tham gia kênh chat qua socket
   const joinChannelSocket = useCallback(() => {

@@ -126,9 +126,8 @@ export function ChannelDialog({
       // Thành công
       toast({
         title: "Thành công",
-        description: `Tạo kênh ${
-          type === "public" ? "công khai" : "riêng tư"
-        } thành công`,
+        description: `Tạo kênh ${type === "public" ? "công khai" : "riêng tư"
+          } thành công`,
         variant: "default",
       });
 
@@ -176,7 +175,7 @@ export function ChannelDialog({
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto py-4 space-y-4">
           {/* Channel Name Input */}
-          <div className="space-y-2">
+          <div className="space-y-2 mx-1">
             <Label
               htmlFor="channelName"
               className="text-sm font-medium text-gray-200"
@@ -187,16 +186,15 @@ export function ChannelDialog({
               id="channelName"
               value={channelName}
               onChange={(e) => setChannelName(e.target.value)}
-              placeholder={`Nhập tên kênh ${
-                type === "public" ? "công khai" : "riêng tư"
-              }`}
+              placeholder={`Nhập tên kênh ${type === "public" ? "công khai" : "riêng tư"
+                }`}
               className="bg-gray-800 text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
               disabled={isLoading}
             />
           </div>
 
           {/* User Search and Selection */}
-          <div className="space-y-2">
+          <div className="space-y-2 mx-1">
             <Label className="text-sm font-medium text-gray-200">
               {type === "private"
                 ? "Thành viên (bắt buộc)"
@@ -204,7 +202,7 @@ export function ChannelDialog({
             </Label>
 
             {/* Selected Users - Fixed Height */}
-            <div className="min-h-[40px]">
+            <div className="min-h-[40px] mx-1">
               {selectedUsers.length > 0 && (
                 <div className="flex flex-wrap gap-1 p-2 bg-gray-800 rounded-md border border-gray-600">
                   {selectedUsers.map((user) => (
@@ -230,7 +228,7 @@ export function ChannelDialog({
             </div>
 
             {/* User Search Input */}
-            <div className="relative">
+            <div className="relative mx-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 value={searchTerm}
@@ -245,7 +243,7 @@ export function ChannelDialog({
             </div>
 
             {/* Search Results - Fixed Height Container */}
-            <div className="h-32">
+            <div className="h-32 mx-1">
               {searchTerm.trim() && (
                 <>
                   {filteredSearchResults.length > 0 && (
@@ -301,7 +299,7 @@ export function ChannelDialog({
           </div>
 
           {/* Channel Type Info */}
-          <div className="p-3 bg-gray-800 rounded-lg border border-gray-600">
+          <div className="p-3 bg-gray-800 rounded-lg border border-gray-600 mx-2">
             <div className="flex items-start gap-2">
               {type === "public" ? (
                 <Globe className="h-4 w-4 text-blue-500 mt-0.5" />

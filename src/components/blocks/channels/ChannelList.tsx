@@ -1,23 +1,16 @@
 import { Hash, User, Globe, Lock } from "lucide-react";
 import { Button } from "../../ui/button";
-import { Badge } from "../../ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
-
-interface Channel {
-    id: string;
-    name: string;
-    description?: string;
-    type: string;
-    member_count?: number;
-    created_at?: string;
-    avatarUrl?: string; // Thêm nếu có url ảnh đại diện
-}
+// import { Badge } from "../../ui/badge";
+import { Avatar, AvatarFallback } from "../../ui/avatar";
+import { Channel } from "@/types/channel";
 
 interface ChannelListProps {
     channels: Channel[];
     selectedChannel: Channel | null;
     onSelectChannel: (channel: Channel) => void;
 }
+
+
 
 const getChannelIcon = (channel: Channel) => {
     if (channel.type === "group-private") return <Lock className="h-4 w-4 mr-2 text-red-500" />;
@@ -26,13 +19,9 @@ const getChannelIcon = (channel: Channel) => {
         return (
             <div className="relative mr-2">
                 <Avatar className="h-6 w-6">
-                    {channel.avatarUrl ? (
-                        <AvatarImage src={channel.avatarUrl} alt={channel.name} />
-                    ) : (
-                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                            {channel.name?.[0]?.toUpperCase() || 'U'}
-                        </AvatarFallback>
-                    )}
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                        {channel.name?.[0]?.toUpperCase() || 'U'}
+                    </AvatarFallback>
                 </Avatar>
                 {/* Chấm online */}
                 <span className="absolute bottom-0 right-0 block w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-background" />
@@ -50,17 +39,19 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 export const ChannelList = ({ channels, selectedChannel, onSelectChannel }: ChannelListProps) => {
-    // Phân loại kênh
+    // Phân loại kênh, chỉ lấy kênh có isActive !== false
     const grouped: Record<string, Channel[]> = {
         group: [],
         "group-private": [],
         personal: [],
         other: []
     };
-    channels.forEach((c) => {
-        if (grouped[c.type]) grouped[c.type].push(c);
-        else grouped.other.push(c);
-    });
+    channels
+        .filter((c: any) => c.isActive !== false) // Lọc kênh không active
+        .forEach((c) => {
+            if (grouped[c.type]) grouped[c.type].push(c);
+            else grouped.other.push(c);
+        });
 
     // Sắp xếp từng nhóm theo thời gian tạo mới nhất lên trên
     Object.keys(grouped).forEach(type => {

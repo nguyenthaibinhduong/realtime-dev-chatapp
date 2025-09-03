@@ -3,14 +3,8 @@ import { Plus } from "lucide-react";
 import { ChannelList } from "./ChannelList";
 import { ChannelDialog } from "./ChannelDialog";
 import { useEffect, useRef, useState } from "react";
+import { Channel } from "@/types/channel";
 
-interface Channel {
-  id: string;
-  name: string;
-  description?: string;
-  type: string;
-  member_count?: number;
-}
 
 interface ChannelSectionProps {
   channels: Channel[];

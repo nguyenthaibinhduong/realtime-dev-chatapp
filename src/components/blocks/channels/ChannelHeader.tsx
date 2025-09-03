@@ -4,23 +4,8 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
+import { Channel, Member } from "@/types/channel";
 
-interface Channel {
-    id: string | number;
-    name: string;
-    description?: string;
-    type: string;
-    member_count?: number;
-    created_at?: string;
-    updated_at?: string;
-}
-
-interface Member {
-    id: string | number;
-    username: string;
-    email: string;
-    isMine?: boolean;
-}
 
 interface ChannelHeaderProps {
     channel: Channel;
@@ -108,6 +93,9 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                                             <span className="text-xs text-muted-foreground ml-2">{m.email}</span>
                                             {m.isMine && (
                                                 <span className="ml-2 px-2 py-0.5 bg-primary text-xs text-white rounded">Bạn</span>
+                                            )}
+                                            {m.isOwner && (
+                                                <span className="ml-2 px-2 py-0.5 bg-primary text-xs text-white rounded">Tưởng nhóm</span>
                                             )}
                                         </li>
                                     ))}
