@@ -4,6 +4,7 @@ import { post, apiget, apipost } from "./Http";
 export const AuthAPI = {
   // Không cần auth
   login: async (data: any) => post("/auth/login", data),
+  listOnline : async () => apiget("/users/list-online"),
   register: async (data: any) => post("/auth/register", data),
   forgotPassword: async (data: any) => post("/auth/forgot-password", { data }),
   verifyToken: async (data: any) => post("/auth/verify-token", { data }),

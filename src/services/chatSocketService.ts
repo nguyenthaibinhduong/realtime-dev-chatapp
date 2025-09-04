@@ -13,8 +13,8 @@ type PresenceUpdate = {
 };
 
 class ChatSocketService {
-  connect() {
-    getSocket().connect();
+  connect(token?: string , forceNew = false) {
+    getSocket(token, forceNew).connect();
   }
 
   disconnect() {
@@ -49,7 +49,7 @@ class ChatSocketService {
     getSocket().on("receiveMessage", callback);
   }
 
- 
+  
 
   offMessage(callback?: (msg: Message) => void) {
     getSocket().off("receiveMessage", callback);

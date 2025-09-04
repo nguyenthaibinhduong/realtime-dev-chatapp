@@ -15,9 +15,12 @@ class AuthService {
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
     try {
       const res = await AuthAPI.login(credentials);
-      if (res.status && res.data)
+      if (res.status && res.data) {
         this.saveTokens(res.data.access_token, res.data.refresh_token);
-      return res;
+        chatSocketService.connect(res.data.access_token, true);
+        return res;
+      }
+        
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -47,6 +50,7 @@ class AuthService {
       const res = await AuthAPI.refreshToken({ refresh_token: token });
       if (res.status && res.data)
         this.saveTokens(res.data.access_token, res.data.refresh_token);
+        
       return res;
     } catch (error) {
       console.error("Refresh token error:", error);
@@ -140,6 +144,8 @@ class AuthService {
     }
   }
 
+
+  
   // Lấy user từ token
   getUserFromToken(token?: string): User | null {
     try {

@@ -9,7 +9,7 @@ import {
   User,
 } from "lucide-react";
 import { Separator } from "../../ui/separator";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,13 +21,15 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { Badge } from "../../ui/badge";
 import { Channel, Member } from "@/types/channel";
+import { OnlineDot } from "../auth/OnlineDot";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ChannelHeaderProps {
   channel: Channel;
   members: Member[];
 }
 
-const getChannelIcon = (channel: Channel) => {
+const getChannelIcon = (channel: Channel, userId?: any) => {
   if (channel.type === "group")
     return <Globe className="h-5 w-5 text-blue-500 mr-2" />;
   if (channel.type === "private")
@@ -37,10 +39,18 @@ const getChannelIcon = (channel: Channel) => {
       <div className="relative mr-2">
         <Avatar className="h-6 w-6">
           <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-            {channel.name?.[0]?.toUpperCase() || "U"}
+            {channel.name?.[0]?.toUpperCase() || 'U'}
           </AvatarFallback>
         </Avatar>
-        <span className="absolute bottom-0 right-0 block w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-background" />
+        {/* Chấm online */}
+        {
+          userId && channel.members && (
+
+
+            <OnlineDot userId={userId} />
+
+          )
+        }
       </div>
     );
   }
@@ -76,13 +86,24 @@ const getChannelTypeColor = (type: string) => {
 export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState("members");
+  const [otherUserId, setOtherUserId] = useState<string | number | undefined>();
+  const { user } = useAuth();
+  useEffect(() => {
+    if (channel.type === "personal" && members && user?.id) {
+      const otherMember = members.find((m: any) => m.id !== user.id);
+      setOtherUserId(otherMember?.id);
+    }
+    console.log("Other User ID:", otherUserId);
+  }, [channel, members, user]);
 
   return (
     <div className="h-14 border-b border-border bg-card px-6 flex items-center justify-between">
       <div className="flex items-center">
-        {getChannelIcon(channel)}
+        {channel.type === "personal"
+          ? getChannelIcon(channel, otherUserId)
+          : getChannelIcon(channel)}
         <h2 className="font-semibold text-foreground">{channel.name}</h2>
-        {channel.member_count && (
+        {channel.member_count > 2 && (
           <>
             <Separator orientation="vertical" className="mx-3 h-4" />
             <p className="text-sm text-muted-foreground">
@@ -121,11 +142,22 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
           {/* Modern Modal Design */}
           <DialogContent className="max-w-lg bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 border-0 shadow-2xl rounded-2xl overflow-hidden">
             {/* Header với gradient background */}
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 -mx-6 -mt-6 px-6 py-6 mb-6">
+            <div className="bg-gradient-to-r from-blue-800 to-purple-600 -mx-6 -mt-6 px-6 py-6 mb-6">
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    {getChannelIcon(channel)}
+                  <div className="w-12 h-12 bg-transparent flex items-center justify-center backdrop-blur-sm">
+                    <Avatar className="h-12 w-12 rounded-xl">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-md">
+                        {channel.name?.[0]?.toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    {/* Chấm online */}
+                    {
+                      channel.type == "personal" && otherUserId && (
+                        <OnlineDot userId={otherUserId} />
+
+                      )
+                    }
                   </div>
                   <div>
                     <DialogTitle className="text-2xl font-bold text-white tracking-tight">
@@ -165,16 +197,22 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                     Danh sách thành viên ({members.length})
                   </h3>
                   <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {members.map((member) => (
+                    {members.map((member: any) => (
                       <div
                         key={member.id}
                         className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-700/80 rounded-lg hover:bg-white dark:hover:bg-slate-700 transition-colors duration-200"
                       >
-                        <Avatar className="h-10 w-10 ring-2 ring-blue-100">
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                            {member.username?.[0]?.toUpperCase() || "U"}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="relative mr-2">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-md">
+                              {member.username?.[0]?.toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          {/* Chấm online */}
+                          {
+                            <OnlineDot userId={member.id} />
+                          }
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
@@ -205,12 +243,25 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
 
               {/* Info Tab */}
               <TabsContent value="info" className="space-y-4">
-                <div className="bg-white/70 dark:bg-slate-800/70 rounded-xl p-6 backdrop-blur-sm space-y-6">
+                <div className="bg-white/70 dark:bg-slate-800/70 rounded-xl p-6  space-y-6">
                   {/* Channel Type */}
                   <div className="flex items-center justify-between p-4 bg-white/80 dark:bg-slate-700/80 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                        {getChannelIcon(channel)}
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div className="w-12 h-12 bg-blue-500 flex rounded-xl items-center justify-center ">
+                          <Avatar className="h-12 w-12 rounded-xl">
+                            <AvatarFallback className="bg-transparent text-primary-foreground text-md">
+                              {channel.name?.[0]?.toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          {/* Chấm online */}
+                          {
+                            channel.type == "personal" && otherUserId && (
+                              <OnlineDot userId={otherUserId} />
+
+                            )
+                          }
+                        </div>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-slate-600 dark:text-slate-400">

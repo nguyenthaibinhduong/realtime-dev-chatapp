@@ -5,7 +5,20 @@ import { Message } from "./Message";
 import React from "react";
 import { MessageListProps } from "@/types/message";
 
-
+function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
+    if (idx === 0) return true;
+    const curr = messages[idx];
+    const prev = messages[idx - 1];
+    // Nếu khác sender hoặc cách nhau hơn 5 phút thì show info
+    if (
+        curr.sender.id !== prev.sender.id ||
+        Math.abs(new Date(curr.created_at).getTime() - new Date(prev.created_at).getTime()) > 5 * 60 * 1000
+    ) {
+        return true;
+    }
+    // Nếu là tin đầu hoặc khác ngày cũng show
+    return false;
+}
 
 export const MessageList = ({ messages }: MessageListProps) => {
     const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
@@ -22,15 +35,16 @@ export const MessageList = ({ messages }: MessageListProps) => {
             style={{ height: "75vh", minHeight: "75vh", maxHeight: "75vh" }}
         >
             <div className="space-y-4">
-                {messages.map((message: any) => {
+                {messages.map((message: any, idx: number) => {
                     const isMe = message.sender.id === user?.id;
+                    const showSenderInfo = !isMe && shouldShowSenderInfo(messages, idx, user?.id);
 
                     return (
                         <div
                             key={message.id}
                             className={`flex ${isMe ? 'justify-end' : 'justify-start'} space-x-3`}
                         >
-                            {!isMe && (
+                            {!isMe && showSenderInfo && (
                                 <div className="relative flex items-center">
                                     <Avatar
                                         className="h-8 w-8 flex-shrink-0 cursor-pointer"
@@ -50,13 +64,13 @@ export const MessageList = ({ messages }: MessageListProps) => {
                             )}
 
                             <div
-                                className={`min-w-0  rounded-2xl px-4 py-2 ${isMe
+                                className={`min-w-0 rounded-2xl px-4 py-2 ${isMe
                                     ? 'bg-blue-600 text-white rounded-br-none'
-                                    : 'bg-gray-700 text-white rounded-bl-none'
+                                    : 'bg-gray-700 text-white rounded-bl-none' + (showSenderInfo ? ' ' : 'pl-10 ml-10')
                                     }  ${message?.type == 'code' ? 'w-[80%] bg-transparent' : ''}`}
                             >
-                                <div className="flex  justify-start mb-1 items-center">
-                                    {!isMe && (
+                                <div className="flex justify-start mb-1 items-center">
+                                    {!isMe && showSenderInfo && (
                                         <p className="text-sm font-medium">
                                             {message.sender.username}
                                         </p>
@@ -73,7 +87,6 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                             })}
                                     </p>
                                 </div>
-
                                 <div className="text-sm whitespace-pre-wrap break-words">
                                     <Message text={message.text} />
                                 </div>

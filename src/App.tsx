@@ -10,12 +10,14 @@ import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import NotificationsPage from "./pages/NotificationsPage";
 import { GitHubCallback } from "./components/GithubCallback";
+import { PresenceProvider } from "./hooks/usePresense";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+
       <TooltipProvider>
         <Toaster />
         <Sonner />

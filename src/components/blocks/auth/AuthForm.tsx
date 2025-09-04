@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, MessageSquare, Github } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
+import { chatSocketService } from '@/services/chatSocketService';
 
 export default function AuthForm() {
     const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +36,6 @@ export default function AuthForm() {
             return;
         }
         toast({ title: "Đăng nhập thành công", description: "Chào mừng bạn quay trở lại!" });
-        navigate("/");
         setIsLoading(false);
     };
 

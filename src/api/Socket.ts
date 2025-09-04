@@ -1,14 +1,18 @@
-// socket.ts
 import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
 
-export function getSocket(): Socket {
-  if (!socket) {
+export function getSocket(token?: string, forceNew = false): Socket {
+  if (!socket || forceNew) {
+    if (socket) {
+      socket.disconnect();
+    }
+
     socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:3088", {
+      autoConnect: false, // 👈 chỉ connect khi gọi .connect()
       extraHeaders: {
-            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-        },
+        Authorization: `Bearer ${token || localStorage.getItem("token") || ""}`,
+      },
     });
 
     socket.on("connect", () => {

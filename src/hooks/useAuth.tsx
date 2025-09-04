@@ -87,7 +87,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      setLoading(true);
       const response = await authService.login({ email, password });
 
       if (response.status && response.data) {
@@ -97,6 +96,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           title: "Đăng nhập thành công",
           description: "Chào mừng bạn quay trở lại!",
         });
+
+
 
         return { error: null };
       } else {
