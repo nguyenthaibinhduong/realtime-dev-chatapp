@@ -87,11 +87,35 @@ export default function ChatLayout() {
     };
   }, [selectedChannel]);
 
+
+
   useEffect(() => {
     // Gọi lại mỗi khi selectedChannel?.id thay đổi
     const cleanup = joinChannelSocket();
     return cleanup;
   }, [joinChannelSocket]);
+
+  useEffect(() => {
+    const handler = (channel: any) => {
+      console.log("📩 Socket receiveChannel:", channel);
+
+      setChannels((prev) => {
+        const idx = prev.findIndex((c: any) => String(c.fakeID) === String(channel.fakeID));
+        if (idx !== -1) {
+          const updated = [...prev];
+          updated[idx] = channel;
+          return updated;
+        }
+        return [...prev, channel];
+      });
+    };
+
+    chatSocketService.onChannel(handler);
+    return () => {
+      chatSocketService.offChannel(handler); // cleanup chính xác
+    };
+  }, []);
+
 
   const handleSelectChannel = (channel: Channel | null) => {
     setSelectedChannel(channel);
@@ -176,7 +200,12 @@ export default function ChatLayout() {
   const sendMessage = useCallback(
     (content: string) => {
       if (!selectedChannel?.id || !content.trim()) return;
-      chatSocketService.sendMessage(selectedChannel.id, content.trim());
+      const data = {
+        channelId: selectedChannel.id,
+        text: content.trim(),
+        channelData: selectedChannel,
+      }
+      chatSocketService.sendMessage(data);
     },
     [selectedChannel]
   );

@@ -37,16 +37,30 @@ class ChatSocketService {
 
   /** ================== MESSAGE ================== */
 
-  sendMessage(channelId: string, text: string) {
-    getSocket().emit("send_message", { channelId, text });
+  sendMessage(data: any) {
+    getSocket().emit("send_message", data );
+  }
+
+  createChannel(data: any) {
+    getSocket().emit("create_channel", data);
   }
 
   onMessage(callback: (msg: Message) => void) {
     getSocket().on("receiveMessage", callback);
   }
 
+ 
+
   offMessage(callback?: (msg: Message) => void) {
     getSocket().off("receiveMessage", callback);
+  }
+
+  onChannel(callback: (msg: Message) => void) {
+    getSocket().on("receiveChannel", callback);
+  }
+
+  offChannel(callback?: (msg: Message) => void) {
+    getSocket().off("receiveChannel", callback);
   }
 
   /** ================== UNREAD ================== */

@@ -43,7 +43,7 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                     </Avatar>
                                     {hoveredId == message.id && (
                                         <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
-                                            {message.sender.email}
+                                            {message.sender.username}
                                         </div>
                                     )}
                                 </div>
@@ -58,7 +58,7 @@ export const MessageList = ({ messages }: MessageListProps) => {
                                 <div className="flex  justify-start mb-1 items-center">
                                     {!isMe && (
                                         <p className="text-sm font-medium">
-                                            {message.sender.email}
+                                            {message.sender.username}
                                         </p>
                                     )}
                                     <p className={`text-xs text-white/60 ${isMe ? '' : 'ml-2'} whitespace-nowrap`}>
