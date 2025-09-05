@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, Search } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
@@ -11,7 +11,6 @@ import MenubarLayout from "./MenubarLayout";
 import MasterLayout from "./MasterLayout";
 import { ChannelSearch } from "./blocks/channels/ChannelSearch";
 import { ChannelSection } from "./blocks/channels/ChannelSection";
-import { ChannelDialog } from "./blocks/channels/ChannelDialog";
 import { ChatAPI } from "@/api/api";
 import {
   Dialog,
@@ -28,40 +27,33 @@ export default function ChatLayout() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // State cho danh sách kênh, kênh đang chọn, tin nhắn và thành viên
+  // State
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
-
-  // State cho modal tìm kiếm kênh
   const [openSearchModal, setOpenSearchModal] = useState(false);
 
-  const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
-  // Sử dụng useCallback cho loadChannels
+  const handleShowChannelTypeMenu = () => setShowChannelTypeMenu(v => !v);
+
+  // Load channels
   const loadChannels = useCallback(async () => {
     try {
       const res = await ChatAPI.fetchChannel();
       let loadedChannels: Channel[] = [];
-      if (Array.isArray(res)) {
-        loadedChannels = res;
-      } else if (res.data && Array.isArray(res.data)) {
-        loadedChannels = res.data;
-      }
+      if (Array.isArray(res)) loadedChannels = res;
+      else if (res?.data && Array.isArray(res.data)) loadedChannels = res.data;
+
       setChannels(loadedChannels);
 
-      // Lấy kênh đã chọn từ localStorage nếu có, nếu không thì lấy kênh đầu tiên
       const savedChannelId = localStorage.getItem("selectedChannelId");
-      const foundChannel = loadedChannels.find(
-        (c) => String(c.id) === savedChannelId
-      );
-      setSelectedChannel(foundChannel || loadedChannels[0] || null);
+      const found = loadedChannels.find(c => String(c.id) === savedChannelId);
+      setSelectedChannel(found || loadedChannels[0] || null);
     } catch (error: any) {
       toast({
         title: "Lỗi tải kênh",
-        description:
-          error?.msg || error?.message || "Không thể tải danh sách kênh",
+        description: error?.msg || error?.message || "Không thể tải danh sách kênh",
         variant: "destructive",
       });
     }
@@ -69,37 +61,32 @@ export default function ChatLayout() {
 
   useEffect(() => {
     loadChannels();
-  }, []);
+  }, [loadChannels]);
 
-  // useCallback cho việc kết nối và tham gia kênh chat qua socket
+  // Socket join/leave + onMessage
   const joinChannelSocket = useCallback(() => {
     if (selectedChannel?.id) {
       chatSocketService.joinRoom(selectedChannel.id);
-      chatSocketService.onMessage((msg) => {
-        console.log("Socket message received:", msg); // Log object msg ra console
-        setMessages((prev: any) => [...prev, msg]);
+      chatSocketService.onMessage((msg: any) => {
+        // Append realtime nếu không trùng
+        setMessages((prev: any) => (prev.some((p: any) => String(p.id) === String(msg.id)) ? prev : [...prev, msg]));
       });
     }
     return () => {
       chatSocketService.leaveRoom(selectedChannel?.id);
       chatSocketService.offMessage();
-      // chatSocketService.disconnect();
     };
   }, [selectedChannel]);
 
-
-
   useEffect(() => {
-    // Gọi lại mỗi khi selectedChannel?.id thay đổi
     const cleanup = joinChannelSocket();
     return cleanup;
   }, [joinChannelSocket]);
 
+  // Socket channel updates (optional)
   useEffect(() => {
     const handler = (channel: any) => {
-      console.log("📩 Socket receiveChannel:", channel);
-
-      setChannels((prev) => {
+      setChannels(prev => {
         const idx = prev.findIndex((c: any) => String(c.fakeID) === String(channel.fakeID));
         if (idx !== -1) {
           const updated = [...prev];
@@ -109,54 +96,39 @@ export default function ChatLayout() {
         return [...prev, channel];
       });
     };
-
     chatSocketService.onChannel(handler);
-    return () => {
-      chatSocketService.offChannel(handler); // cleanup chính xác
-    };
+    return () => chatSocketService.offChannel(handler);
   }, []);
-
 
   const handleSelectChannel = (channel: Channel | null) => {
     setSelectedChannel(channel);
-    if (channel) {
-      localStorage.setItem("selectedChannelId", channel.id);
-    } else {
-      localStorage.removeItem("selectedChannelId");
-    }
+    if (channel) localStorage.setItem("selectedChannelId", String(channel.id));
+    else localStorage.removeItem("selectedChannelId");
   };
 
-  const loadMessages = useCallback(
-    async (channelId: string) => {
-      try {
-        const res = await ChatAPI.fetchMessage(channelId);
-        if (res && res.data) {
-          setMessages(Array.isArray(res.data.items) ? res.data.items : []);
-          setMembers(Array.isArray(res.data.members) ? res.data.members : []);
-        } else {
-          setMessages([]);
-          setMembers([]);
-        }
-      } catch (error: any) {
-        toast({
-          title: "Lỗi tải tin nhắn",
-          description: error?.msg || error?.message || "Không thể tải tin nhắn",
-          variant: "destructive",
-        });
-        setMessages([]);
-        setMembers([]);
+  // Initial load messages for selected channel (server trả ASC: cũ→mới)
+  const loadMessages = useCallback(async (channelId: string) => {
+    try {
+      const res = await ChatAPI.fetchMessage(channelId);
+      if (res?.data) {
+        setMessages(Array.isArray(res.data.items) ? res.data.items : []);
+        setMembers(Array.isArray(res.data.members) ? res.data.members : []);
+      } else {
+        setMessages([]); setMembers([]);
       }
-    },
-    [selectedChannel]
-  );
+    } catch (error: any) {
+      toast({
+        title: "Lỗi tải tin nhắn",
+        description: error?.msg || error?.message || "Không thể tải tin nhắn",
+        variant: "destructive",
+      });
+      setMessages([]); setMembers([]);
+    }
+  }, [toast]);
 
   useEffect(() => {
-    if (selectedChannel?.id) {
-      loadMessages(selectedChannel.id);
-    } else {
-      setMessages([]);
-      setMembers([]);
-    }
+    if (selectedChannel?.id) loadMessages(String(selectedChannel.id));
+    else { setMessages([]); setMembers([]); }
   }, [selectedChannel, loadMessages]);
 
   const handleSelectChannelFromSearch = (channel: any) => {
@@ -167,19 +139,11 @@ export default function ChatLayout() {
   const handleJoinChannelFromSearch = async (id: string, type: string) => {
     try {
       const res = await ChatAPI.joinChannel({ id, type });
-
       if (res && res.status && [200, 201].includes(res.status) && res.data) {
-        // Đầu tiên set vào localStorage
         localStorage.setItem("selectedChannelId", res.data.channelId);
-
-        // Sau đó mới gọi loadChannels để cập nhật lại danh sách và kênh đang chọn
         await loadChannels();
-
         setOpenSearchModal(false);
-        toast({
-          title: "Tham gia kênh thành công",
-          description: `${res.data.msg}`,
-        });
+        toast({ title: "Tham gia kênh thành công", description: `${res.data.msg}` });
       } else {
         toast({
           title: "Lỗi tham gia kênh",
@@ -196,19 +160,34 @@ export default function ChatLayout() {
     }
   };
 
-  // Hàm gửi tin nhắn qua socket
-  const sendMessage = useCallback(
-    (content: string) => {
-      if (!selectedChannel?.id || !content.trim()) return;
-      const data = {
-        channelId: selectedChannel.id,
-        text: content.trim(),
-        channelData: selectedChannel,
-      }
-      chatSocketService.sendMessage(data);
+  // Send message via socket
+  const sendMessage = useCallback((content: string) => {
+    if (!selectedChannel?.id || !content.trim()) return;
+    chatSocketService.sendMessage({
+      channelId: selectedChannel.id,
+      text: content.trim(),
+      channelData: selectedChannel,
+    });
+  }, [selectedChannel]);
+
+  // ✅ API: load older messages by cursor (before = oldest id currently rendered)
+  const loadOlder = useCallback(
+    async (channelId: string, beforeId: string, pageSize = 50) => {
+      const res = await ChatAPI.fetchMessage(channelId, pageSize, beforeId);
+      // Expect shape: { items, hasMoreOlder, cursors }
+      return res?.data ?? { items: [], hasMoreOlder: false, cursors: { before: null } };
     },
-    [selectedChannel]
+    []
   );
+
+  // ✅ Prepend messages (dedupe by id)
+  const handlePrependMessages = useCallback((newMsgs: Message[]) => {
+    setMessages(prev => {
+      const exists = new Set(prev.map(m => String(m.id)));
+      const filtered = newMsgs.filter(m => !exists.has(String(m.id)));
+      return [...filtered, ...prev];
+    });
+  }, []);
 
   return (
     <MasterLayout
@@ -225,25 +204,15 @@ export default function ChatLayout() {
                   style={{ minHeight: 40 }}
                 >
                   <Search className="h-5 w-5 text-white mr-2" />
-                  <span className="text-white opacity-80 text-sm">
-                    Tìm kiếm ...
-                  </span>
+                  <span className="text-white opacity-80 text-sm">Tìm kiếm ...</span>
                 </div>
               </DialogTrigger>
               <DialogContent
                 className="w-full max-w-2xl bg-[#18181b] text-white border-none"
-                style={{
-                  background: "#18181b",
-                  color: "#fff",
-                  height: "85vh",
-                  minHeight: "85vh",
-                  maxHeight: "85vh",
-                }}
+                style={{ background: "#18181b", color: "#fff", height: "85vh" }}
               >
                 <DialogHeader>
-                  <DialogTitle className="text-white">
-                    Tìm kiếm kênh , người dùng
-                  </DialogTitle>
+                  <DialogTitle className="text-white">Tìm kiếm kênh , người dùng</DialogTitle>
                 </DialogHeader>
                 <div className="px-3 pt-2 h-[70vh]">
                   <ChannelSearch
@@ -267,29 +236,27 @@ export default function ChatLayout() {
         </SidebarLayout>
       }
     >
-      {/* Main Chat Content */}
       <div className="flex-1 flex flex-col">
-        {selectedChannel && (
-          <ChannelHeader channel={selectedChannel} members={members} />
-        )}
+        {selectedChannel && <ChannelHeader channel={selectedChannel} members={members} />}
+
         <div className="flex-1 flex items-center justify-center">
           {messages.length === 0 ? (
             <div className="text-center">
               <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">
-                Chat Coming Soon
-              </h3>
-              <p className="text-muted-foreground">
-                Chat functionality will be implemented with the new backend API
-              </p>
+              <h3 className="text-lg font-medium text-white mb-2">Chat Coming Soon</h3>
+              <p className="text-muted-foreground">Chat functionality will be implemented with the new backend API</p>
             </div>
           ) : (
-            <MessageList messages={messages} />
+            <MessageList
+              messages={messages}                  // ASC: cũ → mới
+              channelId={String(selectedChannel!.id)}
+              onPrependMessages={handlePrependMessages}
+              loadOlder={loadOlder}                // ✅ truyền callback API xuống
+            />
           )}
         </div>
-        {selectedChannel && (
-          <MessageInput channelId={selectedChannel.id} onSend={sendMessage} />
-        )}
+
+        {selectedChannel && <MessageInput channelId={selectedChannel.id} onSend={sendMessage} />}
       </div>
     </MasterLayout>
   );

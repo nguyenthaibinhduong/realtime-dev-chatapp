@@ -1,11 +1,11 @@
 // Khai báo kiểu dữ liệu cho tin nhắn
 export interface Message {
-    id: number;
+    id: number | string;
     text: string;
     created_at: string;
     updated_at: string;
     sender: {
-        id: number;
+        id: number | string;
         username: string;
         email: string;
     };

@@ -18,8 +18,7 @@ export const AuthAPI = {
 
 export const ChatAPI = {
   fetchChannel: async () => apiget(`channels/list-channels`),
-  fetchMessage: async (channelId: string) =>
-    apiget(`channels/list-messages/${channelId}`),
+  fetchMessage: async (channelId: string , pageSize?: number, before?: string) => apiget(`channels/list-messages/${channelId}?pageSize=${pageSize ?? 50}&before=${before ?? ''}`),
   createChannel: async (data: any) => apipost(`channels/create-channel`, data),
   joinChannel: async (data: any) => apipost(`channels/join-channel`, data),
   //Tìm kiếm

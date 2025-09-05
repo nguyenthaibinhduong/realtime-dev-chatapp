@@ -49,8 +49,6 @@ class ChatSocketService {
     getSocket().on("receiveMessage", callback);
   }
 
-  
-
   offMessage(callback?: (msg: Message) => void) {
     getSocket().off("receiveMessage", callback);
   }
