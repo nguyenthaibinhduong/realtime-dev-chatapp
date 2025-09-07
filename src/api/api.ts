@@ -1,10 +1,10 @@
 import { join } from "path";
-import { post, apiget, apipost } from "./Http";
+import { get, post, apiget, apipost } from "./Http";
 
 export const AuthAPI = {
   // Không cần auth
   login: async (data: any) => post("/auth/login", data),
-  listOnline : async () => apiget("/users/list-online"),
+  listOnline: async () => apiget("/users/list-online"),
   register: async (data: any) => post("/auth/register", data),
   forgotPassword: async (data: any) => post("/auth/forgot-password", { data }),
   verifyToken: async (data: any) => post("/auth/verify-token", { data }),
@@ -14,11 +14,18 @@ export const AuthAPI = {
   logout: async () => apipost("/auth/logout"),
   refreshToken: async (data: any) => apipost("/auth/refresh-token", data),
   githubLogin: async (code: string) => post("/auth/github-oauth", { code }),
+  confirmEmail: async (token: string) =>
+    get(`/auth/confirm-email?token=${encodeURIComponent(token)}`),
 };
 
 export const ChatAPI = {
   fetchChannel: async () => apiget(`channels/list-channels`),
-  fetchMessage: async (channelId: string , pageSize?: number, before?: string) => apiget(`channels/list-messages/${channelId}?pageSize=${pageSize ?? 50}&before=${before ?? ''}`),
+  fetchMessage: async (channelId: string, pageSize?: number, before?: string) =>
+    apiget(
+      `channels/list-messages/${channelId}?pageSize=${pageSize ?? 50}&before=${
+        before ?? ""
+      }`
+    ),
   createChannel: async (data: any) => apipost(`channels/create-channel`, data),
   joinChannel: async (data: any) => apipost(`channels/join-channel`, data),
   //Tìm kiếm
