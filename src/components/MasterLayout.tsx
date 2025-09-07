@@ -3,6 +3,7 @@ import {
     ResizablePanel,
     ResizableHandle,
 } from "@/components/ui/resizable";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface MasterLayoutProps {
     menu: React.ReactNode;
@@ -11,13 +12,21 @@ interface MasterLayoutProps {
 }
 
 export default function MasterLayout({ menu, sidebar, children }: MasterLayoutProps) {
+    const isMobile = useIsMobile();
+
     return (
         <ResizablePanelGroup direction="horizontal" className="h-screen w-full bg-[hsl(var(--chat-background))] group">
             {/* Menu (MenubarLayout) */}
             {menu}
 
             {/* Sidebar */}
-            <ResizablePanel defaultSize={22} minSize={14} maxSize={40} className="flex flex-col">
+            <ResizablePanel
+                defaultSize={isMobile ? 0 : 22}
+                minSize={isMobile ? 0 : 14}
+                maxSize={isMobile ? 0 : 40}
+                className={`flex flex-col transition-all duration-300 ${isMobile ? "w-0 min-w-0 max-w-0" : ""}`}
+                style={isMobile ? { width: 0, minWidth: 0, maxWidth: 0, padding: 0, overflow: "hidden" } : {}}
+            >
                 {sidebar}
             </ResizablePanel>
 

@@ -22,10 +22,71 @@ import {
 import { Message } from "@/types/message";
 import { Channel, Member } from "@/types/channel";
 import { chatSocketService } from "@/services/chatSocketService";
+import { useIsMobile } from "@/hooks/useMobile";
 
 export default function ChatLayout() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
+  const [showSidebar, setShowSidebar] = useState(false);
+
+  // Thêm state cho vị trí nút điều hướng
+  const [navBtnPos, setNavBtnPos] = useState({ x: 20, y: 20 });
+  const navBtnRef = useRef<HTMLButtonElement>(null);
+  const draggingRef = useRef(false);
+  const offsetRef = useRef({ x: 0, y: 0 });
+
+  // Xử lý kéo thả nút điều hướng
+  const handleNavBtnMouseDown = (e: React.MouseEvent) => {
+    draggingRef.current = true;
+    offsetRef.current = {
+      x: e.clientX - navBtnPos.x,
+      y: e.clientY - navBtnPos.y,
+    };
+    document.addEventListener("mousemove", handleNavBtnMouseMove);
+    document.addEventListener("mouseup", handleNavBtnMouseUp);
+  };
+
+  const handleNavBtnMouseMove = (e: MouseEvent) => {
+    if (!draggingRef.current) return;
+    setNavBtnPos({
+      x: Math.max(0, Math.min(window.innerWidth - 56, e.clientX - offsetRef.current.x)),
+      y: Math.max(0, Math.min(window.innerHeight - 56, e.clientY - offsetRef.current.y)),
+    });
+  };
+
+  const handleNavBtnMouseUp = () => {
+    draggingRef.current = false;
+    document.removeEventListener("mousemove", handleNavBtnMouseMove);
+    document.removeEventListener("mouseup", handleNavBtnMouseUp);
+  };
+
+  // Touch events cho mobile
+  const handleNavBtnTouchStart = (e: React.TouchEvent) => {
+    draggingRef.current = true;
+    const touch = e.touches[0];
+    offsetRef.current = {
+      x: touch.clientX - navBtnPos.x,
+      y: touch.clientY - navBtnPos.y,
+    };
+    document.addEventListener("touchmove", handleNavBtnTouchMove);
+    document.addEventListener("touchend", handleNavBtnTouchEnd);
+  };
+
+  const handleNavBtnTouchMove = (e: TouchEvent) => {
+    if (!draggingRef.current) return;
+    const touch = e.touches[0];
+    setNavBtnPos({
+      x: Math.max(0, Math.min(window.innerWidth - 56, touch.clientX - offsetRef.current.x)),
+      y: Math.max(0, Math.min(window.innerHeight - 56, touch.clientY - offsetRef.current.y)),
+    });
+  };
+
+  const handleNavBtnTouchEnd = () => {
+    draggingRef.current = false;
+    document.removeEventListener("touchmove", handleNavBtnTouchMove);
+    document.removeEventListener("touchend", handleNavBtnTouchEnd);
+  };
 
   // State
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -68,8 +129,17 @@ export default function ChatLayout() {
     if (selectedChannel?.id) {
       chatSocketService.joinRoom(selectedChannel.id);
       chatSocketService.onMessage((msg: any) => {
-        // Append realtime nếu không trùng
-        setMessages((prev: any) => (prev.some((p: any) => String(p.id) === String(msg.id)) ? prev : [...prev, msg]));
+        console.log("New socket message received:", msg);
+        setMessages((prev: any) => {
+          // Nếu có tin nhắn cùng fakeID thì replace, nếu không thì thêm mới
+          const idx = prev.findIndex((p: any) => String(p.fakeID) === String(msg.fakeID));
+          if (idx !== -1) {
+            const updated = [...prev];
+            updated[idx] = msg;
+            return updated;
+          }
+          return [...prev, msg];
+        });
       });
     }
     return () => {
@@ -189,51 +259,136 @@ export default function ChatLayout() {
     });
   }, []);
 
+  // Khi chọn kênh trên mobile thì ẩn sidebar
+  const handleSelectChannelMobile = (channel: Channel | null) => {
+    handleSelectChannel(channel);
+    if (isMobile) setShowSidebar(false);
+  };
+
   return (
     <MasterLayout
       menu={<MenubarLayout />}
       sidebar={
-        <SidebarLayout>
-          <div className="flex items-center justify-between px-3 pt-2">
-            <Dialog open={openSearchModal} onOpenChange={setOpenSearchModal}>
-              <DialogTrigger asChild>
+        isMobile ? (
+          <div>
+            <button
+              ref={navBtnRef}
+              className="fixed z-50 bg-primary text-white rounded-full p-2 shadow flex items-center justify-center"
+              style={{
+                left: navBtnPos.x,
+                top: navBtnPos.y,
+                width: 48,
+                height: 48,
+                touchAction: "none",
+                transition: draggingRef.current ? "none" : "box-shadow 0.2s",
+              }}
+              onClick={() => setShowSidebar((v) => !v)}
+              aria-label="Mở danh sách kênh"
+              onMouseDown={handleNavBtnMouseDown}
+              onTouchStart={handleNavBtnTouchStart}
+            >
+              <span className="flex items-center justify-center w-8 h-8 rounded-full">
+                <svg width={24} height={24} fill="none" viewBox="0 0 24 24">
+                  <rect x={4} y={6} width={16} height={2} rx={1} fill="currentColor" />
+                  <rect x={4} y={11} width={16} height={2} rx={1} fill="currentColor" />
+                  <rect x={4} y={16} width={16} height={2} rx={1} fill="currentColor" />
+                </svg>
+              </span>
+            </button>
+            {showSidebar && (
+              <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setShowSidebar(false)}>
                 <div
-                  className="flex items-center w-full bg-[#222] rounded px-3 py-2 cursor-pointer hover:bg-[#333] transition"
-                  title="Tìm kiếm kênh"
-                  onClick={() => setOpenSearchModal(true)}
-                  style={{ minHeight: 40 }}
+                  className="absolute top-0 left-0 h-full w-[80vw] max-w-xs bg-[#18181b] shadow-lg overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <Search className="h-5 w-5 text-white mr-2" />
-                  <span className="text-white opacity-80 text-sm">Tìm kiếm ...</span>
+                  <SidebarLayout>
+                    <div className="flex items-center justify-between px-3 pt-2">
+                      <Dialog open={openSearchModal} onOpenChange={setOpenSearchModal}>
+                        <DialogTrigger asChild>
+                          <div
+                            className="flex items-center w-full bg-[#222] rounded px-3 py-2 cursor-pointer hover:bg-[#333] transition"
+                            title="Tìm kiếm kênh"
+                            onClick={() => setOpenSearchModal(true)}
+                            style={{ minHeight: 40 }}
+                          >
+                            <Search className="h-5 w-5 text-white mr-2" />
+                            <span className="text-white opacity-80 text-sm">Tìm kiếm ...</span>
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent
+                          className="w-full max-w-2xl bg-[#18181b] text-white border-none"
+                          style={{ background: "#18181b", color: "#fff", height: "85vh" }}
+                        >
+                          <DialogHeader>
+                            <DialogTitle className="text-white">Tìm kiếm kênh , người dùng</DialogTitle>
+                          </DialogHeader>
+                          <div className="px-3 pt-2 h-[70vh]">
+                            <ChannelSearch
+                              onSelectChannel={handleSelectChannelFromSearch}
+                              onJoinChannel={handleJoinChannelFromSearch}
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                    <ScrollArea className="flex-1 px-3">
+                      <ChannelSection
+                        channels={channels}
+                        selectedChannel={selectedChannel}
+                        onSelectChannel={handleSelectChannelMobile}
+                        onShowChannelTypeMenu={handleShowChannelTypeMenu}
+                        showChannelTypeMenu={showChannelTypeMenu}
+                        onChannelCreated={loadChannels}
+                      />
+                    </ScrollArea>
+                  </SidebarLayout>
                 </div>
-              </DialogTrigger>
-              <DialogContent
-                className="w-full max-w-2xl bg-[#18181b] text-white border-none"
-                style={{ background: "#18181b", color: "#fff", height: "85vh" }}
-              >
-                <DialogHeader>
-                  <DialogTitle className="text-white">Tìm kiếm kênh , người dùng</DialogTitle>
-                </DialogHeader>
-                <div className="px-3 pt-2 h-[70vh]">
-                  <ChannelSearch
-                    onSelectChannel={handleSelectChannelFromSearch}
-                    onJoinChannel={handleJoinChannelFromSearch}
-                  />
-                </div>
-              </DialogContent>
-            </Dialog>
+              </div>
+            )}
           </div>
-          <ScrollArea className="flex-1 px-3">
-            <ChannelSection
-              channels={channels}
-              selectedChannel={selectedChannel}
-              onSelectChannel={handleSelectChannel}
-              onShowChannelTypeMenu={handleShowChannelTypeMenu}
-              showChannelTypeMenu={showChannelTypeMenu}
-              onChannelCreated={loadChannels}
-            />
-          </ScrollArea>
-        </SidebarLayout>
+        ) : (
+          <SidebarLayout>
+            <div className="flex items-center justify-between px-3 pt-2">
+              <Dialog open={openSearchModal} onOpenChange={setOpenSearchModal}>
+                <DialogTrigger asChild>
+                  <div
+                    className="flex items-center w-full bg-[#222] rounded px-3 py-2 cursor-pointer hover:bg-[#333] transition"
+                    title="Tìm kiếm kênh"
+                    onClick={() => setOpenSearchModal(true)}
+                    style={{ minHeight: 40 }}
+                  >
+                    <Search className="h-5 w-5 text-white mr-2" />
+                    <span className="text-white opacity-80 text-sm">Tìm kiếm ...</span>
+                  </div>
+                </DialogTrigger>
+                <DialogContent
+                  className="w-full max-w-2xl bg-[#18181b] text-white border-none"
+                  style={{ background: "#18181b", color: "#fff", height: "85vh" }}
+                >
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Tìm kiếm kênh , người dùng</DialogTitle>
+                  </DialogHeader>
+                  <div className="px-3 pt-2 h-[70vh]">
+                    <ChannelSearch
+                      onSelectChannel={handleSelectChannelFromSearch}
+                      onJoinChannel={handleJoinChannelFromSearch}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <ScrollArea className="flex-1 px-3">
+              <ChannelSection
+                channels={channels}
+                selectedChannel={selectedChannel}
+                onSelectChannel={handleSelectChannel}
+                onShowChannelTypeMenu={handleShowChannelTypeMenu}
+                showChannelTypeMenu={showChannelTypeMenu}
+                onChannelCreated={loadChannels}
+              />
+            </ScrollArea>
+          </SidebarLayout>
+        )
       }
     >
       <div className="flex-1 flex flex-col">

@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message as MessageBubble } from "./Message";
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { MessageListProps } from "@/types/message";
 import { Loader2 } from "lucide-react";
 
@@ -30,10 +30,7 @@ type Props = MessageListProps & {
 };
 
 export const MessageList: React.FC<Props> = ({
-    messages,                    // ASC: cũ → mới
-    channelId,
-    onPrependMessages,
-    loadOlder,
+    messages, channelId, onPrependMessages, loadOlder,
 }) => {
     const scrollAreaRef = useRef<HTMLDivElement | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -42,6 +39,25 @@ export const MessageList: React.FC<Props> = ({
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+    const [sentStatusIds, setSentStatusIds] = useState<string[]>([]);
+
+    // Theo dõi các tin nhắn vừa chuyển sang trạng thái "sent"
+    useEffect(() => {
+        messages.forEach((message: any) => {
+            const isMe = message?.sender?.id === user?.id;
+            if (
+                isMe &&
+                message.status === "sent" &&
+                !sentStatusIds.includes(String(message.id))
+            ) {
+                setSentStatusIds((prev) => [...prev, String(message.id)]);
+                setTimeout(() => {
+                    setSentStatusIds((prev) => prev.filter((id) => id !== String(message.id)));
+                }, 3000);
+            }
+        });
+        // eslint-disable-next-line
+    }, [messages]);
 
     // cờ để chặn auto-scroll-bottom khi prepend
     const isPrependingRef = useRef(false);
@@ -142,52 +158,86 @@ export const MessageList: React.FC<Props> = ({
                         const isMe = message?.sender?.id === user?.id;
                         const showSenderInfo = !isMe && shouldShowSenderInfo(messages, idx, user?.id);
 
+                        // Xác định trạng thái gửi tin nhắn
+                        let statusLabel = null;
+                        // Chỉ hiện "Đã gửi" cho tin nhắn cuối cùng của mình
+                        const isLastMyMessage =
+                            isMe &&
+                            idx === messages.length - 1 &&
+                            message.status === "sent" &&
+                            sentStatusIds.includes(String(message.id));
+
+                        if (isMe && message.status) {
+                            if (message.status === "pending") {
+                                statusLabel = (
+                                    <span className="text-xs text-yellow-400 animate-pulse">
+                                        Đang gửi...
+                                    </span>
+                                );
+                            } else if (message.status === "error") {
+                                statusLabel = (
+                                    <span className="text-xs text-red-500">
+                                        Lỗi! Không gửi được
+                                    </span>
+                                );
+                            } else if (isLastMyMessage) {
+                                statusLabel = (
+                                    <span className="text-xs text-green-400">
+                                        Đã gửi
+                                    </span>
+                                );
+                            }
+                        }
+
                         return (
-                            <div
-                                key={message.id}
-                                className={`flex ${isMe ? "justify-end" : "justify-start"} space-x-3`}
-                            >
-                                {!isMe && showSenderInfo && (
-                                    <div className="relative flex items-center">
-                                        <Avatar
-                                            className="h-8 w-8 flex-shrink-0 cursor-pointer"
-                                            onMouseEnter={() => setHoveredId(message.id)}
-                                            onMouseLeave={() => setHoveredId(null)}
-                                        >
-                                            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                                                {message?.sender?.username?.[0]?.toUpperCase() || "U"}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        {hoveredId === message.id && (
-                                            <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
-                                                {message?.sender?.username}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
+                            <div key={message.id} className="flex flex-col items-end">
                                 <div
-                                    className={`min-w-0 rounded-2xl px-4 py-2 ${isMe
-                                        ? "bg-blue-600 text-white rounded-br-none"
-                                        : "bg-gray-700 text-white rounded-bl-none" + (showSenderInfo ? " " : " pl-10 ml-10")
-                                        } ${message?.type === "code" ? "w-[80%] bg-transparent" : ""}`}
+                                    className={`flex ${isMe ? "justify-end" : "justify-start"} space-x-3 w-full`}
                                 >
-                                    <div className="flex justify-start mb-1 items-center">
-                                        {!isMe && showSenderInfo && (
-                                            <p className="text-sm font-medium">{message?.sender?.username}</p>
-                                        )}
-                                        <p className={`text-xs text-white/60 ${isMe ? "" : "ml-2"} whitespace-nowrap`}>
-                                            {new Date(message.send_at || message.created_at).toLocaleTimeString("vi-VN", {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
-                                        </p>
-                                    </div>
+                                    {!isMe && showSenderInfo && (
+                                        <div className="relative flex flex-col items-center justify-center">
+                                            <Avatar
+                                                className="h-8 w-8 flex-shrink-0 cursor-pointer"
+                                                onMouseEnter={() => setHoveredId(message.id)}
+                                                onMouseLeave={() => setHoveredId(null)}
+                                            >
+                                                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                                                    {message?.sender?.username?.[0]?.toUpperCase() || "U"}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            {hoveredId === message.id && (
+                                                <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
+                                                    {message?.sender?.username}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
-                                    <div className="text-sm whitespace-pre-wrap break-words">
-                                        <MessageBubble text={message.text} />
+                                    <div
+                                        className={`min-w-0 rounded-2xl px-4 py-2 flex flex-col ${isMe
+                                            ? "bg-blue-600 text-white "
+                                            : "bg-gray-700 text-white " + (showSenderInfo ? " " : " ml-[43px]")
+                                            } ${message?.type === "code" ? "w-[80%] bg-transparent" : ""}`}
+                                    >
+                                        <div className="flex justify-start mb-1 items-center">
+                                            <p className={`text-xs text-white/60 whitespace-nowrap`}>
+                                                {new Date(message.send_at || message.created_at).toLocaleTimeString("vi-VN", {
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })}
+                                            </p>
+                                        </div>
+                                        <div className="text-sm whitespace-pre-wrap break-words">
+                                            <MessageBubble text={message.text} />
+                                        </div>
                                     </div>
                                 </div>
+                                {/* Hiển thị statusLabel ở ngoài, dưới cùng mỗi tin nhắn của mình */}
+                                {isMe && statusLabel && (
+                                    <div className="mt-1 me-2 flex justify-end w-full">
+                                        {statusLabel}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
