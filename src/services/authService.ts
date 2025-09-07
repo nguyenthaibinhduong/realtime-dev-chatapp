@@ -20,7 +20,6 @@ class AuthService {
         chatSocketService.connect(res.data.access_token, true);
         return res;
       }
-        
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -31,8 +30,8 @@ class AuthService {
   async register(data: RegisterRequest): Promise<ApiResponse<LoginResponse>> {
     try {
       const res = await AuthAPI.register(data);
-      if (res.status && res.data)
-        this.saveTokens(res.data.access_token, res.data.refresh_token);
+      // if (res.status && res.data)
+      //   this.saveTokens(res.data.access_token, res.data.refresh_token);
       return res;
     } catch (error) {
       console.error("Register error:", error);
@@ -50,7 +49,7 @@ class AuthService {
       const res = await AuthAPI.refreshToken({ refresh_token: token });
       if (res.status && res.data)
         this.saveTokens(res.data.access_token, res.data.refresh_token);
-        
+
       return res;
     } catch (error) {
       console.error("Refresh token error:", error);
@@ -144,8 +143,6 @@ class AuthService {
     }
   }
 
-
-  
   // Lấy user từ token
   getUserFromToken(token?: string): User | null {
     try {

@@ -97,8 +97,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           description: "Chào mừng bạn quay trở lại!",
         });
 
-
-
         return { error: null };
       } else {
         return { error: response.msg || "Đăng nhập thất bại" };
@@ -140,11 +138,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await authService.register({
         email,
         password,
-        name: username,
+        username,
       });
 
       if (response.status && response.data) {
-        setUser(response.data.user);
+        // setUser(response.data.user);
 
         toast({
           title: "Đăng ký thành công",

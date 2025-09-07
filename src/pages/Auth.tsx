@@ -63,6 +63,10 @@ export default function Auth() {
         variant: "destructive",
       });
     } else {
+      toast({
+        title: "Đăng ký thành công",
+        description: "Vui lòng đăng nhập bằng tài khoản vừa tạo.",
+      });
       navigate("/");
     }
 
