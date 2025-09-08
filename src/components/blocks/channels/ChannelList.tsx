@@ -10,6 +10,7 @@ interface ChannelListProps {
     channels: Channel[];
     selectedChannel: Channel | null;
     onSelectChannel: (channel: Channel) => void;
+    unreadMap?: Record<string, number>; // thêm prop
 }
 
 
@@ -47,7 +48,12 @@ const SECTION_LABELS: Record<string, string> = {
     other: "Khác"
 };
 
-export const ChannelList = ({ channels, selectedChannel, onSelectChannel }: ChannelListProps) => {
+export const ChannelList = ({
+    channels,
+    selectedChannel,
+    onSelectChannel,
+    unreadMap = {},
+}: ChannelListProps) => {
     // Phân loại kênh, chỉ lấy kênh có isActive !== false
     const grouped: Record<string, Channel[]> = {
         group: [],
@@ -89,20 +95,33 @@ export const ChannelList = ({ channels, selectedChannel, onSelectChannel }: Chan
                                 const otherMember = channel.members.find((m: any) => m.id !== user.id);
                                 otherUserId = otherMember?.id;
                             }
+                            // Nếu là kênh đang chọn thì không hiển thị số unread
+                            // const isSelected = selectedChannel?.id === channel.id;
+                            const unread = unreadMap[channel.id] || 0;
                             return (
                                 <Button
                                     key={channel.id}
                                     variant="ghost"
-                                    className={`w-full justify-start px-2 py-1.5 h-auto font-normal ${selectedChannel?.id === channel.id
-                                        ? 'bg-[hsl(var(--chat-selected))] text-white'
-                                        : 'text-sidebar-foreground hover:text-white hover:bg-[hsl(var(--chat-selected))]'
+                                    className={`w-full justify-between px-2 py-1.5 h-auto font-normal flex items-center
+                                        ${selectedChannel?.id === channel.id
+                                            ? 'bg-[hsl(var(--chat-selected))] text-white'
+                                            : unread > 0
+                                                ? 'font-bold text-white'
+                                                : 'text-sidebar-foreground hover:text-white hover:bg-[hsl(var(--chat-selected))]'
                                         }`}
                                     onClick={() => onSelectChannel(channel)}
                                 >
-                                    {channel.type === "personal"
-                                        ? getChannelIcon(channel, otherUserId)
-                                        : getChannelIcon(channel)}
-                                    <span className="truncate">{channel.name}</span>
+                                    <div className="flex items-center gap-2">
+                                        {channel.type === "personal"
+                                            ? getChannelIcon(channel, otherUserId)
+                                            : getChannelIcon(channel)}
+                                        <span className="truncate">{channel.name}</span>
+                                    </div>
+                                    {unread > 0 && (
+                                        <span className="ml-2 text-xs bg-red-600 text-white rounded-full px-2 py-0.5">
+                                            {unread} mới
+                                        </span>
+                                    )}
                                 </Button>
                             );
                         })}

@@ -27,10 +27,11 @@ type Props = MessageListProps & {
         hasMoreOlder?: boolean;
         cursors?: any;
     }>;
+    type?: string; // Loại kênh: group, group-private, personal
 };
 
 export const MessageList: React.FC<Props> = ({
-    messages, channelId, onPrependMessages, loadOlder,
+    messages, channelId, onPrependMessages, loadOlder, type
 }) => {
     const scrollAreaRef = useRef<HTMLDivElement | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -196,6 +197,7 @@ export const MessageList: React.FC<Props> = ({
                                 >
                                     {!isMe && showSenderInfo && (
                                         <div className="relative flex flex-col items-center justify-center">
+
                                             <Avatar
                                                 className="h-8 w-8 flex-shrink-0 cursor-pointer"
                                                 onMouseEnter={() => setHoveredId(message.id)}
@@ -205,6 +207,8 @@ export const MessageList: React.FC<Props> = ({
                                                     {message?.sender?.username?.[0]?.toUpperCase() || "U"}
                                                 </AvatarFallback>
                                             </Avatar>
+                                            {/* Nếu type khác personal và không phải tin nhắn của mình thì hiện username phía trên avatar */}
+
                                             {hoveredId === message.id && (
                                                 <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
                                                     {message?.sender?.username}
@@ -212,25 +216,30 @@ export const MessageList: React.FC<Props> = ({
                                             )}
                                         </div>
                                     )}
+                                    <div className="flex flex-col items-start">{type !== "personal" && !isMe && showSenderInfo && (
+                                        <span className="ms-2 block text-xs text-white/80 mt-1 mb-1 text-center">
+                                            {message?.sender?.username}
+                                        </span>
+                                    )}
+                                        <div
+                                            className={`min-w-0 rounded-2xl px-4 py-2 flex flex-col ${isMe
+                                                ? "bg-blue-600 text-white "
+                                                : "bg-gray-700 text-white " + (showSenderInfo ? " " : " ml-[43px]")
+                                                } ${message?.type === "code" ? "w-[80%] bg-transparent" : ""}`}
+                                        >
+                                            <div className="flex justify-start mb-1 items-center">
+                                                <p className={`text-xs text-white/60 whitespace-nowrap`}>
+                                                    {new Date(message.send_at || message.created_at).toLocaleTimeString("vi-VN", {
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                    })}
+                                                </p>
+                                            </div>
+                                            <div className="text-sm whitespace-pre-wrap break-words">
+                                                <MessageBubble text={message.text} />
+                                            </div>
+                                        </div></div>
 
-                                    <div
-                                        className={`min-w-0 rounded-2xl px-4 py-2 flex flex-col ${isMe
-                                            ? "bg-blue-600 text-white "
-                                            : "bg-gray-700 text-white " + (showSenderInfo ? " " : " ml-[43px]")
-                                            } ${message?.type === "code" ? "w-[80%] bg-transparent" : ""}`}
-                                    >
-                                        <div className="flex justify-start mb-1 items-center">
-                                            <p className={`text-xs text-white/60 whitespace-nowrap`}>
-                                                {new Date(message.send_at || message.created_at).toLocaleTimeString("vi-VN", {
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
-                                            </p>
-                                        </div>
-                                        <div className="text-sm whitespace-pre-wrap break-words">
-                                            <MessageBubble text={message.text} />
-                                        </div>
-                                    </div>
                                 </div>
                                 {/* Hiển thị statusLabel ở ngoài, dưới cùng mỗi tin nhắn của mình */}
                                 {isMe && statusLabel && (

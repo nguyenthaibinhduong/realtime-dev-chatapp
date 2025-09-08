@@ -20,6 +20,7 @@ export const AuthAPI = {
 
 export const ChatAPI = {
   fetchChannel: async () => apiget(`channels/list-channels`),
+  fetchUnread: async () => apiget(`channels/unread-map`),
   fetchMessage: async (channelId: string, pageSize?: number, before?: string) =>
     apiget(
       `channels/list-messages/${channelId}?pageSize=${pageSize ?? 50}&before=${

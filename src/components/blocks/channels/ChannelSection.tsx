@@ -13,6 +13,7 @@ interface ChannelSectionProps {
   onShowChannelTypeMenu: () => void;
   showChannelTypeMenu: boolean;
   onChannelCreated: () => void;
+  unreadMap?: Record<string, number>; // thêm prop
 }
 
 export const ChannelSection = ({
@@ -22,6 +23,7 @@ export const ChannelSection = ({
   onShowChannelTypeMenu,
   showChannelTypeMenu,
   onChannelCreated, // Nhận callback chung
+  unreadMap = {},
 }: ChannelSectionProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -96,6 +98,7 @@ export const ChannelSection = ({
         channels={channels}
         selectedChannel={selectedChannel}
         onSelectChannel={onSelectChannel}
+        unreadMap={unreadMap} // truyền vào
       />
 
       {/* Channel Dialog với callback */}

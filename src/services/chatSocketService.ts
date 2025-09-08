@@ -31,6 +31,11 @@ class ChatSocketService {
     getSocket().emit("leave_channel", { channelId });
   }
 
+
+  registerUnread(channelIds: string[]) {
+    getSocket().emit("register_unread_channels", { channelIds });
+  }
+
   switchRoom(oldChannelId: string, newChannelId: string) {
     getSocket().emit("switch_channel", { oldChannelId, newChannelId });
   }

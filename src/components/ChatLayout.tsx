@@ -95,10 +95,11 @@ export default function ChatLayout() {
   const [members, setMembers] = useState<Member[]>([]);
   const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
   const [openSearchModal, setOpenSearchModal] = useState(false);
+  const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
 
   const handleShowChannelTypeMenu = () => setShowChannelTypeMenu(v => !v);
 
-  // Load channels
+  // Load channels + unread map
   const loadChannels = useCallback(async () => {
     try {
       const res = await ChatAPI.fetchChannel();
@@ -108,6 +109,19 @@ export default function ChatLayout() {
 
       setChannels(loadedChannels);
 
+      // ✅ Đăng ký nhận unread cho các channel hiện có
+      const channelIds = loadedChannels.map(c => String(c.id));
+      if (channelIds.length > 0) {
+        chatSocketService.registerUnread(channelIds); // emits 'register_unread_channels'
+      }
+
+      // ✅ Lấy danh sách unread ban đầu bằng API (đảm bảo FE có state khi vừa vào)
+      const unreadRes = await ChatAPI.fetchUnread();
+      if (unreadRes?.data && typeof unreadRes.data === "object") {
+        setUnreadMap(unreadRes.data);
+      }
+
+      // Chọn kênh đã lưu hoặc kênh đầu tiên
       const savedChannelId = localStorage.getItem("selectedChannelId");
       const found = loadedChannels.find(c => String(c.id) === savedChannelId);
       setSelectedChannel(found || loadedChannels[0] || null);
@@ -168,6 +182,15 @@ export default function ChatLayout() {
     };
     chatSocketService.onChannel(handler);
     return () => chatSocketService.offChannel(handler);
+  }, []);
+
+  // Lắng nghe unread từ socket
+  useEffect(() => {
+    const handleUnread = (data: { channelId: string; count: number }) => {
+      setUnreadMap(prev => ({ ...prev, [data.channelId]: data.count }));
+    };
+    chatSocketService.onUnread(handleUnread);
+    return () => chatSocketService.offUnread(handleUnread);
   }, []);
 
   const handleSelectChannel = (channel: Channel | null) => {
@@ -339,6 +362,7 @@ export default function ChatLayout() {
                         onShowChannelTypeMenu={handleShowChannelTypeMenu}
                         showChannelTypeMenu={showChannelTypeMenu}
                         onChannelCreated={loadChannels}
+                        unreadMap={unreadMap} // truyền vào
                       />
                     </ScrollArea>
                   </SidebarLayout>
@@ -385,6 +409,7 @@ export default function ChatLayout() {
                 onShowChannelTypeMenu={handleShowChannelTypeMenu}
                 showChannelTypeMenu={showChannelTypeMenu}
                 onChannelCreated={loadChannels}
+                unreadMap={unreadMap} // truyền vào
               />
             </ScrollArea>
           </SidebarLayout>
@@ -406,7 +431,8 @@ export default function ChatLayout() {
               messages={messages}                  // ASC: cũ → mới
               channelId={String(selectedChannel!.id)}
               onPrependMessages={handlePrependMessages}
-              loadOlder={loadOlder}                // ✅ truyền callback API xuống
+              loadOlder={loadOlder}
+              type={selectedChannel?.type}
             />
           )}
         </div>
