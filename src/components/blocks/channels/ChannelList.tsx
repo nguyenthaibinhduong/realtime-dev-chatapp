@@ -119,7 +119,7 @@ export const ChannelList = ({
                                     </div>
                                     {unread > 0 && (
                                         <span className="ml-2 text-xs bg-red-600 text-white rounded-full px-2 py-0.5">
-                                            {unread} mới
+                                            {unread}
                                         </span>
                                     )}
                                 </Button>

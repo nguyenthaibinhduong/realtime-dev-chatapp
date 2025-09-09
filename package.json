@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -50,7 +51,9 @@
     "highlight.js": "^11.11.1",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
+    "monaco-editor": "^0.53.0",
     "next-themes": "^0.3.0",
+    "prettier": "^3.6.2",
     "prismjs": "^1.30.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -91,6 +94,7 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "vite-plugin-monaco-editor": "^1.1.0"
   }
 }
