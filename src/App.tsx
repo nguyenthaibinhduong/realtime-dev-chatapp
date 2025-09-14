@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import NotificationsPage from "./pages/NotificationsPage";
 import { GitHubCallback } from "./components/GithubCallback";
 import ConfirmEmailPage from "./components/ConfirmEmail";
+import SettingsPage from "./pages/Setting";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

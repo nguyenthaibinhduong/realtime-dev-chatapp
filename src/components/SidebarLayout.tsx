@@ -42,7 +42,10 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         {/* User Info */}
         <div className="p-3 border-t border-sidebar-border">
           <div className="flex items-center space-x-2">
-            <Avatar className="h-8 w-8" onClick={() => navigate("/profile")}>
+            <Avatar
+              className="h-8 w-8 hover:cursor-pointer"
+              onClick={() => navigate("/profile")}
+            >
               <AvatarFallback className="bg-primary text-primary-foreground">
                 {user?.email?.[0]?.toUpperCase() || "U"}
               </AvatarFallback>
@@ -60,6 +63,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0 text-sidebar-foreground/50 hover:text-sidebar-foreground"
+              onClick={() => navigate("/settings")}
             >
               <Settings className="h-4 w-4" />
             </Button>
