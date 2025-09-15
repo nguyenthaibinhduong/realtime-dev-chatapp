@@ -13,7 +13,7 @@ const api = axios.create({
 
 const noAuthApi = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -49,7 +49,9 @@ const processQueue = (error: any, token: string | null = null) => {
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError<any>) => {
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as AxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     // Nếu lỗi là 409 (token hết hạn) và chưa retry
     if (error.response?.status === 409 && !originalRequest._retry) {
@@ -71,10 +73,9 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        const refreshRes = await axios.post(
-          `${API_URL}/auth/refresh-token`,
-          { refresh_token: refreshToken }
-        );
+        const refreshRes = await axios.post(`${API_URL}/auth/refresh-token`, {
+          refresh_token: refreshToken,
+        });
 
         const newToken = refreshRes.data.access_token;
         localStorage.setItem("token", newToken);

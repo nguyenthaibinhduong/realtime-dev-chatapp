@@ -39,3 +39,10 @@ export const ChatAPI = {
       params: { type, key, limit },
     }),
 };
+
+export const UploadApi = {
+  getPresignedUrl: async (data: any) =>
+    apipost("upload/get-presigned-url", data),
+
+  getObjectUrl: async (data: any) => apipost("upload/get-object-url", data),
+};
