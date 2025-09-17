@@ -1,5 +1,3 @@
-import { Github } from "lucide-react";
-import { join } from "path";
 import { get, post, apiget, apipost } from "./Http";
 
 export const AuthAPI = {
