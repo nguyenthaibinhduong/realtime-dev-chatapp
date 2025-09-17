@@ -13,7 +13,7 @@ type PresenceUpdate = {
 };
 
 class ChatSocketService {
-  connect(token?: string , forceNew = false) {
+  connect(token?: string, forceNew = false) {
     getSocket(token, forceNew).connect();
   }
 
@@ -31,7 +31,6 @@ class ChatSocketService {
     getSocket().emit("leave_channel", { channelId });
   }
 
-
   registerUnread(channelIds: string[]) {
     getSocket().emit("register_unread_channels", { channelIds });
   }
@@ -43,7 +42,8 @@ class ChatSocketService {
   /** ================== MESSAGE ================== */
 
   sendMessage(data: any) {
-    getSocket().emit("send_message", data );
+    console.log("chatSocketService.ts", data);
+    getSocket().emit("send_message", data);
   }
 
   createChannel(data: any) {
