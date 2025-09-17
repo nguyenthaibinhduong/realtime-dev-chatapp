@@ -22,6 +22,7 @@ export interface User {
   avatar?: string;
   role: string | null;
   github_verified: boolean;
+  github_installation_id: string | null;
   created_at?: string;
   updated_at?: string;
 }

@@ -24,7 +24,7 @@ const AuthGuard = ({ children }) => {
       } else {
         console.log("user in auth guard", user);
 
-        if (user && user.github_verified === false) {
+        if (user && (user.github_verified === false && user.github_installation_id === null)) {
           if (needsGithubLink === "true") {
             setIsLoading(false);
           } else {

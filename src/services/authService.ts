@@ -112,6 +112,7 @@ class AuthService {
   logout(): void {
     localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("needs_github_link");
     chatSocketService.disconnect();
     window.location.href = "/auth";
   }
@@ -160,7 +161,8 @@ class AuthService {
         email: payload.email, 
         name: payload.name, 
         role: payload.role, 
-        github_verified: payload.github_verified 
+        github_verified: payload.github_verified, 
+        github_installation_id: payload.github_installation_id
       };
     } catch {
       return null;
