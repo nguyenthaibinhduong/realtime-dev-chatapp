@@ -22,6 +22,8 @@ const AuthGuard = ({ children }) => {
       if (!isAuthenticated()) {
         navigate("/auth");
       } else {
+        console.log("user in auth guard", user);
+
         if (user && user.github_verified === false) {
           if (needsGithubLink === "true") {
             setIsLoading(false);

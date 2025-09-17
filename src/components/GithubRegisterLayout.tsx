@@ -12,7 +12,8 @@ export default function GithubRegisterLayout() {
     const handleRedirect = async () => {
         try {
             // Chỉ redirect đến GitHub OAuth
-            await authService.installGitHubApp();
+            const { url }: any = await authService.installGitHubApp();
+            window.location.href = url;
         } catch (error: any) {
             console.error("Lỗi Liên kết GitHub:", error);
             toast({

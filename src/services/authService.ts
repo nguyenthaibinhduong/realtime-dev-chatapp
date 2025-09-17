@@ -71,14 +71,17 @@ class AuthService {
   }
 
   // Lấy profile
-  async getProfile(userId?: string): Promise<ApiResponse<User>> {
+  async getProfile(): Promise<ApiResponse<User>> {
     try {
-      return await AuthAPI.fetchUserProfile(userId);
+      const res = await AuthAPI.getProfile();
+      if (res.status === 200 && res.data) return res.data;
     } catch (error) {
       console.error("Get profile error:", error);
       throw error;
     }
   }
+
+  
 
   // Đăng nhập với GitHub
   async loginWithGitHub(): Promise<void> {
@@ -88,7 +91,7 @@ class AuthService {
   }
 
   async installGitHubApp(): Promise<void> {
-    await AuthAPI.goToInstallGithub();
+     return await AuthAPI.goToInstallGithub();
   
   }
 
