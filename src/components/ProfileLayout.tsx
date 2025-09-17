@@ -20,18 +20,16 @@ const ProfileLayout: React.FC = () => {
   return (
     <div className="h-full p-6">
       <h2 className="text-2xl font-bold mb-4 text-white">Hồ sơ của tôi</h2>
-      <div className="flex-col items-center space-x-4 mb-6">
+      <div className="flex-col items-center mb-6">
         <div className="flex-1 bg-slate-700 p-6 rounded-xl">
           <h3 className="text-lg font-semibold text-white">Tên người dùng</h3>
           <p className="text-sm text-white">{username}</p>
           <h3 className="text-lg font-semibold text-white pt-2">Email</h3>
           <p className="text-sm text-white">{email}</p>
         </div>
-        <div>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded ">
-            Đổi mật khẩu
-          </button>
-        </div>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded mt-8">
+          Đổi mật khẩu
+        </button>
       </div>
     </div>
   );

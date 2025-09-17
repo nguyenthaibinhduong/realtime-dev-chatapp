@@ -1,3 +1,4 @@
+import { Github } from "lucide-react";
 import { join } from "path";
 import { get, post, apiget, apipost } from "./Http";
 
@@ -48,4 +49,9 @@ export const UploadApi = {
     apipost("upload/get-presigned-url", data),
 
   getObjectUrl: async (data: any) => apipost("upload/get-object-url", data),
+};
+
+
+export const GithubAPI = {
+  getInstallationRepos: async () => apipost(`/git/get_repo_installation`),
 };

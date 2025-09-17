@@ -1,13 +1,16 @@
-import { AuthAPI } from "@/api/api";
+import { AuthAPI, GithubAPI } from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 import { toast } from "@/hooks/useToast";
 import authService from "@/services/authService";
 import { Github } from "lucide-react";
-
+import { useState, useEffect, useCallback } from "react";
 
 export default function GithubRegisterLayout() {
+    const [repos, setRepos] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const user = JSON.parse(localStorage.getItem("user") || "null");
 
     const handleRedirect = async () => {
         try {
@@ -33,6 +36,29 @@ export default function GithubRegisterLayout() {
         await AuthAPI.updateProfile({ github_verified: true });
         handleSkip();
     };
+
+    const loadRepo = useCallback(async () => {
+        if (!user.github_installation_id) return;
+        setLoading(true);
+        try {
+            const res = await GithubAPI.getInstallationRepos(); // server nên trả { data: [...] }
+            const list = res?.data || [];
+            setRepos(list);
+            console.log("Repos:", list);
+        } catch (e: any) {
+            console.error("Load repos failed:", e);
+            toast({
+                title: "Không tải được danh sách repo",
+                description: e?.message || "Vui lòng thử lại.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    }, [user?.github_installation_id]);
+    useEffect(() => {
+        loadRepo();
+    }, [loadRepo]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--chat-background))] p-4">

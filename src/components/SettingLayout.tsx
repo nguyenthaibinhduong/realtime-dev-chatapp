@@ -5,6 +5,7 @@ import SidebarLayout from "./SidebarLayout";
 import { Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProfileLayout from "./ProfileLayout";
+import GithubRegisterLayout from "./GithubRegisterLayout";
 
 type SettingItem = {
   id: string;
@@ -38,7 +39,7 @@ export default function SettingLayout() {
         {
           id: "github-allowed-apps",
           label: "Liên kết với Github",
-          component: null,
+          component: <GithubRegisterLayout />,
         },
       ],
     },
