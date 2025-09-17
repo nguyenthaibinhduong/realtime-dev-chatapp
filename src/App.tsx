@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import NotificationsPage from "./pages/NotificationsPage";
 import { GitHubCallback } from "./components/GithubCallback";
 import ConfirmEmailPage from "./components/ConfirmEmail";
+import GitHubRegister from "./pages/GitHubRegister";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/github/register" element={<GitHubRegister />} />
             <Route path="/auth/github/callback" element={<GitHubCallback />} />
             <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="/profile" element={<Profile />} />

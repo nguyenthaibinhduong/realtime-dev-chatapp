@@ -20,6 +20,8 @@ export interface User {
   email: string;
   name?: string;
   avatar?: string;
+  role: string | null;
+  github_verified: boolean;
   created_at?: string;
   updated_at?: string;
 }

@@ -10,14 +10,15 @@ export const GitHubCallback = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const code = searchParams.get("code");
+      const accesstoken = searchParams.get("access_token") || searchParams.get("token");
+      const refreshtoken = searchParams.get("refresh_token");
       const error = searchParams.get("error");
 
-      console.log("GitHub callback - Code:", code, "Error:", error);
+      // console.log("GitHub callback - Access Token:", accesstoken, "Refresh Token:", refreshtoken, "Error:", error);
 
       if (error) {
         toast({
-          title: "Đăng nhập GitHub thất bại",
+          title: "Xác thực GitHub thất bại",
           description: `Lỗi: ${error}`,
           variant: "destructive",
         });
@@ -25,7 +26,7 @@ export const GitHubCallback = () => {
         return;
       }
 
-      if (!code) {
+      if (!accesstoken) {
         toast({
           title: "Lỗi đăng nhập",
           description: "Không nhận được mã xác thực từ GitHub",
@@ -36,33 +37,28 @@ export const GitHubCallback = () => {
       }
 
       try {
-        const response = await authService.handleGitHubCallback(code);
+        await authService.handleGitHubCallback(accesstoken, refreshtoken);
 
-        if (response.status && response.data) {
-          toast({
-            title: "Đăng nhập GitHub thành công",
-            description: `Chào mừng ${response.data.user.name || response.data.user.email
-              }!`,
-          });
+        toast({
+          title: "Đăng nhập và kết nối GitHub thành công",
+          description: "Chào mừng bạn đến với ứng dụng!",
+        });
 
-          // Reload page để AuthProvider cập nhật user state
-          window.location.href = "/";
-        } else {
-          throw new Error(response.msg || "Đăng nhập thất bại");
-        }
+        // Reload page để AuthProvider cập nhật user state
+        window.location.href = "/";
       } catch (error: any) {
         console.error("GitHub callback processing error:", error);
 
         let errorMessage = "Có lỗi xảy ra khi xử lý đăng nhập GitHub";
 
-        if (error.response?.status === 404) {
-          errorMessage =
-            "API endpoint không tìm thấy. Vui lòng kiểm tra backend.";
-        } else if (error.response?.data?.msg) {
-          errorMessage = error.response.data.msg;
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
+        // if (error.response?.status === 404) {
+        //   errorMessage =
+        //     "API endpoint không tìm thấy. Vui lòng kiểm tra backend.";
+        // } else if (error.response?.data?.msg) {
+        //   errorMessage = error.response.data.msg;
+        // } else if (error.message) {
+        //   errorMessage = error.message;
+        // }
 
         toast({
           title: "Đăng nhập GitHub thất bại",

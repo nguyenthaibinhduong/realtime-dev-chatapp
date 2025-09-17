@@ -15,7 +15,7 @@ export default function AuthForm() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
-    const { signIn, signUp } = useAuth();
+    const { signIn, signUp, user } = useAuth();
 
     const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

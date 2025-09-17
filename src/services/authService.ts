@@ -82,21 +82,24 @@ class AuthService {
 
   // Đăng nhập với GitHub
   async loginWithGitHub(): Promise<void> {
-    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
-    const redirectUri = import.meta.env.VITE_GITHUB_CALLBACK_URL;
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`;
+    return await AuthAPI.goToLoginGithub();
+
+    
+  }
+
+  async installGitHubApp(): Promise<void> {
+    await AuthAPI.goToInstallGithub();
+  
   }
 
   // Xử lý callback GitHub
-  async handleGitHubCallback(
-    code: string
-  ): Promise<ApiResponse<LoginResponse>> {
+  async handleGitHubCallback(access_token: string, refresh_token: string): Promise<void> {
     try {
-      const res = await AuthAPI.githubLogin(code);
-      if (res.status && res.data)
-        this.saveTokens(res.data.access_token, res.data.refresh_token || "");
-      return res;
-    } catch (error: any) {
+      if (access_token && refresh_token) {
+        this.saveTokens(access_token, refresh_token);
+        chatSocketService.connect(access_token, true);
+      }
+    } catch (error) {
       console.error("GitHub callback error:", error);
       throw error;
     }
@@ -149,7 +152,13 @@ class AuthService {
       const t = token || this.getAccessToken();
       if (!t) return null;
       const payload = JSON.parse(atob(t.split(".")[1]));
-      return { id: payload.sub, email: payload.email, name: payload.name };
+      return { 
+        id: payload.sub, 
+        email: payload.email, 
+        name: payload.name, 
+        role: payload.role, 
+        github_verified: payload.github_verified 
+      };
     } catch {
       return null;
     }

@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
 
           // Get user info from token or profile
-          const userFromToken = authService.getUserFromToken();
+          const userFromToken: any = await authService.getProfile();
           if (userFromToken) {
             setUser(userFromToken);
           } else {
@@ -115,7 +115,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGitHub = async () => {
     try {
       // Chỉ redirect đến GitHub OAuth
-      await authService.loginWithGitHub();
+      const { url }: any = await authService.loginWithGitHub();
+      window.location.href = url;
     } catch (error: any) {
       console.error("Lỗi đăng nhập GitHub:", error);
       toast({
@@ -178,7 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await authService.refreshToken();
       // Update user info after refresh
-      const userFromToken = authService.getUserFromToken();
+      const userFromToken: any = await authService.getProfile();
       if (userFromToken) {
         setUser(userFromToken);
       }

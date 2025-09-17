@@ -8,14 +8,17 @@ export const AuthAPI = {
   register: async (data: any) => post("/auth/register", data),
   forgotPassword: async (data: any) => post("/auth/forgot-password", { data }),
   verifyToken: async (data: any) => post("/auth/verify-token", { data }),
-  fetchUserProfile: async (id: string) => apiget(`/users/${id}`),
+  fetchUserProfile: async (id: string) => post(`/users/${id}`),
+  getProfile: async () => apipost("auth/get-profile"),
   changePassword: async (data: any) => apipost("/auth/change-password", data),
-  updateProfile: async (data: any) => apipost("/users/update-profile", data),
+  updateProfile: async (data: any) => apipost("/auth/update-profile", data),
   logout: async () => apipost("/auth/logout"),
   refreshToken: async (data: any) => apipost("/auth/refresh-token", data),
-  githubLogin: async (code: string) => post("/auth/github-oauth", { code }),
+  githubLogin: async (code: string) => post(`/github-app/callback?${code}`, { code }),
   confirmEmail: async (token: string) =>
-    get(`/auth/confirm-email?token=${encodeURIComponent(token)}`),
+  get(`/auth/confirm-email?token=${encodeURIComponent(token)}`),
+  goToLoginGithub: async () => get("/auth/github-oauth/redirect"),
+  goToInstallGithub: async () => apipost("/github-app/redirect"),
 };
 
 export const ChatAPI = {
