@@ -109,6 +109,9 @@ export default function ChatLayout() {
   const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
+  const [uploadingFiles, setUploadingFiles] = useState<{
+    [key: string]: { progress: number; total: number };
+  }>({});
 
   const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
 
@@ -286,16 +289,65 @@ export default function ChatLayout() {
   // Send message via socket
   const sendMessage = useCallback(
     async (content: string, files: File[]) => {
-      //
+      if (
+        !selectedChannel?.id ||
+        (!content.trim() && (!files || files.length === 0))
+      )
+        return;
+
       let attachments: UploadResult[] = [];
 
       if (files && files.length > 0) {
         try {
-          // Upload files and get results
+          // ✅ Tạo temporary message với loading attachments
+          const tempMessageId = `temp-${Date.now()}`;
+          const tempMessage: any = {
+            id: tempMessageId,
+            fakeID: tempMessageId,
+            text: content.trim(),
+            sender: user,
+            status: "uploading",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            send_at: new Date().toISOString(),
+            isMine: true,
+            attachments: files.map((file, index) => ({
+              id: `temp-${tempMessageId}-${index}`,
+              key: `temp-${tempMessageId}-${index}`,
+              filename: file.name,
+              fileSize: file.size,
+              fileUrl: "",
+              mimeType: file.type,
+              uploading: true,
+              progress: 0,
+            })),
+          };
+
+          // Thêm temporary message vào danh sách
+          setMessages((prev) => [...prev, tempMessage]);
+
+          // Upload files với progress tracking
           const uploadResults = await attachmentService.uploadFile(
             files,
             (fileIndex, progress) => {
               console.log(`File ${fileIndex + 1} progress: ${progress}%`);
+
+              // ✅ Cập nhật progress cho attachment tương ứng
+              setMessages((prev: any) =>
+                prev.map((msg: any) => {
+                  if (msg.id === tempMessageId && msg.attachments) {
+                    const updatedAttachments = [...msg.attachments];
+                    if (updatedAttachments[fileIndex]) {
+                      updatedAttachments[fileIndex] = {
+                        ...updatedAttachments[fileIndex],
+                        progress: progress,
+                      };
+                    }
+                    return { ...msg, attachments: updatedAttachments };
+                  }
+                  return msg;
+                })
+              );
             }
           );
 
@@ -308,12 +360,20 @@ export default function ChatLayout() {
             key: result.key,
           }));
 
+          // ✅ Xóa temporary message sau khi upload thành công
+          setMessages((prev) => prev.filter((msg) => msg.id !== tempMessageId));
+
           toast({
             title: "Upload thành công",
             description: `${files.length} file(s) đã được upload`,
           });
         } catch (error: any) {
           console.error("📎 Upload process failed:", error);
+
+          // ✅ Xóa temporary message và hiển thị lỗi
+          const tempMessageId = `temp-${Date.now()}`;
+          setMessages((prev) => prev.filter((msg) => msg.id !== tempMessageId));
+
           toast({
             title: "Lỗi upload file",
             description: error?.message || "Không thể upload file",
@@ -323,9 +383,7 @@ export default function ChatLayout() {
         }
       }
 
-      if (!selectedChannel?.id || (!content.trim() && attachments.length === 0))
-        return;
-
+      // ✅ Gửi tin nhắn qua socket
       chatSocketService.sendMessage({
         channelId: selectedChannel.id,
         text: content.trim(),
@@ -333,7 +391,7 @@ export default function ChatLayout() {
         ...(attachments.length > 0 && { presignedAttachments: attachments }), // Include attachments if any
       });
     },
-    [selectedChannel]
+    [selectedChannel, user, toast]
   );
 
   // ✅ API: load older messages by cursor (before = oldest id currently rendered)
