@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import ProfileLayout from "./ProfileLayout";
 import GithubRegisterLayout from "./GithubRegisterLayout";
 import { TestLayout, EditorLayout } from "./SandBoxLayout";
+import CodeEditorJudge0 from "./MonacoEditorLayout";
 
 type SettingItem = {
   id: string;
@@ -56,6 +57,11 @@ export default function SettingLayout() {
           id: "editor-sandbox",
           label: "Editor SandBox",
           component: <EditorLayout />,
+        },
+        {
+          id: "monaco-judge0",
+          label: "Monaco + Judge0",
+          component: <CodeEditorJudge0 />,
         },
       ],
     },
