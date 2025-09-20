@@ -9,6 +9,7 @@ import { toast } from "@/hooks/useToast";
 import authService from "@/services/authService";
 import { Github, ExternalLink, Shield, Lock, RefreshCw, Loader2 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import RepoTable from "./blocks/github/RepoTable";
 
 type GHOwner = { login: string; avatar_url: string; html_url: string };
 type GHRepo = {
@@ -142,145 +143,8 @@ export default function GithubRegisterLayout() {
 
     // Đã cài installation → Bảng repo với Table component
     return (
-        <div className="min-h-screen bg-[hsl(var(--chat-background))] p-4">
-            <div className="mx-auto w-full max-w-5xl">
-                <Card className="bg-sidebar border-sidebar-border">
-                    <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                        <div className="space-y-1">
-                            <CardTitle className="text-sidebar-foreground flex items-center gap-2">
-                                <Github className="h-5 w-5 text-primary" />
-                                Repository đã cấp quyền
-                            </CardTitle>
-                            <CardDescription className="text-sidebar-foreground/80 pt-5">
-                                {summary.total_count != null ? (
-                                    <>
-                                        Tổng: <span className="font-medium">{summary.total_count}</span>{" "}
-                                        {summary.selection ? (
-                                            <span className="text-xs text-muted-foreground">(selection: {summary.selection})</span>
-                                        ) : null}
-                                    </>
-                                ) : "Danh sách các repository trong installation này."}
-                            </CardDescription>
-                        </div>
-
-                        <div className="flex items-center gap-2 w-full md:w-auto">
-                            <input
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Tìm theo tên, mô tả, ngôn ngữ…"
-                                className="w-full md:w-64 rounded-md border border-sidebar-border bg-sidebar px-3 py-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-                                aria-label="Lọc repository"
-                            />
-                            <Button variant="outline" onClick={loadRepo} disabled={loading} aria-busy={loading} className="shrink-0" title="Làm mới">
-                                {loading ? (<><Loader2 className="h-4 w-4 animate-spin" /><span className="ml-2">Đang tải…</span></>) : (<><RefreshCw className="h-4 w-4" /><span className="ml-2 hidden sm:inline">Làm mới</span></>)}
-                            </Button>
-                        </div>
-                    </CardHeader>
-
-                    <CardContent>
-                        <Table className="min-w-[720px]">
-                            <TableCaption className="text-muted-foreground">
-                                {filtered.length > 0 ? "Danh sách repository từ GitHub App installation." : "—"}
-                            </TableCaption>
-
-                            <TableHeader>
-                                <TableRow className="text-xs uppercase tracking-wide text-muted-foreground">
-                                    <TableHead className="w-[45%]">Repository</TableHead>
-                                    <TableHead className="w-[15%]">Visibility</TableHead>
-                                    <TableHead className="w-[15%]">Language</TableHead>
-                                    <TableHead className="w-[15%]">Updated</TableHead>
-                                    <TableHead className="w-[10%] text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-
-                            <TableBody>
-                                {loading &&
-                                    Array.from({ length: 5 }).map((_, i) => (
-                                        <TableRow key={`sk-${i}`} className="border-sidebar-border/60">
-                                            <TableCell>
-                                                <div className="h-4 w-40 rounded bg-sidebar-border/60 animate-pulse" />
-                                                <div className="mt-1 h-3 w-64 rounded bg-sidebar-border/40 animate-pulse" />
-                                            </TableCell>
-                                            <TableCell><div className="h-4 w-16 rounded bg-sidebar-border/60 animate-pulse" /></TableCell>
-                                            <TableCell><div className="h-4 w-20 rounded bg-sidebar-border/60 animate-pulse" /></TableCell>
-                                            <TableCell><div className="h-4 w-24 rounded bg-sidebar-border/60 animate-pulse" /></TableCell>
-                                            <TableCell><div className="ml-auto h-8 w-28 rounded bg-sidebar-border/60 animate-pulse" /></TableCell>
-                                        </TableRow>
-                                    ))}
-
-                                {!loading && filtered.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                                            Không có repository nào phù hợp bộ lọc.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-
-                                {!loading &&
-                                    filtered.map((r) => {
-                                        const updated =
-                                            r.updated_at &&
-                                            new Intl.DateTimeFormat(undefined, {
-                                                year: "numeric",
-                                                month: "short",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            }).format(new Date(r.updated_at));
-
-                                        return (
-                                            <TableRow key={r.id} className="border-sidebar-border/60">
-                                                <TableCell>
-                                                    <div className="flex items-start gap-3 text-gray-200">
-                                                        {r.owner?.avatar_url ? (
-                                                            <img
-                                                                src={r.owner.avatar_url}
-                                                                alt={r.owner?.login || "owner"}
-                                                                className="h-8 w-8 rounded-md"
-                                                                loading="lazy"
-                                                            />
-                                                        ) : (
-                                                            <div className="h-8 w-8 rounded-md bg-sidebar-border" />
-                                                        )}
-                                                        <div>
-                                                            <div className="font-medium truncate max-w-[360px]">
-                                                                {r.full_name || r.name}
-                                                            </div>
-                                                            <div className="text-xs text-muted-foreground line-clamp-1 max-w-[480px]">
-                                                                {r.description || "—"}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-
-                                                <TableCell>
-                                                    <span className="inline-flex items-center gap-1 text-xs text-gray-200">
-                                                        {r.private ? (<><Lock className="h-3.5 w-3.5" />Private</>) : (<><Shield className="h-3.5 w-3.5" />Public</>)}
-                                                    </span>
-                                                </TableCell>
-
-                                                <TableCell><span className="text-xs text-gray-200">{r.language || "—"}</span></TableCell>
-
-                                                <TableCell><span className="text-xs text-gray-200">{updated || "—"}</span></TableCell>
-
-                                                <TableCell>
-                                                    <div className="flex justify-end">
-                                                        <Button asChild variant="outline" size="sm" className="gap-1">
-                                                            <a href={r.html_url} target="_blank" rel="noopener noreferrer" aria-label={`Mở ${r.full_name || r.name} trên GitHub`}>
-                                                                <ExternalLink className="h-4 w-4" />
-                                                                Mở GitHub
-                                                            </a>
-                                                        </Button>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+        <Card className="bg-sidebar border-sidebar-border">
+            <RepoTable repos={repos} loading={loading} onRefresh={loadRepo} />
+        </Card>
     );
 }
