@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProfileLayout from "./ProfileLayout";
 import GithubRegisterLayout from "./GithubRegisterLayout";
+import { TestLayout, EditorLayout } from "./SandBoxLayout";
 
 type SettingItem = {
   id: string;
@@ -40,6 +41,21 @@ export default function SettingLayout() {
           id: "github-allowed-apps",
           label: "Liên kết với Github",
           component: <GithubRegisterLayout />,
+        },
+      ],
+    },
+    {
+      title: "Sandbox",
+      items: [
+        {
+          id: "test-sandbox",
+          label: "Test SandBox",
+          component: <TestLayout />,
+        },
+        {
+          id: "editor-sandbox",
+          label: "Editor SandBox",
+          component: <EditorLayout />,
         },
       ],
     },
@@ -169,7 +185,10 @@ export default function SettingLayout() {
       menu={<MenubarLayout />}
       sidebar={<SidebarLayout>{SidebarChildren}</SidebarLayout>}
     >
-      <div className="flex-1 overflow-hidden">
+      <div
+        className="flex-1 overflow-hidden"
+        style={{ height: "100vh", minHeight: "100vh", maxHeight: "100vh" }}
+      >
         <div className="h-full overflow-auto p-6">
           {selectedItem?.component ? (
             // Render component của setting được chọn
