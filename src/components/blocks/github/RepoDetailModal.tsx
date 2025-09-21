@@ -221,7 +221,7 @@ function CodeViewerDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-full max-w-6xl h-[84vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden">
+            <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden">
                 <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-950">
                     <DialogTitle className="text-sm truncate">{selPath || "Code"}</DialogTitle>
                 </DialogHeader>
@@ -444,7 +444,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose }) => {
 
     return (
         <Dialog open={!!repo} onOpenChange={onClose}>
-            <DialogContent className="w-full max-w-7xl h-[92vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden flex flex-col">
+            <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden flex flex-col">
                 <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-950">
                     <DialogTitle className="text-base flex items-center gap-3">
                         <span className="truncate">{repo.full_name}</span>
