@@ -6,16 +6,17 @@ export const AuthAPI = {
   listOnline: async () => apiget("/users/list-online"),
   register: async (data: any) => post("/auth/register", data),
   forgotPassword: async (data: any) => post("/auth/forgot-password", { data }),
-  verifyToken: async (data: any) => post("/auth/verify-token", { data }),
+  verifyToken: async () => post("/auth/verify-token"),
   fetchUserProfile: async (id: string) => post(`/users/${id}`),
   getProfile: async () => apipost("auth/get-profile"),
   changePassword: async (data: any) => apipost("/auth/change-password", data),
   updateProfile: async (data: any) => apipost("/auth/update-profile", data),
   logout: async () => apipost("/auth/logout"),
   refreshToken: async (data: any) => apipost("/auth/refresh-token", data),
-  githubLogin: async (code: string) => post(`/github-app/callback?${code}`, { code }),
+  githubLogin: async (code: string) =>
+    post(`/github-app/callback?${code}`, { code }),
   confirmEmail: async (token: string) =>
-  get(`/auth/confirm-email?token=${encodeURIComponent(token)}`),
+    get(`/auth/confirm-email?token=${encodeURIComponent(token)}`),
   goToLoginGithub: async () => get("/auth/github-oauth/redirect"),
   goToInstallGithub: async () => apipost("/github-app/redirect"),
 };
@@ -49,8 +50,7 @@ export const UploadApi = {
   getObjectUrl: async (data: any) => apipost("upload/get-object-url", data),
 };
 
-
 export const GithubAPI = {
   getInstallationRepos: async () => apipost(`/git/get_repo_installation`),
-  getRepoData: async (data:any) => apipost(`/git/get_repo_data_by_url`, data),
+  getRepoData: async (data: any) => apipost(`/git/get_repo_data_by_url`, data),
 };

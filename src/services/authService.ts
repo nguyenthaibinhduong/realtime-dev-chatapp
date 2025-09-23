@@ -63,7 +63,7 @@ class AuthService {
     try {
       const t = token || localStorage.getItem("token");
       if (!t) throw new Error("No token to verify");
-      return await AuthAPI.verifyToken({ token: t });
+      return await AuthAPI.verifyToken();
     } catch (error) {
       console.error("Verify token error:", error);
       throw error;
@@ -81,22 +81,20 @@ class AuthService {
     }
   }
 
-  
-
   // Đăng nhập với GitHub
   async loginWithGitHub(): Promise<void> {
     return await AuthAPI.goToLoginGithub();
-
-    
   }
 
   async installGitHubApp(): Promise<void> {
-     return await AuthAPI.goToInstallGithub();
-  
+    return await AuthAPI.goToInstallGithub();
   }
 
   // Xử lý callback GitHub
-  async handleGitHubCallback(access_token: string, refresh_token: string): Promise<void> {
+  async handleGitHubCallback(
+    access_token: string,
+    refresh_token: string
+  ): Promise<void> {
     try {
       if (access_token && refresh_token) {
         this.saveTokens(access_token, refresh_token);
@@ -156,13 +154,13 @@ class AuthService {
       const t = token || this.getAccessToken();
       if (!t) return null;
       const payload = JSON.parse(atob(t.split(".")[1]));
-      return { 
-        id: payload.sub, 
-        email: payload.email, 
-        name: payload.name, 
-        role: payload.role, 
-        github_verified: payload.github_verified, 
-        github_installation_id: payload.github_installation_id
+      return {
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        role: payload.role,
+        github_verified: payload.github_verified,
+        github_installation_id: payload.github_installation_id,
       };
     } catch {
       return null;
