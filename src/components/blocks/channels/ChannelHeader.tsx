@@ -7,6 +7,9 @@ import {
   Calendar,
   Crown,
   User,
+  Github,
+  Check,
+  ChevronDown,
 } from "lucide-react";
 import { Separator } from "../../ui/separator";
 import { useEffect, useState } from "react";
@@ -23,6 +26,10 @@ import { Badge } from "../../ui/badge";
 import { Channel, Member } from "@/types/channel";
 import { OnlineDot } from "../auth/OnlineDot";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { GithubAPI } from "@/api/api";
+import { toast } from "@/hooks/useToast";
+import { RepoChatDialog } from "../github/RepoChatDialog";
 
 interface ChannelHeaderProps {
   channel: Channel;
@@ -88,6 +95,43 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
   const [tab, setTab] = useState("members");
   const [otherUserId, setOtherUserId] = useState<string | number | undefined>();
   const { user } = useAuth();
+  const [openGitModal, setOpenGitModal] = useState(false);
+
+  // State cho danh sách repo
+  const [repos, setRepos] = useState<any[]>([]);
+  const [loadingRepos, setLoadingRepos] = useState(false);
+
+  // State lưu repo đã chọn (giá trị là mảng url)
+  const [selectedRepoIds, setSelectedRepoIds] = useState<number[]>([]);
+
+  // State cho dropdown repo
+  const [showRepoDropdown, setShowRepoDropdown] = useState(false);
+
+  // Lấy danh sách repo khi mở modal
+  // useEffect(() => {
+  //   const loadRepo = async () => {
+  //     setLoadingRepos(true);
+  //     try {
+  //       const res = await GithubAPI.getInstallationRepos();
+  //       // parseRepoPayload logic đơn giản
+  //       const payload = res?.data;
+  //       const dataNode = Array.isArray(payload)
+  //         ? payload
+  //         : payload?.repositories ?? payload?.data ?? [];
+  //       setRepos(Array.isArray(dataNode) ? dataNode : []);
+  //     } catch (e: any) {
+  //       toast({
+  //         title: "Không tải được danh sách repo",
+  //         description: e?.message || "Vui lòng thử lại.",
+  //         variant: "destructive",
+  //       });
+  //     } finally {
+  //       setLoadingRepos(false);
+  //     }
+  //   };
+  //   if (openGitModal) loadRepo();
+  // }, [openGitModal]);
+
   useEffect(() => {
     if (channel.type === "personal" && members && user?.id) {
       const otherMember = members.find((m: any) => m.id !== user.id);
@@ -113,6 +157,16 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
         )}
       </div>
       <div className="flex items-center gap-2">
+        {/* Nút mở modal kết nối repo git */}
+        <button
+          className="p-2 rounded-lg hover:bg-muted transition-colors duration-200"
+          title="Kết nối repo Git"
+          onClick={() => setOpenGitModal(true)}
+        >
+          <Github className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+          <span className="sr-only">Kết nối repo Git</span>
+        </button>
+        <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} channel_id={channel.id} />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <button
@@ -225,7 +279,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                               </Badge>
                             )}
                             {member.isMine && (
-                              <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 px-2 py-0.5 text-xs">
+                              <Badge className="bg-gradient-to-r from-green-500 to-blue-700 text-white border-0 px-2 py-0.5 text-xs">
                                 <User className="h-3 w-3 mr-1" />
                                 Bạn
                               </Badge>
@@ -285,7 +339,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                   {channel.created_at && (
                     <div className="flex items-center justify-between p-4 bg-white/80 dark:bg-slate-700/80 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-teal-600 rounded-lg flex items-center justify-center">
                           <Calendar className="h-5 w-5 text-white" />
                         </div>
                         <div>

@@ -74,7 +74,7 @@ export default function GithubRegisterLayout() {
     };
 
     const loadRepo = useCallback(async () => {
-        if (!installed) return;
+        if (!installed || !user || !user.github_verified || !user.github_installation_id) return;
         setLoading(true);
         try {
             const res = await GithubAPI.getInstallationRepos();
@@ -90,21 +90,13 @@ export default function GithubRegisterLayout() {
         } finally {
             setLoading(false);
         }
-    }, [installed]);
+    }, [installed, user]);
 
     useEffect(() => {
-        loadRepo();
-    }, [loadRepo]);
-
-    const filtered = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        if (!q) return repos;
-        return repos.filter((r) =>
-            `${r.name} ${r.full_name} ${r.description || ""} ${r.language || ""}`
-                .toLowerCase()
-                .includes(q)
-        );
-    }, [repos, query]);
+        if (user && installed && user.github_verified && user.github_installation_id) {
+            loadRepo();
+        }
+    }, [user.github_installation_id]);
 
     // Chưa cài installation → card hướng dẫn (giữ màu hiện có)
     if (!installed) {
@@ -130,11 +122,9 @@ export default function GithubRegisterLayout() {
                             <Button className="flex-1 flex items-center justify-center gap-2" onClick={handleRedirect} disabled={redirecting} aria-busy={redirecting}>
                                 {redirecting ? (<><Loader2 className="h-5 w-5 animate-spin" />Đang mở GitHub…</>) : (<><Github className="h-5 w-5" />Liên kết Github</>)}
                             </Button>
-                            <Button className="flex-1" variant="outline" onClick={handleSkip}>Bỏ qua</Button>
+                            <Button className="flex-1" variant="outline" onClick={handleDisableNotify}>Bỏ qua</Button>
                         </div>
-                        <Button variant="ghost" className="w-full mt-2 text-xs text-muted-foreground" onClick={handleDisableNotify}>
-                            Không nhận thông báo này nữa
-                        </Button>
+
                     </CardContent>
                 </Card>
             </div>
