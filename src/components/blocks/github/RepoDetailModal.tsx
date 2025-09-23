@@ -7,7 +7,7 @@ import { GithubAPI } from "@/api/api";
 import { Editor } from "@monaco-editor/react";
 
 /** ---------------- Types ---------------- */
-type RepoViewerProps = { repo: any | null; onClose: () => void };
+type RepoViewerProps = { repo: any | null; onClose: () => void; installation_id?: string };
 
 type ContentItem = {
     name: string;
@@ -33,9 +33,9 @@ type TreeEntry = {
 /** ---------------- Utils ---------------- */
 const cleanTmpl = (url: string) => url?.replace(/\{.*\}/, "") ?? "";
 const fmt = (d?: string) => (d ? new Date(d).toLocaleString() : "—");
-const fetchJson = async (url: string) => {
+const fetchJson = async (url: string, installation_id?: string) => {
     if (!url) return [];
-    const res = await GithubAPI.getRepoData({ url });
+    const res = await GithubAPI.getRepoData({ url, installation_id });
     return (res as any)?.data ?? res;
 };
 
@@ -101,12 +101,14 @@ function CodeViewerDialog({
     repo,
     refParam,
     initialPath,
+    installation_id
 }: {
     open: boolean;
     onOpenChange: (v: boolean) => void;
     repo: any;
     refParam: string;
     initialPath: string;
+    installation_id?: string;
 }) {
     const [tree, setTree] = useState<TreeEntry[]>([]);
     const [dialogPath, setDialogPath] = useState<string>(""); // folder path inside dialog
@@ -128,7 +130,7 @@ function CodeViewerDialog({
             const tURL = repo.trees_url
                 ? `${cleanTmpl(repo.trees_url)}/${encodeURIComponent(refParam)}?recursive=1`
                 : "";
-            const data = tURL ? await fetchJson(tURL) : null;
+            const data = tURL ? await fetchJson(tURL, installation_id) : null;
             const entries: TreeEntry[] = Array.isArray((data as any)?.tree) ? (data as any).tree : [];
             setTree(entries);
         } finally {
@@ -147,7 +149,7 @@ function CodeViewerDialog({
                 const url = base
                     ? `${base}${base.includes("?") ? "&" : "?"}ref=${encodeURIComponent(refParam)}`
                     : "";
-                const meta = await fetchJson(url); // object: has download_url
+                const meta = await fetchJson(url, installation_id); // object: has download_url
                 const raw = (meta as any)?.download_url;
                 if (!raw) {
                     setFileText("// No raw URL");
@@ -360,7 +362,7 @@ function CodeViewerDialog({
 }
 
 /** ---------------- Main component ---------------- */
-const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose }) => {
+const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose, installation_id }) => {
     const [tab, setTab] = useState<"code" | "commits">("code");
 
     // ref: branch | commit
@@ -390,7 +392,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose }) => {
         if (!repo) return;
         const bURL = cleanTmpl(repo.branches_url);
         const cURL = `${cleanTmpl(repo.commits_url)}?per_page=25`;
-        const [b, c] = await Promise.all([bURL ? fetchJson(bURL) : [], cURL ? fetchJson(cURL) : []]);
+        const [b, c] = await Promise.all([bURL ? fetchJson(bURL, installation_id) : [], cURL ? fetchJson(cURL, installation_id) : []]);
         setBranches(Array.isArray(b) ? b : []);
         const cList = Array.isArray((c as any)?.data) ? (c as any).data : Array.isArray(c) ? c : [];
         setCommits(cList);
@@ -404,7 +406,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose }) => {
         try {
             const base = repo.contents_url?.replace("{+path}", path || "");
             const url = base ? `${base}${base.includes("?") ? "&" : "?"}ref=${encodeURIComponent(refParam)}` : "";
-            const data = await fetchJson(url);
+            const data = await fetchJson(url, installation_id);
             setItems(Array.isArray(data) ? (data as ContentItem[]) : []);
         } finally {
             setLoading(false);
@@ -416,7 +418,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose }) => {
         if (!repo) return;
         const base = cleanTmpl(repo.commits_url);
         const url = `${base}?per_page=50&sha=${encodeURIComponent(branch)}`;
-        const data = await fetchJson(url);
+        const data = await fetchJson(url, installation_id);
         const list = Array.isArray((data as any)?.data) ? (data as any).data : Array.isArray(data) ? data : [];
         setCommits(list);
     }, [repo, branch]);
@@ -628,6 +630,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose }) => {
                 repo={repo}
                 refParam={refParam}
                 initialPath={codePath}
+                installation_id={installation_id ?? ''}
             />
         </Dialog>
     );

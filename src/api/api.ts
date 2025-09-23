@@ -52,5 +52,7 @@ export const UploadApi = {
 
 export const GithubAPI = {
   getInstallationRepos: async () => apipost(`/git/get_repo_installation`),
-  getRepoData: async (data:any) => apipost(`/git/get_repo_data_by_url`, data),
+  getRepoData: async (data: any) => apipost(`/git/get_repo_data_by_url`, data),
+  getRepoForChannel: async (data: any) => apipost(`/git/get_list_repo_data_by_channel`, data),
+  addReposToChannel: async (data: any) => apipost(`/channels/add-repositories`, data),
 };
