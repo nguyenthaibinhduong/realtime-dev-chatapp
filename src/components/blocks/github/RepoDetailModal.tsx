@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { GitBranch, GitCommit, Folder, FileText, RefreshCw, ExternalLink, Play, Terminal } from "lucide-react";
+import { GitBranch, GitCommit, Folder, FileText, RefreshCw, ExternalLink, Play, Terminal, Lock, Shield } from "lucide-react";
 import { GithubAPI } from "@/api/api";
 import { Editor } from "@monaco-editor/react";
 
@@ -225,7 +225,46 @@ function CodeViewerDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden">
                 <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-950">
-                    <DialogTitle className="text-sm truncate">{selPath || "Code"}</DialogTitle>
+                    <div className="flex items-center gap-4">
+                        {/* Repo avatar/icon */}
+                        <div className="flex items-center justify-center h-10 w-10 rounded bg-zinc-900 border border-zinc-800">
+                            <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7 text-white">
+                                <path d="M12 2C6.477 2 2 6.484 2 12.012c0 4.425 2.867 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.37-1.342-3.37-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.646.35-1.088.636-1.34-2.221-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.025 2.747-1.025.546 1.378.202 2.396.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .268.18.579.688.481C19.135 20.19 22 16.437 22 12.012 22 6.484 17.523 2 12 2z" />
+                            </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <DialogTitle className="text-base flex items-center gap-2 font-semibold text-white truncate">
+                                <span className="truncate">{repo.full_name}</span>
+                                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                                    {repo.private ? (
+                                        <span className="inline-flex items-center gap-1"><Lock className="h-3 w-3" /> Private</span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1"><Shield className="h-3 w-3" /> Public</span>
+                                    )}
+                                </span>
+                                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                                    <span className="inline-flex items-center gap-1"><GitBranch className="h-3 w-3" /> {repo.default_branch || "main"}</span>
+                                </span>
+                                {repo.language && (
+                                    <span className="ml-2 px-2 py-0.5 flex rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                                        <span className="inline-flex items-center gap-1"><FileText className="h-3 w-3 mr-2" /> {repo.language}</span>
+                                    </span>
+                                )}
+                            </DialogTitle>
+                            <div className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                <a
+                                    href={repo.html_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:underline text-zinc-300"
+                                >
+                                    {repo.html_url}
+                                </a>
+                                <span className="ml-2">Lần cập nhật gần nhất: {repo.updated_at ? fmt(repo.updated_at) : "—"}</span>
+                            </div>
+                        </div>
+                    </div>
                 </DialogHeader>
                 <div className="h-full flex overflow-y-auto">
                     {/* Left: folder-like tree (compact) */}
@@ -361,9 +400,20 @@ function CodeViewerDialog({
     );
 }
 
+// Skeleton component
+const SkeletonLine = ({ width = "100%", height = "1rem", className = "" }) => (
+    <div
+        className={`bg-zinc-800 animate-pulse rounded ${className}`}
+        style={{ width, height }}
+    />
+);
+
 /** ---------------- Main component ---------------- */
 const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose, installation_id }) => {
     const [tab, setTab] = useState<"code" | "commits">("code");
+    const [commitSearch, setCommitSearch] = useState<string>("");
+    const [commitPage, setCommitPage] = useState<number>(1);
+    const [commitLoadingMore, setCommitLoadingMore] = useState<boolean>(false);
 
     // ref: branch | commit
     const defaultBranch = repo?.default_branch || "main";
@@ -414,14 +464,59 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose, installation_id 
     }, [repo, path, refParam]);
 
     // commits theo branch khi ở tab "commits"
-    const loadCommitsForBranch = useCallback(async () => {
+    const loadCommitsForBranch = useCallback(async (append = false, page = 1, search = "") => {
         if (!repo) return;
+        setCommitLoadingMore(true);
         const base = cleanTmpl(repo.commits_url);
-        const url = `${base}?per_page=50&sha=${encodeURIComponent(branch)}`;
+        let url = `${base}?per_page=20&page=${page}&sha=${encodeURIComponent(branch)}`;
+        if (search) url += `&q=${encodeURIComponent(search)}`;
         const data = await fetchJson(url, installation_id);
         const list = Array.isArray((data as any)?.data) ? (data as any).data : Array.isArray(data) ? data : [];
-        setCommits(list);
-    }, [repo, branch]);
+        setCommits(prev => append ? [...prev, ...list] : list);
+        setCommitLoadingMore(false);
+    }, [repo, branch, installation_id]);
+
+    // Infinite scroll handlerx`
+    const commitListRef = React.useRef<HTMLUListElement>(null);
+    useEffect(() => {
+        if (tab !== "commits") return;
+        const el = commitListRef.current;
+        if (!el) return;
+        const onScroll = () => {
+            if (
+                el.scrollTop + el.clientHeight >= el.scrollHeight - 40 &&
+                !commitLoadingMore
+            ) {
+                setCommitPage(p => p + 1);
+            }
+        };
+        el.addEventListener("scroll", onScroll);
+        return () => el.removeEventListener("scroll", onScroll);
+    }, [tab, commitLoadingMore]);
+
+    // Reload commits when branch/search changes (reset page)
+    useEffect(() => {
+        setCommitPage(1);
+    }, [branch, commitSearch]);
+
+    // Load commits on page change
+    useEffect(() => {
+        if (tab === "commits") {
+            if (commitPage === 1) {
+                loadCommitsForBranch(false, 1, commitSearch);
+            } else {
+                loadCommitsForBranch(true, commitPage, commitSearch);
+            }
+        }
+        // eslint-disable-next-line
+    }, [tab, branch, commitSearch, commitPage]);
+
+    // Search commit: gọi API lại khi nhập
+    const handleCommitSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCommitSearch(e.target.value);
+        setCommitPage(1);
+        // loadCommitsForBranch(false, 1, e.target.value); // useEffect will handle
+    };
 
     // open code dialog from file click
     const openCode = useCallback((p: string) => {
@@ -448,52 +543,84 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose, installation_id 
         <Dialog open={!!repo} onOpenChange={onClose}>
             <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden flex flex-col">
                 <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-950">
-                    <DialogTitle className="text-base flex items-center gap-3">
-                        <span className="truncate">{repo.full_name}</span>
-                        <span className="text-xs text-zinc-400">• default: {defaultBranch}</span>
-                    </DialogTitle>
+                    <div className="flex items-center gap-4">
+                        {/* Repo avatar/icon */}
+                        <div className="flex items-center justify-center h-10 w-10 rounded bg-zinc-900 border border-zinc-800">
+                            <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7 text-white">
+                                <path d="M12 2C6.477 2 2 6.484 2 12.012c0 4.425 2.867 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.37-1.342-3.37-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.646.35-1.088.636-1.34-2.221-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.025 2.747-1.025.546 1.378.202 2.396.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .268.18.579.688.481C19.135 20.19 22 16.437 22 12.012 22 6.484 17.523 2 12 2z" />
+                            </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <DialogTitle className="text-base flex items-center gap-2 font-semibold text-white truncate">
+                                <span className="truncate">{repo.full_name}</span>
+                                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                                    {repo.private ? (
+                                        <span className="inline-flex items-center gap-1"><Lock className="h-3 w-3" /> Private</span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1"><Shield className="h-3 w-3" /> Public</span>
+                                    )}
+                                </span>
+                                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                                    <span className="inline-flex items-center gap-1"><GitBranch className="h-3 w-3" /> {repo.default_branch || "main"}</span>
+                                </span>
+                                {repo.language && (
+                                    <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                                        <span className="inline-flex items-center gap-1"><FileText className="h-3 w-3" /> {repo.language}</span>
+                                    </span>
+                                )}
+                            </DialogTitle>
+                            <div className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                <a
+                                    href={repo.html_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:underline text-zinc-300"
+                                >
+                                    {repo.html_url}
+                                </a>
+                                <span className="ml-2">• Lần cập nhật gần nhất: {repo.updated_at ? fmt(repo.updated_at) : "—"}</span>
+                            </div>
+                        </div>
+                    </div>
                 </DialogHeader>
-
                 <div className="h-full flex flex-col overflow-y-auto">
                     {/* Ref bar */}
                     <div className="px-4 py-2 flex items-center gap-2 border-b border-zinc-900 bg-zinc-950">
                         <div className="flex items-center gap-2">
                             <GitBranch className="h-4 w-4 text-emerald-400" />
-                            {/* <select
-                                className="bg-black border border-zinc-700 rounded px-2 py-1 text-sm"
-                                value={mode}
-                                onChange={(e) => setMode(e.target.value as any)}
-                            >
-                                <option value="branch">Branch</option>
-                                <option value="commit">Commit</option>
-                            </select> */}
-
                             {mode === "branch" ? (
                                 <select
                                     className="bg-black border border-zinc-700 rounded px-2 py-1 text-sm"
                                     value={branch}
                                     onChange={(e) => setBranch(e.target.value)}
+                                    disabled={loading}
                                 >
-                                    {[...branches].map((b: any) => (
-                                        <option key={b.name} value={b.name}>{b.name ?? 'Nhánh'}</option>
-                                    ))}
+                                    {loading
+                                        ? <option>Đang tải…</option>
+                                        : [...branches].map((b: any) => (
+                                            <option key={b.name} value={b.name}>{b.name ?? 'Nhánh'}</option>
+                                        ))}
                                 </select>
                             ) : (
                                 <select
                                     className="bg-black border border-zinc-700 rounded px-2 py-1 text-sm max-w-[280px]"
                                     value={commitSha}
                                     onChange={(e) => setCommitSha(e.target.value)}
+                                    disabled={loading}
                                 >
-                                    {commits.map((c) => (
-                                        <option key={c.sha} value={c.sha}>
-                                            {c.sha.slice(0, 7) ?? ' '} — {c.commit?.message?.slice(0, 50) || "Commit"}
-                                        </option>
-                                    ))}
+                                    {loading
+                                        ? <option>Đang tải…</option>
+                                        : commits.map((c) => (
+                                            <option key={c.sha} value={c.sha}>
+                                                {c.sha.slice(0, 7) ?? ' '} — {c.commit?.message?.slice(0, 50) || "Commit"}
+                                            </option>
+                                        ))}
                                 </select>
                             )}
 
-                            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => loadContents()} title="Refresh">
-                                <RefreshCw className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => loadContents()} title="Refresh" disabled={loading}>
+                                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                             </Button>
                         </div>
                     </div>
@@ -531,7 +658,17 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose, installation_id 
 
                             <div className="h-[calc(100%-28px)] overflow-auto border border-zinc-800 rounded">
                                 {loading ? (
-                                    <div className="p-4 text-sm text-zinc-400">Loading…</div>
+                                    <ul className="divide-y divide-zinc-800 p-4">
+                                        {Array.from({ length: 6 }).map((_, i) => (
+                                            <li key={i} className="flex items-center justify-between py-2">
+                                                <div className="flex items-center gap-2">
+                                                    <SkeletonLine width="24px" height="24px" className="mr-2" />
+                                                    <SkeletonLine width="120px" height="16px" />
+                                                </div>
+                                                <SkeletonLine width="60px" height="14px" />
+                                            </li>
+                                        ))}
+                                    </ul>
                                 ) : (
                                     <ul className="divide-y divide-zinc-800">
                                         {items.map((c) => (
@@ -561,62 +698,94 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose, installation_id 
 
                         {/* COMMITS */}
                         <TabsContent value="commits" className="flex-1 p-4 overflow-auto">
-                            <ul className="border border-zinc-800 rounded divide-y divide-zinc-800">
-                                {commits.map((c) => (
-                                    <li key={c.sha} className="px-4 py-3 hover:bg-zinc-900">
-                                        <div className="flex items-center justify-between gap-3 flex-wrap">
-                                            <div className="min-w-0 flex items-center gap-3">
-                                                {c.author?.avatar_url && (
-                                                    <img
-                                                        src={c.author.avatar_url}
-                                                        alt={c.author?.login || "avatar"}
-                                                        className="h-6 w-6 rounded-full border border-zinc-700"
-                                                        loading="lazy"
-                                                    />
-                                                )}
-                                                <div className="min-w-0">
-                                                    <div className="font-mono text-emerald-400 text-sm">{c.sha.slice(0, 7)}</div>
-                                                    <div className="text-sm truncate">{c.commit?.message}</div>
-                                                    <div className="text-xs text-zinc-400 truncate">
-                                                        {c.author?.login && (
-                                                            <a
-                                                                href={`https://github.com/${c.author.login}`}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                className="hover:underline text-zinc-300"
-                                                            >
-                                                                @{c.commit?.author?.name || c.author.login}
-                                                            </a>
-                                                        )}
-                                                        {/* {c.commit?.author?.name && <span className="ml-2">{c.commit.author.name}</span>} */}
-                                                        {c.commit?.author?.email && <span className="ml-2 opacity-80">{c.commit.author.email}</span>}
+                            <div className="mb-3 flex items-center gap-2">
+                                <input
+                                    value={commitSearch}
+                                    onChange={handleCommitSearch}
+                                    placeholder="Tìm commit theo message, SHA, tác giả…"
+                                    className="w-full px-3 py-2 rounded-md border border-zinc-700 bg-zinc-900 text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                                />
+                            </div>
+                            <ul
+                                ref={commitListRef}
+                                className="border border-zinc-800 rounded divide-y divide-zinc-800 max-h-[calc(80vh-120px)] overflow-auto"
+                                style={{ minHeight: 240 }}
+                            >
+                                {commitPage === 1 && commitLoadingMore ? (
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <li key={i} className="px-4 py-3 flex items-center gap-3">
+                                            <SkeletonLine width="24px" height="24px" className="rounded-full mr-3" />
+                                            <div className="flex-1 space-y-1">
+                                                <SkeletonLine width="80px" height="14px" />
+                                                <SkeletonLine width="180px" height="14px" />
+                                                <SkeletonLine width="120px" height="12px" />
+                                            </div>
+                                            <SkeletonLine width="60px" height="14px" />
+                                        </li>
+                                    ))
+                                ) : (
+                                    commits.map((c) => (
+                                        <li key={c.sha} className="px-4 py-3 hover:bg-zinc-900">
+                                            <div className="flex items-center justify-between gap-3 flex-wrap">
+                                                <div className="min-w-0 flex items-center gap-3">
+                                                    {c.author?.avatar_url && (
+                                                        <img
+                                                            src={c.author.avatar_url}
+                                                            alt={c.author?.login || "avatar"}
+                                                            className="h-6 w-6 rounded-full border border-zinc-700"
+                                                            loading="lazy"
+                                                        />
+                                                    )}
+                                                    <div className="min-w-0">
+                                                        <div className="font-mono text-emerald-400 text-sm">{c.sha.slice(0, 7)}</div>
+                                                        <div className="text-sm truncate">{c.commit?.message}</div>
+                                                        <div className="text-xs text-zinc-400 truncate">
+                                                            {c.author?.login && (
+                                                                <a
+                                                                    href={`https://github.com/${c.author.login}`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="hover:underline text-zinc-300"
+                                                                >
+                                                                    @{c.commit?.author?.name || c.author.login}
+                                                                </a>
+                                                            )}
+                                                            {c.commit?.author?.email && <span className="ml-2 opacity-80">{c.commit.author.email}</span>}
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <div className="text-xs text-zinc-400">{fmt(c.commit?.author?.date)}</div>
                                             </div>
-                                            <div className="text-xs text-zinc-400">{fmt(c.commit?.author?.date)}</div>
-                                        </div>
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="h-8 border-zinc-700 text-zinc-700"
-                                                onClick={() => {
-                                                    setMode("commit");
-                                                    setCommitSha(c.sha);
-                                                    setTab("code");
-                                                }}
-                                            >
-                                                <GitCommit className="h-4 w-4 mr-2" /> Mở Commit
-                                            </Button>
-                                            {c.html_url && (
-                                                <a href={c.html_url} target="_blank" rel="noreferrer" className="text-xs text-sky-400 hover:underline">
-                                                    Mở trên GitHub
-                                                </a>
-                                            )}
-                                        </div>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-8 border-zinc-700 text-zinc-700"
+                                                    onClick={() => {
+                                                        setMode("commit");
+                                                        setCommitSha(c.sha);
+                                                        setTab("code");
+                                                    }}
+                                                >
+                                                    <GitCommit className="h-4 w-4 mr-2" /> Mở Commit
+                                                </Button>
+                                                {c.html_url && (
+                                                    <a href={c.html_url} target="_blank" rel="noreferrer" className="text-xs text-sky-400 hover:underline">
+                                                        Mở trên GitHub
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </li>
+                                    ))
+                                )}
+                                {commitLoadingMore && commitPage > 1 && (
+                                    <li className="px-4 py-3 text-center text-zinc-400">
+                                        <SkeletonLine width="100%" height="18px" />
                                     </li>
-                                ))}
-                                {!commits.length && <li className="px-4 py-6 text-sm text-zinc-500">Không có commit nào.</li>}
+                                )}
+                                {!commitLoadingMore && !commits.length && (
+                                    <li className="px-4 py-6 text-sm text-zinc-500">Không có commit nào.</li>
+                                )}
                             </ul>
                         </TabsContent>
                     </Tabs>
