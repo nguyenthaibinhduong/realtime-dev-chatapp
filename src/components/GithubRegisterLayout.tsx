@@ -94,7 +94,7 @@ export default function GithubRegisterLayout() {
 
     useEffect(() => {
         if (user && installed && user.github_verified && user.github_installation_id) {
-            //loadRepo();
+            loadRepo();
         }
     }, [user.github_installation_id]);
 

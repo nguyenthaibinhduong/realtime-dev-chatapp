@@ -102,17 +102,20 @@ export function RepoChatDialog({ open, onOpenChange, channel_id }: { open: boole
     const handleAddRepos = async () => {
         try {
             // Gọi API backend để gắn repo vào channel, ví dụ:
-            await GithubAPI.addReposToChannel({ channel_id, repository_ids: selectedRepoIds });
-            toast({
-                title: "Đã thêm repository vào kênh!",
-            });
-            setSelectedRepoIds([]);
-            setShowRepoDropdown(false);
-            await loadRepoChannel();
+            const res = await GithubAPI.addReposToChannel({ channel_id, repository_ids: selectedRepoIds });
+            if (res?.status == 201 || res?.status == 200) {
+                toast({
+                    title: "Đã thêm repository vào kênh!",
+                });
+                setSelectedRepoIds([]);
+                setShowRepoDropdown(false);
+                await loadRepoChannel();
+            }
+
         } catch (e: any) {
             toast({
                 title: "Không thể thêm repository",
-                description: e?.message || "Vui lòng thử lại.",
+                description: e?.response?.data?.msg || "Vui lòng thử lại.",
                 variant: "destructive",
             });
         }
