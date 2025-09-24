@@ -74,7 +74,10 @@ class AuthService {
   async getProfile(): Promise<ApiResponse<User>> {
     try {
       const res = await AuthAPI.getProfile();
-      if (res.status === 200 && res.data) return res.data;
+      if (res.status === 200 && res.data) {
+        localStorage.setItem("app_user", JSON.stringify(res.data));
+        return res.data;
+      }
     } catch (error) {
       console.error("Get profile error:", error);
       throw error;
@@ -137,35 +140,18 @@ class AuthService {
   }
 
   // Kiểm tra token hết hạn
-  isTokenExpired(token?: string): boolean {
-    try {
-      const t = token || this.getAccessToken();
-      if (!t) return true;
-      const payload = JSON.parse(atob(t.split(".")[1]));
-      return payload.exp < Math.floor(Date.now() / 1000);
-    } catch {
-      return true;
-    }
-  }
+  // isTokenExpired(token?: string): boolean {
+  //   try {
+  //     const t = token || this.getAccessToken();
+  //     if (!t) return true;
+  //     const payload = JSON.parse(atob(t.split(".")[1]));
+  //     return payload.exp < Math.floor(Date.now() / 1000);
+  //   } catch {
+  //     return true;
+  //   }
+  // }
 
-  // Lấy user từ token
-  getUserFromToken(token?: string): User | null {
-    try {
-      const t = token || this.getAccessToken();
-      if (!t) return null;
-      const payload = JSON.parse(atob(t.split(".")[1]));
-      return {
-        id: payload.sub,
-        email: payload.email,
-        name: payload.name,
-        role: payload.role,
-        github_verified: payload.github_verified,
-        github_installation_id: payload.github_installation_id,
-      };
-    } catch {
-      return null;
-    }
-  }
+
 }
 
 export const authService = new AuthService();

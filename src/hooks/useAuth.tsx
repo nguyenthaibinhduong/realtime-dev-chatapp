@@ -26,7 +26,6 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isAuthenticated: () => boolean;
   refreshToken: () => Promise<void>;
-  handleGitHubSuccess: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,23 +40,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         // Check if user is authenticated
         if (authService.isAuthenticated()) {
-          // Check if token is expired
-          if (authService.isTokenExpired()) {
-            try {
-              // Try to refresh token
-              await authService.refreshToken();
-            } catch (error) {
-              // If refresh fails, logout
-              authService.logout();
-              setLoading(false);
-              return;
-            }
-          }
 
           // Get user info from token or profile
           const userFromToken: any = await authService.getProfile();
           if (userFromToken) {
-            setUser(userFromToken);
+            setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
           } else {
             // Fallback: get profile from API
             try {
@@ -127,11 +114,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const handleGitHubSuccess = (user: User) => {
-    setUser(user);
-    setLoading(false);
-  };
-
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
     try {
@@ -190,7 +172,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const isAuthenticated = () => {
-    return authService.isAuthenticated() && !authService.isTokenExpired();
+    return authService.isAuthenticated();
   };
 
   return (
@@ -203,8 +185,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signUp,
         signOut,
         isAuthenticated,
-        refreshToken,
-        handleGitHubSuccess, // Export method này nếu cần
+        refreshToken, // Export method này nếu cần
       }}
     >
       {children}

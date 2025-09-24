@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import { AuthAPI } from "./api";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3088/v1/api";
 
@@ -72,7 +73,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
+        const refreshToken = localStorage.getItem("refresh_token");
         const refreshRes = await axios.post(`${API_URL}/auth/refresh-token`, {
           refresh_token: refreshToken,
         });
@@ -80,8 +81,11 @@ api.interceptors.response.use(
         console.log("Refresh token response:", refreshRes);
 
         const newToken = refreshRes?.data?.data?.access_token;
+        const newRefreshToken = refreshRes?.data?.data?.refresh_token;
         localStorage.setItem("token", newToken);
-
+        localStorage.setItem("refresh_token", newRefreshToken);
+        const res = await AuthAPI.getProfile();
+        if (res.status === 200 && res.data) localStorage.setItem("app_user", JSON.stringify(res.data));
         api.defaults.headers.Authorization = `Bearer ${newToken}`;
         processQueue(null, newToken);
 

@@ -22,7 +22,6 @@ import { useState, useMemo } from "react";
 import RepoDetailModal from "./RepoDetailModal"; // Modal chi tiết repo
 import { useAuth } from "@/hooks/useAuth";
 import { GithubAPI } from "@/api/api";
-import { toast } from "sonner";
 import { useToast } from "@/hooks/useToast";
 import { chatSocketService } from "@/services/chatSocketService";
 
@@ -57,6 +56,7 @@ export default function RepoChatList({
     const [hoveredRepoId, setHoveredRepoId] = useState<number | null>(null);
     const { user } = useAuth();
     const { toast } = useToast();
+    const [confirmDelete, setConfirmDelete] = useState<{ id: number; name: string } | null>(null);
 
     // Map lại dữ liệu: lấy repo_info nếu có
     const repoList = useMemo(() => {
@@ -74,7 +74,7 @@ export default function RepoChatList({
     }, [repoList, query]);
 
     // Xóa repo khỏi channel
-    const handleRemoveRepo = async (repoId: number) => {
+    const handleRemoveRepo = async (repoId: number, repoName: string) => {
         if (!channel_id || !repoId) return;
         try {
             await GithubAPI.removeReposToChannel({
@@ -83,9 +83,8 @@ export default function RepoChatList({
             });
             chatSocketService.sendMessage({
                 channelId: channel_id,
-                text: 'đã xóa 1 repository ra khỏi kênh.',
+                text: `đã xóa repository ${repoName} ra khỏi kênh.`,
                 type: 'notification',
-                // Include attachments if any
             });
             if (onRefresh) await onRefresh();
         } catch (e) {
@@ -272,7 +271,6 @@ export default function RepoChatList({
                                             className="relative min-h-[40px] h-10"
                                         >
                                             <div className="flex justify-end items-center gap-2 h-10">
-                                                {/* Nút GitHub luôn nằm trước */}
                                                 <Button
                                                     asChild
                                                     variant="outline"
@@ -289,16 +287,15 @@ export default function RepoChatList({
                                                         GitHub
                                                     </a>
                                                 </Button>
-                                                {/* Nút xóa luôn render, nằm sau nút GitHub, không absolute để không đè lên */}
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
                                                     className={`bg-white text-red-600 border-gray-300 rounded-full ml-1 transition-all
                 ${user?.id === repoUserId && hoveredRepoId === r.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
                                                     title="Xóa khỏi kênh"
-                                                    onClick={async (e) => {
+                                                    onClick={(e) => {
                                                         e.stopPropagation();
-                                                        await handleRemoveRepo(r.id);
+                                                        setConfirmDelete({ id: r.id, name: r.full_name || r.name });
                                                     }}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -311,6 +308,39 @@ export default function RepoChatList({
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Modal xác nhận xóa */}
+            {confirmDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="bg-white rounded-xl shadow-lg p-6 min-w-[320px] max-w-[90vw]">
+                        <div className="text-lg font-semibold text-black mb-2">
+                            Xác nhận xóa repository
+                        </div>
+                        <div className="text-black mb-4">
+                            Bạn có muốn xóa repository <span className="font-bold">{confirmDelete.name}</span> ra khỏi kênh chat không?
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                variant="outline"
+                                className="bg-gray-100 text-black border-gray-300"
+                                onClick={() => setConfirmDelete(null)}
+                            >
+                                Không
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                className="bg-red-600 text-white"
+                                onClick={async () => {
+                                    await handleRemoveRepo(confirmDelete.id, confirmDelete.name);
+                                    setConfirmDelete(null);
+                                }}
+                            >
+                                Có, xóa
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal chi tiết repo */}
             {selectedRepo && (
