@@ -17,7 +17,7 @@ class AuthService {
       const res = await AuthAPI.login(credentials);
       if (res.status && res.data) {
         this.saveTokens(res.data.access_token, res.data.refresh_token);
-        chatSocketService.connect(res.data.access_token, true);
+        
         return res;
       }
     } catch (error) {
@@ -137,6 +137,7 @@ class AuthService {
   private saveTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem("token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
+    chatSocketService.connect(accessToken, true);
   }
 
   // Kiểm tra token hết hạn

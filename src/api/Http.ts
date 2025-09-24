@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { AuthAPI } from "./api";
+import { chatSocketService } from "@/services/chatSocketService";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3088/v1/api";
 
@@ -84,6 +85,7 @@ api.interceptors.response.use(
         const newRefreshToken = refreshRes?.data?.data?.refresh_token;
         localStorage.setItem("token", newToken);
         localStorage.setItem("refresh_token", newRefreshToken);
+        chatSocketService.connect(newToken, true);
         const res = await AuthAPI.getProfile();
         if (res.status === 200 && res.data) localStorage.setItem("app_user", JSON.stringify(res.data));
         api.defaults.headers.Authorization = `Bearer ${newToken}`;
