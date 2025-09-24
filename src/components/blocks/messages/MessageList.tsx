@@ -7,6 +7,7 @@ import { MessageListProps } from "@/types/message";
 import { Loader2 } from "lucide-react";
 import attachmentService from "@/services/attachmentService";
 import Attachment from "./Attachment";
+import { RepoChatDialog } from "../github/RepoChatDialog";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -18,9 +19,9 @@ function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
     curr.sender.id !== prev.sender.id ||
     Math.abs(
       new Date(curr.created_at || curr.send_at).getTime() -
-        new Date(prev.created_at || prev.send_at).getTime()
+      new Date(prev.created_at || prev.send_at).getTime()
     ) >
-      5 * 60 * 1000
+    5 * 60 * 1000
   );
 }
 
@@ -54,6 +55,7 @@ export const MessageList: React.FC<Props> = ({
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [sentStatusIds, setSentStatusIds] = useState<string[]>([]);
+  const [openGitModal, setOpenGitModal] = useState(false);
 
   // Theo dõi các tin nhắn vừa chuyển sang trạng thái "sent"
   useEffect(() => {
@@ -195,7 +197,7 @@ export const MessageList: React.FC<Props> = ({
               message.status === "sent" &&
               sentStatusIds.includes(String(message.id));
 
-            if (isMe && message.status) {
+            if (isMe && message.status && message.type != 'notification') {
               if (message.status === "pending") {
                 statusLabel = (
                   <span className="text-xs text-yellow-400 animate-pulse">
@@ -220,6 +222,27 @@ export const MessageList: React.FC<Props> = ({
                   <span className="text-xs text-green-400">Đã gửi</span>
                 );
               }
+            }
+
+            // Nếu là notification thì hiển thị ra giữa
+            if (message?.type === "notification") {
+              return (
+                <div key={message.id} className="flex justify-center my-2">
+                  <div className=" text-white px-4 py-2 rounded-full text-sm shadow  flex items-center gap-2">
+                    <span className="font-semibold text-blue-400">{message?.sender?.username}</span>
+                    <span>{message.text}</span>
+
+                    <span className="text-xs text-zinc-400">
+                      {new Date(message.send_at || message.created_at).toLocaleTimeString("vi-VN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <span onClick={() => setOpenGitModal(true)} className="text-blue-600  hover:underline hover:cursor-pointer">xem</span>
+                  </div>
+                  <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} channel_id={channelId} />
+                </div>
+              );
             }
 
             return (
@@ -254,12 +277,11 @@ export const MessageList: React.FC<Props> = ({
                       </span>
                     )}
                     <div
-                      className={`min-w-0 rounded-2xl px-4 py-2 flex flex-col ${
-                        isMe
-                          ? "bg-blue-600 text-white "
-                          : "bg-gray-700 text-white " +
-                            (showSenderInfo ? " " : " ml-[43px]")
-                      } ${message?.type === "code" ? "w-[80%] bg-transparent" : ""}`}
+                      className={`min-w-0 rounded-2xl px-4 py-2 flex flex-col ${isMe
+                        ? "bg-blue-600 text-white "
+                        : "bg-gray-700 text-white " +
+                        (showSenderInfo ? " " : " ml-[43px]")
+                        } ${message?.type === "code" ? "w-[80%] bg-transparent" : ""}`}
                     >
                       <div className="flex justify-start mb-1 items-center">
                         <p

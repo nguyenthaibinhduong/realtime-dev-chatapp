@@ -13,6 +13,7 @@ import RepoChatList from "./RepoChatList"; // Đã có sẵn
 import { log } from "console";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { chatSocketService } from "@/services/chatSocketService";
 
 export function RepoChatDialog({ open, onOpenChange, channel_id }: { open: boolean; onOpenChange: (v: boolean) => void, channel_id: string }) {
     const [repos, setRepos] = useState<any[]>([]);
@@ -37,11 +38,11 @@ export function RepoChatDialog({ open, onOpenChange, channel_id }: { open: boole
                 setRepos(Array.isArray(dataNode) ? dataNode : []);
 
             } catch (e: any) {
-                toast({
-                    title: "Không tải được danh sách repo",
-                    description: e?.message || "Vui lòng thử lại.",
-                    variant: "destructive",
-                });
+                // toast({
+                //     title: "Không tải được danh sách repo",
+                //     description: e?.message || "Vui lòng thử lại.",
+                //     variant: "destructive",
+                // });
             } finally {
                 setLoadingRepos(false);
             }
@@ -68,13 +69,13 @@ export function RepoChatDialog({ open, onOpenChange, channel_id }: { open: boole
             const res2 = await GithubAPI.getRepoForChannel({ channel_id });
             const payload2 = res2?.data;
             setRepoChannel(Array.isArray(payload2) ? payload2 : []);
-            console.log("Repo channel:", payload2);
+            //console.log("Repo channel:", payload2);
         } catch (e: any) {
-            toast({
-                title: "Không tải được danh sách repo đã gắn",
-                description: e?.message || "Vui lòng thử lại.",
-                variant: "destructive",
-            });
+            // toast({
+            //     title: "Không tải được danh sách repo đã gắn",
+            //     description: e?.message || "Vui lòng thử lại.",
+            //     variant: "destructive",
+            // });
         } finally {
             setLoadingChannelRepos(false);
         }
@@ -109,6 +110,12 @@ export function RepoChatDialog({ open, onOpenChange, channel_id }: { open: boole
                 });
                 setSelectedRepoIds([]);
                 setShowRepoDropdown(false);
+                chatSocketService.sendMessage({
+                    channelId: channel_id,
+                    text: `đã thêm ${selectedRepoIds.length} repository mới vào kênh.`,
+                    type: 'notification',
+                    // Include attachments if any
+                });
                 await loadRepoChannel();
             }
 
@@ -246,6 +253,7 @@ export function RepoChatDialog({ open, onOpenChange, channel_id }: { open: boole
                             repos={repoChannel}
                             loading={loadingChannelRepos}
                             onRefresh={loadRepoChannel}
+                            channel_id={channel_id ?? ''}
                         />
                     </div>
                 </div>

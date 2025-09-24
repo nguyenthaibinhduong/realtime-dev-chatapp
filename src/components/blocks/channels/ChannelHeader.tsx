@@ -116,7 +116,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
         {/* Nút mở modal kết nối repo git */}
         <button
           className="p-2 rounded-lg hover:bg-muted transition-colors duration-200"
-          title="Kết nối repo Git"
+          title="Chức năng GitHub"
           onClick={() => setOpenGitModal(true)}
         >
           <Github className="h-5 w-5 text-muted-foreground hover:text-foreground" />

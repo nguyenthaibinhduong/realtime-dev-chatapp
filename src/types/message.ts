@@ -2,6 +2,7 @@
 export interface Message {
   id: number | string;
   text: string;
+  type:"message" | "notification"|"system";
   created_at: string;
   updated_at: string;
   sender: {

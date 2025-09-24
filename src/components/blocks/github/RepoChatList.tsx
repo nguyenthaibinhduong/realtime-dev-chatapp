@@ -16,9 +16,15 @@ import {
     Loader2,
     Search,
     X,
+    Trash2,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import RepoDetailModal from "./RepoDetailModal"; // Modal chi tiết repo
+import { useAuth } from "@/hooks/useAuth";
+import { GithubAPI } from "@/api/api";
+import { toast } from "sonner";
+import { useToast } from "@/hooks/useToast";
+import { chatSocketService } from "@/services/chatSocketService";
 
 type GHOwner = { login: string; avatar_url: string; html_url: string };
 export type GHRepo = {
@@ -37,15 +43,20 @@ type RepoTableProps = {
     repos: any[]; // nhận mảng object có repo_info
     loading: boolean;
     onRefresh?: () => Promise<void> | void;
+    channel_id?: string;
 };
 
 export default function RepoChatList({
     repos,
     loading,
     onRefresh,
+    channel_id,
 }: RepoTableProps) {
     const [query, setQuery] = useState("");
     const [selectedRepo, setSelectedRepo] = useState<any | null>(null);
+    const [hoveredRepoId, setHoveredRepoId] = useState<number | null>(null);
+    const { user } = useAuth();
+    const { toast } = useToast();
 
     // Map lại dữ liệu: lấy repo_info nếu có
     const repoList = useMemo(() => {
@@ -61,6 +72,30 @@ export default function RepoChatList({
                 .includes(q)
         );
     }, [repoList, query]);
+
+    // Xóa repo khỏi channel
+    const handleRemoveRepo = async (repoId: number) => {
+        if (!channel_id || !repoId) return;
+        try {
+            await GithubAPI.removeReposToChannel({
+                channel_id: channel_id,
+                repository_id: repoId,
+            });
+            chatSocketService.sendMessage({
+                channelId: channel_id,
+                text: 'đã xóa 1 repository ra khỏi kênh.',
+                type: 'notification',
+                // Include attachments if any
+            });
+            if (onRefresh) await onRefresh();
+        } catch (e) {
+            toast({
+                title: "Không thể xóa repository",
+                description: (e as any)?.response?.data?.msg || "Vui lòng thử lại.",
+                variant: "destructive",
+            })
+        }
+    };
 
     return (
         <div className="space-y-4">
@@ -117,7 +152,6 @@ export default function RepoChatList({
                             ? "Danh sách repository từ GitHub App installation."
                             : "—"}
                     </TableCaption>
-
                     <TableHeader>
                         <TableRow className="text-xs uppercase tracking-wide text-gray-400 bg-gray-800/50">
                             <TableHead className="w-[45%]">Repository</TableHead>
@@ -127,7 +161,6 @@ export default function RepoChatList({
                             <TableHead className="w-[10%] text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
-
                     <TableBody>
                         {loading &&
                             Array.from({ length: 6 }).map((_, i) => (
@@ -174,11 +207,20 @@ export default function RepoChatList({
                                         minute: "2-digit",
                                     }).format(new Date(r.updated_at));
 
+                                // Lấy user_id từ item gốc (repo_info hoặc item)
+                                const repoItem = repos.find(
+                                    (item) =>
+                                        (item.repo_info?.id ?? item.id) === r.id
+                                );
+                                const repoUserId = repoItem?.user_id;
+
                                 return (
                                     <TableRow
                                         key={r.id}
-                                        className="border-gray-800 cursor-pointer hover:bg-gray-800/40"
+                                        className="border-gray-800 cursor-pointer hover:bg-gray-800/40 group"
                                         onClick={() => setSelectedRepo(r)}
+                                        onMouseEnter={() => setHoveredRepoId(r.id)}
+                                        onMouseLeave={() => setHoveredRepoId(null)}
                                     >
                                         <TableCell>
                                             <div className="flex items-start gap-3">
@@ -202,7 +244,6 @@ export default function RepoChatList({
                                                 </div>
                                             </div>
                                         </TableCell>
-
                                         <TableCell>
                                             <span className="inline-flex items-center gap-1 text-xs text-gray-200">
                                                 {r.private ? (
@@ -216,26 +257,27 @@ export default function RepoChatList({
                                                 )}
                                             </span>
                                         </TableCell>
-
                                         <TableCell>
                                             <span className="text-xs text-gray-200">
                                                 {r.language || "—"}
                                             </span>
                                         </TableCell>
-
                                         <TableCell>
                                             <span className="text-xs text-gray-200">
                                                 {updated || "—"}
                                             </span>
                                         </TableCell>
-
-                                        <TableCell onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex justify-end">
+                                        <TableCell
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="relative min-h-[40px] h-10"
+                                        >
+                                            <div className="flex justify-end items-center gap-2 h-10">
+                                                {/* Nút GitHub luôn nằm trước */}
                                                 <Button
                                                     asChild
                                                     variant="outline"
                                                     size="sm"
-                                                    className="gap-1 text-black"
+                                                    className="gap-1 bg-white text-black border-gray-300 hover:bg-gray-100"
                                                 >
                                                     <a
                                                         href={r.html_url}
@@ -246,6 +288,20 @@ export default function RepoChatList({
                                                         <ExternalLink className="h-4 w-4" />
                                                         GitHub
                                                     </a>
+                                                </Button>
+                                                {/* Nút xóa luôn render, nằm sau nút GitHub, không absolute để không đè lên */}
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className={`bg-white text-red-600 border-gray-300 rounded-full ml-1 transition-all
+                ${user?.id === repoUserId && hoveredRepoId === r.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                                                    title="Xóa khỏi kênh"
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        await handleRemoveRepo(r.id);
+                                                    }}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>

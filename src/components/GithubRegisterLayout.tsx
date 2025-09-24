@@ -74,7 +74,7 @@ export default function GithubRegisterLayout() {
     };
 
     const loadRepo = useCallback(async () => {
-        if (!installed || !user || !user.github_verified || !user.github_installation_id) return;
+        if (!user.github_installation_id) return;
         setLoading(true);
         try {
             const res = await GithubAPI.getInstallationRepos();
@@ -93,10 +93,8 @@ export default function GithubRegisterLayout() {
     }, [installed, user]);
 
     useEffect(() => {
-        if (user && installed && user.github_verified && user.github_installation_id) {
-            loadRepo();
-        }
-    }, [user.github_installation_id]);
+        loadRepo();
+    }, [loadRepo]);
 
     // Chưa cài installation → card hướng dẫn (giữ màu hiện có)
     if (!installed) {
