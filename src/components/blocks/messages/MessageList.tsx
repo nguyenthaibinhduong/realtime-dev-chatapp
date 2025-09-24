@@ -13,6 +13,7 @@ function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
   const curr = messages[idx];
   const prev = messages[idx - 1];
+  if (curr?.type === "notification" || prev?.type === "notification") return true;
   if (!curr?.sender || !prev?.sender) return true;
   // hiển thị nếu khác người gửi hoặc cách > 5 phút
   return (
