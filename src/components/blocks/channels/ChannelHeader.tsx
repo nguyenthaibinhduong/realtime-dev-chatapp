@@ -122,7 +122,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
           <Github className="h-5 w-5 text-muted-foreground hover:text-foreground" />
           <span className="sr-only">Kết nối repo Git</span>
         </button>
-        <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} channel_id={channel.id} />
+        <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <button

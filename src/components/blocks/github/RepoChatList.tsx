@@ -75,14 +75,14 @@ export default function RepoChatList({
 
     // Xóa repo khỏi channel
     const handleRemoveRepo = async (repoId: number, repoName: string) => {
-        if (!channel_id || !repoId) return;
+        if (!localStorage.getItem("selectedChannelId") || !repoId) return;
         try {
             await GithubAPI.removeReposToChannel({
-                channel_id: channel_id,
+                channel_id: localStorage.getItem("selectedChannelId"),
                 repository_id: repoId,
             });
             chatSocketService.sendMessage({
-                channelId: channel_id,
+                channelId: localStorage.getItem("selectedChannelId"),
                 text: `đã xóa repository ${repoName} ra khỏi kênh.`,
                 type: 'notification',
             });
@@ -95,6 +95,9 @@ export default function RepoChatList({
             })
         }
     };
+
+
+
 
     return (
         <div className="space-y-4">
@@ -189,7 +192,7 @@ export default function RepoChatList({
                                     colSpan={5}
                                     className="text-center text-gray-500 py-8"
                                 >
-                                    Không có repository nào phù hợp bộ lọc.
+                                    Chưa có repository
                                 </TableCell>
                             </TableRow>
                         )}

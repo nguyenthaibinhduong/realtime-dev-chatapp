@@ -241,7 +241,7 @@ export const MessageList: React.FC<Props> = ({
                     </span>
                     <span onClick={() => setOpenGitModal(true)} className="text-blue-600  hover:underline hover:cursor-pointer">xem</span>
                   </div>
-                  <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} channel_id={channelId} />
+                  <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
                 </div>
               );
             }
