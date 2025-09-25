@@ -288,7 +288,18 @@ export const MessageList: React.FC<Props> = ({
                       )}
                     </div>
                   )}
-                  <div className="flex flex-col items-stretch w-full max-w-xl">
+                  <div onClick={() => {
+                    setCodeShareParams({
+                      repo,
+                      refParam,
+                      initialPath: codePath,
+                      installation_id,
+                      isShare: true,
+                    });
+                    setCodeOpen(true);
+                  }}
+                    className={`flex flex-col hover:cursor-pointer items-stretch w-full max-w-xl ${!isMe && showSenderInfo ? "" : "ml-10"}`}
+                  >
                     {/* Tiêu đề repo màu xanh lá cây */}
                     <div className="rounded-t-xl bg-blue-600 px-6 py-2 text-white font-semibold text-sm flex items-center gap-2">
                       <Code className="h-4 w-4 text-white" />
