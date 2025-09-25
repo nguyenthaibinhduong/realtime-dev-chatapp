@@ -8,6 +8,9 @@ import { Loader2 } from "lucide-react";
 import attachmentService from "@/services/attachmentService";
 import Attachment from "./Attachment";
 import { RepoChatDialog } from "../github/RepoChatDialog";
+import { Code } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CodeViewerDialog } from "../github/RepoDetailModal";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -167,6 +170,10 @@ export const MessageList: React.FC<Props> = ({
     return () => viewport.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+  // Thêm state để mở modal code share
+  const [codeOpen, setCodeOpen] = useState(false);
+  const [codeShareParams, setCodeShareParams] = useState<any>(null);
+
   return (
     <ScrollArea
       className="flex-1 p-4"
@@ -242,6 +249,89 @@ export const MessageList: React.FC<Props> = ({
                     <span onClick={() => setOpenGitModal(true)} className="text-blue-600  hover:underline hover:cursor-pointer">xem</span>
                   </div>
                   <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
+                </div>
+              );
+            }
+
+            // Nếu là code-share thì hiển thị card đặc biệt
+            if (message?.type === "code-share") {
+              let jsonData: any = {};
+              try {
+                jsonData = message.json_data ? JSON.parse(message.json_data) : {};
+              } catch { jsonData = {}; }
+              const repo = jsonData.repo;
+              const refParam = jsonData.refParam;
+              const codePath = jsonData.initialPath;
+              const installation_id = jsonData.installation_id;
+
+              return (
+                <div
+                  key={message.id}
+                  className={`flex my-4 ${isMe ? "justify-end" : "justify-start"}`}
+                >
+                  {/* Avatar người gửi (chỉ hiện bên trái nếu không phải mình và showSenderInfo) */}
+                  {!isMe && showSenderInfo && (
+                    <div className="mr-3 flex flex-col items-center justify-center">
+                      <Avatar
+                        className="h-8 w-8 flex-shrink-0 cursor-pointer"
+                        onMouseEnter={() => setHoveredId(message.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                      >
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                          {message?.sender?.username?.[0]?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      {hoveredId === message.id && (
+                        <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
+                          {message?.sender?.username}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex flex-col items-stretch w-full max-w-xl">
+                    {/* Tiêu đề repo màu xanh lá cây */}
+                    <div className="rounded-t-xl bg-blue-600 px-6 py-2 text-white font-semibold text-sm flex items-center gap-2">
+                      <Code className="h-4 w-4 text-white" />
+                      <span>{repo?.full_name}</span>
+                      <span className="ml-auto font-mono text-blue-300">{codePath?.split("/").pop()}</span>
+                    </div>
+                    <div className="bg-zinc-900 border border-zinc-700 rounded-b-xl px-6 py-4 flex flex-col items-center shadow-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-blue-400">Chia sẻ code</span>
+                        <span className="text-xs text-zinc-400 ml-2">
+                          {new Date(message.send_at || message.created_at).toLocaleTimeString("vi-VN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      <div className="text-sm text-white mb-2 text-center">
+                        <span className="font-semibold">{message?.sender?.username}</span>
+                        <span className="mx-1">đã chia sẻ file</span>
+                        <span className="font-mono text-blue-300">{codePath?.split("/").pop()}</span>
+                        <span className="mx-1">từ repo</span>
+                        <span className="font-mono text-emerald-400">{repo?.full_name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Button
+                          size="sm"
+                          className="bg-blue-600 text-white hover:bg-blue-700"
+                          onClick={() => {
+                            setCodeShareParams({
+                              repo,
+                              refParam,
+                              initialPath: codePath,
+                              installation_id,
+                              isShare: true,
+                            });
+                            setCodeOpen(true);
+                          }}
+                        >
+                          <Code className="h-4 w-4 mr-1" /> Xem code
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             }
@@ -412,6 +502,22 @@ export const MessageList: React.FC<Props> = ({
               </div>
             );
           })}
+
+          {/* Modal xem code share */}
+          {codeShareParams && (
+            <CodeViewerDialog
+              open={codeOpen}
+              onOpenChange={(v) => {
+                setCodeOpen(v);
+                if (!v) setCodeShareParams(null);
+              }}
+              repo={codeShareParams.repo}
+              refParam={codeShareParams.refParam}
+              initialPath={codeShareParams.initialPath}
+              installation_id={codeShareParams.installation_id}
+              isShare={true}
+            />
+          )}
 
           {/* đáy danh sách — để auto scroll */}
           <div ref={messagesEndRef} />

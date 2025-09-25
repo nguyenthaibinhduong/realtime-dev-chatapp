@@ -21,6 +21,7 @@ interface UserType {
 interface ChannelSearchProps {
   onJoinChannel?: (id: string, type: string) => void;
   onSelectChannel?: (channel: Channel) => void;
+  isShare?: boolean; // Thêm prop này
 }
 
 type FilterType = "personal" | "group" | "group-private";
@@ -28,9 +29,11 @@ type FilterType = "personal" | "group" | "group-private";
 export function ChannelSearch({
   onJoinChannel,
   onSelectChannel,
+  isShare = false, // Mặc định là false
 }: ChannelSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
+  const [selectedChannelId, setSelectedChannelId] = useState<number | null>(null); // Chỉ chọn 1 kênh khi share
 
   const { data: searchData, isLoading } = useSearchChats(
     searchTerm,
@@ -72,7 +75,12 @@ export function ChannelSearch({
     filteredResults.privateChats.length > 0;
 
   const handleChannelClick = (channel: Channel) => {
-    onSelectChannel?.(channel);
+    if (isShare) {
+      setSelectedChannelId(channel.id);
+      onSelectChannel?.(channel);
+    } else {
+      onSelectChannel?.(channel);
+    }
   };
 
   const handleJoinChannel = async (id: string, type: string) => {
@@ -202,11 +210,13 @@ export function ChannelSearch({
               {filteredResults.personalChats.map((channel) => (
                 <div
                   key={`personal-${channel.id}`}
-                  className="flex items-center px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition"
+                  className={`flex items-center px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition
+                    ${isShare && selectedChannelId === channel.id ? "bg-white text-black" : ""}
+                  `}
                   onClick={() => handleChannelClick(channel)}
                 >
-                  <User className="h-5 w-5 text-green-400 mr-2" />
-                  <span className="font-medium text-white">{channel.name}</span>
+                  <User className={`h-5 w-5 ${isShare && selectedChannelId === channel.id ? "text-black" : "text-green-400"} mr-2`} />
+                  <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-white"}`}>{channel.name}</span>
                 </div>
               ))}
             </div>
@@ -223,29 +233,33 @@ export function ChannelSearch({
               {filteredResults.groupChats.map((channel) => (
                 <div
                   key={`group-${channel.id}`}
-                  className="flex items-center justify-between px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition"
+                  className={`flex items-center justify-between px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition
+                    ${isShare && selectedChannelId === channel.id ? "bg-white text-black" : ""}
+                  `}
                   onClick={() => handleChannelClick(channel)}
                 >
                   <div className="flex items-center gap-2">
-                    <Globe className="h-5 w-5 text-blue-400" />
-                    <span className="font-medium text-white">{channel.name}</span>
+                    <Globe className={`h-5 w-5 ${isShare && selectedChannelId === channel.id ? "text-black" : "text-blue-400"}`} />
+                    <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-white"}`}>{channel.name}</span>
                     {channel.member_count && (
-                      <span className="text-xs text-muted-foreground ml-2">
+                      <span className={`text-xs ml-2 ${isShare && selectedChannelId === channel.id ? "text-black/70" : "text-muted-foreground"}`}>
                         {channel.member_count} thành viên
                       </span>
                     )}
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-3 text-xs text-white hover:text-white hover:bg-white/10 rounded-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleJoinChannel(channel?.id, 'group');
-                    }}
-                  >
-                    Tham gia
-                  </Button>
+                  {!isShare && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-3 text-xs text-white hover:text-white hover:bg-white/10 rounded-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinChannel(channel?.id, 'group');
+                      }}
+                    >
+                      Tham gia
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -262,19 +276,21 @@ export function ChannelSearch({
               {filteredResults.privateChats.map((channel) => (
                 <div
                   key={`private-${channel.id}`}
-                  className="flex items-center justify-between px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition"
+                  className={`flex items-center justify-between px-3 py-2 bg-[#23272f] rounded-lg hover:bg-[#2a2e38] cursor-pointer transition
+                    ${isShare && selectedChannelId === channel.id ? "bg-white text-black" : ""}
+                  `}
                   onClick={() => handleChannelClick(channel)}
                 >
                   <div className="flex items-center gap-2">
-                    <Lock className="h-5 w-5 text-purple-400" />
-                    <span className="font-medium text-white">{channel.name}</span>
+                    <Lock className={`h-5 w-5 ${isShare && selectedChannelId === channel.id ? "text-black" : "text-purple-400"}`} />
+                    <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-white"}`}>{channel.name}</span>
                     {channel.member_count && (
-                      <span className="text-xs text-muted-foreground ml-2">
+                      <span className={`text-xs ml-2 ${isShare && selectedChannelId === channel.id ? "text-black/70" : "text-muted-foreground"}`}>
                         {channel.member_count} thành viên
                       </span>
                     )}
                   </div>
-
+                  {/* Ẩn nút tham gia nếu isShare */}
                 </div>
               ))}
             </div>

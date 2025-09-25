@@ -2,7 +2,7 @@
 export interface Message {
   id: number | string;
   text: string;
-  type:"message" | "notification"|"system";
+  type:"message" | "notification"|"system" | "code-share" | "file-upload" | "code-card";
   created_at: string;
   updated_at: string;
   sender: {
