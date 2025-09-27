@@ -89,6 +89,10 @@ class AuthService {
     return await AuthAPI.goToLoginGithub();
   }
 
+  async loginUpdateWithGitHub(): Promise<void> {
+    return await AuthAPI.goToUpdateLoginGithub();
+  }
+
   async installGitHubApp(): Promise<void> {
     return await AuthAPI.goToInstallGithub();
   }

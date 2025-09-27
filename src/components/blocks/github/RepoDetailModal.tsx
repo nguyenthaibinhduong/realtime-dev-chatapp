@@ -2,9 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { GitBranch, GitCommit, Folder, FileText, RefreshCw, ExternalLink, Play, Terminal, Lock, Shield } from "lucide-react";
+import { GitBranch, GitCommit, Folder, FileText, RefreshCw, ExternalLink, Play, Terminal, Lock, Shield, Share2 } from "lucide-react";
 import { GithubAPI } from "@/api/api";
 import { Editor } from "@monaco-editor/react";
+import { log } from "console";
+import { ChannelSearch } from "@/components/blocks/channels/ChannelSearch"; // Đảm bảo đã import
+import { chatSocketService } from "@/services/chatSocketService";
+import { toast } from "@/hooks/useToast";
 
 /** ---------------- Types ---------------- */
 type RepoViewerProps = { repo: any | null; onClose: () => void; installation_id?: string };
@@ -79,6 +83,8 @@ const guessMonacoLang = (p: string) => {
             return "yaml";
         case "sh":
             return "shell";
+        case "php":
+            return "php";
         default:
             return "plaintext";
     }
@@ -95,13 +101,14 @@ const judge0LanguageId: Record<string, number | undefined> = {
 };
 
 /** ---------------- Code Viewer Dialog (2-pane, folder-like) ---------------- */
-function CodeViewerDialog({
+export function CodeViewerDialog({
     open,
     onOpenChange,
     repo,
     refParam,
     initialPath,
-    installation_id
+    installation_id,
+    isShare = false,
 }: {
     open: boolean;
     onOpenChange: (v: boolean) => void;
@@ -109,6 +116,7 @@ function CodeViewerDialog({
     refParam: string;
     initialPath: string;
     installation_id?: string;
+    isShare?: boolean;
 }) {
     const [tree, setTree] = useState<TreeEntry[]>([]);
     const [dialogPath, setDialogPath] = useState<string>(""); // folder path inside dialog
@@ -120,8 +128,27 @@ function CodeViewerDialog({
     const [code, setCode] = useState<string>("");
     const [output, setOutput] = useState<string>("");
     const [isRunning, setIsRunning] = useState<boolean>(false);
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [shareChannelId, setShareChannelId] = useState<string | null>(null);
+
+    // Thêm state để kiểm soát đã load tree và file lần đầu chưa
+    const [treeLoaded, setTreeLoaded] = useState(false);
+    const [fileLoaded, setFileLoaded] = useState(false);
 
 
+    useEffect(() => {
+        if (!open) {
+            const params = {
+                repo,
+                refParam,
+                initialPath,
+                installation_id,
+                isShare
+            }
+            console.log("RepoDetailModal - params on close:", params);
+        }
+
+    }, [open]);
     // load full tree (recursive)
     const loadTree = useCallback(async () => {
         if (!repo) return;
@@ -133,10 +160,11 @@ function CodeViewerDialog({
             const data = tURL ? await fetchJson(tURL, installation_id) : null;
             const entries: TreeEntry[] = Array.isArray((data as any)?.tree) ? (data as any).tree : [];
             setTree(entries);
+            setTreeLoaded(true); // đánh dấu đã load tree
         } finally {
             setLoadingTree(false);
         }
-    }, [repo, refParam]);
+    }, [repo, refParam, installation_id]);
 
     // load selected file content
     const loadFile = useCallback(
@@ -159,26 +187,53 @@ function CodeViewerDialog({
                 const text = await res.text();
                 setFileText(text);
                 setCode(text);
+                setFileLoaded(true); // đánh dấu đã load file
             } catch {
                 setFileText("// Failed to load file content.");
             } finally {
                 setLoadingFile(false);
             }
         },
-        [repo, refParam]
+        [repo, refParam, installation_id]
     );
 
+    // Chỉ load tree 1 lần đầu nếu isShare, còn lại như cũ
     useEffect(() => {
-        if (open) loadTree();
-    }, [open, loadTree]);
+        if (open) {
+            if (isShare) {
+                if (!treeLoaded) loadTree();
+            } else {
+                loadTree();
+            }
+        }
+        // eslint-disable-next-line
+    }, [open, loadTree, isShare]);
 
+    // Chỉ load file 1 lần đầu nếu isShare, còn lại như cũ
     useEffect(() => {
         if (open) {
             setSelPath(initialPath);
             setDialogPath(parentDir(initialPath));
-            if (initialPath) loadFile(initialPath);
+            if (initialPath) {
+                if (isShare) {
+                    if (!fileLoaded) loadFile(initialPath);
+                } else {
+                    loadFile(initialPath);
+                }
+            }
         }
-    }, [open, initialPath, loadFile]);
+        // eslint-disable-next-line
+    }, [open, initialPath, loadFile, isShare]);
+
+    // Khi click chọn file khác: nếu isShare và đã load rồi thì không load lại nữa
+    const handleSelectFile = (full: string) => {
+        setSelPath(full);
+        if (isShare) {
+            if (!fileLoaded) loadFile(full);
+        } else {
+            loadFile(full);
+        }
+    };
 
     // Build folder-like children of current dialogPath
     const dirChildren = useMemo(() => {
@@ -221,8 +276,52 @@ function CodeViewerDialog({
         </div>
     );
 
+    // Hàm chia sẻ
+    const handleShare = () => {
+        // Hiện modal chọn kênh hoặc chọn kênh hiện tại
+        setShowShareModal(true);
+    };
+
+    // Khi chọn kênh trong modal ChannelSearch
+    const handleSelectChannel = (channel: any) => {
+        setShareChannelId(String(channel.id));
+    };
+
+    // Khi bấm nút chia sẻ thực sự
+    const handleDoShare = (type: "current" | "other") => {
+        let channel_id = "";
+        if (type === "current") {
+            channel_id = localStorage.getItem("selectedChannelId") || "";
+        } else {
+            channel_id = shareChannelId || "";
+        }
+        const params = {
+            repo,
+            refParam,
+            initialPath: selPath,
+            installation_id,
+            isShare: true,
+            channel_id,
+        };
+        chatSocketService.sendMessage({
+            channelId: channel_id,
+            text: `File  ${params.refParam} đã được chia sẻ từ repo ${params.repo.full_name}`,
+            type: 'code-share',
+            json_data: JSON.stringify(params),
+        });
+        toast(
+            {
+                title: "Đã chia sẻ file vào kênh chat.",
+                description: `File ${params.refParam} từ repo ${params.repo.full_name} đã được chia sẻ vào kênh chat.`
+            }
+        );
+        // Đóng modal
+        setShowShareModal(false);
+
+    };
+
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={onOpenChange} >
             <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden">
                 <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-950">
                     <div className="flex items-center gap-4">
@@ -264,11 +363,67 @@ function CodeViewerDialog({
                                 <span className="ml-2">Lần cập nhật gần nhất: {repo.updated_at ? fmt(repo.updated_at) : "—"}</span>
                             </div>
                         </div>
+                        {/* Nút chia sẻ */}
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="mr-10 bg-white text-black border-gray-300 hover:bg-gray-100"
+                            title="Chia sẻ code này cho kênh"
+                            onClick={handleShare}
+                        >
+                            <Share2 className="h-5 w-5" />
+                        </Button>
+
+                        {/* Modal chọn kênh để chia sẻ, dùng Dialog chuẩn */}
+                        <Dialog open={showShareModal} onOpenChange={(v) => {
+                            setShowShareModal(v);
+                            if (!v) setShareChannelId(null); // Reset kênh chọn khi đóng
+                        }}>
+                            <DialogContent
+                                className="bg-black rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center"
+                                style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)", position: "fixed" }}
+                            >
+                                {/* Nút đóng X góc phải */}
+                                <button
+                                    className="absolute top-3 right-3 text-zinc-400 hover:text-white text-xl"
+                                    onClick={() => {
+                                        setShowShareModal(false);
+                                        setShareChannelId(null);
+                                    }}
+                                    aria-label="Đóng"
+                                    type="button"
+                                >
+                                    ×
+                                </button>
+                                <div className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                                    <Share2 className="h-5 w-5 text-blue-500" />
+                                    Chia sẻ code cho kênh
+                                </div>
+                                <div className="mb-4 w-full">
+                                    <div className="text-xs text-gray-600 mb-2 text-center">Chọn kênh để chia sẻ</div>
+                                    <ChannelSearch onSelectChannel={handleSelectChannel} isShare={true} />
+                                    <Button
+                                        className="w-full mt-4 bg-blue-600 text-white"
+                                        onClick={() => handleDoShare("current")}
+                                    >
+                                        Chia sẻ cho kênh hiện tại
+                                    </Button>
+                                    {shareChannelId && (
+                                        <Button
+                                            className="w-full mt-4 bg-white text-black hover:bg-blue-600 hover:text-white"
+                                            onClick={() => handleDoShare("other")}
+                                        >
+                                            Chia sẻ cho kênh này
+                                        </Button>
+                                    )}
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </DialogHeader>
                 <div className="h-full flex overflow-y-auto">
                     {/* Left: folder-like tree (compact) */}
-                    <div className="w-56 min-w-56 border-r border-zinc-800 h-full flex flex-col">
+                    {!isShare && (<div className="w-56 min-w-56 border-r border-zinc-800 h-full flex flex-col">
                         {breadcrumb}
                         {loadingTree ? (
                             <div className="p-3 text-xs text-zinc-400">Loading tree…</div>
@@ -290,7 +445,10 @@ function CodeViewerDialog({
                                     <button
                                         key={f}
                                         className={`w-full text-left px-3 py-1.5 hover:bg-zinc-900 ${selPath === (dialogPath ? `${dialogPath}/${f}` : f) ? "bg-zinc-900 text-zinc-100" : "text-zinc-300"}`}
-                                        onClick={() => { const full = dialogPath ? `${dialogPath}/${f}` : f; setSelPath(full); loadFile(full); }}
+                                        onClick={() => {
+                                            const full = dialogPath ? `${dialogPath}/${f}` : f;
+                                            handleSelectFile(full);
+                                        }}
                                         title={dialogPath ? `${dialogPath}/${f}` : f}
                                     >
                                         <span className="inline-flex items-center gap-2"><FileText className="h-3.5 w-3.5" /><span className="truncate">{f}</span></span>
@@ -302,6 +460,9 @@ function CodeViewerDialog({
                             </div>
                         )}
                     </div>
+
+                    )}
+
 
                     {/* Right: code */}
 
@@ -381,7 +542,7 @@ function CodeViewerDialog({
                         </div>
 
                         {/* Output panel */}
-                        <div className="h-40 bg-black border-t border-zinc-800">
+                        {/* <div className="h-40 bg-black border-t border-zinc-800">
                             <div className="px-4 py-2 bg-zinc-950 border-b border-zinc-800 flex items-center gap-2 text-white text-xs">
                                 <Terminal className="h-3.5 w-3.5 text-emerald-500" />
                                 <span>Output</span>
@@ -391,11 +552,14 @@ function CodeViewerDialog({
                                     {output || "Click Run to execute (if supported)."}
                                 </pre>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
                 </div>
             </DialogContent>
+
+            {/* Modal chọn kênh để chia sẻ */}
+
         </Dialog>
     );
 }

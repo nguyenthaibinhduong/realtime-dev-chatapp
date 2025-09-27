@@ -31,8 +31,13 @@ export default function GithubRegisterLayout() {
     const handleRedirect = async () => {
         try {
             setRedirecting(true);
-            const { url }: any = await authService.installGitHubApp();
-            window.location.href = url;
+            if (!user?.github_installation_id && !user?.github_verified) {
+                const { url }: any = await authService.loginUpdateWithGitHub();
+                window.location.href = url;
+            } else {
+                const { url }: any = await authService.installGitHubApp();
+                window.location.href = url;
+            }
         } catch (error: any) {
             setRedirecting(false);
             toast({
