@@ -19,6 +19,7 @@ export const AuthAPI = {
     get(`/auth/confirm-email?token=${encodeURIComponent(token)}`),
   goToLoginGithub: async () => get("/auth/github-oauth/redirect"),
   goToInstallGithub: async () => apipost("/github-app/redirect"),
+  goToUpdateLoginGithub: async () => apipost("/auth/github-oauth/redirect-update"),
 };
 
 export const ChatAPI = {
