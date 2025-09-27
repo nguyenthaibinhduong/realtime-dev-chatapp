@@ -8,6 +8,7 @@ import ProfileLayout from "./ProfileLayout";
 import GithubRegisterLayout from "./GithubRegisterLayout";
 import { TestLayout, EditorLayout } from "./SandBoxLayout";
 import CodeEditorJudge0 from "./MonacoEditorLayout";
+import TestNotiLayout from "./TestLayout";
 
 type SettingItem = {
   id: string;
@@ -62,6 +63,11 @@ export default function SettingLayout() {
           id: "monaco-judge0",
           label: "Monaco + Judge0",
           component: <CodeEditorJudge0 />,
+        },
+        {
+          id: "TestLayout",
+          label: "TestLayout",
+          component: <TestNotiLayout />,
         },
       ],
     },
