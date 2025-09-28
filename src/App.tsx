@@ -13,12 +13,16 @@ import { GitHubCallback } from "./components/GithubCallback";
 import ConfirmEmailPage from "./components/ConfirmEmail";
 import GitHubRegister from "./pages/GitHubRegister";
 import SettingsPage from "./pages/Setting";
+import { NotificationProvider } from "./hooks/useSSENotifications";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <NotificationProvider      
+        autoConnect={true}
+        enableToast={true}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -36,6 +40,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </NotificationProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
