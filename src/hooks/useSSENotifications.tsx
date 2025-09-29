@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode,
 import sseConnection, { initializeSSE, ensureSSEConnection } from "@/api/sse";
 import { useToast } from "@/hooks/useToast";
 import { useAuth } from "@/hooks/useAuth";
+import { chatSocketService } from "@/services/chatSocketService";
 
 interface SSEMessage {
   userId: number;
@@ -223,6 +224,8 @@ export function NotificationProvider({
       if (event.key === 'token') {
         if (event.newValue) {
           // Token updated, reconnect
+          chatSocketService.connect();
+          chatSocketService.joinRoom(localStorage.getItem("selectedChannelId") || "" );
           reconnect();
         } else {
           // Token removed, disconnect

@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Calculate time until expiration minus 10 seconds
     const currentTime = Date.now();
-    const timeUntilRefresh = Math.max(0, expiresAt - currentTime - 10000); // 10 seconds before expiration
+    const timeUntilRefresh = Math.max(0, expiresAt - currentTime); // 10 seconds before expiration
 
     console.log(
       `Token will be refreshed in ${timeUntilRefresh / 1000} seconds`
@@ -107,12 +107,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               authService.logout();
             }
           }
+          // Connect socket if authentication is successful
+          chatSocketService.connect();
 
           // Set up refresh timer after successful authentication
           setupRefreshTimer();
 
-          // Connect socket if authentication is successful
-          chatSocketService.connect();
+
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
