@@ -53,6 +53,7 @@
     "cross-env": "^10.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
+    "event-source-polyfill": "^1.0.31",
     "highlight.js": "^11.11.1",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",

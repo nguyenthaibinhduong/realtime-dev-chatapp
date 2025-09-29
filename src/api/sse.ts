@@ -1,15 +1,19 @@
+import { EventSourcePolyfill } from "event-source-polyfill";
+
 class SSEConnection {
-  private eventSource: EventSource | null = null;
+  private eventSource: EventSourcePolyfill | null = null;
   private url: string;
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 5;
   private reconnectDelay: number = 1000; // 1 second
 
-  constructor(url: string = `http://localhost:3088/v1/notifications/stream`) {
+  constructor(
+    url: string = `${import.meta.env.VITE_SOCKET_URL || "http://localhost:3088"}/v1/notifications/stream`
+  ) {
     this.url = url;
   }
 
-  connect(): EventSource | null {
+  connect(): EventSourcePolyfill | null {
     try {
       // Get token from localStorage
       const token = localStorage.getItem("token");
@@ -19,18 +23,21 @@ class SSEConnection {
         return null;
       }
 
-      // Set token as cookie for server-side authentication
-      document.cookie = `token=${token}; path=/; secure; samesite=strict`;
-
-      // Create EventSource with credentials
-      this.eventSource = new EventSource(this.url, {
-        withCredentials: true,
+      // Create EventSource with Authorization header
+      this.eventSource = new EventSourcePolyfill(this.url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+        },
+        withCredentials: false, // Không cần credentials khi dùng Bearer token
+        heartbeatTimeout: 30000, // 30 seconds
       });
 
       // Setup event handlers
       this.setupEventHandlers();
 
-      console.log("SSE connection established");
+      console.log("SSE connection established with Bearer token");
       return this.eventSource;
     } catch (error) {
       console.error("Failed to create EventSource:", error);
@@ -59,9 +66,14 @@ class SSEConnection {
     this.eventSource.onerror = (error) => {
       console.error("❌ SSE connection error:", error);
 
-      if (this.eventSource?.readyState === EventSource.CLOSED) {
+      // Check if connection is closed
+      if (this.eventSource?.readyState === EventSourcePolyfill.CLOSED) {
         console.log("🔒 SSE connection closed by server");
         this.attemptReconnect();
+      } else if (
+        this.eventSource?.readyState === EventSourcePolyfill.CONNECTING
+      ) {
+        console.log("🔄 SSE connection is trying to reconnect");
       }
     };
   }
@@ -78,6 +90,13 @@ class SSEConnection {
   private attemptReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error("Max reconnect attempts reached. Giving up.");
+      return;
+    }
+
+    // Check if token is still available before reconnecting
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("No token available for reconnection");
       return;
     }
 
@@ -109,7 +128,7 @@ class SSEConnection {
 
   // Check if connection is open
   isConnected(): boolean {
-    return this.eventSource?.readyState === EventSource.OPEN;
+    return this.eventSource?.readyState === EventSourcePolyfill.OPEN;
   }
 
   // Add custom event listener for specific message types
@@ -127,6 +146,15 @@ class SSEConnection {
   ): void {
     this.eventSource?.removeEventListener(type, listener);
   }
+
+  // Method to update Authorization header (useful for token refresh)
+  updateToken(newToken: string): void {
+    if (this.isConnected()) {
+      console.log("Updating token, reconnecting SSE...");
+      this.close();
+      setTimeout(() => this.connect(), 100);
+    }
+  }
 }
 
 // Create singleton instance
@@ -137,7 +165,7 @@ export { SSEConnection };
 export default sseConnection;
 
 // Helper function to initialize SSE with token validation
-export function initializeSSE(url?: string): EventSource | null {
+export function initializeSSE(url?: string): EventSourcePolyfill | null {
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -178,8 +206,7 @@ window.addEventListener("storage", (event) => {
     if (event.newValue) {
       // Token updated, reconnect with new token
       console.log("Token updated, reconnecting SSE...");
-      sseConnection.close();
-      setTimeout(() => sseConnection.connect(), 100);
+      sseConnection.updateToken(event.newValue);
     } else {
       // Token removed, close connection
       console.log("Token removed, closing SSE connection");
