@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   ReactNode,
+  useRef,
 } from "react";
 import authService from "@/services/authService";
 import { useToast } from "@/hooks/useToast";
@@ -34,12 +35,61 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Function to setup token refresh timer
+  const setupRefreshTimer = () => {
+    // Clear any existing timer
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    if (!authService.isAuthenticated()) return;
+
+    // Get token expiration time
+    const expiresAt = authService.getTokenExpirationTime();
+    if (!expiresAt) return;
+
+    // Calculate time until expiration minus 10 seconds
+    const currentTime = Date.now();
+    const timeUntilRefresh = Math.max(0, expiresAt - currentTime - 10000); // 10 seconds before expiration
+
+    console.log(
+      `Token will be refreshed in ${timeUntilRefresh / 1000} seconds`
+    );
+
+    // Set up timer for refresh
+    refreshTimerRef.current = setTimeout(async () => {
+      console.log("Auto refreshing token before expiration");
+      if (authService.isAuthenticated()) {
+        try {
+          await refreshToken();
+        } catch (error) {
+          console.error("Auto token refresh failed:", error);
+        }
+      }
+    }, timeUntilRefresh);
+  };
 
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Check if user is authenticated
+        // Check if user is authenticated (with improved check that considers refresh tokens)
         if (authService.isAuthenticated()) {
+          // Check if access token is expired
+          if (authService.isTokenExpired()) {
+            try {
+              console.log("Access token expired on page load, refreshing...");
+              // Try to refresh token
+              await authService.refreshToken();
+            } catch (error) {
+              console.error("Failed to refresh token on init:", error);
+              // If refresh fails after max attempts, user will be logged out
+              setLoading(false);
+              return;
+            }
+          }
 
           // Get user info from token or profile
           const userFromToken: any = await authService.getProfile();
@@ -58,7 +108,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           }
 
-          // Nếu xác thực thành công thì connect socket
+          // Set up refresh timer after successful authentication
+          setupRefreshTimer();
+
+          // Connect socket if authentication is successful
           chatSocketService.connect();
         }
       } catch (error) {
@@ -69,6 +122,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     initializeAuth();
+
+    // Clean up timer on unmount
+    return () => {
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -78,6 +138,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.status && response.data) {
         setUser(response.data.user);
+
+        // Setup refresh timer after successful login
+        setupRefreshTimer();
 
         toast({
           title: "Đăng nhập thành công",
@@ -114,6 +177,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
     try {
@@ -149,6 +213,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Đăng xuất
   const signOut = async () => {
+    // Clear refresh timer when logging out
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
     setUser(null);
     authService.logout();
     toast({
@@ -165,6 +234,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (userFromToken) {
         setUser(userFromToken);
       }
+      // Reset the refresh timer after successful token refresh
+      setupRefreshTimer();
     } catch (error) {
       console.error("Refresh token failed:", error);
       signOut();
