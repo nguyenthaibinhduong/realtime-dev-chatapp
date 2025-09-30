@@ -6,6 +6,7 @@ import MenubarLayout from "./MenubarLayout";
 import { Notification } from "@/types/notifications";
 import { NotificationAPI } from "@/api/api";
 import { useAuth } from "@/hooks/useAuth";
+import { chatSocketService } from "@/services/chatSocketService";
 
 export default function NotificationLayout() {
   const { user } = useAuth();
@@ -107,14 +108,25 @@ export default function NotificationLayout() {
     }
   }, [user, fetchNotifications]); // Loại bỏ notifications.length dependency
 
-  // Loại bỏ useEffect cho page change vì đã handle trong loadMore
-  // useEffect(() => {
-  //   if (filter.page > 1) {
-  //     console.log("Page changed, loading more:", filter.page);
-  //     fetchNotifications();
-  //   }
-  // }, [filter.page, fetchNotifications]);
+  useEffect(() => {
+    const handler = (notify: any) => {
+      setNotifications((prev) => {
+        const idx = prev.findIndex(
+          (c: any) => String(c.fakeID) === String(notify.fakeID)
+        );
+        if (idx !== -1) {
+          const updated = [...prev];
+          updated[idx] = notify;
+          return updated;
+        }
+        console.log("New notification received via socket:", notify);
 
+        return [notify, ...prev];
+      });
+    };
+    chatSocketService.onNotification(handler);
+    return () => chatSocketService.offNotification(handler);
+  }, []);
   // Handle mark as read
   const handleMarkAsRead = useCallback((id: string) => {
     setNotifications(prev =>

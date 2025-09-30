@@ -102,6 +102,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   }, []);
 
+
+
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {

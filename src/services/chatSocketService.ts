@@ -85,6 +85,14 @@ class ChatSocketService {
   offPresenceUpdate(callback?: (data: PresenceUpdate) => void) {
     getSocket().off("presenceUpdate", callback);
   }
+
+  onNotification(callback: (data: any) => void) {
+    getSocket().on("receiveNotification", callback);
+  }
+
+  offNotification(callback?: (data: any) => void) {
+    getSocket().off("receiveNotification", callback);
+  }
 }
 
 export const chatSocketService = new ChatSocketService();
