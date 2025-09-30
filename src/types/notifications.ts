@@ -7,6 +7,7 @@ export interface Notification {
   createdAt: string; // ISO date string
   relatedChannelId?: string; // Optional, for group notifications
   relatedUserId?: string; // Optional, for personal notifications
+  data?: Record<string, any>; // Additional data related to the notification
 
   read?: boolean;
 }
