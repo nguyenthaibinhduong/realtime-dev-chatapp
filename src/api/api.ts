@@ -1,3 +1,4 @@
+import { Notification } from "@/types/notifications";
 import { get, post, apiget, apipost } from "./Http";
 
 export const AuthAPI = {
@@ -57,4 +58,10 @@ export const GithubAPI = {
   getRepoForChannel: async (data: any) =>apipost(`/git/get_list_repo_data_by_channel`, data),
   addReposToChannel: async (data: any) => apipost(`/channels/add-repositories`, data),
   removeReposToChannel: async (data: any) => apipost(`/channels/remove-repositories`, data),
+};
+
+export const NotificationAPI = {
+  fetchNotifications: async (data:any) => apiget(`/notifications?page=${data.page}&limit=${data.limit}`),
+  markAsRead: async (id: string) => apipost(`/notifications/${id}/read`),
+  deleteNotification: async (id: string) => apipost(`/notifications/${id}/delete`),
 };

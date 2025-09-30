@@ -16,7 +16,6 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import NotificationBadge from "./blocks/notifications/NotificationBadge";
-import { useNotifications } from "@/hooks/useNotifications";
 
 export default function MenubarLayout({
   onSelect,
@@ -32,8 +31,7 @@ export default function MenubarLayout({
   const handleLogout = async () => {
     await signOut();
   };
-
-  const { unreadCount } = useNotifications();
+  const unreadCount = 5; // Giả sử có 5 thông báo chưa đọc, thay bằng logic thực tế
 
   const items = [
     {
@@ -87,11 +85,10 @@ export default function MenubarLayout({
                   location.pathname === item.link ? "secondary" : "ghost"
                 }
                 size="icon"
-                className={`rounded-lg ${
-                  location.pathname === item.link
+                className={`rounded-lg ${location.pathname === item.link
                     ? "bg-blue-600 text-white"
                     : "text-sidebar-foreground hover:bg-blue-100"
-                }`}
+                  }`}
                 onClick={() => {
                   onSelect?.(item.key);
                   navigate(item.link);

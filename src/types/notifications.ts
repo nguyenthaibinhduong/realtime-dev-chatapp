@@ -1,14 +1,14 @@
 export interface Notification {
   id: string;
-  type: "mention" | "thread" | "reaction" | "invitation" | "message";
+  type: "personal" | "group" | "system";
   title: string;
   message: string;
-  avatar?: string;
-  username: string;
-  channel: string;
-  timestamp: Date;
   isRead: boolean;
-  isUnread?: boolean;
+  createdAt: string; // ISO date string
+  relatedChannelId?: string; // Optional, for group notifications
+  relatedUserId?: string; // Optional, for personal notifications
+
+  read?: boolean;
 }
 
 export type NotificationFilter =

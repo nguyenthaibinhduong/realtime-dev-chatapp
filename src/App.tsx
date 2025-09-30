@@ -20,9 +20,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <NotificationProvider      
+      {/* <NotificationProvider      
         autoConnect={true}
-        enableToast={true}>
+        enableToast={true}> */}
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -40,7 +40,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-      </NotificationProvider>
+      {/* </NotificationProvider> */}
     </AuthProvider>
   </QueryClientProvider>
 );

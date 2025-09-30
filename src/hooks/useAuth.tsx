@@ -76,44 +76,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = async () => {
       try {
         // Check if user is authenticated (with improved check that considers refresh tokens)
-        if (authService.isAuthenticated()) {
-          // Check if access token is expired
-          if (authService.isTokenExpired()) {
-            try {
-              console.log("Access token expired on page load, refreshing...");
-              // Try to refresh token
-              await authService.refreshToken();
-            } catch (error) {
-              console.error("Failed to refresh token on init:", error);
-              // If refresh fails after max attempts, user will be logged out
-              setLoading(false);
-              return;
+        const userFromToken: any = await authService.getProfile();
+        if (userFromToken) {
+          setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
+        } else {
+          // Fallback: get profile from API
+          try {
+            const profileResponse = await authService.getProfile();
+            if (profileResponse.status && profileResponse.data) {
+              setUser(profileResponse.data);
             }
+          } catch (error) {
+            console.error("Failed to get profile:", error);
+            authService.logout();
           }
-
-          // Get user info from token or profile
-          const userFromToken: any = await authService.getProfile();
-          if (userFromToken) {
-            setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
-          } else {
-            // Fallback: get profile from API
-            try {
-              const profileResponse = await authService.getProfile();
-              if (profileResponse.status && profileResponse.data) {
-                setUser(profileResponse.data);
-              }
-            } catch (error) {
-              console.error("Failed to get profile:", error);
-              authService.logout();
-            }
-          }
-          // Connect socket if authentication is successful
-          chatSocketService.connect();
-
-          // Set up refresh timer after successful authentication
-          setupRefreshTimer();
-
-
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
@@ -124,12 +100,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initializeAuth();
 
-    // Clean up timer on unmount
-    return () => {
-      if (refreshTimerRef.current) {
-        clearTimeout(refreshTimerRef.current);
-      }
-    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
