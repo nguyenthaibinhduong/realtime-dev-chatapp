@@ -37,40 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Function to setup token refresh timer
-  const setupRefreshTimer = () => {
-    // Clear any existing timer
-    if (refreshTimerRef.current) {
-      clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = null;
-    }
 
-    if (!authService.isAuthenticated()) return;
-
-    // Get token expiration time
-    const expiresAt = authService.getTokenExpirationTime();
-    if (!expiresAt) return;
-
-    // Calculate time until expiration minus 10 seconds
-    const currentTime = Date.now();
-    const timeUntilRefresh = Math.max(0, expiresAt - currentTime); // 10 seconds before expiration
-
-    console.log(
-      `Token will be refreshed in ${timeUntilRefresh / 1000} seconds`
-    );
-
-    // Set up timer for refresh
-    refreshTimerRef.current = setTimeout(async () => {
-      console.log("Auto refreshing token before expiration");
-      if (authService.isAuthenticated()) {
-        try {
-          await refreshToken();
-        } catch (error) {
-          console.error("Auto token refresh failed:", error);
-        }
-      }
-    }, timeUntilRefresh);
-  };
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -79,22 +46,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userFromToken: any = await authService.getProfile();
         if (userFromToken) {
           setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
-        } else {
-          // Fallback: get profile from API
-          try {
-            const profileResponse = await authService.getProfile();
-            if (profileResponse.status && profileResponse.data) {
-              setUser(profileResponse.data);
-            }
-          } catch (error) {
-            console.error("Failed to get profile:", error);
-            authService.logout();
-          }
-        }
+        } else
+          console.error("Failed to get profile");
+
       } catch (error) {
         console.error("Auth initialization error:", error);
       } finally {
         setLoading(false);
+        chatSocketService.connect();
       }
     };
 
@@ -112,8 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response.status && response.data) {
         setUser(response.data.user);
 
-        // Setup refresh timer after successful login
-        setupRefreshTimer();
+
 
         toast({
           title: "Đăng nhập thành công",
@@ -199,24 +157,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+
+
+  // Check if user is authenticated
+  const isAuthenticated = () => !!user;
+
+  // Dummy refreshToken implementation (replace with actual logic if needed)
   const refreshToken = async () => {
     try {
       await authService.refreshToken();
-      // Update user info after refresh
-      const userFromToken: any = await authService.getProfile();
-      if (userFromToken) {
-        setUser(userFromToken);
-      }
-      // Reset the refresh timer after successful token refresh
-      setupRefreshTimer();
+      // Optionally update user info here
     } catch (error) {
       console.error("Refresh token failed:", error);
-      signOut();
     }
-  };
-
-  const isAuthenticated = () => {
-    return authService.isAuthenticated();
   };
 
   return (
@@ -229,7 +182,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signUp,
         signOut,
         isAuthenticated,
-        refreshToken, // Export method này nếu cần
+        refreshToken
       }}
     >
       {children}
