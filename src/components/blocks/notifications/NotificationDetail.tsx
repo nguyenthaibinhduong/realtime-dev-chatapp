@@ -97,8 +97,11 @@ function renderNotification(notification: Notification): React.ReactNode {
 
   // fallback cho các loại thông báo khác
   return (
-    <div className="p-6 text-center text-muted-foreground">
-      Thông báo này chưa được hỗ trợ hiển thị chi tiết.
+    <div className="p-6 text-center text-muted-foreground min-h-[80vh] flex flex-col items-center justify-center">
+      <Bell className="w-12 h-12 mb-4" />
+      <h2 className="text-md mb-2 text-white text-foreground">
+        Loại thông báo không xác định
+      </h2>
     </div>
   );
 }
@@ -111,7 +114,7 @@ export default function NotificationDetail({
   if (!notification) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-8">
-        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6">
+        <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-6">
           <Bell className="w-8 h-8 text-muted-foreground" />
         </div>
         <h2 className="text-xl font-semibold mb-2 text-white">
@@ -160,12 +163,12 @@ export default function NotificationDetail({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-blue-50/5 ">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm">
+      <div className="flex items-center justify-between p-4 bg-black text-white">
         <div className="flex items-center gap-3">
           {getNotificationIcon()}
-          <h1 className="text-lg font-semibold text-foreground">
+          <h1 className="text-lg font-semibold">
             Nội dung thông báo
           </h1>
           {getNotificationTypeBadge()}
@@ -176,7 +179,7 @@ export default function NotificationDetail({
               variant="outline"
               size="sm"
               onClick={handleMarkAsRead}
-              className="text-sm"
+              className="text-sm text-black"
             >
               Đánh dấu đã đọc
             </Button>

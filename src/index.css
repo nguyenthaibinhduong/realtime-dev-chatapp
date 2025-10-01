@@ -5,6 +5,21 @@
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
+@keyframes flash-white {
+
+  0%,
+  100% {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  50% {
+    background: #f8fafc;
+    /* Slightly gray */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: scale(1.01);
+  }
+}
 
 @layer base {
   :root {

@@ -86,8 +86,8 @@ export default function MenubarLayout({
                 }
                 size="icon"
                 className={`rounded-lg ${location.pathname === item.link
-                    ? "bg-blue-600 text-white"
-                    : "text-sidebar-foreground hover:bg-blue-100"
+                  ? "bg-blue-600 text-white"
+                  : "text-sidebar-foreground hover:bg-blue-100"
                   }`}
                 onClick={() => {
                   onSelect?.(item.key);

@@ -100,18 +100,31 @@ const NotificationItem = memo(({
   // Format notification content dựa trên type
   const getNotificationDisplay = useMemo(() => {
     switch (notification.type) {
-      case "group":
+      case "message":
         return {
           title: `#${notification.data?.channel?.name || "kênh"}`,
           content: `${notification.data?.sender?.username || "Ai đó"}: ${notification.data?.text || notification.data?.message || "tin nhắn"}`,
           titleClass: "text-blue-400 font-medium"
         };
 
-      case "git":
+      case "github":
+        // Extract GitHub notification data
+        const repository = notification.data?.repository?.name || "Repository";
+        const owner = notification.data?.repository?.owner?.login || notification.data?.pusher?.name || "Unknown";
+        const commitMessage = notification.data?.head_commit?.message || "No commit message";
+        const branch = notification.data?.ref ? notification.data.ref.replace('refs/heads/', '') : 'main';
+        const commitsCount = notification.data?.commits?.length || 1;
+
         return {
-          title: notification.data?.repository || "Repository",
-          content: notification.data?.message || notification.data?.description || "Git activity",
-          titleClass: "text-green-400 font-medium"
+          title: `${owner}/${repository}`,
+          content: `${commitsCount} commit${commitsCount > 1 ? 's' : ''} to ${branch}: ${commitMessage}`,
+          titleClass: "text-green-400 font-medium",
+          metadata: {
+            branch,
+            commitsCount,
+            author: notification.data?.head_commit?.author?.name || owner,
+            compareUrl: notification.data?.compare
+          }
         };
 
       case "system":
@@ -130,16 +143,28 @@ const NotificationItem = memo(({
     }
   }, [notification]);
 
+  // Kiểm tra xem có phải notification mới không (có fakeID)
+  const isNewNotification = Boolean(notification.fakeID);
+
   return (
     <div
       className={cn(
         "cursor-pointer transition-all duration-200 p-4 hover:bg-sidebar-accent/30 border-b border-sidebar-border/20",
-        isSelected
+        isSelected && !isNewNotification
           ? "bg-sidebar-accent/50 border-l-2 border-l-blue-500"
           : "border-l-2 border-l-transparent hover:border-l-blue-300",
-        !notification.read && "bg-blue-50/5"
+        !notification.read && "bg-blue-50/5",
+        // Animation cho notification mới - nền trắng chữ đen
+        isNewNotification && "bg-white text-black border-l-2 border-l-green-500"
       )}
       onClick={() => onSelect(notification)}
+      style={isNewNotification ? {
+        background: "white",
+        color: "black",
+        animation: "flash-white 0.8s ease-in-out 4",
+        border: "1px solid rgba(0,0,0,0.1)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+      } : undefined}
     >
       <div className="flex items-start gap-3">
         <NotificationIcon type={notification.type} />
@@ -147,45 +172,81 @@ const NotificationItem = memo(({
         <div className="flex-1 min-w-0 space-y-1.5">
           {/* Header với thời gian và dot */}
           <div className="flex items-center justify-between">
-            <h4 className={cn("text-sm truncate", getNotificationDisplay.titleClass)}>
+            <h4 className={cn(
+              "text-sm truncate",
+              getNotificationDisplay.titleClass,
+              isNewNotification && "text-gray-900 font-semibold" // Chữ đen đậm trên nền trắng
+            )}>
               {getNotificationDisplay.title}
             </h4>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-xs text-sidebar-foreground/50 font-medium">
+              <span className={cn(
+                "text-xs font-medium",
+                isNewNotification
+                  ? "text-gray-600" // Xám đậm trên nền trắng
+                  : "text-sidebar-foreground/50"
+              )}>
                 {formatTime(notification.createdAt)}
-
               </span>
-
-
-              {!notification.read && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+              {(!notification.read) && (
+                <div
+                  className={cn(
+                    "w-2 h-2 rounded-full",
+                    isNewNotification
+                      ? "bg-green-600" // Xanh đậm hơn để thấy rõ trên nền trắng
+                      : "bg-blue-500"
+                  )}
+                  style={isNewNotification ? {
+                    animation: "pulse 1s ease-in-out infinite",
+                    boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)"
+                  } : undefined}
+                />
               )}
             </div>
           </div>
 
           {/* Content - tin nhắn trên 1 hàng với ellipsis */}
-          <p className="text-sm text-sidebar-foreground/80 truncate leading-relaxed">
+          <p className={cn(
+            "text-sm truncate leading-relaxed",
+            isNewNotification
+              ? "text-gray-800" // Xám đậm cho content trên nền trắng  
+              : "text-sidebar-foreground/80"
+          )}>
             {getNotificationDisplay.content}
           </p>
 
+          {/* GitHub specific metadata */}
+          {notification.type === "github" && getNotificationDisplay.metadata && (
+            <div className="flex items-center gap-3 text-xs text-sidebar-foreground/50">
+              <span>Branch: {getNotificationDisplay.metadata.branch}</span>
+              <span>•</span>
+              <span>By: {getNotificationDisplay.metadata.author}</span>
+              {getNotificationDisplay.metadata.commitsCount > 1 && (
+                <>
+                  <span>•</span>
+                  <span>{getNotificationDisplay.metadata.commitsCount} commits</span>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Thời gian chính xác */}
-          <div className="flex items-center gap-1 text-xs text-sidebar-foreground/40">
+          <div className={cn(
+            "flex items-center gap-1 text-xs",
+            isNewNotification
+              ? "text-gray-500" // Xám nhạt cho thời gian trên nền trắng
+              : "text-sidebar-foreground/40"
+          )}>
             <Clock className="w-3 h-3" />
             <span>{formatExactTime(notification.createdAt)}</span>
           </div>
 
-          {/* Metadata nhỏ */}
-          {(notification.type === "git" && notification.data?.branch) ||
-            (notification.type === "system") ? (
+          {/* Metadata nhỏ cho các loại khác */}
+          {notification.type === "system" && (
             <div className="flex items-center gap-3 text-xs text-sidebar-foreground/40 pt-1">
-              {notification.type === "git" && notification.data?.branch && (
-                <span>Branch: {notification.data.branch}</span>
-              )}
-              {notification.type === "system" && (
-                <span>Thông báo hệ thống</span>
-              )}
+              <span>Thông báo hệ thống</span>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
@@ -333,9 +394,9 @@ export default function NotificationsList({
   // Memoized filter options
   const filterOptions = useMemo(() => [
     { value: "all", label: "Tất cả", icon: MessageCircle },
-    { value: "group", label: "Tin nhắn", icon: Users },
+    { value: "message", label: "Tin nhắn", icon: Users },
     { value: "system", label: "Hệ thống", icon: Settings },
-    { value: "git", label: "Git", icon: GitBranch },
+    { value: "github", label: "GitHub", icon: GitBranch },
   ], []);
 
   const formatTime = useMemo(() => formatTimeHelper(), []);
@@ -511,6 +572,7 @@ export default function NotificationsList({
           </div>
         )}
       </div>
+
     );
   }, [notifications, isInitialLoad]);
 
