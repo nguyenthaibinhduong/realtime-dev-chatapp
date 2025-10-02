@@ -9,6 +9,17 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   User,
   Mail,
   Edit3,
@@ -18,7 +29,8 @@ import {
   Key,
   Shield,
   LogOut,
-  Unlink
+  Unlink,
+  AlertTriangle
 } from "lucide-react";
 import { AuthAPI, GithubAPI } from "@/api/api";
 import { useToast } from "@/hooks/useToast";
@@ -80,18 +92,29 @@ const ProfileLayout: React.FC = () => {
   };
 
   const handleUnlinkGithub = async () => {
-    const response: any = await GithubAPI.unlinkGithub();
+    setLoading(true);
+    try {
+      const response: any = await GithubAPI.unlinkGithub();
 
-    if (response.status == 200) {
-      const userFromToken: any = await authService.getProfile();
-      if (userFromToken) {
-        setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
+      if (response.status == 200) {
+        const userFromToken: any = await authService.getProfile();
+        if (userFromToken) {
+          setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
+        }
+
+        toast({
+          title: "Hủy liên kết thành công",
+          description: "Đã hủy liên kết tài khoản GitHub.",
+        });
       }
-
+    } catch (error: any) {
       toast({
-        title: "Hủy liên kết thành công",
-        description: "Đã hủy liên kết tài khoản GitHub.",
+        title: "Hủy liên kết thất bại",
+        description: error.message || "Có lỗi xảy ra khi hủy liên kết.",
+        variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -239,16 +262,52 @@ const ProfileLayout: React.FC = () => {
               </div>
 
               {isGithubLinked && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleUnlinkGithub}
-                  disabled={loading}
-                  className="gap-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
-                >
-                  <Unlink className="w-4 h-4" />
-                  Hủy liên kết
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={loading}
+                      className="gap-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                    >
+                      <Unlink className="w-4 h-4" />
+                      Hủy liên kết
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-gray-900 border-gray-700">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-white flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                        Xác nhận hủy liên kết GitHub
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="text-gray-300 leading-relaxed">
+                        Bạn có chắc chắn muốn gỡ ứng dụng GitHub khỏi tài khoản này không?
+                        <br />
+                        <br />
+                        <span className="text-yellow-400 font-medium">Lưu ý:</span> Sau khi hủy liên kết, bạn sẽ không thể nhận thông báo từ GitHub và các tính năng tích hợp sẽ bị tắt.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="border-gray-600 text-black hover:bg-gray-700/50 hover:text-white">
+                        Hủy bỏ
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleUnlinkGithub}
+                        disabled={loading}
+                        className="bg-red-600/20 text-red-400 border-red-500/50 hover:bg-red-600/30 hover:text-red-300"
+                      >
+                        {loading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400 mr-2" />
+                            Đang hủy...
+                          </>
+                        ) : (
+                          "Xác nhận hủy liên kết"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
           </div>
@@ -261,7 +320,6 @@ const ProfileLayout: React.FC = () => {
               variant="outline"
               className="w-full gap-2 border-gray-600/50 text-black hover:bg-gray-700/50 hover:text-gray-200"
               onClick={() => {
-                // TODO: Implement change password
                 toast({
                   title: "Tính năng đang phát triển",
                   description: "Chức năng đổi mật khẩu sẽ có trong phiên bản tiếp theo.",
@@ -271,21 +329,6 @@ const ProfileLayout: React.FC = () => {
               <Key className="w-4 h-4 text-yellow-600" />
               Đổi mật khẩu
             </Button>
-
-            {/* <Button
-                variant="outline"
-                className="w-full gap-2 border-gray-600/50 text-black hover:bg-gray-700/50 hover:text-gray-200"
-                onClick={() => {
-                  // TODO: Navigate to security settings
-                  toast({
-                    title: "Tính năng đang phát triển",
-                    description: "Cài đặt bảo mật sẽ có trong phiên bản tiếp theo.",
-                  });
-                }}
-              >
-                <Shield className="w-4 h-4 text-orange-600" />
-                Cài đặt bảo mật
-              </Button> */}
 
             <Separator className="bg-gray-700/50" />
 
