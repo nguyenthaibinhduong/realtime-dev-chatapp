@@ -5,6 +5,8 @@ import {
   Bell,
   MessageSquare,
   LogOut,
+  GitBranch,
+  GitFork,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,23 +36,18 @@ export default function MenubarLayout({
   const unreadCount = 5; // Giả sử có 5 thông báo chưa đọc, thay bằng logic thực tế
 
   const items = [
+
     {
-      key: "home",
-      icon: <Home className="h-5 w-5" />,
-      label: "Home",
+      key: "chat",
+      icon: <MessageSquare className="h-5 w-5" />,
+      label: "Chat",
       link: "/",
     },
     {
-      key: "channels",
-      icon: <MessageSquare className="h-5 w-5" />,
-      label: "Channels",
-      link: "/channels",
-    },
-    {
-      key: "users",
-      icon: <Users className="h-5 w-5" />,
-      label: "Users",
-      link: "/users",
+      key: "github",
+      icon: <GitFork className="h-5 w-5" />,
+      label: "GitHub",
+      link: "/github",
     },
     {
       key: "notifications",

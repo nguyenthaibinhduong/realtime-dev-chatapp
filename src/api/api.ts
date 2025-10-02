@@ -1,5 +1,6 @@
 import { Notification } from "@/types/notifications";
 import { get, post, apiget, apipost } from "./Http";
+import { unlink } from "fs";
 
 export const AuthAPI = {
   // Không cần auth
@@ -58,6 +59,7 @@ export const GithubAPI = {
   getRepoForChannel: async (data: any) =>apipost(`/git/get_list_repo_data_by_channel`, data),
   addReposToChannel: async (data: any) => apipost(`/channels/add-repositories`, data),
   removeReposToChannel: async (data: any) => apipost(`/channels/remove-repositories`, data),
+  unlinkGithub: async () => apipost(`/github-app/uninstall`),
 };
 
 export const NotificationAPI = {

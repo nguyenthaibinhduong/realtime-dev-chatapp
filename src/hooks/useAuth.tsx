@@ -27,6 +27,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isAuthenticated: () => boolean;
   refreshToken: () => Promise<void>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -182,7 +183,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signUp,
         signOut,
         isAuthenticated,
-        refreshToken
+        refreshToken,
+        setUser
       }}
     >
       {children}

@@ -13,6 +13,8 @@ import { GitHubCallback } from "./components/GithubCallback";
 import ConfirmEmailPage from "./components/ConfirmEmail";
 import GitHubRegister from "./pages/GitHubRegister";
 import SettingsPage from "./pages/Setting";
+import GithubRegisterLayout from "./components/GithubRegisterLayout";
+import GitHubPage from "./pages/GitHubPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/github/register" element={<GitHubRegister />} />
+            <Route path="/github" element={<GitHubPage />} />
             <Route path="/auth/github/callback" element={<GitHubCallback />} />
             <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="/profile" element={<Profile />} />

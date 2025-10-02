@@ -19,10 +19,14 @@ export interface User {
   id: number;
   email: string;
   name?: string;
+  github_email?: string;  
+  username?: string;
+  email_verified?: boolean;
   avatar?: string;
   role: string | null;
   github_verified: boolean;
   github_installation_id: string | null;
+  github_avatar?: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -1,108 +1,305 @@
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  User,
+  Mail,
+  Edit3,
+  Check,
+  X,
+  Github,
+  Key,
+  Shield,
+  LogOut,
+  Unlink
+} from "lucide-react";
+import { AuthAPI, GithubAPI } from "@/api/api";
+import { useToast } from "@/hooks/useToast";
+import authService from "@/services/authService";
 
 const ProfileLayout: React.FC = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
-  const [editing, setEditing] = React.useState(false);
-  const [username, setUsername] = React.useState(user?.name || "nnma06118053");
-  const [newUsername, setNewUsername] = React.useState(user?.name || "nnma06118053");
-  const email = user?.email || "********@gmail.com";
+  const { user, isAuthenticated, setUser, signOut } = useAuth();
+  const { toast } = useToast();
 
-  React.useEffect(() => {
-    if (!isAuthenticated()) navigate("/auth");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [isEditing, setIsEditing] = useState(false);
+  const [username, setUsername] = useState<string>((user as any)?.username || user?.name || "");
+  const [loading, setLoading] = useState(false);
 
-  const handleEdit = () => {
-    setNewUsername(username);
-    setEditing(true);
-  };
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/auth", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
-  const handleUpdateUsername = (e: React.FormEvent) => {
+  // Update username state when user changes
+  useEffect(() => {
+    setUsername((user as any)?.username || user?.name || "");
+  }, [user]);
+
+  const handleUsernameUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUsername(newUsername);
-    setEditing(false);
-    // TODO: Gọi API cập nhật tên người dùng ở đây nếu cần
+    if (!username.trim()) return;
+
+    setLoading(true);
+    try {
+      const response = await AuthAPI.updateProfile({
+        username: username.trim()
+      });
+
+      if (response.status == 200) {
+        const userFromToken: any = await authService.getProfile();
+        if (userFromToken) {
+          setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
+        }
+
+        toast({
+          title: "Cập nhật thành công",
+          description: "Tên người dùng đã được cập nhật.",
+        });
+      }
+
+      setIsEditing(false);
+    } catch (error: any) {
+      toast({
+        title: "Cập nhật thất bại",
+        description: error.message || "Có lỗi xảy ra khi cập nhật.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleUnlinkGithub = async () => {
+    const response: any = await GithubAPI.unlinkGithub();
+
+    if (response.status == 200) {
+      const userFromToken: any = await authService.getProfile();
+      if (userFromToken) {
+        setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
+      }
+
+      toast({
+        title: "Hủy liên kết thành công",
+        description: "Đã hủy liên kết tài khoản GitHub.",
+      });
+    }
+  };
+
+  const handleSignOut = () => {
+    signOut();
+    navigate("/auth", { replace: true });
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400" />
+      </div>
+    );
+  }
+
+  const isGithubLinked = Boolean(user.github_installation_id);
+  const userInitial = (user.username || user.name || user.email)?.charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-zinc-900 to-slate-800">
-      <div className="w-full max-w-xl mt-12 bg-white/5 rounded-2xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-white text-center">Hồ sơ của tôi</h2>
-        <div className="space-y-6">
-          {/* Tên người dùng */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">Tên người dùng</label>
-            {!editing ? (
-              <div className="flex items-center gap-3">
-                <span className="text-base text-white font-semibold">{username}</span>
+    <div className="w-full mx-auto pt-8">
+      <Card className="shadow-2xl bg-transparent border-black backdrop-blur-sm">
+        <CardHeader className="text-center pb-6 border-b border-gray-700/50">
+          <div className="flex flex-col items-center gap-4">
+            <Avatar className="w-20 h-20 ring-2 ring-gray-600/50">
+              <AvatarImage src={user.github_avatar || user.avatar} />
+              <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle className="text-2xl text-gray-100">Hồ sơ cá nhân</CardTitle>
+              <p className="text-gray-400 mt-1">
+                Quản lý thông tin và cài đặt tài khoản
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="w-4/5 mx-auto space-y-3 p-6">
+          {/* Username Section */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2 text-gray-300">
+              <User className="w-4 h-4 text-blue-400" />
+              Tên người dùng
+            </Label>
+
+            {!isEditing ? (
+              <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600/30">
+                <span className="font-medium text-gray-200">{(user as any).username || user.name}</span>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                  onClick={handleEdit}
+                  onClick={() => setIsEditing(true)}
+                  className="h-8 gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-600/50"
                 >
-                  Cập nhật
+                  <Edit3 className="w-4 h-4" />
+                  Sửa
                 </Button>
               </div>
             ) : (
-              <form onSubmit={handleUpdateUsername} className="flex items-center gap-3">
+              <form onSubmit={handleUsernameUpdate} className="space-y-3">
                 <Input
-                  type="text"
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  className="w-40"
-                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Nhập tên người dùng"
                   autoFocus
+                  disabled={loading}
+                  className="bg-gray-700/50 border-gray-600/50 text-gray-200 placeholder:text-gray-500 focus:border-blue-500/50"
                 />
-                <Button
-                  type="submit"
-                  variant="default"
-                  size="sm"
-                  className="bg-green-600 text-white hover:bg-green-700"
-                >
-                  Lưu
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="bg-zinc-700 text-white hover:bg-zinc-800"
-                  onClick={() => setEditing(false)}
-                >
-                  Hủy
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={loading || !username.trim()}
+                    className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Check className="w-4 h-4" />
+                    {loading ? "Đang lưu..." : "Lưu"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setUsername(user?.username || user?.name || "");
+                    }}
+                    disabled={loading}
+                    className="gap-2 border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:text-gray-200"
+                  >
+                    <X className="w-4 h-4" />
+                    Hủy
+                  </Button>
+                </div>
               </form>
             )}
           </div>
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">Email</label>
-            <span className="text-base text-white">{email}</span>
+
+          {/* Email Section */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2 text-gray-300">
+              <Mail className="w-4 h-4 text-green-400" />
+              Email
+            </Label>
+            <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600/30">
+              <span className="text-gray-200">{user.email}</span>
+              <Badge
+                variant={user.email_verified ? "default" : "secondary"}
+                className={user.email_verified
+                  ? "bg-green-600/20 text-green-400 border-green-500/30"
+                  : "bg-gray-600/20 text-gray-400 border-gray-500/30"
+                }
+              >
+                {user.email_verified ? "Đã xác minh" : "Chưa xác minh"}
+              </Badge>
+            </div>
           </div>
-          {/* Actions */}
-          <div className="flex flex-col gap-3 pt-4">
-            <Button
-              variant="default"
-              size="lg"
-              className="bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Đổi mật khẩu
-            </Button>
+
+          <Separator className="bg-gray-700/50" />
+
+          {/* GitHub Integration */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2 text-gray-300">
+              <Github className="w-4 h-4 text-purple-400" />
+              Tích hợp GitHub
+            </Label>
+
+            <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600/30">
+              <div className="flex items-center gap-3">
+                <Badge
+                  variant={isGithubLinked ? "default" : "secondary"}
+                  className={isGithubLinked
+                    ? "bg-purple-600/20 text-purple-400 border-purple-500/30"
+                    : "bg-gray-600/20 text-gray-400 border-gray-500/30"
+                  }
+                >
+                  {isGithubLinked ? "Đã liên kết" : "Chưa liên kết"}
+                </Badge>
+                {isGithubLinked && user.github_email && (
+                  <span className="text-sm text-gray-400">
+                    {user.github_email}
+                  </span>
+                )}
+              </div>
+
+              {isGithubLinked && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUnlinkGithub}
+                  disabled={loading}
+                  className="gap-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                >
+                  <Unlink className="w-4 h-4" />
+                  Hủy liên kết
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <Separator className="bg-gray-700/50" />
+
+          {/* Action Buttons */}
+          <div className="w-2/3 mx-auto flex flex-col gap-3">
             <Button
               variant="outline"
-              size="lg"
-              className="bg-white text-black hover:bg-zinc-100 border"
+              className="w-full gap-2 border-gray-600/50 text-black hover:bg-gray-700/50 hover:text-gray-200"
+              onClick={() => {
+                // TODO: Implement change password
+                toast({
+                  title: "Tính năng đang phát triển",
+                  description: "Chức năng đổi mật khẩu sẽ có trong phiên bản tiếp theo.",
+                });
+              }}
             >
-              Hủy liên kết Github
+              <Key className="w-4 h-4 text-yellow-600" />
+              Đổi mật khẩu
+            </Button>
+
+            {/* <Button
+                variant="outline"
+                className="w-full gap-2 border-gray-600/50 text-black hover:bg-gray-700/50 hover:text-gray-200"
+                onClick={() => {
+                  // TODO: Navigate to security settings
+                  toast({
+                    title: "Tính năng đang phát triển",
+                    description: "Cài đặt bảo mật sẽ có trong phiên bản tiếp theo.",
+                  });
+                }}
+              >
+                <Shield className="w-4 h-4 text-orange-600" />
+                Cài đặt bảo mật
+              </Button> */}
+
+            <Separator className="bg-gray-700/50" />
+
+            <Button
+              variant="destructive"
+              className="w-full gap-2 bg-red-600/20 text-red-400 border-red-500/50 hover:bg-red-600/30 hover:text-red-300"
+              onClick={handleSignOut}
+            >
+              <LogOut className="w-4 h-4" />
+              Đăng xuất
             </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

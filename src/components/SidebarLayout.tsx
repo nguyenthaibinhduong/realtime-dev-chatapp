@@ -52,7 +52,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user?.name || user?.email?.split("@")[0] || "User"}
+                {user?.username || user?.email?.split("@")[0] || "User"}
               </p>
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-[hsl(var(--online-status))] rounded-full mr-1" />

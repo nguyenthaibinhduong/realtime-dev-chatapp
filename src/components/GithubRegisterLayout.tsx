@@ -136,8 +136,15 @@ export default function GithubRegisterLayout() {
 
     // Đã cài installation → Bảng repo với Table component
     return (
-        <Card className="bg-sidebar border-sidebar-border">
-            <RepoTable repos={repos} loading={loading} onRefresh={loadRepo} />
-        </Card>
+        <div className="min-h-screen p-6 bg-[hsl(var(--chat-background))]">
+            <div className="flex items-center justify-between mb-4">
+                <div>
+                    <h2 className="text-2xl font-bold text-sidebar-foreground mb-1">Kho lưu trữ GitHub</h2>
+                </div>
+            </div>
+            <Card className="bg-sidebar border-sidebar-border bg-black">
+                <RepoTable repos={repos} loading={loading} onRefresh={loadRepo} />
+            </Card>
+        </div>
     );
 }
