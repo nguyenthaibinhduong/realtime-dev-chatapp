@@ -1,6 +1,6 @@
 export interface Notification {
   id: string;
-  type: "personal" | "group" | "system";
+  type: "message" | "github" | "system";
   title: string;
   message: string;
   isRead: boolean;

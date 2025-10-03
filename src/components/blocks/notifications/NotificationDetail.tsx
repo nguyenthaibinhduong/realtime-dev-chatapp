@@ -29,8 +29,7 @@ interface NotificationDetailProps {
 //render notification content
 function renderNotification(notification: Notification): React.ReactNode {
   const typeMap: Record<string, string> = {
-    group: "Nhóm",
-    personal: "Cá nhân",
+    message: "Tin nhắn",
   };
 
   if (typeMap[notification.type]) {
@@ -129,8 +128,7 @@ export default function NotificationDetail({
 
   const getNotificationIcon = () => {
     switch (notification.type) {
-      case "personal":
-      case "group":
+      case "message":
         return <MessageSquare className="w-5 h-5 text-green-500" />;
       default:
         return <Hash className="w-5 h-5 text-gray-500" />;
@@ -168,9 +166,7 @@ export default function NotificationDetail({
       <div className="flex items-center justify-between p-4 bg-black text-white">
         <div className="flex items-center gap-3">
           {getNotificationIcon()}
-          <h1 className="text-lg font-semibold">
-            Nội dung thông báo
-          </h1>
+          <h1 className="text-lg font-semibold">Nội dung thông báo</h1>
           {getNotificationTypeBadge()}
         </div>
         <div className="flex items-center gap-2">

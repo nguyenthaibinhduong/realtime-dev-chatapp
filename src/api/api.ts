@@ -21,7 +21,8 @@ export const AuthAPI = {
     get(`/auth/confirm-email?token=${encodeURIComponent(token)}`),
   goToLoginGithub: async () => get("/auth/github-oauth/redirect"),
   goToInstallGithub: async () => apipost("/github-app/redirect"),
-  goToUpdateLoginGithub: async () => apipost("/auth/github-oauth/redirect-update"),
+  goToUpdateLoginGithub: async () =>
+    apipost("/auth/github-oauth/redirect-update"),
 };
 
 export const ChatAPI = {
@@ -56,14 +57,22 @@ export const UploadApi = {
 export const GithubAPI = {
   getInstallationRepos: async () => apipost(`/git/get_repo_installation`),
   getRepoData: async (data: any) => apipost(`/git/get_repo_data_by_url`, data),
-  getRepoForChannel: async (data: any) =>apipost(`/git/get_list_repo_data_by_channel`, data),
-  addReposToChannel: async (data: any) => apipost(`/channels/add-repositories`, data),
-  removeReposToChannel: async (data: any) => apipost(`/channels/remove-repositories`, data),
+  getRepoForChannel: async (data: any) =>
+    apipost(`/git/get_list_repo_data_by_channel`, data),
+  addReposToChannel: async (data: any) =>
+    apipost(`/channels/add-repositories`, data),
+  removeReposToChannel: async (data: any) =>
+    apipost(`/channels/remove-repositories`, data),
   unlinkGithub: async () => apipost(`/github-app/uninstall`),
 };
 
 export const NotificationAPI = {
-  fetchNotifications: async (data:any) => apiget(`/notifications?page=${data.page}&limit=${data.limit}`),
+  fetchNotifications: async (data: any) =>
+    apiget(
+      `/notifications?page=${data.page}&limit=${data.limit}&type=${data.type || ""}`
+    ),
   markAsRead: async (id: string) => apipost(`/notifications/${id}/read`),
-  deleteNotification: async (id: string) => apipost(`/notifications/${id}/delete`),
+  deleteNotification: async (id: string) =>
+    apipost(`/notifications/${id}/delete`),
+  markAsAllRead: async () => apipost(`/notifications/mark-all-as-read`),
 };
