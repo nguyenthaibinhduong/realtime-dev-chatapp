@@ -142,15 +142,50 @@ export default function NotificationLayout() {
   }, []);
 
   // Handle mark as read
-  const handleMarkAsRead = useCallback((id: string) => {
-    NotificationAPI.markAsRead(id);
-    fetchNotifications(true, 1, filter.type);
-  }, []);
+  const handleMarkAsRead = useCallback(
+    async (id: string) => {
+      // Optimistic update - update UI immediately
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, read: true } : n))
+      );
+
+      if (selectedNotification?._id === id) {
+        setSelectedNotification((prev) =>
+          prev ? { ...prev, read: true } : null
+        );
+      }
+
+      // Then call API
+      try {
+        await NotificationAPI.markAsRead(id);
+      } catch (error) {
+        console.error("Failed to mark as read:", error);
+        // Revert on error
+        fetchNotifications(true, 1, filter.type);
+      }
+    },
+    [selectedNotification, filter.type, fetchNotifications]
+  );
+
   // Handle mark all as read
-  const handleMarkAllAsRead = useCallback(() => {
-    NotificationAPI.markAsAllRead();
-    fetchNotifications(true, 1, filter.type);
-  }, []);
+  const handleMarkAllAsRead = useCallback(async () => {
+    // Optimistic update
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
+    if (selectedNotification) {
+      setSelectedNotification((prev) =>
+        prev ? { ...prev, read: true } : null
+      );
+    }
+
+    try {
+      await NotificationAPI.markAsAllRead();
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
+      // Revert on error
+      fetchNotifications(true, 1, filter.type);
+    }
+  }, [selectedNotification, filter.type, fetchNotifications]);
 
   return (
     <MasterLayout

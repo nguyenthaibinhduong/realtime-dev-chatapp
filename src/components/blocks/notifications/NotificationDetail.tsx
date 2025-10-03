@@ -41,19 +41,21 @@ function renderNotification(notification: Notification): React.ReactNode {
               <Avatar className="w-12 h-12 border border-border">
                 {/* <AvatarImage src={notification.avatar} /> */}
                 <AvatarFallback className="bg-muted text-muted-foreground font-medium">
-                  {/* {notification.username.slice(0, 2).toUpperCase()} */}
+                  {notification.data?.sender?.username
+                    .slice(0, 1)
+                    .toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-semibold text-foreground">
-                    {/* {notification.username} */}
+                    {notification.data?.sender?.username}
                   </h3>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-primary">
                     {typeMap[notification.type]}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-slate-950">
                   <span>{formatExactTimeHelper()(notification.createdAt)}</span>
                   <span>•</span>
                   <span>
@@ -64,7 +66,7 @@ function renderNotification(notification: Notification): React.ReactNode {
                   </span>
                 </div>
               </div>
-              {!notification.isRead && (
+              {!notification.read && (
                 <div className="w-3 h-3 bg-blue-500 rounded-full" />
               )}
             </div>
@@ -72,13 +74,6 @@ function renderNotification(notification: Notification): React.ReactNode {
           <Separator className="bg-border/50" />
           <CardContent className="pt-6">
             <div className="space-y-6">
-              <div>
-                <h4 className="font-medium mb-3 text-foreground">Người gửi</h4>
-                <p className="text-muted-foreground leading-relaxed">
-                  {notification.data?.sender?.username || "Không xác định"}
-                </p>
-              </div>
-
               <div>
                 <h4 className="font-medium mb-3 text-foreground">Nội dung</h4>
                 <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
