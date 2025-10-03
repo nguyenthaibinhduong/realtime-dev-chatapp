@@ -71,7 +71,8 @@ export const NotificationAPI = {
     apiget(
       `/notifications?page=${data.page}&limit=${data.limit}&type=${data.type || ""}`
     ),
-  markAsRead: async (id: string) => apipost(`/notifications/${id}/read`),
+  markAsRead: async (id: string) =>
+    apipost(`/notifications/mark-as-read`, { id }),
   deleteNotification: async (id: string) =>
     apipost(`/notifications/${id}/delete`),
   markAsAllRead: async () => apipost(`/notifications/mark-all-as-read`),

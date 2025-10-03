@@ -110,6 +110,7 @@ export default function NotificationDetail({
   onClose,
   onMarkAsRead,
 }: NotificationDetailProps) {
+  console.log("selected notification:", notification);
   if (!notification) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-8">
@@ -156,7 +157,7 @@ export default function NotificationDetail({
 
   const handleMarkAsRead = () => {
     if (!notification.isRead && onMarkAsRead) {
-      onMarkAsRead(notification.id);
+      onMarkAsRead(notification._id);
     }
   };
 

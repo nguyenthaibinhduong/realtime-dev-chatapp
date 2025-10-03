@@ -1,5 +1,5 @@
 export interface Notification {
-  id: string;
+  _id: string;
   type: "message" | "github" | "system";
   title: string;
   message: string;

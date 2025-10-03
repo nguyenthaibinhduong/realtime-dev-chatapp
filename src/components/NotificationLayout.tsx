@@ -31,13 +31,13 @@ export default function NotificationLayout() {
       const pageToFetch = currentPage || filter.page;
       const typeToFetch = currentType || filter.type;
 
-      console.log("fetchNotifications called:", {
-        reset,
-        page: pageToFetch,
-        loading: loadingRef.current,
-        hasMore: hasMoreRef.current,
-        type: typeToFetch,
-      });
+      // console.log("fetchNotifications called:", {
+      //   reset,
+      //   page: pageToFetch,
+      //   loading: loadingRef.current,
+      //   hasMore: hasMoreRef.current,
+      //   type: typeToFetch,
+      // });
 
       if (loadingRef.current || (!hasMoreRef.current && !reset)) {
         console.log("Skip fetch:", {
@@ -140,13 +140,16 @@ export default function NotificationLayout() {
     chatSocketService.onNotification(handler);
     return () => chatSocketService.offNotification(handler);
   }, []);
+
   // Handle mark as read
   const handleMarkAsRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification._id === id ? { ...notification, read: true } : notification
-      )
-    );
+    NotificationAPI.markAsRead(id);
+    fetchNotifications(true, 1, filter.type);
+  }, []);
+  // Handle mark all as read
+  const handleMarkAllAsRead = useCallback(() => {
+    NotificationAPI.markAsAllRead();
+    fetchNotifications(true, 1, filter.type);
   }, []);
 
   return (
@@ -162,6 +165,7 @@ export default function NotificationLayout() {
           loading={loading}
           hasMore={hasMore}
           onLoadMore={loadMore}
+          onMarkAllAsRead={handleMarkAllAsRead}
         />
       }
     >
