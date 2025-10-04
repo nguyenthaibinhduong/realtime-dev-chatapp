@@ -26,7 +26,6 @@ export default function TestNotiLayout(): JSX.Element {
 
   function connect() {
     disconnect(); // ensure no duplicate
-    // set cookie used by server-side auth (path optional)
     document.cookie = `access_token=${token}; path=/`;
 
     try {
