@@ -254,7 +254,7 @@ export const MessageList: React.FC<Props> = ({
             }
 
             // Nếu là code-share thì hiển thị card đặc biệt
-            if (message?.type === "code-share") {
+            if (message.type == "code-share") {
               let jsonData: any = {};
               try {
                 jsonData = message.json_data ? JSON.parse(message.json_data) : {};
@@ -293,7 +293,7 @@ export const MessageList: React.FC<Props> = ({
                       repo,
                       refParam,
                       initialPath: codePath,
-                      installation_id,
+                      installation_id: message?.sender?.github_installation_id,
                       isShare: true,
                     });
                     setCodeOpen(true);
@@ -332,7 +332,7 @@ export const MessageList: React.FC<Props> = ({
                               repo,
                               refParam,
                               initialPath: codePath,
-                              installation_id,
+                              installation_id: message?.sender?.github_installation_id || installation_id,
                               isShare: true,
                             });
                             setCodeOpen(true);

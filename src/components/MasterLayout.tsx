@@ -24,7 +24,7 @@ export default function MasterLayout({ menu, sidebar, children }: MasterLayoutPr
 
             // Xử lý notification dựa trên type
             switch (notify.type) {
-                case "group":
+                case "message":
                     // Tin nhắn trong group/channel
                     const channelName = notify.data?.channel?.name || "kênh";
                     const senderName = notify.data?.sender?.username || "Ai đó";
@@ -42,7 +42,7 @@ export default function MasterLayout({ menu, sidebar, children }: MasterLayoutPr
                     });
                     break;
 
-                case "git":
+                case "github":
                     // Git notification
                     const repository = notify.data?.repository || "Repository";
                     const branch = notify.data?.branch || "";
