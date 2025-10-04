@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const DEFAULT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoidXNlcjFAZXhhbXBsZS5jb20iLCJ1c2VybmFtZSI6InVzZXIxIiwicm9sZSI6InVzZXIiLCJnaXRodWJfdmVyaWZpZWQiOnRydWUsImdpdGh1Yl9pbnN0YWxsYXRpb25faWQiOm51bGwsImlhdCI6MTc1OTAzMzYwOCwiZXhwIjoxNzU5MTIwMDA4fQ.KIpSe3166D1Linn4y5wceDp_TNBnuo1Kubal7I288MA";
+const DEFAULT_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoidXNlcjFAZXhhbXBsZS5jb20iLCJ1c2VybmFtZSI6InVzZXIxIiwicm9sZSI6InVzZXIiLCJnaXRodWJfdmVyaWZpZWQiOnRydWUsImdpdGh1Yl9pbnN0YWxsYXRpb25faWQiOm51bGwsImlhdCI6MTc1OTAzMzYwOCwiZXhwIjoxNzU5MTIwMDA4fQ.KIpSe3166D1Linn4y5wceDp_TNBnuo1Kubal7I288MA";
 const DEFAULT_URL = "http://localhost:3088/v1/notifications/stream";
 
 export default function TestNotiLayout(): JSX.Element {
@@ -14,7 +15,6 @@ export default function TestNotiLayout(): JSX.Element {
     return () => {
       disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function addLog(message: string) {
