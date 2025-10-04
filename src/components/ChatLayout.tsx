@@ -157,8 +157,8 @@ export default function ChatLayout() {
 
   // Socket join/leave + onMessage
   const joinChannelSocket = useCallback(() => {
-    if (selectedChannel?.id) {
-      chatSocketService.joinRoom(selectedChannel.id);
+    if (localStorage.getItem("selectedChannelId")) {
+      chatSocketService.joinRoom(localStorage.getItem("selectedChannelId"));
       chatSocketService.onMessage((msg: any) => {
         console.log("New socket message received:", msg);
         setMessages((prev: any) => {
