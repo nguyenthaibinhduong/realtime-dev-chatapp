@@ -8,8 +8,7 @@ import {
   Crown,
   User,
   Github,
-  Check,
-  ChevronDown,
+  Paperclip,
 } from "lucide-react";
 import { Separator } from "../../ui/separator";
 import { useEffect, useState } from "react";
@@ -30,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { GithubAPI } from "@/api/api";
 import { toast } from "@/hooks/useToast";
 import { RepoChatDialog } from "../github/RepoChatDialog";
+import { AttachmentModal } from "../attachments/AttachmentModal";
 
 interface ChannelHeaderProps {
   channel: Channel;
@@ -46,18 +46,11 @@ const getChannelIcon = (channel: Channel, userId?: any) => {
       <div className="relative mr-2">
         <Avatar className="h-6 w-6">
           <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-            {channel.name?.[0]?.toUpperCase() || 'U'}
+            {channel.name?.[0]?.toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>
         {/* Chấm online */}
-        {
-          userId && channel.members && (
-
-
-            <OnlineDot userId={userId} />
-
-          )
-        }
+        {userId && channel.members && <OnlineDot userId={userId} />}
       </div>
     );
   }
@@ -77,16 +70,13 @@ const getChannelTypeLabel = (type: string) => {
   }
 };
 
-
-
 export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState("members");
   const [otherUserId, setOtherUserId] = useState<string | number | undefined>();
   const { user } = useAuth();
   const [openGitModal, setOpenGitModal] = useState(false);
-
-
+  const [openAttachmentModal, setOpenAttachmentModal] = useState(false);
 
   useEffect(() => {
     if (channel.type === "personal" && members && user?.id) {
@@ -95,6 +85,13 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
     }
     console.log("Other User ID:", otherUserId);
   }, [channel, members, user]);
+
+  // Handle file selection from attachment modal
+  const handleFileSelect = (file: File, type: string) => {
+    console.log("File selected:", file.name, "Type:", type);
+    // TODO: Implement file upload logic
+    // You can call your upload API here
+  };
 
   return (
     <div className="h-14 border-b border-border bg-card px-6 flex items-center justify-between">
@@ -113,6 +110,23 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
         )}
       </div>
       <div className="flex items-center gap-2">
+        {/* Nút mở attachment modal */}
+        <button
+          className="p-2 rounded-lg hover:bg-muted transition-colors duration-200 group"
+          title="Đính kèm tệp"
+          onClick={() => setOpenAttachmentModal(true)}
+        >
+          <Paperclip className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <span className="sr-only">Đính kèm tệp</span>
+        </button>
+
+        {/* Attachment Modal */}
+        {/* <AttachmentModal
+          open={openAttachmentModal}
+          onOpenChange={setOpenAttachmentModal}
+          onFileSelect={handleFileSelect}
+        /> */}
+
         {/* Nút mở modal kết nối repo git */}
         <button
           className="p-2 rounded-lg hover:bg-muted transition-colors duration-200"
@@ -158,7 +172,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                   <div className="w-12 h-12 flex items-center justify-center">
                     <Avatar className="h-12 w-12 rounded-xl">
                       <AvatarFallback className="bg-blue-800 text-white text-md">
-                        {channel.name?.[0]?.toUpperCase() || 'U'}
+                        {channel.name?.[0]?.toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                     {/* Chấm online */}
@@ -212,7 +226,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                         <div className="relative mr-2">
                           <Avatar className="h-10 w-10">
                             <AvatarFallback className="bg-blue-700 text-white text-md">
-                              {member.username?.[0]?.toUpperCase() || 'U'}
+                              {member.username?.[0]?.toUpperCase() || "U"}
                             </AvatarFallback>
                           </Avatar>
                           {/* Chấm online */}
@@ -255,7 +269,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                       <div className="w-10 h-10 bg-gradient-to-br from-zinc-700 to-zinc-900 rounded-lg flex items-center justify-center">
                         <Avatar className="h-12 w-12 rounded-xl">
                           <AvatarFallback className="bg-blue-800 text-white text-md">
-                            {channel.name?.[0]?.toUpperCase() || 'U'}
+                            {channel.name?.[0]?.toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>
                         {/* Chấm online */}
@@ -272,9 +286,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                         </p>
                       </div>
                     </div>
-                    <Badge
-                      className="bg-zinc-800 text-white border border-zinc-700 font-medium px-3 py-1"
-                    >
+                    <Badge className="bg-zinc-800 text-white border border-zinc-700 font-medium px-3 py-1">
                       {channel.type.toUpperCase()}
                     </Badge>
                   </div>
