@@ -350,7 +350,7 @@ export default function RepoChatList({
                 <RepoDetailModal
                     repo={selectedRepo}
                     onClose={() => setSelectedRepo(null)}
-                    installation_id={repos.find((item) => item.repo_info?.id === selectedRepo.id)?.user_id}
+                    installation_id={repos.find((item) => item.repo_info?.id === selectedRepo.id)?.repo_installation}
                 />
             )}
         </div>

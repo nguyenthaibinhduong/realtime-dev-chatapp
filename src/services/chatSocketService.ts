@@ -42,7 +42,6 @@ class ChatSocketService {
   /** ================== MESSAGE ================== */
 
   sendMessage(data: any) {
-    console.log("chatSocketService.ts", data);
     getSocket().emit("send_message", data);
   }
 

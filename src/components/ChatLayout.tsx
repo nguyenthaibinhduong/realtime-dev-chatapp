@@ -156,35 +156,36 @@ export default function ChatLayout() {
   }, [loadChannels]);
 
   // Socket join/leave + onMessage
-  const joinChannelSocket = useCallback(() => {
-    if (localStorage.getItem("selectedChannelId")) {
-      chatSocketService.joinRoom(localStorage.getItem("selectedChannelId"));
-      chatSocketService.onMessage((msg: any) => {
-        console.log("New socket message received:", msg);
-        setMessages((prev: any) => {
-          // Nếu có tin nhắn cùng fakeID thì replace, nếu không thì thêm mới
-          const idx = prev.findIndex(
-            (p: any) => String(p.fakeID) === String(msg.fakeID)
-          );
-          if (idx !== -1) {
-            const updated = [...prev];
-            updated[idx] = msg;
-            return updated;
-          }
-          return [...prev, msg];
-        });
-      });
-    }
-    return () => {
-      chatSocketService.leaveRoom(selectedChannel?.id);
-      chatSocketService.offMessage();
-    };
-  }, [selectedChannel]);
+
 
   useEffect(() => {
-    const cleanup = joinChannelSocket();
-    return cleanup;
-  }, [joinChannelSocket]);
+    const handleMessage = (msg: any) => {
+      console.log("New socket message received:", msg);
+      setMessages((prev) => {
+        const idx = prev.findIndex((p: any) => String(p.fakeID) === String(msg.fakeID));
+        if (idx !== -1) {
+          const updated = [...prev];
+          updated[idx] = msg;
+          return updated;
+        }
+        return [...prev, msg];
+      });
+    };
+
+    chatSocketService.onMessage(handleMessage);
+    return () => {
+      chatSocketService.offMessage(handleMessage);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    if (selectedChannel?.id) {
+      chatSocketService.joinRoom(selectedChannel.id);
+      return () => chatSocketService.leaveRoom(selectedChannel.id);
+    }
+  }, [selectedChannel?.id]);
+
 
   // Socket channel updates (optional)
   useEffect(() => {

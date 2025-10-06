@@ -679,7 +679,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({ repo, onClose, installation_id 
     const handleCommitSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCommitSearch(e.target.value);
         setCommitPage(1);
-        // loadCommitsForBranch(false, 1, e.target.value); // useEffect will handle
+        loadCommitsForBranch(false, 1, e.target.value); // useEffect will handle
     };
 
     // open code dialog from file click

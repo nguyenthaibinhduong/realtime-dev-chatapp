@@ -79,7 +79,7 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
 
         return () => {
             // chatSocketService.leaveRoom(channelId);
-            // chatSocketService.offMessage(handleSocketMsg);
+            chatSocketService.offMessage(handleSocketMsg);
             if (fetchTimeout.current) clearTimeout(fetchTimeout.current);
         };
     }, [open, channelId, loadRepoChannel]);
