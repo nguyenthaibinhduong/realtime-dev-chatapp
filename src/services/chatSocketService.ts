@@ -49,19 +49,19 @@ class ChatSocketService {
     getSocket().emit("create_channel", data);
   }
 
-  onMessage(callback: (msg: Message) => void) {
+  onMessage(callback: (msg: any) => void) {
     getSocket().on("receiveMessage", callback);
   }
 
-  offMessage(callback?: (msg: Message) => void) {
+  offMessage(callback?: (msg: any) => void) {
     getSocket().off("receiveMessage", callback);
   }
 
-  onChannel(callback: (msg: Message) => void) {
+  onChannel(callback: (msg: any) => void) {
     getSocket().on("receiveChannel", callback);
   }
 
-  offChannel(callback?: (msg: Message) => void) {
+  offChannel(callback?: (msg: any) => void) {
     getSocket().off("receiveChannel", callback);
   }
 
