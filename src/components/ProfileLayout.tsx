@@ -30,11 +30,12 @@ import {
   Shield,
   LogOut,
   Unlink,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 import { AuthAPI, GithubAPI } from "@/api/api";
 import { useToast } from "@/hooks/useToast";
 import authService from "@/services/authService";
+import { UpdatePassword } from "./blocks/auth/UpdatePassword";
 
 const ProfileLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -42,8 +43,11 @@ const ProfileLayout: React.FC = () => {
   const { toast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [username, setUsername] = useState<string>((user as any)?.username || user?.name || "");
+  const [username, setUsername] = useState<string>(
+    (user as any)?.username || user?.name || ""
+  );
   const [loading, setLoading] = useState(false);
+  const [showUpdatePassword, setShowUpdatePassword] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -64,13 +68,17 @@ const ProfileLayout: React.FC = () => {
     setLoading(true);
     try {
       const response = await AuthAPI.updateProfile({
-        username: username.trim()
+        username: username.trim(),
       });
 
       if (response.status == 200) {
         const userFromToken: any = await authService.getProfile();
         if (userFromToken) {
-          setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
+          setUser(
+            localStorage.getItem("app_user")
+              ? JSON.parse(localStorage.getItem("app_user") as string)
+              : userFromToken
+          );
         }
 
         toast({
@@ -99,7 +107,11 @@ const ProfileLayout: React.FC = () => {
       if (response.status == 200) {
         const userFromToken: any = await authService.getProfile();
         if (userFromToken) {
-          setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
+          setUser(
+            localStorage.getItem("app_user")
+              ? JSON.parse(localStorage.getItem("app_user") as string)
+              : userFromToken
+          );
         }
 
         toast({
@@ -123,6 +135,10 @@ const ProfileLayout: React.FC = () => {
     navigate("/auth", { replace: true });
   };
 
+  const handleUpdatePassword = () => {
+    setShowUpdatePassword(true);
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -132,7 +148,9 @@ const ProfileLayout: React.FC = () => {
   }
 
   const isGithubLinked = Boolean(user.github_installation_id);
-  const userInitial = (user.username || user.name || user.email)?.charAt(0).toUpperCase();
+  const userInitial = (user.username || user.name || user.email)
+    ?.charAt(0)
+    .toUpperCase();
 
   return (
     <div className="w-full mx-auto pt-8">
@@ -146,7 +164,9 @@ const ProfileLayout: React.FC = () => {
               </AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="text-2xl text-gray-100">Hồ sơ cá nhân</CardTitle>
+              <CardTitle className="text-2xl text-gray-100">
+                Hồ sơ cá nhân
+              </CardTitle>
               <p className="text-gray-400 mt-1">
                 Quản lý thông tin và cài đặt tài khoản
               </p>
@@ -164,7 +184,9 @@ const ProfileLayout: React.FC = () => {
 
             {!isEditing ? (
               <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600/30">
-                <span className="font-medium text-gray-200">{(user as any).username || user.name}</span>
+                <span className="font-medium text-gray-200">
+                  {(user as any).username || user.name}
+                </span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -224,9 +246,10 @@ const ProfileLayout: React.FC = () => {
               <span className="text-gray-200">{user.email}</span>
               <Badge
                 variant={user.email_verified ? "default" : "secondary"}
-                className={user.email_verified
-                  ? "bg-green-600/20 text-green-400 border-green-500/30"
-                  : "bg-gray-600/20 text-gray-400 border-gray-500/30"
+                className={
+                  user.email_verified
+                    ? "bg-green-600/20 text-green-400 border-green-500/30"
+                    : "bg-gray-600/20 text-gray-400 border-gray-500/30"
                 }
               >
                 {user.email_verified ? "Đã xác minh" : "Chưa xác minh"}
@@ -247,9 +270,10 @@ const ProfileLayout: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Badge
                   variant={isGithubLinked ? "default" : "secondary"}
-                  className={isGithubLinked
-                    ? "bg-purple-600/20 text-purple-400 border-purple-500/30"
-                    : "bg-gray-600/20 text-gray-400 border-gray-500/30"
+                  className={
+                    isGithubLinked
+                      ? "bg-purple-600/20 text-purple-400 border-purple-500/30"
+                      : "bg-gray-600/20 text-gray-400 border-gray-500/30"
                   }
                 >
                   {isGithubLinked ? "Đã liên kết" : "Chưa liên kết"}
@@ -281,10 +305,15 @@ const ProfileLayout: React.FC = () => {
                         Xác nhận hủy liên kết GitHub
                       </AlertDialogTitle>
                       <AlertDialogDescription className="text-gray-300 leading-relaxed">
-                        Bạn có chắc chắn muốn gỡ ứng dụng GitHub khỏi tài khoản này không?
+                        Bạn có chắc chắn muốn gỡ ứng dụng GitHub khỏi tài khoản
+                        này không?
                         <br />
                         <br />
-                        <span className="text-yellow-400 font-medium">Lưu ý:</span> Sau khi hủy liên kết, bạn sẽ không thể nhận thông báo từ GitHub và các tính năng tích hợp sẽ bị tắt.
+                        <span className="text-yellow-400 font-medium">
+                          Lưu ý:
+                        </span>{" "}
+                        Sau khi hủy liên kết, bạn sẽ không thể nhận thông báo từ
+                        GitHub và các tính năng tích hợp sẽ bị tắt.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -319,12 +348,7 @@ const ProfileLayout: React.FC = () => {
             <Button
               variant="outline"
               className="w-full gap-2 border-gray-600/50 text-black hover:bg-gray-700/50 hover:text-gray-200"
-              onClick={() => {
-                toast({
-                  title: "Tính năng đang phát triển",
-                  description: "Chức năng đổi mật khẩu sẽ có trong phiên bản tiếp theo.",
-                });
-              }}
+              onClick={handleUpdatePassword}
             >
               <Key className="w-4 h-4 text-yellow-600" />
               Đổi mật khẩu
@@ -343,6 +367,11 @@ const ProfileLayout: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <UpdatePassword
+        open={showUpdatePassword}
+        onOpenChange={setShowUpdatePassword}
+      />
     </div>
   );
 };
