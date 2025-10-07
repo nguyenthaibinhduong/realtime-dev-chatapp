@@ -196,6 +196,12 @@ export const MessageList: React.FC<Props> = ({
             const showSenderInfo =
               !isMe && shouldShowSenderInfo(messages, idx, user?.id);
 
+            // Detect file-upload messages that carry attachments
+            const isFileUploadWithAttachments =
+              message?.type === 'file-upload' &&
+              message.attachments &&
+              message.attachments.length > 0;
+
             // Xác định trạng thái gửi tin nhắn
             let statusLabel = null;
             // Chỉ hiện "Đã gửi" cho tin nhắn cuối cùng của mình
@@ -379,11 +385,19 @@ export const MessageList: React.FC<Props> = ({
                       </span>
                     )}
                     <div
-                      className={`min-w-0 rounded-2xl px-4 py-2 flex flex-col ${isMe
-                        ? "bg-blue-600 text-white "
-                        : "bg-gray-700 text-white " +
-                        (showSenderInfo ? " " : " ml-[43px]")
-                        } ${message?.type === "code" ? "w-[80%] bg-transparent" : ""}`}
+                      className={
+                        (() => {
+                          const base = 'min-w-0 rounded-2xl flex flex-col';
+                          const padding = isFileUploadWithAttachments ? 'p-0' : 'px-4 py-2';
+                          const color = isFileUploadWithAttachments
+                            ? 'bg-transparent text-white'
+                            : isMe
+                              ? 'bg-blue-600 text-white'
+                              : `bg-gray-700 text-white ${showSenderInfo ? '' : 'ml-[43px]'}`;
+                          const codeStyle = message?.type === 'code' ? 'w-[80%] bg-transparent' : '';
+                          return `${base} ${padding} ${color} ${codeStyle}`;
+                        })()
+                      }
                     >
                       <div className="flex justify-start mb-1 items-center">
                         <p
@@ -403,104 +417,102 @@ export const MessageList: React.FC<Props> = ({
                       </div>
 
                       {/* attachments nếu có */}
-                      {message.attachments &&
-                        message.attachments.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {message.attachments.map((att: any) => (
-                              <div
-                                key={att.key || att.id}
-                                className="inline-block"
-                              >
-                                {att.uploading ? (
-                                  // ✅ Hiển thị loading state cho attachment đang upload
-                                  <div className="relative max-w-xs rounded shadow-sm bg-gray-800/30 border border-gray-700/50 p-3">
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex-shrink-0">
-                                        <div className="h-6 w-6 text-gray-400 animate-pulse">
-                                          {att.mimeType?.startsWith(
-                                            "image/"
-                                          ) ? (
-                                            <svg
-                                              className="h-6 w-6"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                              />
-                                            </svg>
-                                          ) : (
-                                            <svg
-                                              className="h-6 w-6"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                              />
-                                            </svg>
-                                          )}
-                                        </div>
+                      {message.attachments && message.attachments.length > 0 && (
+                        <div
+                          className={isFileUploadWithAttachments ? 'mt-0 grid grid-cols-1 gap-3' : 'mt-2 flex flex-wrap gap-2'}
+                        >
+                          {message.attachments.map((att: any) => (
+                            <div key={att.key || att.id} className={isFileUploadWithAttachments ? 'w-full' : 'inline-block'}>
+                              {att.uploading ? (
+                                // ✅ Hiển thị loading state cho attachment đang upload
+                                <div className={isFileUploadWithAttachments ? 'relative w-full rounded shadow-sm bg-gray-800/20 border border-gray-700/30 p-3' : 'relative max-w-xs rounded shadow-sm bg-gray-800/30 border border-gray-700/50 p-3'}>
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex-shrink-0">
+                                      <div className="h-6 w-6 text-gray-400 animate-pulse">
+                                        {att.mimeType?.startsWith(
+                                          "image/"
+                                        ) ? (
+                                          <svg
+                                            className="h-6 w-6"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                            />
+                                          </svg>
+                                        ) : (
+                                          <svg
+                                            className="h-6 w-6"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            />
+                                          </svg>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-medium text-gray-200 truncate">
+                                        {att.filename || "Uploading file..."}
                                       </div>
 
-                                      <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium text-gray-200 truncate">
-                                          {att.filename || "Uploading file..."}
+                                      {att.fileSize && (
+                                        <div className="text-xs text-gray-400">
+                                          {attachmentService.formatFileSize(
+                                            att.fileSize
+                                          )}
                                         </div>
+                                      )}
 
-                                        {att.fileSize && (
-                                          <div className="text-xs text-gray-400">
-                                            {attachmentService.formatFileSize(
-                                              att.fileSize
-                                            )}
-                                          </div>
-                                        )}
+                                      {/* Progress bar */}
+                                      <div className="mt-2 w-full bg-gray-700 rounded-full h-1.5">
+                                        <div
+                                          className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                                          style={{
+                                            width: `${att.progress || 0}%`,
+                                          }}
+                                        />
+                                      </div>
 
-                                        {/* Progress bar */}
-                                        <div className="mt-2 w-full bg-gray-700 rounded-full h-1.5">
-                                          <div
-                                            className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-                                            style={{
-                                              width: `${att.progress || 0}%`,
-                                            }}
-                                          />
-                                        </div>
-
-                                        <div className="flex justify-between items-center mt-1">
-                                          <span className="text-xs text-gray-400">
-                                            Uploading...
-                                          </span>
-                                          <span className="text-xs text-gray-400">
-                                            {Math.round(att.progress || 0)}%
-                                          </span>
-                                        </div>
+                                      <div className="flex justify-between items-center mt-1">
+                                        <span className="text-xs text-gray-400">
+                                          Uploading...
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                          {Math.round(att.progress || 0)}%
+                                        </span>
                                       </div>
                                     </div>
                                   </div>
-                                ) : (
-                                  // ✅ Hiển thị attachment bình thường sau khi upload xong
-                                  <Attachment
-                                    keyName={att.key} // storage key để component fetch presigned URL
-                                    fileUrl={att.fileUrl} // nếu đã có public URL, component sẽ ưu tiên
-                                    filename={att.filename}
-                                    mimeType={att.mimeType}
-                                    fileSize={att.fileSize}
-                                    className="max-w-xs rounded shadow-sm"
-                                    style={{ maxHeight: 200 }}
-                                  />
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                                </div>
+                              ) : (
+                                // ✅ Hiển thị attachment bình thường sau khi upload xong
+                                <Attachment
+                                  keyName={att.key} // storage key để component fetch presigned URL
+                                  fileUrl={att.fileUrl} // nếu đã có public URL, component sẽ ưu tiên
+                                  filename={att.filename}
+                                  mimeType={att.mimeType}
+                                  fileSize={att.fileSize}
+                                  className={isFileUploadWithAttachments ? 'w-full rounded shadow-sm' : 'max-w-xs rounded shadow-sm'}
+                                  style={isFileUploadWithAttachments ? { maxHeight: 360 } : { maxHeight: 200 }}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

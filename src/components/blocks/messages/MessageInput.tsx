@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 
 interface MessageInputProps {
   channelId: string;
-  onSend?: (content: string, files?: File[]) => void;
+  // onSend may be async (returns Promise) so the input can await uploads/sending
+  onSend?: (content: string, files?: File[]) => void | Promise<void>;
 }
 
 type Lang =
@@ -48,6 +49,40 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
     setPreviews((p) => [...p, ...selected.map((f) => URL.createObjectURL(f))]);
   };
 
+  // Handle paste events to allow pasting images directly into the input
+  const handlePaste = (e: React.ClipboardEvent) => {
+    // If in code mode (or auto code detection), do not intercept paste
+    if (isAutoCode) return;
+
+    try {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const filesFromClipboard: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        // item.kind === 'file' typically for images
+        if (item.kind === "file") {
+          const file = item.getAsFile();
+          if (file) filesFromClipboard.push(file);
+        }
+      }
+
+      if (filesFromClipboard.length === 0) return;
+
+      // Prevent default paste so images are not inserted as data URLs into textarea
+      e.preventDefault();
+
+      // Reuse the onFiles logic by building a DataTransfer to get a FileList
+      const dt = new DataTransfer();
+      filesFromClipboard.forEach((f) => dt.items.add(f));
+      onFiles(dt.files);
+    } catch (err) {
+      // swallow any clipboard errors
+      console.warn("Paste handling failed:", err);
+    }
+  };
+
   const handleRemoveFile = (idx: number) => {
     setFiles((f) => f.filter((_, i) => i !== idx));
     setPreviews((p) => p.filter((_, i) => i !== idx));
@@ -58,8 +93,10 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
     (isCodeMode ? code.trim().length > 0 : newMessage.trim().length > 0) ||
     files.length > 0;
 
+  const [isSending, setIsSending] = useState(false);
+
   const handleSend = async () => {
-    if (!canSend) return;
+    if (!canSend || isSending) return;
 
     let content = newMessage.trim();
     if (isAutoCode) {
@@ -70,11 +107,24 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
       content = `\`\`\`${fence}\n${body}\n\`\`\``;
     }
 
-    onSend?.(content, files);
-    setNewMessage("");
-    setFiles([]);
-    setPreviews([]);
-    if (isCodeMode) setCode("");
+    try {
+      setIsSending(true);
+      const res = onSend?.(content, files);
+      if (res && typeof (res as any).then === "function") {
+        await res;
+      }
+
+      // Clear inputs only after successful send
+      setNewMessage("");
+      setFiles([]);
+      setPreviews([]);
+      if (isCodeMode) setCode("");
+    } catch (err) {
+      console.error("Send failed:", err);
+      // keep inputs so user can retry; parent can show notifications
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -133,10 +183,10 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
       else
         setNewMessage(
           "```" +
-            (lang === "plaintext" ? "" : lang) +
-            "\n" +
-            formatted +
-            "\n```"
+          (lang === "plaintext" ? "" : lang) +
+          "\n" +
+          formatted +
+          "\n```"
         );
     } catch (e) {
       console.warn("Format error:", e);
@@ -184,9 +234,8 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
               setIsCodeMode((v) => !v);
             }}
             title={isAutoCode ? "Đang ở chế độ code" : "Bật chế độ code"}
-            className={`flex h-7 w-7 items-center justify-center rounded hover:bg-primary/80 transition-colors ${
-              isAutoCode ? "bg-primary text-white" : ""
-            }`}
+            className={`flex h-7 w-7 items-center justify-center rounded hover:bg-primary/80 transition-colors ${isAutoCode ? "bg-primary text-white" : ""
+              }`}
           >
             <Code2
               className={`h-4 w-4 ${isAutoCode ? "text-white" : "text-muted-foreground"}`}
@@ -197,9 +246,8 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
         {/* Khung chat nhỏ lại, nằm cùng hàng với nút (giữ styling khung) */}
         <div className="relative flex-1">
           <div
-            className={`rounded border border-border bg-[hsl(var(--chat-input))] px-2 shadow-sm ${
-              isAutoCode ? "pt-2" : "pt-3"
-            } flex ${isAutoCode ? "flex-col" : "items-center"}`}
+            className={`rounded border border-border bg-[hsl(var(--chat-input))] px-2 shadow-sm ${isAutoCode ? "pt-2" : "pt-3"
+              } flex ${isAutoCode ? "flex-col" : "items-center"}`}
           >
             {/* ======= CODE MODE: Monaco giữ nguyên phong cách khung của bạn ======= */}
             {isAutoCode ? (
@@ -290,6 +338,7 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
                   rows={1}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
+                  onPaste={handlePaste}
                   onKeyDown={handleKeyDown}
                   placeholder={
                     isAutoCode
@@ -307,6 +356,8 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
                     className="absolute bottom-2 right-2 h-7 w-7 rounded"
                     aria-label="Gửi"
                     title="Gửi"
+
+                    disabled={isSending}
                   >
                     <Send className="h-4 w-4" />
                   </Button>

@@ -113,10 +113,10 @@ export const Attachment: React.FC<AttachmentProps> = ({
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
         />
-        <div className="mt-1 text-xs">{filename}</div>
-        <div className="text-xs">
+        {/* <div className="mt-1 text-xs">{filename}</div> */}
+        {/* <div className="text-xs">
           {attachmentService.formatFileSize(fileSize)}
-        </div>
+        </div> */}
       </div>
     );
   }

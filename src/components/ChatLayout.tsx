@@ -411,6 +411,7 @@ export default function ChatLayout() {
       chatSocketService.sendMessage({
         channelId: selectedChannel.id,
         text: content.trim(),
+        type: "file-upload",
         channelData: selectedChannel,
         ...(attachments.length > 0 && { presignedAttachments: attachments }), // Include attachments if any
       });
