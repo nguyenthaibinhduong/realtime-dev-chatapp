@@ -24,10 +24,12 @@ class ChatSocketService {
   /** ================== CHANNEL ================== */
 
   joinRoom(channelId: string) {
+    console.log("Joining channel socket:", channelId);
     getSocket().emit("join_channel", { channelId });
   }
 
   leaveRoom(channelId: string) {
+    console.log("Leaving channel socket:", channelId);
     getSocket().emit("leave_channel", { channelId });
   }
 

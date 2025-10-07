@@ -156,9 +156,9 @@ export default function ChatLayout() {
   }, [loadChannels]);
 
   // Socket join/leave + onMessage
-  const joinChannelSocket = useCallback(() => {
+  const joinChannelSocketA = useCallback(() => {
     if (selectedChannel?.id) {
-      chatSocketService.joinRoom(selectedChannel.id);
+      chatSocketService.joinRoom(selectedChannel?.id);
       chatSocketService.onMessage((msg: any) => {
         console.log("New socket message received:", msg);
         setMessages((prev: any) => {
@@ -180,10 +180,35 @@ export default function ChatLayout() {
       chatSocketService.offMessage();
     };
   }, [selectedChannel]);
+  const joinChannelSocketB = useCallback(() => {
+    if (selectedChannel?.id) {
+      chatSocketService.joinRoom(localStorage.getItem("selectedChannelId"));
+      chatSocketService.onMessage((msg: any) => {
+        console.log("New socket message received:", msg);
+        setMessages((prev: any) => {
+          // Nếu có tin nhắn cùng fakeID thì replace, nếu không thì thêm mới
+          const idx = prev.findIndex(
+            (p: any) => String(p.fakeID) === String(msg.fakeID)
+          );
+          if (idx !== -1) {
+            const updated = [...prev];
+            updated[idx] = msg;
+            return updated;
+          }
+          return [...prev, msg];
+        });
+      });
+    }
+    return () => {
+      chatSocketService.leaveRoom(localStorage.getItem("selectedChannelId"));
+      chatSocketService.offMessage();
+    };
+  }, [selectedChannel]);
 
   useEffect(() => {
-    joinChannelSocket();
-  }, [joinChannelSocket]);
+    joinChannelSocketA();
+    joinChannelSocketB();
+  }, [joinChannelSocketA, joinChannelSocketB]);
 
   // Socket channel updates (optional)
   useEffect(() => {
@@ -614,7 +639,7 @@ export default function ChatLayout() {
           ) : (
             <MessageList
               messages={messages} // ASC: cũ → mới
-              channelId={String(selectedChannel!.id)}
+              channelId={String(selectedChannel.id)}
               onPrependMessages={handlePrependMessages}
               loadOlder={loadOlder}
               type={selectedChannel?.type}
