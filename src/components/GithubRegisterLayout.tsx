@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import {
     Card, CardContent, CardHeader, CardTitle, CardDescription,
 } from "@/components/ui/card";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption } from "@/components/ui/table";
+
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/useToast";
 import authService from "@/services/authService";
-import { Github, ExternalLink, Shield, Lock, RefreshCw, Loader2 } from "lucide-react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { Github, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import RepoTable from "./blocks/github/RepoTable";
 
 type GHOwner = { login: string; avatar_url: string; html_url: string };
