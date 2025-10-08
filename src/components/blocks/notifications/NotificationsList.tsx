@@ -120,38 +120,85 @@ const NotificationItem = memo(
     const getNotificationDisplay = useMemo(() => {
       switch (notification.type) {
         case "message":
+          const messageType = notification.data?.type || 'message';
+          let messageTitle = `#${notification.data?.channel?.name || "kênh"}`;
+          let messageContent = '';
+
+          switch (messageType) {
+            case "code-share":
+              messageTitle = `🔗 ${notification.data?.channel?.name || "kênh"}`;
+              messageContent = `${notification.data?.sender?.username || "Ai đó"} đã chia sẻ code: ${notification.data?.text || ""}`;
+              break;
+            case "file-upload":
+              messageTitle = `📁 ${notification.data?.channel?.name || "kênh"}`;
+              const attachmentCount = notification.data?.attachments?.length || 0;
+              messageContent = `${notification.data?.sender?.username || "Ai đó"} đã gửi ${attachmentCount} file${attachmentCount > 1 ? 's' : ''}`;
+              break;
+            case "notification":
+              messageTitle = `🔔 ${notification.data?.channel?.name || "kênh"}`;
+              messageContent = `${notification.data?.sender?.username || "Ai đó"} ${notification.data?.text || ""}`;
+              break;
+            default:
+              messageContent = `${notification.data?.sender?.username || "Ai đó"}: ${notification.data?.text || "tin nhắn"}`;
+          }
+
           return {
-            title: `#${notification.data?.channel?.name || "kênh"}`,
-            content: `${notification.data?.sender?.username || "Ai đó"}: ${notification.data?.text || notification.data?.message || "tin nhắn"}`,
+            title: messageTitle,
+            content: messageContent,
             titleClass: "text-blue-400 font-medium",
           };
 
         case "github":
-          // Extract GitHub notification data
-          const repository =
-            notification.data?.repository?.name || "Repository";
-          const owner =
-            notification.data?.repository?.owner?.login ||
-            notification.data?.pusher?.name ||
-            "Unknown";
-          const commitMessage =
-            notification.data?.head_commit?.message || "No commit message";
-          const branch = notification.data?.ref
-            ? notification.data.ref.replace("refs/heads/", "")
-            : "main";
-          const commitsCount = notification.data?.commits?.length || 1;
+          // GitHub có nhiều loại action khác nhau
+          const action = notification.data?.action;
 
-          return {
-            title: `${owner}/${repository}`,
-            content: `${commitsCount} commit${commitsCount > 1 ? "s" : ""} to ${branch}: ${commitMessage}`,
-            titleClass: "text-green-400 font-medium",
-            metadata: {
-              branch,
-              commitsCount,
-              author: notification.data?.head_commit?.author?.name || owner,
-              compareUrl: notification.data?.compare,
-            },
-          };
+          if (action === "created") {
+            // Installation created
+            const repoCount = notification.data?.repositories?.length || 0;
+            const owner = notification.data?.installation?.account?.login || "Unknown";
+
+            return {
+              title: `🔧 GitHub App - ${owner}`,
+              content: `Đã cài đặt ứng dụng cho ${repoCount} repository${repoCount > 1 ? 's' : ''}`,
+              titleClass: "text-green-400 font-medium",
+              metadata: {
+                action: "installation_created",
+                repoCount,
+                owner,
+                createdAt: notification.data?.installation?.created_at,
+              },
+            };
+          } else if (notification.data?.repository && notification.data?.commits) {
+            // Push event
+            const repository = notification.data.repository.name;
+            const owner = notification.data.repository.owner?.login || notification.data.pusher?.name || "Unknown";
+            const commitMessage = notification.data.head_commit?.message || "No commit message";
+            const branch = notification.data.ref ? notification.data.ref.replace("refs/heads/", "") : "main";
+            const commitsCount = notification.data.commits?.length || 1;
+
+            return {
+              title: `📦 ${owner}/${repository}`,
+              content: `${commitsCount} commit${commitsCount > 1 ? "s" : ""} to ${branch}: ${commitMessage}`,
+              titleClass: "text-green-400 font-medium",
+              metadata: {
+                action: "push",
+                branch,
+                commitsCount,
+                author: notification.data.head_commit?.author?.name || owner,
+                compareUrl: notification.data.compare,
+              },
+            };
+          } else {
+            // Other GitHub events
+            return {
+              title: `🐙 GitHub Event`,
+              content: `Action: ${action || 'unknown'}`,
+              titleClass: "text-green-400 font-medium",
+              metadata: {
+                action: action || 'unknown',
+              },
+            };
+          }
 
         case "system":
           return {
@@ -189,18 +236,18 @@ const NotificationItem = memo(
           !notification.read && "bg-blue-50/5",
           // Animation cho notification mới - nền trắng chữ đen
           isNewNotification &&
-            "bg-white text-black border-l-2 border-l-green-500"
+          "bg-white text-black border-l-2 border-l-green-500"
         )}
         onClick={() => onSelect(notification)}
         style={
           isNewNotification
             ? {
-                background: "white",
-                color: "black",
-                animation: "flash-white 0.8s ease-in-out 4",
-                border: "1px solid rgba(0,0,0,0.1)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              }
+              background: "white",
+              color: "black",
+              animation: "flash-white 0.8s ease-in-out 4",
+              border: "1px solid rgba(0,0,0,0.1)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }
             : undefined
         }
       >
@@ -241,9 +288,9 @@ const NotificationItem = memo(
                     style={
                       isNewNotification
                         ? {
-                            animation: "pulse 1s ease-in-out infinite",
-                            boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
-                          }
+                          animation: "pulse 1s ease-in-out infinite",
+                          boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
+                        }
                         : undefined
                     }
                   />
@@ -264,22 +311,30 @@ const NotificationItem = memo(
             </p>
 
             {/* GitHub specific metadata */}
-            {notification.type === "github" &&
-              getNotificationDisplay.metadata && (
-                <div className="flex items-center gap-3 text-xs text-sidebar-foreground/50">
-                  <span>Branch: {getNotificationDisplay.metadata.branch}</span>
-                  <span>•</span>
-                  <span>By: {getNotificationDisplay.metadata.author}</span>
-                  {getNotificationDisplay.metadata.commitsCount > 1 && (
-                    <>
-                      <span>•</span>
-                      <span>
-                        {getNotificationDisplay.metadata.commitsCount} commits
-                      </span>
-                    </>
-                  )}
-                </div>
-              )}
+            {notification.type === "github" && getNotificationDisplay.metadata && (
+              <div className="flex items-center gap-3 text-xs text-sidebar-foreground/50">
+                {getNotificationDisplay.metadata.action === "push" && (
+                  <>
+                    <span>Branch: {getNotificationDisplay.metadata.branch}</span>
+                    <span>•</span>
+                    <span>By: {getNotificationDisplay.metadata.author}</span>
+                    {getNotificationDisplay.metadata.commitsCount > 1 && (
+                      <>
+                        <span>•</span>
+                        <span>{getNotificationDisplay.metadata.commitsCount} commits</span>
+                      </>
+                    )}
+                  </>
+                )}
+                {getNotificationDisplay.metadata.action === "installation_created" && (
+                  <>
+                    <span>Repositories: {getNotificationDisplay.metadata.repoCount}</span>
+                    <span>•</span>
+                    <span>Owner: {getNotificationDisplay.metadata.owner}</span>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Thời gian chính xác */}
             <div
