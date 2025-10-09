@@ -9,7 +9,7 @@ export function getSocket(token?: string, forceNew = false): Socket {
     }
 
     socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:3088", {
-      autoConnect: true, // 👈 chỉ connect khi gọi .connect()
+      autoConnect: false, // 👈 chỉ connect khi gọi .connect()
       extraHeaders: {
         Authorization: `Bearer ${token || localStorage.getItem("token") || ""}`,
       },

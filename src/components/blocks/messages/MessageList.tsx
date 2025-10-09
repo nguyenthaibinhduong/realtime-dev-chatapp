@@ -1,16 +1,15 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Message as MessageBubble } from "./Message";
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { MessageListProps } from "@/types/message";
-import { Loader2 } from "lucide-react";
-import attachmentService from "@/services/attachmentService";
-import Attachment from "./Attachment";
 import { RepoChatDialog } from "../github/RepoChatDialog";
-import { Code } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { CodeViewerDialog } from "../github/RepoDetailModal";
+import MessageItem from "./type/MessageItem";
+import NotificationMessage from "./type/NotificationMessage";
+import CodeShareMessage from "./type/CodeShareMessage";
+import LoadMoreIndicator from "@/components/common/LoadMoreIndicator";
+import { useMessageScroll } from "@/hooks/useMessage";
+import { useMessageStatus } from "@/hooks/useMessage";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -18,14 +17,12 @@ function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   const prev = messages[idx - 1];
   if (curr?.type === "notification" || prev?.type === "notification") return true;
   if (!curr?.sender || !prev?.sender) return true;
-  // hiển thị nếu khác người gửi hoặc cách > 5 phút
   return (
     curr.sender.id !== prev.sender.id ||
     Math.abs(
       new Date(curr.created_at || curr.send_at).getTime() -
       new Date(prev.created_at || prev.send_at).getTime()
-    ) >
-    5 * 60 * 1000
+    ) > 5 * 60 * 1000
   );
 }
 
@@ -41,7 +38,7 @@ type Props = MessageListProps & {
     hasMoreOlder?: boolean;
     cursors?: any;
   }>;
-  type?: string; // Loại kênh: group, group-private, personal
+  type?: string;
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -51,128 +48,92 @@ export const MessageList: React.FC<Props> = ({
   loadOlder,
   type,
 }) => {
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { user } = useAuth();
-
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [sentStatusIds, setSentStatusIds] = useState<string[]>([]);
   const [openGitModal, setOpenGitModal] = useState(false);
+  const [codeOpen, setCodeOpen] = useState(false);
+  const [codeShareParams, setCodeShareParams] = useState<any>(null);
 
-  // Theo dõi các tin nhắn vừa chuyển sang trạng thái "sent"
-  useEffect(() => {
-    messages.forEach((message: any) => {
-      const isMe = message?.sender?.id === user?.id;
-      if (
-        isMe &&
-        message.status === "sent" &&
-        !sentStatusIds.includes(String(message.id))
-      ) {
-        setSentStatusIds((prev) => [...prev, String(message.id)]);
-        setTimeout(() => {
-          setSentStatusIds((prev) =>
-            prev.filter((id) => id !== String(message.id))
-          );
-        }, 3000);
-      }
-    });
-    // eslint-disable-next-line
-  }, [messages]);
-
-  // cờ để chặn auto-scroll-bottom khi prepend
-  const isPrependingRef = useRef(false);
-  const prevLenRef = useRef<number>(messages.length);
-
-  // Scroll xuống đáy khi mount lần đầu
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "auto" });
-    }
-  }, []);
-
-  // Auto scroll xuống đáy khi có tin mới (không phải prepend)
-  useEffect(() => {
-    const grew = messages.length > prevLenRef.current;
-    prevLenRef.current = messages.length;
-
-    if (isPrependingRef.current) {
-      isPrependingRef.current = false;
-      return;
-    }
-    if (grew && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages.length]);
-
+  // Custom hooks
+  const { sentStatusIds } = useMessageStatus(messages, user?.id);
   const firstMsgId = messages.length > 0 ? String(messages[0].id) : undefined;
 
-  const handleScroll = useCallback(async () => {
-    if (!scrollAreaRef.current || loadingMore || !hasMore || !loadOlder) return;
-
-    // ✅ viewport đúng của shadcn/ui – Radix
-    const viewport = scrollAreaRef.current.querySelector(
-      "div[data-radix-scroll-area-viewport]"
-    ) as HTMLDivElement | null;
-    if (!viewport) return;
-
-    // gần đỉnh → load older
-    if (viewport.scrollTop <= 40 && messages.length > 0) {
-      setLoadingMore(true);
-      isPrependingRef.current = true;
-
-      const prevScrollHeight = viewport.scrollHeight;
-
-      try {
-        const res = await loadOlder(channelId, firstMsgId!, 50); // lấy thêm 50 tin cũ hơn
-        const newItems = Array.isArray(res?.items) ? res.items : [];
-
-        if (newItems.length > 0) {
-          onPrependMessages?.(newItems);
-
-          if (typeof res?.hasMoreOlder === "boolean")
-            setHasMore(res.hasMoreOlder);
-          else setHasMore(newItems.length >= 50);
-
-          // bù scroll để không nhảy vị trí
-          requestAnimationFrame(() => {
-            const newScrollHeight = viewport.scrollHeight;
-            const delta = newScrollHeight - prevScrollHeight;
-            viewport.scrollTop = viewport.scrollTop + delta;
-          });
-        } else {
-          setHasMore(false);
-        }
-      } catch {
-        setHasMore(false);
-      } finally {
-        setLoadingMore(false);
-      }
-    }
-  }, [
+  const { scrollAreaRef, messagesEndRef } = useMessageScroll({
+    messages,
     channelId,
     firstMsgId,
     hasMore,
-    loadOlder,
     loadingMore,
-    messages.length,
+    loadOlder,
     onPrependMessages,
-  ]);
+    setLoadingMore,
+    setHasMore,
+  });
 
-  // attach scroll listener
-  useEffect(() => {
-    const viewport = scrollAreaRef.current?.querySelector(
-      "div[data-radix-scroll-area-viewport]"
-    ) as HTMLDivElement | null;
-    if (!viewport) return;
-    viewport.addEventListener("scroll", handleScroll);
-    return () => viewport.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+  // Memoized handlers
+  const handleCodeShare = (params: any) => {
+    setCodeShareParams(params);
+    setCodeOpen(true);
+  };
 
-  // Thêm state để mở modal code share
-  const [codeOpen, setCodeOpen] = useState(false);
-  const [codeShareParams, setCodeShareParams] = useState<any>(null);
+  const handleCloseCodeViewer = (v: boolean) => {
+    setCodeOpen(v);
+    if (!v) setCodeShareParams(null);
+  };
+
+  // Memoized message items
+  const messageItems = useMemo(() => {
+    return messages.map((message: any, idx: number) => {
+      const isMe = message?.sender?.id === user?.id;
+      const showSenderInfo = !isMe && shouldShowSenderInfo(messages, idx, user?.id);
+      const isLastMyMessage = isMe && idx === messages.length - 1;
+
+      // Notification message
+      if (message?.type === "notification") {
+        return (
+          <NotificationMessage
+            key={message.id}
+            message={message}
+            onViewRepo={() => setOpenGitModal(true)}
+          />
+        );
+      }
+
+      // Code share message
+      if (message.type === "code-share") {
+        return (
+          <CodeShareMessage
+            key={message.id}
+            message={message}
+            isMe={isMe}
+            showSenderInfo={showSenderInfo}
+            hoveredId={hoveredId}
+            onHover={setHoveredId}
+            onOpenCode={handleCodeShare}
+          />
+        );
+      }
+
+      // Regular message
+      return (
+        <MessageItem
+          key={message.id}
+          message={message}
+          isMe={isMe}
+          showSenderInfo={showSenderInfo}
+          type={type}
+          user={user}
+          sentStatusIds={sentStatusIds}
+          isLastMyMessage={isLastMyMessage}
+          hoveredId={hoveredId}
+          onHover={setHoveredId}
+          onCodeShare={handleCodeShare}
+        />
+      );
+    });
+  }, [messages, user, type, hoveredId]);
 
   return (
     <ScrollArea
@@ -181,358 +142,31 @@ export const MessageList: React.FC<Props> = ({
       ref={scrollAreaRef}
     >
       <div>
-        {loadingMore && (
-          <div className="flex items-center justify-center py-2">
-            <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
-            <span className="text-xs text-muted-foreground">
-              Đang tải thêm tin nhắn...
-            </span>
-          </div>
-        )}
+        <LoadMoreIndicator loading={loadingMore} />
 
         <div className="space-y-4">
-          {messages.map((message: any, idx: number) => {
-            const isMe = message?.sender?.id === user?.id;
-            const showSenderInfo =
-              !isMe && shouldShowSenderInfo(messages, idx, user?.id);
-
-            // Xác định trạng thái gửi tin nhắn
-            let statusLabel = null;
-            // Chỉ hiện "Đã gửi" cho tin nhắn cuối cùng của mình
-            const isLastMyMessage =
-              isMe &&
-              idx === messages.length - 1 &&
-              message.status === "sent" &&
-              sentStatusIds.includes(String(message.id));
-
-            if (isMe && message.status && message.type != 'notification') {
-              if (message.status === "pending") {
-                statusLabel = (
-                  <span className="text-xs text-yellow-400 animate-pulse">
-                    Đang gửi...
-                  </span>
-                );
-              } else if (message.status === "uploading") {
-                statusLabel = (
-                  <span className="text-xs text-blue-400 animate-pulse flex items-center gap-1">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Đang upload...
-                  </span>
-                );
-              } else if (message.status === "error") {
-                statusLabel = (
-                  <span className="text-xs text-red-500">
-                    Lỗi! Không gửi được
-                  </span>
-                );
-              } else if (isLastMyMessage) {
-                statusLabel = (
-                  <span className="text-xs text-green-400">Đã gửi</span>
-                );
-              }
-            }
-
-            // Nếu là notification thì hiển thị ra giữa
-            if (message?.type === "notification") {
-              return (
-                <div key={message.id} className="flex justify-center my-2">
-                  <div className=" text-white px-4 py-2 rounded-full text-sm shadow  flex items-center gap-2">
-                    <span className="font-semibold text-blue-400">{message?.sender?.username}</span>
-                    <span>{message.text}</span>
-
-                    <span className="text-xs text-zinc-400">
-                      {new Date(message.send_at || message.created_at).toLocaleTimeString("vi-VN", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                    <span onClick={() => setOpenGitModal(true)} className="text-blue-600  hover:underline hover:cursor-pointer">xem</span>
-                  </div>
-                  <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
-                </div>
-              );
-            }
-
-            // Nếu là code-share thì hiển thị card đặc biệt
-            if (message.type == "code-share") {
-              let jsonData: any = {};
-              try {
-                jsonData = message.json_data ? JSON.parse(message.json_data) : {};
-              } catch { jsonData = {}; }
-              const repo = jsonData.repo;
-              const refParam = jsonData.refParam;
-              const codePath = jsonData.initialPath;
-              const installation_id = jsonData.installation_id;
-
-              return (
-                <div
-                  key={message.id}
-                  className={`flex my-4 ${isMe ? "justify-end" : "justify-start"}`}
-                >
-                  {/* Avatar người gửi (chỉ hiện bên trái nếu không phải mình và showSenderInfo) */}
-                  {!isMe && showSenderInfo && (
-                    <div className="mr-3 flex flex-col items-center justify-center">
-                      <Avatar
-                        className="h-8 w-8 flex-shrink-0 cursor-pointer"
-                        onMouseEnter={() => setHoveredId(message.id)}
-                        onMouseLeave={() => setHoveredId(null)}
-                      >
-                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                          {message?.sender?.username?.[0]?.toUpperCase() || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      {hoveredId === message.id && (
-                        <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
-                          {message?.sender?.username}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <div onClick={() => {
-                    setCodeShareParams({
-                      repo,
-                      refParam,
-                      initialPath: codePath,
-                      installation_id: message?.sender?.github_installation_id,
-                      isShare: true,
-                    });
-                    setCodeOpen(true);
-                  }}
-                    className={`flex flex-col hover:cursor-pointer items-stretch w-full max-w-xl ${!isMe && showSenderInfo ? "" : "ml-10"}`}
-                  >
-                    {/* Tiêu đề repo màu xanh lá cây */}
-                    <div className="rounded-t-xl bg-blue-600 px-6 py-2 text-white font-semibold text-sm flex items-center gap-2">
-                      <Code className="h-4 w-4 text-white" />
-                      <span>{repo?.full_name}</span>
-                      <span className="ml-auto font-mono text-blue-300">{codePath?.split("/").pop()}</span>
-                    </div>
-                    <div className="bg-zinc-900 border border-zinc-700 rounded-b-xl px-6 py-4 flex flex-col items-center shadow-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-blue-400">Chia sẻ code</span>
-                        <span className="text-xs text-zinc-400 ml-2">
-                          {new Date(message.send_at || message.created_at).toLocaleTimeString("vi-VN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      <div className="text-sm text-white mb-2 text-center">
-                        <span className="font-semibold">{message?.sender?.username}</span>
-                        <span className="mx-1">đã chia sẻ file</span>
-                        <span className="font-mono text-blue-300">{codePath?.split("/").pop()}</span>
-                        <span className="mx-1">từ repo</span>
-                        <span className="font-mono text-emerald-400">{repo?.full_name}</span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Button
-                          size="sm"
-                          className="bg-blue-600 text-white hover:bg-blue-700"
-                          onClick={() => {
-                            setCodeShareParams({
-                              repo,
-                              refParam,
-                              initialPath: codePath,
-                              installation_id: message?.sender?.github_installation_id || installation_id,
-                              isShare: true,
-                            });
-                            setCodeOpen(true);
-                          }}
-                        >
-                          <Code className="h-4 w-4 mr-1" /> Xem code
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div key={message.id} className="flex flex-col items-end">
-                <div
-                  className={`flex ${isMe ? "justify-end" : "justify-start"} space-x-3 w-full`}
-                >
-                  {!isMe && showSenderInfo && (
-                    <div className="relative flex flex-col items-center justify-center">
-                      <Avatar
-                        className="h-8 w-8 flex-shrink-0 cursor-pointer"
-                        onMouseEnter={() => setHoveredId(message.id)}
-                        onMouseLeave={() => setHoveredId(null)}
-                      >
-                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                          {message?.sender?.username?.[0]?.toUpperCase() || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      {/* Nếu type khác personal và không phải tin nhắn của mình thì hiện username phía trên avatar */}
-
-                      {hoveredId === message.id && (
-                        <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
-                          {message?.sender?.username}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <div className="flex flex-col items-start">
-                    {type !== "personal" && !isMe && showSenderInfo && (
-                      <span className="ms-2 block text-xs text-white/80 mt-1 mb-1 text-center">
-                        {message?.sender?.username}
-                      </span>
-                    )}
-                    <div
-                      className={`min-w-0 rounded-2xl px-4 py-2 flex flex-col ${isMe
-                        ? "bg-blue-600 text-white "
-                        : "bg-gray-700 text-white " +
-                        (showSenderInfo ? " " : " ml-[43px]")
-                        } ${message?.type === "code" ? "w-[80%] bg-transparent" : ""}`}
-                    >
-                      <div className="flex justify-start mb-1 items-center">
-                        <p
-                          className={`text-xs text-white/60 whitespace-nowrap`}
-                        >
-                          {new Date(
-                            message.send_at || message.created_at
-                          ).toLocaleTimeString("vi-VN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-
-                      <div className="text-sm whitespace-pre-wrap break-words">
-                        <MessageBubble text={message.text} />
-                      </div>
-
-                      {/* attachments nếu có */}
-                      {message.attachments &&
-                        message.attachments.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {message.attachments.map((att: any) => (
-                              <div
-                                key={att.key || att.id}
-                                className="inline-block"
-                              >
-                                {att.uploading ? (
-                                  // ✅ Hiển thị loading state cho attachment đang upload
-                                  <div className="relative max-w-xs rounded shadow-sm bg-gray-800/30 border border-gray-700/50 p-3">
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex-shrink-0">
-                                        <div className="h-6 w-6 text-gray-400 animate-pulse">
-                                          {att.mimeType?.startsWith(
-                                            "image/"
-                                          ) ? (
-                                            <svg
-                                              className="h-6 w-6"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                              />
-                                            </svg>
-                                          ) : (
-                                            <svg
-                                              className="h-6 w-6"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                              />
-                                            </svg>
-                                          )}
-                                        </div>
-                                      </div>
-
-                                      <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium text-gray-200 truncate">
-                                          {att.filename || "Uploading file..."}
-                                        </div>
-
-                                        {att.fileSize && (
-                                          <div className="text-xs text-gray-400">
-                                            {attachmentService.formatFileSize(
-                                              att.fileSize
-                                            )}
-                                          </div>
-                                        )}
-
-                                        {/* Progress bar */}
-                                        <div className="mt-2 w-full bg-gray-700 rounded-full h-1.5">
-                                          <div
-                                            className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-                                            style={{
-                                              width: `${att.progress || 0}%`,
-                                            }}
-                                          />
-                                        </div>
-
-                                        <div className="flex justify-between items-center mt-1">
-                                          <span className="text-xs text-gray-400">
-                                            Uploading...
-                                          </span>
-                                          <span className="text-xs text-gray-400">
-                                            {Math.round(att.progress || 0)}%
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  // ✅ Hiển thị attachment bình thường sau khi upload xong
-                                  <Attachment
-                                    keyName={att.key} // storage key để component fetch presigned URL
-                                    fileUrl={att.fileUrl} // nếu đã có public URL, component sẽ ưu tiên
-                                    filename={att.filename}
-                                    mimeType={att.mimeType}
-                                    fileSize={att.fileSize}
-                                    className="max-w-xs rounded shadow-sm"
-                                    style={{ maxHeight: 200 }}
-                                  />
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                    </div>
-                  </div>
-                </div>
-                {/* Hiển thị statusLabel ở ngoài, dưới cùng mỗi tin nhắn của mình */}
-                {isMe && statusLabel && (
-                  <div className="mt-1 me-2 flex justify-end w-full">
-                    {statusLabel}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Modal xem code share */}
-          {codeShareParams && (
-            <CodeViewerDialog
-              open={codeOpen}
-              onOpenChange={(v) => {
-                setCodeOpen(v);
-                if (!v) setCodeShareParams(null);
-              }}
-              repo={codeShareParams.repo}
-              refParam={codeShareParams.refParam}
-              initialPath={codeShareParams.initialPath}
-              installation_id={codeShareParams.installation_id}
-              isShare={true}
-            />
-          )}
-
-          {/* đáy danh sách — để auto scroll */}
+          {messageItems}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Modals */}
+        <RepoChatDialog
+          open={openGitModal}
+          onOpenChange={setOpenGitModal}
+        />
+
+        {codeShareParams && (
+          <CodeViewerDialog
+            open={codeOpen}
+            onOpenChange={handleCloseCodeViewer}
+            repo={codeShareParams.repo}
+            refParam={codeShareParams.refParam}
+            initialPath={codeShareParams.initialPath}
+            installation_id={codeShareParams.installation_id}
+            isShare={true}
+            json_data_code={codeShareParams.json_code_data}
+          />
+        )}
       </div>
     </ScrollArea>
   );

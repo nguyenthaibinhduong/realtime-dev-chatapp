@@ -5,14 +5,21 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
+const TOAST_LIMIT = 3 // Tăng limit để hiển thị nhiều toast hơn
 const TOAST_REMOVE_DELAY = 1000000
+
+// Extended ToastAction interface để hỗ trợ custom action
+interface ToastAction {
+  altText: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
-  action?: ToastActionElement
+  action?: ToastActionElement | ToastAction // Hỗ trợ cả 2 kiểu
 }
 
 const actionTypes = {
@@ -139,20 +146,41 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
-function toast({ ...props }: Toast) {
+function toast({ action, ...props }: Toast) {
   const id = genId()
 
-  const update = (props: ToasterToast) =>
+  // Transform custom action to ToastActionElement if needed
+  let processedAction: any = undefined;
+  
+  if (action && 'onClick' in action && 'children' in action) {
+    // Custom action format từ notification handler
+    const customAction = action as ToastAction;
+    processedAction = React.createElement('button', {
+      className: "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      onClick: () => {
+        customAction.onClick();
+        dismiss(); // Auto dismiss toast sau khi click action
+      },
+      'aria-label': customAction.altText,
+    }, customAction.children);
+  } else if (action) {
+    // Standard ToastActionElement
+    processedAction = action as ToastActionElement;
+  }
+
+  const update = (props: Partial<ToasterToast>) =>
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
     })
+    
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
   dispatch({
     type: "ADD_TOAST",
     toast: {
       ...props,
+      action: processedAction,
       id,
       open: true,
       onOpenChange: (open) => {
@@ -189,3 +217,4 @@ function useToast() {
 }
 
 export { useToast, toast }
+export type { ToastAction }

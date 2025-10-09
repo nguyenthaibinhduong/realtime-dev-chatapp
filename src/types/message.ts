@@ -10,6 +10,7 @@ export interface Message {
     username: string;
     email: string;
   };
+  json_data:string | null;
   send_at: string;
   isMine: boolean;
   attachments?: {
