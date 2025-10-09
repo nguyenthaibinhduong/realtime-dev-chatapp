@@ -284,7 +284,7 @@ export default function ChatLayout() {
           const idx = prev.findIndex(
             (p: any) => String(p.fakeID) === String(msg.fakeID)
           );
-          if (idx !== -1) {
+          if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
             const updated = [...prev];
             updated[idx] = msg;
             return updated;
@@ -305,10 +305,11 @@ export default function ChatLayout() {
         console.log("New socket message received:", msg);
         setMessages((prev: any) => {
           // Nếu có tin nhắn cùng fakeID thì replace, nếu không thì thêm mới
+
           const idx = prev.findIndex(
             (p: any) => String(p.fakeID) === String(msg.fakeID)
           );
-          if (idx !== -1) {
+          if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
             const updated = [...prev];
             updated[idx] = msg;
             return updated;
