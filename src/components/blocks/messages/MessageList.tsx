@@ -88,8 +88,7 @@ export const MessageList: React.FC<Props> = ({
     return messages.map((message: any, idx: number) => {
       const isMe = message?.sender?.id === user?.id;
       const showSenderInfo = !isMe && shouldShowSenderInfo(messages, idx, user?.id);
-      const isLastMyMessage = isMe && idx === messages.length - 1 &&
-        message.status === "sent" && sentStatusIds.includes(String(message.id));
+      const isLastMyMessage = isMe && idx === messages.length - 1;
 
       // Notification message
       if (message?.type === "notification") {
@@ -134,7 +133,7 @@ export const MessageList: React.FC<Props> = ({
         />
       );
     });
-  }, [messages, user, type, sentStatusIds, hoveredId]);
+  }, [messages, user, type, hoveredId]);
 
   return (
     <ScrollArea
@@ -165,6 +164,7 @@ export const MessageList: React.FC<Props> = ({
             initialPath={codeShareParams.initialPath}
             installation_id={codeShareParams.installation_id}
             isShare={true}
+            json_data_code={codeShareParams.json_code_data}
           />
         )}
       </div>

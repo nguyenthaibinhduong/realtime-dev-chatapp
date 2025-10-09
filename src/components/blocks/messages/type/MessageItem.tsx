@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState, useRef, useMemo } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Code, Loader2 } from "lucide-react";
@@ -31,40 +31,83 @@ const MessageItem = memo(({
     onHover,
     onCodeShare,
 }: MessageItemProps) => {
+    const [showSentStatus, setShowSentStatus] = useState(false);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
     // Detect file-upload messages that carry attachments
     const isFileUploadWithAttachments =
         message?.type === 'file-upload' &&
         message.attachments &&
         message.attachments.length > 0;
 
-    // Xác định trạng thái gửi tin nhắn
-    let statusLabel = null;
-    if (isMe && message.status && message.type !== 'notification') {
-        if (message.status === "pending") {
-            statusLabel = (
-                <span className="text-xs text-yellow-400 animate-pulse">
-                    Đang gửi...
-                </span>
-            );
-        } else if (message.status === "uploading") {
-            statusLabel = (
-                <span className="text-xs text-blue-400 animate-pulse flex items-center gap-1">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Đang upload...
-                </span>
-            );
-        } else if (message.status === "error") {
-            statusLabel = (
-                <span className="text-xs text-red-500">
-                    Lỗi! Không gửi được
-                </span>
-            );
-        } else if (isLastMyMessage) {
-            statusLabel = (
-                <span className="text-xs text-green-400">Đã gửi</span>
-            );
+    // 🔥 Sửa effect để tránh re-trigger liên tục
+    useEffect(() => {
+        // Clear timer cũ nếu có
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
         }
-    }
+
+        // Chỉ show status khi là tin nhắn cuối của mình và status là "sent"
+        if (isMe && message.status === "sent" && isLastMyMessage && !showSentStatus) {
+            setShowSentStatus(true);
+
+            timerRef.current = setTimeout(() => {
+                setShowSentStatus(false);
+                timerRef.current = null;
+            }, 2000);
+        } else if (!isMe || message.status !== "sent" || !isLastMyMessage) {
+            // Ẩn status nếu không phải tin nhắn cuối hoặc không phải "sent"
+            setShowSentStatus(false);
+        }
+
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+    }, [isMe, message.status, isLastMyMessage, showSentStatus]);
+
+    // 🔥 Memoize statusLabel để tránh re-calculate không cần thiết
+    const statusLabel = useMemo(() => {
+        if (!isMe || !message.status || message.type === 'notification') {
+            return null;
+        }
+
+        switch (message.status) {
+            case "pending":
+                return (
+                    <span className="text-sm text-yellow-400 animate-pulse">
+                        Đang gửi...
+                    </span>
+                );
+            case "uploading":
+                return (
+                    <span className="text-sm text-blue-400 animate-pulse flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Đang upload...
+                    </span>
+                );
+            case "error":
+                return (
+                    <span className="text-sm text-red-500">
+                        Lỗi! Không gửi được
+                    </span>
+                );
+            case "sent":
+                if (isLastMyMessage && showSentStatus) {
+                    return (
+                        <span className="text-sm text-white">
+                            ✓ Đã gửi
+                        </span>
+                    );
+                }
+                return null;
+            default:
+                return null;
+        }
+    }, [isMe, message.status, message.type, isLastMyMessage, showSentStatus]);
 
     const formatTime = (date: string) => {
         return new Date(date).toLocaleTimeString("vi-VN", {

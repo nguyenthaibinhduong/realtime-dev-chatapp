@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, Search } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
+import { useNotificationActions } from "@/hooks/useNotificationToast";
+import { useSearchParams } from "react-router-dom";
 import SidebarLayout from "./SidebarLayout";
 import { ChannelHeader } from "./blocks/channels/ChannelHeader";
 import { MessageList } from "./blocks/messages/MessageList";
@@ -30,6 +32,134 @@ export default function ChatLayout() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [showSidebar, setShowSidebar] = useState(false);
+  const { registerHandler, unregisterHandler } = useNotificationActions();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Navigation states for GitHub detail
+  const [showGithubDetail, setShowGithubDetail] = useState(false);
+  const [githubDetailData, setGithubDetailData] = useState<any>(null);
+
+  // State
+  const [channels, setChannels] = useState<Channel[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
+  const [openSearchModal, setOpenSearchModal] = useState(false);
+  const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
+  const [uploadingFiles, setUploadingFiles] = useState<{
+    [key: string]: { progress: number; total: number };
+  }>({});
+
+  // ✅ Register notification handlers
+  useEffect(() => {
+    // Handler for navigating to channel from notification
+    const handleNavigateToChannel = (data: any) => {
+      const { channelId, channel, messageId } = data;
+
+      // Find channel in current list or use provided channel data
+      let targetChannel = channels.find(c => String(c.id) === String(channelId));
+      if (!targetChannel && channel) {
+        targetChannel = channel;
+        // Optionally add channel to list if not present
+        setChannels(prev => {
+          const exists = prev.find(c => String(c.id) === String(channelId));
+          return exists ? prev : [...prev, channel];
+        });
+      }
+
+      if (targetChannel) {
+        handleSelectChannel(targetChannel);
+
+        // Update URL params
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('channel', String(channelId));
+        if (messageId) {
+          newParams.set('message', String(messageId));
+        }
+        setSearchParams(newParams);
+
+        // Scroll to specific message if provided
+        if (messageId) {
+          setTimeout(() => {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+              messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 500);
+        }
+
+        // Show success toast
+        toast({
+          title: "Đã chuyển đến kênh",
+          description: `#${targetChannel.name}`,
+          duration: 2000,
+        });
+
+        // Close sidebar on mobile
+        if (isMobile) {
+          setShowSidebar(false);
+        }
+      } else {
+        toast({
+          title: "Lỗi",
+          description: "Không tìm thấy kênh",
+          variant: "destructive",
+        });
+      }
+    };
+
+    // Handler for opening GitHub detail
+    const handleOpenGithubDetail = (data: any) => {
+      setGithubDetailData(data);
+      setShowGithubDetail(true);
+    };
+
+    // Handler for system notifications
+    const handleOpenSystemDetail = (data: any) => {
+      console.log("System notification detail:", data);
+      toast({
+        title: "System Detail",
+        description: data.message,
+        duration: 3000,
+      });
+    };
+
+    // Handler for general notifications
+    const handleOpenNotificationDetail = (data: any) => {
+      console.log("Notification detail:", data);
+      toast({
+        title: "Notification Detail",
+        description: data.description,
+        duration: 3000,
+      });
+    };
+
+    // Register all handlers
+    registerHandler('navigateToChannel', handleNavigateToChannel);
+    registerHandler('openGithubDetail', handleOpenGithubDetail);
+    registerHandler('openSystemDetail', handleOpenSystemDetail);
+    registerHandler('openNotificationDetail', handleOpenNotificationDetail);
+
+    // Cleanup handlers on unmount
+    return () => {
+      unregisterHandler('navigateToChannel');
+      unregisterHandler('openGithubDetail');
+      unregisterHandler('openSystemDetail');
+      unregisterHandler('openNotificationDetail');
+    };
+  }, [channels, registerHandler, unregisterHandler, toast, isMobile, searchParams, setSearchParams]);
+
+  // ✅ Handle URL params on mount
+  useEffect(() => {
+    const channelParam = searchParams.get('channel');
+    if (channelParam && channels.length > 0) {
+      const targetChannel = channels.find(c => String(c.id) === channelParam);
+      if (targetChannel && targetChannel.id !== selectedChannel?.id) {
+        handleSelectChannel(targetChannel);
+      }
+    }
+  }, [searchParams, channels, selectedChannel]);
 
   // Thêm state cho vị trí nút điều hướng
   const [navBtnPos, setNavBtnPos] = useState({ x: 20, y: 20 });
@@ -100,18 +230,6 @@ export default function ChatLayout() {
     document.removeEventListener("touchmove", handleNavBtnTouchMove);
     document.removeEventListener("touchend", handleNavBtnTouchEnd);
   };
-
-  // State
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
-  const [openSearchModal, setOpenSearchModal] = useState(false);
-  const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
-  const [uploadingFiles, setUploadingFiles] = useState<{
-    [key: string]: { progress: number; total: number };
-  }>({});
 
   const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
 
@@ -240,8 +358,21 @@ export default function ChatLayout() {
 
   const handleSelectChannel = (channel: Channel | null) => {
     setSelectedChannel(channel);
-    if (channel) localStorage.setItem("selectedChannelId", String(channel.id));
-    else localStorage.removeItem("selectedChannelId");
+    if (channel) {
+      localStorage.setItem("selectedChannelId", String(channel.id));
+      // Update URL
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('channel', String(channel.id));
+      newParams.delete('message'); // Clear message param when switching channels
+      setSearchParams(newParams);
+    } else {
+      localStorage.removeItem("selectedChannelId");
+      // Clear URL params
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('channel');
+      newParams.delete('message');
+      setSearchParams(newParams);
+    }
   };
 
   // Initial load messages for selected channel (server trả ASC: cũ→mới)
@@ -411,7 +542,7 @@ export default function ChatLayout() {
       chatSocketService.sendMessage({
         channelId: selectedChannel.id,
         text: content.trim(),
-        type: "file-upload",
+        type: attachments.length > 0 ? "file-upload" : "message",
         channelData: selectedChannel,
         ...(attachments.length > 0 && { presignedAttachments: attachments }), // Include attachments if any
       });
@@ -639,8 +770,8 @@ export default function ChatLayout() {
             </div>
           ) : (
             <MessageList
-              messages={messages} // ASC: cũ → mới
-              channelId={String(selectedChannel.id)}
+              messages={messages}
+              channelId={String(selectedChannel?.id)}
               onPrependMessages={handlePrependMessages}
               loadOlder={loadOlder}
               type={selectedChannel?.type}
@@ -650,6 +781,22 @@ export default function ChatLayout() {
 
         {selectedChannel && (
           <MessageInput channelId={selectedChannel.id} onSend={sendMessage} />
+        )}
+
+        {/* GitHub Detail Modal */}
+        {showGithubDetail && (
+          <Dialog open={showGithubDetail} onOpenChange={setShowGithubDetail}>
+            <DialogContent className="max-w-2xl bg-gray-900 text-white">
+              <DialogHeader>
+                <DialogTitle>GitHub Event Detail</DialogTitle>
+              </DialogHeader>
+              <div className="p-4">
+                <pre className="text-sm bg-gray-800 p-4 rounded overflow-auto">
+                  {JSON.stringify(githubDetailData, null, 2)}
+                </pre>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
     </MasterLayout>

@@ -31,6 +31,9 @@ const CodeShareMessage = memo(({
     const refParam = jsonData.refParam;
     const codePath = jsonData.initialPath;
     const installation_id = jsonData.installation_id;
+    const json_code_data = jsonData.code_text || "No code shared";
+
+
 
     const formatTime = (date: string) => {
         return new Date(date).toLocaleTimeString("vi-VN", {
@@ -46,6 +49,7 @@ const CodeShareMessage = memo(({
             initialPath: codePath,
             installation_id: message?.sender?.github_installation_id || installation_id,
             isShare: true,
+            json_code_data
         });
     };
 

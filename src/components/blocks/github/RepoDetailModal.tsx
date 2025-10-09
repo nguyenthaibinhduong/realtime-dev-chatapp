@@ -107,6 +107,7 @@ export function CodeViewerDialog({
     initialPath,
     installation_id,
     isShare = false,
+    json_data_code,
     viewBranchOfCommit, // 👈 hiển thị branch gốc khi xem commit
 }: {
     open: boolean;
@@ -116,6 +117,7 @@ export function CodeViewerDialog({
     initialPath: string;
     installation_id?: string;
     isShare?: boolean;
+    json_data_code?: string; // nếu là share code thì có thêm param này
     viewBranchOfCommit?: string | null;
 }) {
     const [tree, setTree] = useState<TreeEntry[]>([]);
@@ -158,16 +160,25 @@ export function CodeViewerDialog({
             setLoadingFile(true);
             setFileText("Loading…");
             try {
-                const base = repo.contents_url?.replace("{+path}", path);
-                const url = base ? `${base}${base.includes("?") ? "&" : "?"}ref=${encodeURIComponent(refParam)}` : "";
-                const meta = await fetchJson(url, installation_id);
-                const raw = (meta as any)?.download_url;
-                if (!raw) {
-                    setFileText("// No raw URL");
-                    return;
+                let text = "";
+                if (isShare) {
+                    console.log("Using shared code from json_data_code", { json_data_code });
+                    text = json_data_code;
+                } else {
+                    const base = repo.contents_url?.replace("{+path}", path);
+                    const url = base ? `${base}${base.includes("?") ? "&" : "?"}ref=${encodeURIComponent(refParam)}` : "";
+                    const meta = await fetchJson(url, installation_id);
+                    const raw = (meta as any)?.download_url;
+                    if (!raw) {
+                        setFileText("// No raw URL");
+                        return;
+                    }
+                    const res = await fetch(raw);
+                    text = await res.text();
                 }
-                const res = await fetch(raw);
-                const text = await res.text();
+
+                console.log('Filetext', text);
+
                 setFileText(text);
                 setCode(text);
                 setFileLoaded(true);
@@ -182,9 +193,7 @@ export function CodeViewerDialog({
 
     useEffect(() => {
         if (open) {
-            if (isShare) {
-                if (!treeLoaded) loadTree();
-            } else {
+            if (!isShare) {
                 loadTree();
             }
         }
@@ -268,7 +277,7 @@ export function CodeViewerDialog({
             channelId: channel_id,
             text: `File  ${params.refParam} đã được chia sẻ từ repo ${params.repo.full_name}`,
             type: "code-share",
-            json_data: JSON.stringify(params),
+            json_data: JSON.stringify({ ...params, code_text: fileText, timeshared: new Date().toISOString() }),
         });
         toast({
             title: "Đã chia sẻ file vào kênh chat.",
