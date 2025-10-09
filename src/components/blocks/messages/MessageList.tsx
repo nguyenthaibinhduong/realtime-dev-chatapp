@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { MessageListProps } from "@/types/message";
 import { RepoChatDialog } from "../github/RepoChatDialog";
 import { CodeViewerDialog } from "../github/RepoDetailModal";
@@ -10,6 +10,8 @@ import CodeShareMessage from "./type/CodeShareMessage";
 import LoadMoreIndicator from "@/components/common/LoadMoreIndicator";
 import { useMessageScroll } from "@/hooks/useMessage";
 import { useMessageStatus } from "@/hooks/useMessage";
+import { useMessageActions } from "@/hooks/useMessage";
+import { MessageActionType } from "@/components/blocks/messages/MessageAction";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -72,16 +74,79 @@ export const MessageList: React.FC<Props> = ({
     setHasMore,
   });
 
+  // Message action handlers
+  const handleLike = useCallback(async (messageId: string) => {
+    console.log('Like message:', messageId);
+    // TODO: Implement API call
+    // await chatAPI.likeMessage(channelId, messageId);
+  }, [channelId]);
+
+  const handleReply = useCallback((messageId: string) => {
+    console.log('Reply to message:', messageId);
+    // TODO: Set reply context in message input
+  }, []);
+
+  const handleForward = useCallback((messageId: string) => {
+    console.log('Forward message:', messageId);
+    // TODO: Open forward dialog
+  }, []);
+
+  const handlePin = useCallback(async (messageId: string) => {
+    console.log('Pin message:', messageId);
+    // TODO: Implement API call
+    // await chatAPI.pinMessage(channelId, messageId);
+  }, [channelId]);
+
+  const handleEdit = useCallback((messageId: string) => {
+    console.log('Edit message:', messageId);
+    // TODO: Set edit mode in message input
+  }, []);
+
+  const handleDelete = useCallback(async (messageId: string) => {
+    console.log('Delete message:', messageId);
+    // TODO: Implement API call
+    // await chatAPI.deleteMessage(channelId, messageId);
+  }, [channelId]);
+
+  const handleCopy = useCallback((messageId: string, text: string) => {
+    console.log('Copy message:', messageId, text);
+  }, []);
+
+  const handleShare = useCallback((messageId: string) => {
+    console.log('Share message:', messageId);
+    // TODO: Open share dialog
+  }, []);
+
+  // Initialize message actions hook
+  const { handleAction } = useMessageActions({
+    onLike: handleLike,
+    onReply: handleReply,
+    onForward: handleForward,
+    onPin: handlePin,
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    onCopy: handleCopy,
+    onShare: handleShare,
+  });
+
   // Memoized handlers
-  const handleCodeShare = (params: any) => {
+  const handleCodeShare = useCallback((params: any) => {
     setCodeShareParams(params);
     setCodeOpen(true);
-  };
+  }, []);
 
-  const handleCloseCodeViewer = (v: boolean) => {
+  const handleCloseCodeViewer = useCallback((v: boolean) => {
     setCodeOpen(v);
     if (!v) setCodeShareParams(null);
-  };
+  }, []);
+
+  const handleMessageAction = useCallback((
+    type: MessageActionType,
+    messageId: string,
+    messageData?: any
+  ) => {
+    handleAction(type, messageId, messageData);
+  }, [handleAction]);
 
   // Memoized message items
   const messageItems = useMemo(() => {
@@ -130,10 +195,11 @@ export const MessageList: React.FC<Props> = ({
           hoveredId={hoveredId}
           onHover={setHoveredId}
           onCodeShare={handleCodeShare}
+          onMessageAction={handleMessageAction}
         />
       );
     });
-  }, [messages, user, type, hoveredId]);
+  }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction]);
 
   return (
     <ScrollArea
@@ -144,7 +210,7 @@ export const MessageList: React.FC<Props> = ({
       <div>
         <LoadMoreIndicator loading={loadingMore} />
 
-        <div className="space-y-4">
+        <div className="space-y-2">
           {messageItems}
           <div ref={messagesEndRef} />
         </div>
@@ -154,7 +220,7 @@ export const MessageList: React.FC<Props> = ({
           open={openGitModal}
           onOpenChange={setOpenGitModal}
         />
-// dataa
+
         {codeShareParams && (
           <CodeViewerDialog
             open={codeOpen}

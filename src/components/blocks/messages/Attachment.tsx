@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import attachmentService from "@/services/attachmentService";
 
 type AttachmentProps = {
-  keyName?: string; // the storage key (att.key)
-  fileUrl?: string; // optional already-known public URL
+  keyName?: string;
+  fileUrl?: string;
   filename?: string;
   mimeType?: string;
   className?: string;
@@ -11,20 +11,13 @@ type AttachmentProps = {
   style?: React.CSSProperties;
 };
 
-/**
- * Render an attachment. It will call attachmentService.getObjectUrl(keyName)
- * to obtain a (presigned) URL when keyName is provided.
- *
- * Usage:
- * <Attachment keyName={att.key} filename={att.filename} mimeType={att.mimeType} />
- */
 export const Attachment: React.FC<AttachmentProps> = ({
   keyName,
   fileUrl,
   filename,
   mimeType,
   fileSize,
-  className = "max-w-xs rounded",
+  className = "w-56 rounded", // fixed width by default (change w-56 to adjust)
   style,
 }) => {
   const [url, setUrl] = useState<string | null>(fileUrl ?? null);
@@ -35,7 +28,6 @@ export const Attachment: React.FC<AttachmentProps> = ({
     let mounted = true;
     setError(null);
 
-    // If fileUrl already provided or keyName is empty, use it directly
     if (!keyName) {
       setLoading(false);
       return;
@@ -65,11 +57,14 @@ export const Attachment: React.FC<AttachmentProps> = ({
 
   const isImage = !!mimeType && mimeType.startsWith("image/");
 
+  // unified wrapper style to keep fixed width and auto height for images
+  const wrapperStyle: React.CSSProperties = { width: undefined, ...style };
+
   if (loading) {
     return (
       <div
         className={`flex items-center justify-center ${className}`}
-        style={style}
+        style={wrapperStyle}
       >
         <div className="text-sm text-muted-foreground">Loading...</div>
       </div>
@@ -80,7 +75,7 @@ export const Attachment: React.FC<AttachmentProps> = ({
     return (
       <div
         className={`p-2 bg-red-50 text-red-600 rounded ${className}`}
-        style={style}
+        style={wrapperStyle}
       >
         <div className="text-sm">Error loading attachment</div>
         <div className="text-xs text-red-500">{error}</div>
@@ -92,44 +87,36 @@ export const Attachment: React.FC<AttachmentProps> = ({
     return (
       <div
         className={`p-2 bg-gray-50 text-gray-600 rounded ${className}`}
-        style={style}
+        style={wrapperStyle}
       >
         <div className="text-sm">No attachment</div>
       </div>
     );
   }
 
-  // Image preview
   if (isImage) {
     return (
-      <div className="inline-block">
+      <div className={`inline-block ${className}`} style={wrapperStyle}>
         <img
           src={url}
           alt={filename || "attachment"}
-          className={className}
-          style={{ maxHeight: 200, ...style }}
+          className="block w-full h-auto rounded"
+          style={{ objectFit: "cover", ...style }}
           onError={(e) => {
-            // fallback: hide broken image
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
         />
-        {/* <div className="mt-1 text-xs">{filename}</div> */}
-        {/* <div className="text-xs">
-          {attachmentService.formatFileSize(fileSize)}
-        </div> */}
       </div>
     );
   }
 
-  // Non-image: show filename + download button
   return (
     <div
       className={`inline-flex items-center gap-3 p-2 bg-gray-800/30 rounded ${className}`}
-      style={style}
+      style={wrapperStyle}
     >
       <div className="flex-1 min-w-0">
         <div className="text-sm truncate">{filename || url}</div>
-        {/* file size */}
         <div className="text-xs">
           {attachmentService.formatFileSize(fileSize)}
         </div>

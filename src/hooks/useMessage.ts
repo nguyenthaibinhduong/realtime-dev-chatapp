@@ -1,4 +1,157 @@
 import { useRef, useEffect, useCallback, useState } from "react";
+import { useToast } from '@/hooks/useToast';
+import { MessageActionType } from "@/components/blocks/messages/MessageAction";
+
+interface UseMessageActionsProps {
+    onLike?: (messageId: string) => Promise<void>;
+    onReply?: (messageId: string) => void;
+    onForward?: (messageId: string) => void;
+    onPin?: (messageId: string) => Promise<void>;
+    onEdit?: (messageId: string) => void;
+    onDelete?: (messageId: string) => Promise<void>;
+    onCopy?: (messageId: string, text: string) => void;
+    onShare?: (messageId: string) => void;
+}
+
+export const useMessageActions = ({
+    onLike,
+    onReply,
+    onForward,
+    onPin,
+    onEdit,
+    onDelete,
+    onCopy,
+    onShare,
+}: UseMessageActionsProps = {}) => {
+    const { toast } = useToast();
+
+    const handleAction = useCallback(async (
+        type: MessageActionType, 
+        messageId: string,
+        messageData?: any
+    ) => {
+        console.log(`Action: ${type} on message ${messageId}`);
+
+        try {
+            switch (type) {
+                case 'like':
+                    if (onLike) {
+                        await onLike(messageId);
+                        toast({
+                            description: "👍 Đã thích tin nhắn",
+                            duration: 2000,
+                        });
+                    } else {
+                        console.warn('Like handler not provided');
+                    }
+                    break;
+
+                case 'reply':
+                    if (onReply) {
+                        onReply(messageId);
+                        toast({
+                            description: "💬 Đang trả lời...",
+                            duration: 2000,
+                        });
+                    } else {
+                        console.warn('Reply handler not provided');
+                    }
+                    break;
+
+                case 'forward':
+                    if (onForward) {
+                        onForward(messageId);
+                        toast({
+                            description: "➡️ Chuyển tiếp tin nhắn",
+                            duration: 2000,
+                        });
+                    } else {
+                        console.warn('Forward handler not provided');
+                    }
+                    break;
+
+                case 'pin':
+                    if (onPin) {
+                        await onPin(messageId);
+                        toast({
+                            description: "📌 Đã ghim tin nhắn",
+                            duration: 2000,
+                        });
+                    } else {
+                        console.warn('Pin handler not provided');
+                    }
+                    break;
+
+                case 'edit':
+                    if (onEdit) {
+                        onEdit(messageId);
+                        toast({
+                            description: "✏️ Đang chỉnh sửa...",
+                            duration: 2000,
+                        });
+                    } else {
+                        console.warn('Edit handler not provided');
+                    }
+                    break;
+
+                case 'delete':
+                    if (onDelete) {
+                        // Confirm before delete
+                        if (window.confirm('Bạn có chắc muốn xóa tin nhắn này?')) {
+                            await onDelete(messageId);
+                            toast({
+                                description: "🗑️ Đã xóa tin nhắn",
+                                duration: 2000,
+                            });
+                        }
+                    } else {
+                        console.warn('Delete handler not provided');
+                    }
+                    break;
+
+                case 'copy':
+                    if (onCopy && messageData?.text) {
+                        onCopy(messageId, messageData.text);
+                        // Copy to clipboard
+                        await navigator.clipboard.writeText(messageData.text);
+                        toast({
+                            description: "📋 Đã sao chép",
+                            duration: 2000,
+                        });
+                    } else {
+                        console.warn('Copy handler not provided or no text');
+                    }
+                    break;
+
+                case 'share':
+                    if (onShare) {
+                        onShare(messageId);
+                        toast({
+                            description: "📤 Đang chia sẻ...",
+                            duration: 2000,
+                        });
+                    } else {
+                        console.warn('Share handler not provided');
+                    }
+                    break;
+
+                default:
+                    console.warn(`Unknown action type: ${type}`);
+                    break;
+            }
+        } catch (error) {
+            console.error(`Error handling ${type} action:`, error);
+            toast({
+                title: "Lỗi",
+                description: `Không thể ${type} tin nhắn`,
+                variant: "destructive",
+                duration: 3000,
+            });
+        }
+    }, [onLike, onReply, onForward, onPin, onEdit, onDelete, onCopy, onShare, toast]);
+
+    return { handleAction };
+};
 
 interface UseMessageScrollProps {
   messages: any[];
