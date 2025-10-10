@@ -118,7 +118,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
     setSelectedUsers((prev) => prev.filter((user) => user.id !== userId));
   }, []);
 
-  const handleCreate = async () => {
+  const handleCreate = () => {
     if (!channelName.trim()) {
       return toast({
         title: "Lỗi",
@@ -143,7 +143,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
         name: channelName.trim(),
       };
 
-      await chatSocketService.createChannel(data);
+      chatSocketService.createChannel(data);
 
       toast({
         title: "Thành công",

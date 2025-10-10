@@ -18,6 +18,7 @@ interface MessageItemProps {
     onHover: (id: string | null) => void;
     onCodeShare?: (params: any) => void;
     onMessageAction?: (type: MessageActionType, messageId: string, messageData?: any) => void;
+    onJumpToMessage?: (id: string) => void; // <-- added
 }
 
 const MessageItem = memo(({
@@ -32,6 +33,7 @@ const MessageItem = memo(({
     onHover,
     onCodeShare,
     onMessageAction,
+    onJumpToMessage, // <-- added
 }: MessageItemProps) => {
     const [showSentStatus, setShowSentStatus] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -99,7 +101,7 @@ const MessageItem = memo(({
         } else if (message.status === "sent" && isLastMyMessage && showSentStatus) {
             statusLabel = (
                 <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-green-400">✓ Đã gửi</span>
+                    <span className="text-[11px] text-white">✓ Đã gửi</span>
                 </div>
             );
         }
@@ -121,8 +123,8 @@ const MessageItem = memo(({
 
     return (
         <div
+            data-message-id={message.id} // giúp debug/scroll đến message
             className={cn(
-                // vùng hover rộng, nhưng hide/show actions ngay lập tức
                 "flex gap-1 group px-3 py-1.5 transition-all duration-100 rounded-md",
                 isMe ? "flex-row-reverse" : "flex-row"
             )}
@@ -182,6 +184,36 @@ const MessageItem = memo(({
                         isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700",
                         hasOnlyImages && "bg-transparent"
                     )}>
+
+                        {/* Reply preview cho type: reply-message */}
+                        {message.type === 'reply-message' && message.replyTo && (
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onJumpToMessage?.(String(message.replyTo.id)); }}
+                                className={cn(
+                                    "mb-2 w-full text-left group/reply rounded-md border px-2 py-1.5",
+                                    isMe ? "border-blue-400/30 bg-blue-900 hover:bg-blue-600/30"
+                                        : "border-gray-700 bg-gray-900/40 hover:bg-gray-900/60"
+                                )}
+                                title="Đi tới tin nhắn đã được trả lời"
+                            >
+                                <div className="flex items-start gap-2">
+                                    <div className={cn("w-0.5 rounded", isMe ? "bg-blue-300" : "bg-blue-500")} />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-[12px]">
+                                            <span className="opacity-80">Trả lời </span>
+                                            <span className="font-semibold">{message.replyTo.sender}</span>
+                                        </div>
+                                        {message.replyTo.text ? (
+                                            <div className="text-[12px] opacity-80 truncate">
+                                                {message.replyTo.text}
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            </button>
+                        )}
+
                         {message.text && (
                             <p className={cn(
                                 "text-[14px] leading-relaxed whitespace-pre-wrap break-words",
@@ -227,9 +259,9 @@ const MessageItem = memo(({
                                         minute: '2-digit'
                                     })}
                                 </span>
-                                {isMe && message.status === "sent" && (
+                                {/* {isMe && message.status === "sent" && (
                                     <span className="text-blue-200 text-[10px]">✓</span>
-                                )}
+                                )} */}
                             </div>
                         )}
                     </div>

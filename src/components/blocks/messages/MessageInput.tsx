@@ -7,8 +7,16 @@ import { Button } from "@/components/ui/button";
 interface MessageInputProps {
   channelId: string;
   // onSend may be async (returns Promise) so the input can await uploads/sending
-  onSend?: (content: string, files?: File[]) => void | Promise<void>;
+  onSend?: (content: string, files?: File[], meta?: { replyTo?: ReplyMessage }) => void | Promise<void>;
+  replyMessage?: ReplyMessage; // <-- thêm
+  onCancelReply?: () => void;  // <-- thêm
 }
+
+export type ReplyMessage = {
+  id: string;
+  sender: string;
+  text?: string;
+};
 
 type Lang =
   | "javascript"
@@ -19,7 +27,7 @@ type Lang =
   | "css"
   | "plaintext";
 
-export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
+export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }: MessageInputProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -109,7 +117,7 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
 
     try {
       setIsSending(true);
-      const res = onSend?.(content, files);
+      const res = onSend?.(content, files, { replyTo: replyMessage }); // <-- truyền kèm replyTo
       if (res && typeof (res as any).then === "function") {
         await res;
       }
@@ -121,7 +129,7 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
       if (isCodeMode) setCode("");
     } catch (err) {
       console.error("Send failed:", err);
-      // keep inputs so user can retry; parent can show notifications
+      // keep inputs so user can retry
     } finally {
       setIsSending(false);
     }
@@ -195,6 +203,32 @@ export const MessageInput = ({ channelId, onSend }: MessageInputProps) => {
 
   return (
     <div className="border-t border-border p-2">
+      {/* Reply preview */}
+      {replyMessage && (
+        <div className="mb-2 rounded-md bg-[#1f2937] text-gray-200 px-3 py-2 relative">
+          <div className="flex items-start gap-2">
+            <div className="w-1 rounded bg-blue-500 mt-0.5" />
+            <div className="flex-1">
+              <div className="text-sm">
+                <span className="opacity-80">Trả lời </span>
+                <span className="font-semibold">{replyMessage.sender}</span>
+              </div>
+              {replyMessage.text ? (
+                <div className="text-xs opacity-80 line-clamp-1">{replyMessage.text}</div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              className="ml-2 opacity-70 hover:opacity-100"
+              onClick={onCancelReply}
+              title="Hủy trả lời"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Nhóm nút và khung chat nằm cùng hàng, icon bên trái (giữ styling) */}
       <div className="flex items-start gap-2">
         <div className="flex items-center gap-1 py-2">

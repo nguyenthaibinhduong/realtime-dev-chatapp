@@ -41,6 +41,7 @@ type Props = MessageListProps & {
     cursors?: any;
   }>;
   type?: string;
+  onReplySelect?: (reply: { id: string; sender: string; text?: string }) => void; // <-- thêm
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -49,6 +50,7 @@ export const MessageList: React.FC<Props> = ({
   onPrependMessages,
   loadOlder,
   type,
+  onReplySelect, // <-- thêm
 }) => {
   const { user } = useAuth();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -82,9 +84,14 @@ export const MessageList: React.FC<Props> = ({
   }, [channelId]);
 
   const handleReply = useCallback((messageId: string) => {
-    console.log('Reply to message:', messageId);
-    // TODO: Set reply context in message input
-  }, []);
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+    onReplySelect?.({
+      id: String(msg.id),
+      sender: msg.sender?.username || msg.sender?.name || "Unknown",
+      text: msg.text || (Array.isArray(msg.attachments) && msg.attachments.length > 0 ? `[${msg.attachments.length} tệp đính kèm]` : ""),
+    });
+  }, [messages, onReplySelect]);
 
   const handleForward = useCallback((messageId: string) => {
     console.log('Forward message:', messageId);
@@ -145,8 +152,23 @@ export const MessageList: React.FC<Props> = ({
     messageId: string,
     messageData?: any
   ) => {
+    if (type === 'reply') {
+      handleReply(messageId); // đẩy dữ liệu reply lên ChatLayout
+      return;
+    }
     handleAction(type, messageId, messageData);
-  }, [handleAction]);
+  }, [handleAction, handleReply]);
+
+  // Jump đến message có id tương ứng (dùng cho reply preview)
+  const scrollToMessage = useCallback((targetId: string) => {
+    if (!targetId) return;
+    const el = document.querySelector(`[data-message-id="${targetId}"]`) as HTMLElement | null;
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHoveredId(String(targetId));
+      window.setTimeout(() => setHoveredId(null), 1600);
+    }
+  }, []);
 
   // Memoized message items
   const messageItems = useMemo(() => {
@@ -196,10 +218,11 @@ export const MessageList: React.FC<Props> = ({
           onHover={setHoveredId}
           onCodeShare={handleCodeShare}
           onMessageAction={handleMessageAction}
+          onJumpToMessage={scrollToMessage} // <-- added
         />
       );
     });
-  }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction]);
+  }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction, scrollToMessage]);
 
   return (
     <ScrollArea

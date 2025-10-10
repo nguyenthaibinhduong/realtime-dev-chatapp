@@ -50,6 +50,7 @@ export default function ChatLayout() {
   const [uploadingFiles, setUploadingFiles] = useState<{
     [key: string]: { progress: number; total: number };
   }>({});
+  const [replyTo, setReplyTo] = useState<{ id: string; sender: string; text?: string } | null>(null);
 
   // ✅ Register notification handlers
   useEffect(() => {
@@ -444,12 +445,8 @@ export default function ChatLayout() {
 
   // Send message via socket
   const sendMessage = useCallback(
-    async (content: string, files: File[]) => {
-      if (
-        !selectedChannel?.id ||
-        (!content.trim() && (!files || files.length === 0))
-      )
-        return;
+    async (content: string, files: File[], meta?: { replyTo?: { id: string; sender: string; text?: string } }) => {
+      if (!selectedChannel?.id || (!content.trim() && (!files || files.length === 0))) return;
 
       let attachments: UploadResult[] = [];
 
@@ -539,14 +536,30 @@ export default function ChatLayout() {
         }
       }
 
+      // Xác định type gửi
+      const computedType =
+        meta?.replyTo
+          ? "reply-message"
+          : (attachments.length > 0 ? "file-upload" : "message");
+
       // ✅ Gửi tin nhắn qua socket
       chatSocketService.sendMessage({
         channelId: selectedChannel.id,
         text: content.trim(),
-        type: attachments.length > 0 ? "file-upload" : "message",
+        type: computedType,
         channelData: selectedChannel,
-        ...(attachments.length > 0 && { presignedAttachments: attachments }), // Include attachments if any
+        ...(attachments.length > 0 && { presignedAttachments: attachments }),
+        ...(meta?.replyTo && {
+          replyTo: {
+            id: meta.replyTo.id,
+            sender: meta.replyTo.sender,
+            text: meta.replyTo.text,
+          },
+        }),
       });
+
+      // clear reply sau khi gửi
+      if (meta?.replyTo) setReplyTo(null);
     },
     [selectedChannel, user, toast]
   );
@@ -776,12 +789,18 @@ export default function ChatLayout() {
               onPrependMessages={handlePrependMessages}
               loadOlder={loadOlder}
               type={selectedChannel?.type}
+              onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
             />
           )}
         </div>
 
         {selectedChannel && (
-          <MessageInput channelId={selectedChannel.id} onSend={sendMessage} />
+          <MessageInput
+            channelId={selectedChannel.id}
+            onSend={sendMessage}
+            replyMessage={replyTo || undefined}        // <-- truyền xuống input
+            onCancelReply={() => setReplyTo(null)}     // <-- hủy reply
+          />
         )}
 
         {/* GitHub Detail Modal */}
