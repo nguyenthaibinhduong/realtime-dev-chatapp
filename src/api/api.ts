@@ -78,3 +78,30 @@ export const NotificationAPI = {
     apipost(`/notifications/${id}/delete`),
   markAsAllRead: async () => apipost(`/notifications/mark-all-as-read`),
 };
+
+export const AttachmentAPI = {
+  getAttachmentsByChannel: async (params: {
+    channelId: string | number;
+    limit?: number;
+    cursor?: number;
+    filename?: string;
+    mimeType?: string;
+    senderId?: string | number;
+    startDate?: string;
+    endDate?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params.limit) queryParams.append("limit", params.limit.toString());
+    if (params.cursor) queryParams.append("cursor", params.cursor.toString());
+    if (params.filename) queryParams.append("filename", params.filename);
+    if (params.mimeType) queryParams.append("mimeType", params.mimeType);
+    if (params.senderId)
+      queryParams.append("senderId", params.senderId.toString());
+    if (params.startDate) queryParams.append("startDate", params.startDate);
+    if (params.endDate) queryParams.append("endDate", params.endDate);
+
+    return apiget(
+      `/channels/${params.channelId}/attachments?${queryParams.toString()}`
+    );
+  },
+};

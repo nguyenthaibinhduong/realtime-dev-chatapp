@@ -113,19 +113,20 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
         {/* Nút mở attachment modal */}
         <button
           className="p-2 rounded-lg hover:bg-muted transition-colors duration-200 group"
-          title="Đính kèm tệp"
+          title="Xem tệp đính kèm"
           onClick={() => setOpenAttachmentModal(true)}
         >
           <Paperclip className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-          <span className="sr-only">Đính kèm tệp</span>
+          <span className="sr-only">Xem tệp đính kèm</span>
         </button>
 
         {/* Attachment Modal */}
-        {/* <AttachmentModal
+        <AttachmentModal
           open={openAttachmentModal}
           onOpenChange={setOpenAttachmentModal}
-          onFileSelect={handleFileSelect}
-        /> */}
+          channelId={channel.id}
+          members={members}
+        />
 
         {/* Nút mở modal kết nối repo git */}
         <button
