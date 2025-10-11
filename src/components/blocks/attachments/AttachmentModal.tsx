@@ -198,14 +198,15 @@ export const AttachmentModal = ({
     if (endDate) newFilters.endDate = endDate;
 
     setFilters(newFilters);
-    fetchAttachments(true);
   }, [searchQuery, selectedType, selectedSender, startDate, endDate]);
+
+  useEffect(() => {
+    fetchAttachments(true);
+  }, [filters]);
 
   const filteredAttachments = useMemo(() => {
     return attachments;
   }, [attachments]);
-
-  console.log("filter att", filteredAttachments);
 
   const typeStats = useMemo(() => {
     const stats: Record<string, number> = {};
@@ -328,48 +329,30 @@ export const AttachmentModal = ({
               {/* Sender Filter */}
               {members.length > 0 && (
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={`bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 ${
-                        selectedSender ? "border-blue-500" : ""
-                      }`}
+                  <div className="space-y-2">
+                    <Select
+                      value={selectedSender || ""}
+                      onValueChange={setSelectedSender}
                     >
-                      <User className="h-3 w-3 mr-1" />
-                      {selectedSender
-                        ? members.find(
-                            (m) => m.id.toString() === selectedSender
-                          )?.username || "Người gửi"
-                        : "Người gửi"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56 bg-zinc-900 border-zinc-800">
-                    <div className="space-y-2">
-                      <Label className="text-sm text-zinc-400">
-                        Lọc theo người gửi
-                      </Label>
-                      <Select
-                        value={selectedSender || ""}
-                        onValueChange={setSelectedSender}
-                      >
-                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                          <SelectValue placeholder="Chọn người gửi" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-800">
-                          <SelectItem value="">Tất cả</SelectItem>
-                          {members.map((member) => (
-                            <SelectItem
-                              key={member.id}
-                              value={member.id.toString()}
-                            >
-                              {member.username}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </PopoverContent>
+                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                        <SelectValue placeholder="Chọn người gửi" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-zinc-800">
+                        <SelectItem value=" " className="text-white">
+                          Tất cả người gửi
+                        </SelectItem>
+                        {members.map((member) => (
+                          <SelectItem
+                            key={member.id}
+                            value={member.id.toString()}
+                            className="text-white"
+                          >
+                            {member.username} ({member.id})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </Popover>
               )}
 
@@ -442,7 +425,7 @@ export const AttachmentModal = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleResetFilters}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white"
+                  className="bg-red-500 hover:bg-red-600 text-white hover:text-slate-700"
                 >
                   <RotateCcw className="h-3 w-3 mr-1" />
                   Xóa bộ lọc ({activeFilterCount})
@@ -484,7 +467,7 @@ export const AttachmentModal = ({
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3 justify-items-center">
                   {filteredAttachments.map((attachment) => (
                     <AttachmentItem
                       key={attachment.id}
@@ -493,7 +476,7 @@ export const AttachmentModal = ({
                       mimeType={attachment.mimeType}
                       fileSize={attachment.fileSize}
                       showRemove={false}
-                      className="hover:shadow-lg transition-shadow"
+                      className="hover:shadow-lg transition-shadow w-40"
                     />
                   ))}
                 </div>

@@ -11,6 +11,7 @@ import {
   Download,
   X,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,9 +28,8 @@ type AttachmentItemProps = {
 
 // Get file icon based on mime type or extension
 const getFileIcon = (mimeType?: string, filename?: string) => {
-  // Check mime type first
   if (mimeType) {
-    if (mimeType.startsWith("image/")) return null; // Will show image preview
+    if (mimeType.startsWith("image/")) return null;
     if (mimeType.startsWith("video/")) return FileVideo;
     if (mimeType.startsWith("audio/")) return FileAudio;
     if (mimeType.includes("pdf")) return FileText;
@@ -51,7 +51,6 @@ const getFileIcon = (mimeType?: string, filename?: string) => {
       return FileCode;
   }
 
-  // Check file extension as fallback
   if (filename) {
     const ext = filename.toLowerCase().split(".").pop();
     switch (ext) {
@@ -98,59 +97,106 @@ const getFileIcon = (mimeType?: string, filename?: string) => {
     }
   }
 
-  return File; // Default icon
+  return File;
 };
 
-// Get color class based on mime type
-const getFileColor = (mimeType?: string, filename?: string) => {
+// Get color and gradient based on mime type
+const getFileStyle = (mimeType?: string, filename?: string) => {
   if (mimeType) {
-    if (mimeType.startsWith("video/")) return "text-purple-400";
-    if (mimeType.startsWith("audio/")) return "text-pink-400";
-    if (mimeType.includes("pdf")) return "text-red-400";
+    if (mimeType.startsWith("video/"))
+      return {
+        color: "text-purple-400",
+        bg: "bg-purple-500/10",
+        gradient: "from-purple-600 to-purple-700",
+      };
+    if (mimeType.startsWith("audio/"))
+      return {
+        color: "text-pink-400",
+        bg: "bg-pink-500/10",
+        gradient: "from-pink-600 to-pink-700",
+      };
+    if (mimeType.includes("pdf"))
+      return {
+        color: "text-red-400",
+        bg: "bg-red-500/10",
+        gradient: "from-red-600 to-red-700",
+      };
     if (mimeType.includes("word") || mimeType.includes("document"))
-      return "text-blue-400";
+      return {
+        color: "text-blue-400",
+        bg: "bg-blue-500/10",
+        gradient: "from-blue-600 to-blue-700",
+      };
     if (mimeType.includes("excel") || mimeType.includes("spreadsheet"))
-      return "text-green-400";
+      return {
+        color: "text-green-400",
+        bg: "bg-green-500/10",
+        gradient: "from-green-600 to-green-700",
+      };
     if (mimeType.includes("zip") || mimeType.includes("rar"))
-      return "text-yellow-400";
+      return {
+        color: "text-yellow-400",
+        bg: "bg-yellow-500/10",
+        gradient: "from-yellow-600 to-orange-600",
+      };
     if (mimeType.includes("json") || mimeType.includes("javascript"))
-      return "text-orange-400";
+      return {
+        color: "text-orange-400",
+        bg: "bg-orange-500/10",
+        gradient: "from-orange-600 to-orange-700",
+      };
   }
 
   if (filename) {
     const ext = filename.toLowerCase().split(".").pop();
-    switch (ext) {
-      case "pdf":
-        return "text-red-400";
-      case "doc":
-      case "docx":
-        return "text-blue-400";
-      case "xls":
-      case "xlsx":
-        return "text-green-400";
-      case "zip":
-      case "rar":
-      case "7z":
-        return "text-yellow-400";
-      case "js":
-      case "jsx":
-      case "ts":
-      case "tsx":
-      case "json":
-        return "text-orange-400";
-      case "mp4":
-      case "avi":
-      case "mov":
-        return "text-purple-400";
-      case "mp3":
-      case "wav":
-        return "text-pink-400";
-      default:
-        return "text-gray-400";
-    }
+    const extStyles: Record<
+      string,
+      { color: string; bg: string; gradient: string }
+    > = {
+      pdf: {
+        color: "text-red-400",
+        bg: "bg-red-500/10",
+        gradient: "from-red-600 to-red-700",
+      },
+      doc: {
+        color: "text-blue-400",
+        bg: "bg-blue-500/10",
+        gradient: "from-blue-600 to-blue-700",
+      },
+      docx: {
+        color: "text-blue-400",
+        bg: "bg-blue-500/10",
+        gradient: "from-blue-600 to-blue-700",
+      },
+      xls: {
+        color: "text-green-400",
+        bg: "bg-green-500/10",
+        gradient: "from-green-600 to-green-700",
+      },
+      xlsx: {
+        color: "text-green-400",
+        bg: "bg-green-500/10",
+        gradient: "from-green-600 to-green-700",
+      },
+      zip: {
+        color: "text-yellow-400",
+        bg: "bg-yellow-500/10",
+        gradient: "from-yellow-600 to-orange-600",
+      },
+      rar: {
+        color: "text-yellow-400",
+        bg: "bg-yellow-500/10",
+        gradient: "from-yellow-600 to-orange-600",
+      },
+    };
+    if (ext && extStyles[ext]) return extStyles[ext];
   }
 
-  return "text-gray-400";
+  return {
+    color: "text-gray-400",
+    bg: "bg-gray-500/10",
+    gradient: "from-gray-600 to-gray-700",
+  };
 };
 
 export const AttachmentItem: React.FC<AttachmentItemProps> = ({
@@ -200,20 +246,20 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
 
   const isImage = !!mimeType && mimeType.startsWith("image/");
   const FileIcon = getFileIcon(mimeType, filename);
-  const fileColor = getFileColor(mimeType, filename);
+  const fileStyle = getFileStyle(mimeType, filename);
 
   // Loading state
   if (loading) {
     return (
       <div
-        className={`flex items-center gap-3 p-3 bg-zinc-900 border border-zinc-800 rounded-lg ${className}`}
+        className={`w-full max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`}
       >
-        <div className="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center">
-          <Loader2 className="w-6 h-6 text-zinc-400 animate-spin" />
+        <div className="aspect-square bg-zinc-800 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-zinc-400 animate-spin" />
         </div>
-        <div className="flex-1">
-          <div className="h-4 bg-zinc-800 rounded w-3/4 mb-2"></div>
-          <div className="h-3 bg-zinc-800 rounded w-1/2"></div>
+        <div className="p-3 space-y-2">
+          <div className="h-3 bg-zinc-800 rounded w-full"></div>
+          <div className="h-2 bg-zinc-800 rounded w-2/3"></div>
         </div>
       </div>
     );
@@ -223,25 +269,17 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
   if (error) {
     return (
       <div
-        className={`flex items-center gap-3 p-3 bg-red-900/20 border border-red-800/50 rounded-lg ${className}`}
+        className={`w-full max-w-[160px] bg-red-900/20 border border-red-800/50 rounded-xl overflow-hidden ${className}`}
       >
-        <div className="w-12 h-12 bg-red-900/30 rounded-lg flex items-center justify-center">
-          <X className="w-6 h-6 text-red-400" />
+        <div className="aspect-square bg-red-900/30 flex items-center justify-center">
+          <X className="w-8 h-8 text-red-400" />
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-medium text-red-400">Failed to load</p>
-          <p className="text-xs text-red-400/70">{error}</p>
+        <div className="p-3">
+          <p className="text-xs font-medium text-red-400 truncate">
+            Failed to load
+          </p>
+          <p className="text-xs text-red-400/70 truncate">{error}</p>
         </div>
-        {showRemove && onRemove && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRemove}
-            className="hover:bg-red-900/30"
-          >
-            <X className="w-4 h-4 text-red-400" />
-          </Button>
-        )}
       </div>
     );
   }
@@ -254,7 +292,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
   if (isImage) {
     return (
       <div
-        className={`relative group rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800 ${className}`}
+        className={`relative group w-full max-w-[160px] rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all duration-200 ${className}`}
       >
         <div className="relative aspect-square">
           <img
@@ -272,77 +310,108 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
+              className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
+              title="Tải xuống"
             >
               <Download className="w-5 h-5 text-white" />
             </a>
             {showRemove && onRemove && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={onRemove}
-                className="p-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg backdrop-blur-sm"
+                className="p-2.5 bg-red-500/20 hover:bg-red-500/30 rounded-lg backdrop-blur-sm transition-colors"
+                title="Xóa"
               >
                 <X className="w-5 h-5 text-white" />
-              </Button>
+              </button>
             )}
           </div>
         </div>
         {/* Filename */}
-        <div className="p-2 bg-zinc-900/90 backdrop-blur-sm">
-          <p className="text-xs text-white truncate font-medium">
+        <div className="p-3 bg-zinc-900/90 backdrop-blur-sm">
+          <p
+            className="text-xs text-white truncate font-medium"
+            title={filename}
+          >
             {filename || "Image"}
           </p>
-          <p className="text-xs text-zinc-400">
-            {attachmentService.formatFileSize(fileSize)}
-          </p>
+          {fileSize !== undefined && (
+            <p className="text-xs text-zinc-400 mt-1">
+              {attachmentService.formatFileSize(fileSize)}
+            </p>
+          )}
         </div>
       </div>
     );
   }
 
-  // Non-image file
+  // Non-image file - Vertical card layout
   return (
     <div
-      className={`flex items-center gap-3 p-3 bg-zinc-900 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition-colors group ${className}`}
+      className={`relative group w-full max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 hover:shadow-lg transition-all duration-200 ${className}`}
     >
-      {/* File icon */}
-      <div className="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center group-hover:bg-zinc-700 transition-colors">
-        {FileIcon && <FileIcon className={`w-6 h-6 ${fileColor}`} />}
+      {/* Icon Section */}
+      <div
+        className={`aspect-square flex items-center justify-center ${fileStyle.bg} relative`}
+      >
+        <div
+          className={`w-16 h-16 bg-gradient-to-br ${fileStyle.gradient} rounded-2xl flex items-center justify-center shadow-lg`}
+        >
+          {FileIcon && <FileIcon className="w-8 h-8 text-white" />}
+        </div>
+
+        {/* Hover Actions */}
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
+            title="Mở"
+          >
+            <ExternalLink className="w-5 h-5 text-white" />
+          </a>
+          <a
+            href={url}
+            download={filename}
+            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
+            title="Tải xuống"
+          >
+            <Download className="w-5 h-5 text-white" />
+          </a>
+        </div>
+
+        {/* Remove button */}
+        {showRemove && onRemove && (
+          <button
+            onClick={onRemove}
+            className="absolute top-2 right-2 p-1.5 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            title="Xóa"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
+        )}
       </div>
 
-      {/* File info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">
+      {/* File Info Section */}
+      <div className="p-3 space-y-1">
+        <p
+          className="text-xs font-semibold text-white truncate leading-tight"
+          title={filename}
+        >
           {filename || "Unknown file"}
         </p>
-        <p className="text-xs text-zinc-400">
-          {attachmentService.formatFileSize(fileSize)}
-        </p>
+        {fileSize !== undefined && (
+          <p className="text-xs text-zinc-400 font-medium">
+            {attachmentService.formatFileSize(fileSize)}
+          </p>
+        )}
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1">
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
-          title="Download"
-        >
-          <Download className="w-4 h-4 text-zinc-400 hover:text-white transition-colors" />
-        </a>
-        {showRemove && onRemove && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRemove}
-            className="p-2 hover:bg-red-900/30 rounded-lg transition-colors"
-            title="Remove"
-          >
-            <X className="w-4 h-4 text-zinc-400 hover:text-red-400 transition-colors" />
-          </Button>
-        )}
+      {/* File type badge */}
+      <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 backdrop-blur-sm rounded-md">
+        <p className={`text-[10px] font-semibold uppercase ${fileStyle.color}`}>
+          {filename?.split(".").pop() || "File"}
+        </p>
       </div>
     </div>
   );
