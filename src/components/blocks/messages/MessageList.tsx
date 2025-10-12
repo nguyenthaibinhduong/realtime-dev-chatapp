@@ -12,6 +12,9 @@ import { useMessageScroll } from "@/hooks/useMessage";
 import { useMessageStatus } from "@/hooks/useMessage";
 import { useMessageActions } from "@/hooks/useMessage";
 import { MessageActionType } from "@/components/blocks/messages/MessageAction";
+import { chatSocketService } from "@/services/chatSocketService";
+import { toast } from "@/hooks/useToast";
+import { id } from "date-fns/locale";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -110,10 +113,21 @@ export const MessageList: React.FC<Props> = ({
   }, []);
 
   const handleDelete = useCallback(async (messageId: string) => {
-    console.log('Delete message:', messageId);
-    // TODO: Implement API call
-    // await chatAPI.deleteMessage(channelId, messageId);
-  }, [channelId]);
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+    //console.log('Delete message:', msg);
+
+    chatSocketService.sendMessage({
+      id: messageId,
+      isUpdate: true,
+      channelId: channelId,
+      text: `tin nhắn đã bị xóa`,
+      type: 'remove',
+    });
+    // toast({
+    //   title: "Đã xóa tin nhắn!",
+    // });
+  }, [channelId, messages]);
 
   const handleCopy = useCallback((messageId: string, text: string) => {
     console.log('Copy message:', messageId, text);
