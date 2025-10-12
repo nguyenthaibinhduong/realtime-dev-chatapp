@@ -33,10 +33,10 @@ const getFileIcon = (mimeType?: string, filename?: string) => {
     if (mimeType.startsWith("video/")) return FileVideo;
     if (mimeType.startsWith("audio/")) return FileAudio;
     if (mimeType.includes("pdf")) return FileText;
+    if (mimeType.includes("sheet") || mimeType.includes("spreadsheet"))
+      return FileSpreadsheet;
     if (mimeType.includes("word") || mimeType.includes("document"))
       return FileText;
-    if (mimeType.includes("excel") || mimeType.includes("spreadsheet"))
-      return FileSpreadsheet;
     if (
       mimeType.includes("zip") ||
       mimeType.includes("rar") ||
@@ -46,7 +46,8 @@ const getFileIcon = (mimeType?: string, filename?: string) => {
     if (
       mimeType.includes("json") ||
       mimeType.includes("javascript") ||
-      mimeType.includes("typescript")
+      mimeType.includes("typescript") ||
+      mimeType.includes("--")
     )
       return FileCode;
   }
@@ -81,6 +82,7 @@ const getFileIcon = (mimeType?: string, filename?: string) => {
       case "java":
       case "cpp":
       case "c":
+      case "go":
         return FileCode;
       case "mp4":
       case "avi":
@@ -121,18 +123,19 @@ const getFileStyle = (mimeType?: string, filename?: string) => {
         bg: "bg-red-500/10",
         gradient: "from-red-600 to-red-700",
       };
+    if (mimeType.includes("sheet") || mimeType.includes("spreadsheet"))
+      return {
+        color: "text-green-400",
+        bg: "bg-green-500/10",
+        gradient: "from-green-600 to-green-700",
+      };
     if (mimeType.includes("word") || mimeType.includes("document"))
       return {
         color: "text-blue-400",
         bg: "bg-blue-500/10",
         gradient: "from-blue-600 to-blue-700",
       };
-    if (mimeType.includes("excel") || mimeType.includes("spreadsheet"))
-      return {
-        color: "text-green-400",
-        bg: "bg-green-500/10",
-        gradient: "from-green-600 to-green-700",
-      };
+
     if (mimeType.includes("zip") || mimeType.includes("rar"))
       return {
         color: "text-yellow-400",

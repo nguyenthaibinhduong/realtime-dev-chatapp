@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import attachmentService from "@/services/attachmentService";
 
 interface AttachmentModalProps {
   open: boolean;
@@ -87,61 +88,9 @@ const attachmentTypeConfig = {
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
   },
-  other: {
-    label: "Khác",
-    icon: File,
-    gradient: "from-gray-600 to-gray-700",
-    color: "text-gray-500",
-    bgColor: "bg-gray-500/10",
-  },
-};
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-};
-
-const formatDate = (date: Date): string => {
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-  if (days === 0) return "Hôm nay";
-  if (days === 1) return "Hôm qua";
-  if (days < 7) return `${days} ngày trước`;
-
-  return date.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 };
 
 // Mapping mime types to attachment types
-const getMimeTypeCategory = (mimeType: string): string | null => {
-  if (mimeType.startsWith("image/")) return "image";
-  if (mimeType.startsWith("video/")) return "video";
-  if (mimeType.startsWith("audio/")) return "audio";
-  if (
-    mimeType.includes("pdf") ||
-    mimeType.includes("word") ||
-    mimeType.includes("document") ||
-    mimeType.includes("text")
-  )
-    return "document";
-  if (
-    mimeType.includes("zip") ||
-    mimeType.includes("rar") ||
-    mimeType.includes("7z") ||
-    mimeType.includes("tar") ||
-    mimeType.includes("gz")
-  )
-    return "archive";
-  return "other";
-};
 
 export const AttachmentModal = ({
   open,
@@ -154,8 +103,6 @@ export const AttachmentModal = ({
   const [selectedSender, setSelectedSender] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [previewAttachment, setPreviewAttachment] =
-    useState<AttachmentType | null>(null);
 
   const {
     attachments,
@@ -169,7 +116,6 @@ export const AttachmentModal = ({
     resetFilters,
   } = useAttachment(channelId);
 
-  // Fetch attachments khi mở modal hoặc channelId thay đổi
   useEffect(() => {
     if (open && channelId) {
       fetchAttachments(true);
@@ -188,8 +134,8 @@ export const AttachmentModal = ({
         image: "image/",
         video: "video/",
         audio: "audio/",
-        document: "application/pdf",
-        archive: "application/zip",
+        document: "document",
+        archive: "compressed",
       };
       newFilters.mimeType = mimeTypeMap[selectedType];
     }
@@ -207,32 +153,6 @@ export const AttachmentModal = ({
   const filteredAttachments = useMemo(() => {
     return attachments;
   }, [attachments]);
-
-  const typeStats = useMemo(() => {
-    const stats: Record<string, number> = {};
-    attachments.forEach((att) => {
-      const category = getMimeTypeCategory(att.mimeType);
-      if (category) {
-        stats[category] = (stats[category] || 0) + 1;
-      }
-    });
-    return stats;
-  }, [attachments]);
-
-  const handleDownload = (attachment: AttachmentType) => {
-    if (attachment.url) {
-      window.open(attachment.url, "_blank");
-    }
-  };
-
-  const handlePreview = (attachment: AttachmentType) => {
-    const category = getMimeTypeCategory(attachment.mimeType);
-    if (category && ["image", "video", "audio"].includes(category)) {
-      setPreviewAttachment(attachment);
-    } else if (attachment.url) {
-      window.open(attachment.url, "_blank");
-    }
-  };
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -255,7 +175,7 @@ export const AttachmentModal = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[85vh] bg-zinc-950 text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl h-4/5 bg-zinc-950 text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
           {/* Header */}
           <div className="bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6">
             <DialogHeader>
@@ -301,12 +221,9 @@ export const AttachmentModal = ({
                 }`}
                 onClick={() => setSelectedType(null)}
               >
-                Tất cả ({attachments.length})
+                Tất cả
               </Badge>
               {Object.entries(attachmentTypeConfig).map(([type, config]) => {
-                const count = typeStats[type] || 0;
-                if (count === 0) return null;
-
                 return (
                   <Badge
                     key={type}
@@ -314,11 +231,11 @@ export const AttachmentModal = ({
                     className={`cursor-pointer whitespace-nowrap ${
                       selectedType === type
                         ? `${config.bgColor} ${config.color} border-${config.color}`
-                        : "bg-zinc-800 hover:bg-zinc-700 border-zinc-700"
+                        : "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
                     }`}
                     onClick={() => setSelectedType(type)}
                   >
-                    {config.label} ({count})
+                    {config.label}
                   </Badge>
                 );
               })}
@@ -329,7 +246,7 @@ export const AttachmentModal = ({
               {/* Sender Filter */}
               {members.length > 0 && (
                 <Popover>
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-36">
                     <Select
                       value={selectedSender || ""}
                       onValueChange={setSelectedSender}
@@ -338,16 +255,13 @@ export const AttachmentModal = ({
                         <SelectValue placeholder="Chọn người gửi" />
                       </SelectTrigger>
                       <SelectContent className="bg-zinc-900 border-zinc-800">
-                        <SelectItem value=" " className="text-white">
-                          Tất cả người gửi
-                        </SelectItem>
                         {members.map((member) => (
                           <SelectItem
                             key={member.id}
                             value={member.id.toString()}
                             className="text-white"
                           >
-                            {member.username} ({member.id})
+                            {member.username}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -506,72 +420,6 @@ export const AttachmentModal = ({
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Preview Modal */}
-      {previewAttachment && (
-        <Dialog
-          open={!!previewAttachment}
-          onOpenChange={() => setPreviewAttachment(null)}
-        >
-          <DialogContent className="max-w-4xl max-h-[90vh] bg-zinc-950 text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden">
-            <div className="relative">
-              <button
-                onClick={() => setPreviewAttachment(null)}
-                className="absolute top-2 right-2 z-10 p-2 bg-zinc-900/80 hover:bg-zinc-800 rounded-lg transition-colors"
-              >
-                <X className="h-5 w-5 text-white" />
-              </button>
-
-              {getMimeTypeCategory(previewAttachment.mimeType) === "image" &&
-                previewAttachment.url && (
-                  <img
-                    src={previewAttachment.url}
-                    alt={previewAttachment.filename}
-                    className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
-                  />
-                )}
-
-              {getMimeTypeCategory(previewAttachment.mimeType) === "video" &&
-                previewAttachment.url && (
-                  <video
-                    src={previewAttachment.url}
-                    controls
-                    className="w-full h-auto max-h-[80vh] rounded-lg"
-                  />
-                )}
-
-              {getMimeTypeCategory(previewAttachment.mimeType) === "audio" &&
-                previewAttachment.url && (
-                  <div className="p-8">
-                    <audio
-                      src={previewAttachment.url}
-                      controls
-                      className="w-full"
-                    />
-                  </div>
-                )}
-
-              <div className="mt-4 p-4 bg-zinc-900 rounded-lg">
-                <p className="text-white font-semibold mb-2">
-                  {previewAttachment.filename}
-                </p>
-                <div className="flex items-center gap-4 text-sm text-zinc-400">
-                  <span>{formatFileSize(previewAttachment.fileSize)}</span>
-                  <span>•</span>
-                  <span>
-                    {formatDate(new Date(previewAttachment.createdAt))}
-                  </span>
-                  <span>•</span>
-                  <span>
-                    {previewAttachment.senderName ||
-                      `User ${previewAttachment.senderId}`}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </>
   );
 };
