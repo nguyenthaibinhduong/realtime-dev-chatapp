@@ -36,6 +36,7 @@ import { AuthAPI, GithubAPI } from "@/api/api";
 import { useToast } from "@/hooks/useToast";
 import authService from "@/services/authService";
 import { UpdatePassword } from "./blocks/auth/UpdatePassword";
+import AvatarUser from "./common/AvartarUser";
 
 const ProfileLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -157,12 +158,7 @@ const ProfileLayout: React.FC = () => {
       <Card className="shadow-2xl bg-transparent border-black backdrop-blur-sm">
         <CardHeader className="text-center pb-6 border-b border-gray-700/50">
           <div className="flex flex-col items-center gap-4">
-            <Avatar className="w-20 h-20 ring-2 ring-gray-600/50">
-              <AvatarImage src={user.github_avatar || user.avatar} />
-              <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-                {userInitial}
-              </AvatarFallback>
-            </Avatar>
+            <AvatarUser user={user} isMe={user?.id === user?.id} size={24} />
             <div>
               <CardTitle className="text-2xl text-gray-100">
                 Hồ sơ cá nhân
@@ -177,13 +173,13 @@ const ProfileLayout: React.FC = () => {
         <CardContent className="w-4/5 mx-auto space-y-3 p-6">
           {/* Username Section */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2 text-gray-300">
+            <Label className="text-sm font-medium flex items-cente p-2 gap-2 text-gray-300">
               <User className="w-4 h-4 text-blue-400" />
               Tên người dùng
             </Label>
 
             {!isEditing ? (
-              <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600/30">
+              <div className="flex items-center justify-between p-2 bg-gray-700/50 rounded-lg border border-gray-600/30">
                 <span className="font-medium text-gray-200">
                   {(user as any).username || user.name}
                 </span>
@@ -207,16 +203,9 @@ const ProfileLayout: React.FC = () => {
                   disabled={loading}
                   className="bg-gray-700/50 border-gray-600/50 text-gray-200 placeholder:text-gray-500 focus:border-blue-500/50"
                 />
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={loading || !username.trim()}
-                    className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Check className="w-4 h-4" />
-                    {loading ? "Đang lưu..." : "Lưu"}
-                  </Button>
+
+                {/* Buttons: cancel (left) + primary save (right) - responsive */}
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
                   <Button
                     type="button"
                     variant="outline"
@@ -226,10 +215,20 @@ const ProfileLayout: React.FC = () => {
                       setUsername(user?.username || user?.name || "");
                     }}
                     disabled={loading}
-                    className="gap-2 border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:text-gray-200"
+                    className="gap-2 border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:text-gray-200 sm:order-1"
                   >
                     <X className="w-4 h-4" />
                     Hủy
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={loading || !username.trim()}
+                    className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-sm sm:order-2"
+                  >
+                    <Check className="w-4 h-4" />
+                    {loading ? "Đang lưu..." : "Lưu thay đổi"}
                   </Button>
                 </div>
               </form>
@@ -265,26 +264,27 @@ const ProfileLayout: React.FC = () => {
               <Github className="w-4 h-4 text-purple-400" />
               Tích hợp GitHub
             </Label>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between bg-gray-700/50 rounded-lg border border-gray-600/30">
+                <div className="flex items-center gap-3">
+                  <Badge
+                    variant={isGithubLinked ? "default" : "secondary"}
+                    className={
+                      isGithubLinked
+                        ? "bg-purple-600/20 text-purple-400 border-purple-500/30"
+                        : "bg-gray-600/20 text-gray-400 border-gray-500/30"
+                    }
+                  >
+                    {isGithubLinked ? "Đã liên kết" : "Chưa liên kết"}
+                  </Badge>
+                  {isGithubLinked && user.github_email && (
+                    <span className="text-sm text-gray-400">
+                      {user.github_email}
+                    </span>
+                  )}
+                </div>
 
-            <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600/30">
-              <div className="flex items-center gap-3">
-                <Badge
-                  variant={isGithubLinked ? "default" : "secondary"}
-                  className={
-                    isGithubLinked
-                      ? "bg-purple-600/20 text-purple-400 border-purple-500/30"
-                      : "bg-gray-600/20 text-gray-400 border-gray-500/30"
-                  }
-                >
-                  {isGithubLinked ? "Đã liên kết" : "Chưa liên kết"}
-                </Badge>
-                {isGithubLinked && user.github_email && (
-                  <span className="text-sm text-gray-400">
-                    {user.github_email}
-                  </span>
-                )}
               </div>
-
               {isGithubLinked && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -292,7 +292,7 @@ const ProfileLayout: React.FC = () => {
                       variant="outline"
                       size="sm"
                       disabled={loading}
-                      className="gap-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                      className="w-40 h-10 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
                     >
                       <Unlink className="w-4 h-4" />
                       Hủy liên kết
@@ -343,27 +343,36 @@ const ProfileLayout: React.FC = () => {
 
           <Separator className="bg-gray-700/50" />
 
-          {/* Action Buttons */}
-          <div className="w-2/3 mx-auto flex flex-col gap-3">
-            <Button
-              variant="outline"
-              className="w-full gap-2 border-gray-600/50 text-black hover:bg-gray-700/50 hover:text-gray-200"
-              onClick={handleUpdatePassword}
-            >
-              <Key className="w-4 h-4 text-yellow-600" />
-              Đổi mật khẩu
-            </Button>
-
-            <Separator className="bg-gray-700/50" />
-
-            <Button
-              variant="destructive"
-              className="w-full gap-2 bg-red-600/20 text-red-400 border-red-500/50 hover:bg-red-600/30 hover:text-red-300"
-              onClick={handleSignOut}
-            >
-              <LogOut className="w-4 h-4" />
-              Đăng xuất
-            </Button>
+          {/* Action Buttons - compact + instruction above each button */}
+          <div className="w-full mx-auto flex flex-col items-center gap-6">
+            <div className="w-full flex justify-between gap-x-4">
+              <p className="text-sm text text-white mb-2">
+                Thay đổi mật khẩu định kỳ để bảo vệ tài khoản. Sử dụng mật khẩu mạnh (≥12 ký tự).
+              </p>
+              <Button
+                variant="outline"
+                className="w-44 h-10 px-3 flex text-black items-center justify-center gap-2 border-gray-600/50  hover:bg-gray-800/50"
+                onClick={handleUpdatePassword}
+                aria-label="Đổi mật khẩu"
+              >
+                <Key className="w-4 h-4 text-black" />
+                Đổi mật khẩu
+              </Button>
+            </div>
+            <div className="w-full flex justify-between gap-x-4">
+              <p className="text-sm text-white mb-2">
+                Đăng xuất sẽ kết thúc phiên hiện tại trên thiết bị này. Lưu công việc trước khi thoát.
+              </p>
+              <Button
+                variant="destructive"
+                className="w-44 h-10 px-3 flex items-center justify-center gap-2 bg-red-600/10 text-red-400 border-red-500/30 hover:bg-red-600/20"
+                onClick={handleSignOut}
+                aria-label="Đăng xuất"
+              >
+                <LogOut className="w-4 h-4" />
+                Đăng xuất
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

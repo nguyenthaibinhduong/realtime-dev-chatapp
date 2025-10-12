@@ -1,3 +1,4 @@
+import AvatarUser from "@/components/common/AvartarUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,14 +43,8 @@ function renderNotification(notification: Notification): React.ReactNode {
         <Card className="max-w-3xl mx-auto bg-gray-900/50 border-gray-800 backdrop-blur-sm shadow-xl">
           <CardHeader className="pb-4 space-y-4">
             <div className="flex items-start gap-4">
-              <Avatar className="w-14 h-14 border-2 border-gray-700 ring-2 ring-gray-800">
-                <AvatarImage src={notification.data?.sender?.avatar} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-lg">
-                  {notification.data?.sender?.username
-                    ?.slice(0, 1)
-                    .toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
+
+              <AvatarUser user={notification.data?.sender} size={8} />
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2 flex-wrap">

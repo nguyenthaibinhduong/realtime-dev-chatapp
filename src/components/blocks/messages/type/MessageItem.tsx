@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { MessageActions, MessageActionType } from "@/components/blocks/messages/MessageAction";
 import Attachment from "../Attachment";
 import attachmentService from "@/services/attachmentService";
+import AvatarUser from "@/components/common/AvartarUser";
 
 interface MessageItemProps {
     message: any;
@@ -133,12 +134,7 @@ const MessageItem = memo(({
         >
             {/* Avatar */}
             {showSenderInfo && !isMe ? (
-                <Avatar className="h-9 w-9 flex-shrink-0 ring-2 ring-gray-700 shadow-sm">
-                    <AvatarImage src={message.sender?.avatar} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-semibold">
-                        {message.sender?.username?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                </Avatar>
+                <AvatarUser user={message?.sender} isMe={isMe} size={8} />
             ) : !isMe ? (
                 <div className="w-9 flex-shrink-0" />
             ) : null}

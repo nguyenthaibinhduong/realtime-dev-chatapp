@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import AvatarUser from "./common/AvartarUser";
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -42,14 +43,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         {/* User Info */}
         <div className="p-3 border-t border-sidebar-border">
           <div className="flex items-center space-x-2">
-            <Avatar
-              className="h-8 w-8 hover:cursor-pointer"
-              onClick={() => navigate("/profile")}
-            >
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {user?.email?.[0]?.toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
+            <AvatarUser user={user} isMe={user?.id === user?.id} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
                 {user?.username || user?.email?.split("@")[0] || "User"}

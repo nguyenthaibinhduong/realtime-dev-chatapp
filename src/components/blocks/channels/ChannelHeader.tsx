@@ -30,31 +30,31 @@ import { GithubAPI } from "@/api/api";
 import { toast } from "@/hooks/useToast";
 import { RepoChatDialog } from "../github/RepoChatDialog";
 import { AttachmentModal } from "../attachments/AttachmentModal";
+import AvatarUser from "@/components/common/AvartarUser";
+import { AvatarGroupGrid } from "@/components/common/AvatarGroup";
 
 interface ChannelHeaderProps {
   channel: Channel;
   members: Member[];
 }
 
-const getChannelIcon = (channel: Channel, userId?: any) => {
-  if (channel.type === "group")
-    return <Globe className="h-5 w-5 text-blue-500 mr-2" />;
-  if (channel.type === "private")
-    return <Lock className="h-5 w-5 text-red-500 mr-2" />;
+const getChannelIcon = (channel: Channel, user?: any) => {
+  if (channel.type === "group" || channel.type === "group-private") return <AvatarGroupGrid users={channel.members} tile={18} />;
   if (channel.type === "personal") {
     return (
       <div className="relative mr-2">
-        <Avatar className="h-6 w-6">
-          <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-            {channel.name?.[0]?.toUpperCase() || "U"}
-          </AvatarFallback>
-        </Avatar>
+        <AvatarUser user={user} size={8} />
         {/* Chấm online */}
-        {userId && channel.members && <OnlineDot userId={userId} />}
+        {
+          user?.id && channel.members && (
+            <OnlineDot userId={user?.id} />
+
+          )
+        }
       </div>
     );
   }
-  return <Hash className="h-5 w-5 text-muted-foreground mr-2" />;
+  return <Hash className="h-4 w-4 mr-2 text-muted-foreground" />;
 };
 
 const getChannelTypeLabel = (type: string) => {
@@ -73,7 +73,7 @@ const getChannelTypeLabel = (type: string) => {
 export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState("members");
-  const [otherUserId, setOtherUserId] = useState<string | number | undefined>();
+  const [otherUser, setOtherUser] = useState<any>();
   const { user } = useAuth();
   const [openGitModal, setOpenGitModal] = useState(false);
   const [openAttachmentModal, setOpenAttachmentModal] = useState(false);
@@ -81,25 +81,19 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
   useEffect(() => {
     if (channel.type === "personal" && members && user?.id) {
       const otherMember = members.find((m: any) => m.id !== user.id);
-      setOtherUserId(otherMember?.id);
+      setOtherUser(otherMember);
     }
-    console.log("Other User ID:", otherUserId);
+    console.log("Other User ID:", otherUser);
   }, [channel, members, user]);
 
-  // Handle file selection from attachment modal
-  const handleFileSelect = (file: File, type: string) => {
-    console.log("File selected:", file.name, "Type:", type);
-    // TODO: Implement file upload logic
-    // You can call your upload API here
-  };
 
   return (
     <div className="h-14 border-b border-border bg-card px-6 flex items-center justify-between">
       <div className="flex items-center">
         {channel.type === "personal"
-          ? getChannelIcon(channel, otherUserId)
+          ? getChannelIcon(channel, otherUser)
           : getChannelIcon(channel)}
-        <h2 className="font-semibold text-foreground">{channel.name}</h2>
+        <h2 className="font-semibold text-foreground ml-2">{channel.name}</h2>
         {channel.member_count > 2 && (
           <>
             <Separator orientation="vertical" className="mx-3 h-4" />
@@ -171,15 +165,10 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
               <DialogHeader>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 flex items-center justify-center">
-                    <Avatar className="h-12 w-12 rounded-xl">
-                      <AvatarFallback className="bg-blue-800 text-white text-md">
-                        {channel.name?.[0]?.toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    {/* Chấm online */}
-                    {channel.type == "personal" && otherUserId && (
-                      <OnlineDot userId={otherUserId} />
-                    )}
+                    {channel.type === "personal"
+                      ? getChannelIcon(channel, otherUser)
+                      : getChannelIcon(channel)}
+
                   </div>
                   <div>
                     <DialogTitle className="text-2xl font-bold text-white tracking-tight">
@@ -225,11 +214,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                         className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg hover:bg-zinc-700 transition-colors duration-200"
                       >
                         <div className="relative mr-2">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-blue-700 text-white text-md">
-                              {member.username?.[0]?.toUpperCase() || "U"}
-                            </AvatarFallback>
-                          </Avatar>
+                          <AvatarUser user={member} size={8} />
                           {/* Chấm online */}
                           <OnlineDot userId={member.id} />
                         </div>
@@ -274,8 +259,8 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
                           </AvatarFallback>
                         </Avatar>
                         {/* Chấm online */}
-                        {channel.type == "personal" && otherUserId && (
-                          <OnlineDot userId={otherUserId} />
+                        {channel.type == "personal" && otherUser && (
+                          <OnlineDot userId={otherUser} />
                         )}
                       </div>
                       <div>
