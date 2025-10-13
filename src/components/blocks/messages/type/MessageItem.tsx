@@ -346,7 +346,7 @@ const MessageItem = memo(({
                         )}
 
                         {/* Like Button - Always visible at bottom left for non-removed messages */}
-                        {!isRemovedMessage && (
+                        {/* {!isRemovedMessage && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -372,7 +372,7 @@ const MessageItem = memo(({
                                     </span>
                                 )}
                             </button>
-                        )}
+                        )} */}
                     </div>
                 )}
 
