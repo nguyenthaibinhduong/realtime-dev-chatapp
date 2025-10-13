@@ -50,6 +50,7 @@ type Props = MessageListProps & {
   type?: string;
   onReplySelect?: (reply: { id: string; sender: string; text?: string }) => void; // <-- thêm
   onEditSelect?: (edit: { id: string; sender: string; text?: string }) => void; // <-- thêm edit
+  hasInputPreview?: boolean; // <-- thêm để biết có reply/edit preview không
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -60,6 +61,7 @@ export const MessageList: React.FC<Props> = ({
   type,
   onReplySelect, // <-- thêm
   onEditSelect, // <-- thêm edit
+  hasInputPreview = false, // <-- thêm
 }) => {
   const { user } = useAuth();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -90,10 +92,44 @@ export const MessageList: React.FC<Props> = ({
 
   // Message action handlers
   const handleLike = useCallback(async (messageId: string) => {
-    console.log('Like message:', messageId);
-    // TODO: Implement API call
-    // await chatAPI.likeMessage(channelId, messageId);
-  }, [channelId]);
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+
+    // Kiểm tra xem user đã like chưa
+    const currentLikeData = msg.like_data || {};
+    const currentLikes = currentLikeData.users || [];
+    const userAlreadyLiked = currentLikes.some((like: any) => like.userId === user?.id);
+
+    let updatedLikes;
+    let updatedCount;
+
+    if (userAlreadyLiked) {
+      // Bỏ like - xóa user khỏi danh sách
+      updatedLikes = currentLikes.filter((like: any) => like.userId !== user?.id);
+      updatedCount = Math.max(0, (currentLikeData.count || 0) - 1);
+    } else {
+      // Thêm like - thêm user vào danh sách
+      updatedLikes = [...currentLikes, {
+        userId: user?.id,
+        username: user?.username || user?.name || 'Unknown',
+        likedAt: new Date().toISOString(),
+      }];
+      updatedCount = (currentLikeData.count || 0) + 1;
+    }
+
+    chatSocketService.sendMessage({
+      id: messageId,
+      isUpdate: true,
+      likeData: {
+        count: updatedCount,
+        users: updatedLikes,
+      },
+      isLiked: !userAlreadyLiked,
+      likeCount: updatedCount,
+      channelId: channelId,
+      type: 'message',
+    });
+  }, [messages, channelId, user]);
 
   const handleReply = useCallback((messageId: string) => {
     const msg: any = messages.find((m) => String(m.id) === String(messageId));
@@ -346,8 +382,11 @@ export const MessageList: React.FC<Props> = ({
 
   return (
     <ScrollArea
-      className="flex-1 p-4"
-      style={{ height: "75vh", minHeight: "75vh", maxHeight: "75vh" }}
+      className="p-4 overflow-auto"
+      style={{
+        height: hasInputPreview ? "calc(100vh - 25vh)" : "calc(100vh - 20vh)",
+        transition: "height 0.3s ease-in-out"
+      }}
       ref={scrollAreaRef}
     >
       <div>

@@ -894,21 +894,23 @@ export default function ChatLayout() {
         )
       }
     >
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         {selectedChannel && (
           <ChannelHeader channel={selectedChannel} members={members} />
         )}
 
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-col h-full">
           {messages.length === 0 ? (
-            <div className="text-center">
-              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">
-                Chat Coming Soon
-              </h3>
-              <p className="text-muted-foreground">
-                Chat functionality will be implemented with the new backend API
-              </p>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">
+                  Chat Coming Soon
+                </h3>
+                <p className="text-muted-foreground">
+                  Chat functionality will be implemented with the new backend API
+                </p>
+              </div>
             </div>
           ) : (
             <MessageList
@@ -919,20 +921,23 @@ export default function ChatLayout() {
               type={selectedChannel?.type}
               onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
               onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
+              hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
             />
           )}
-        </div>
 
-        {selectedChannel && (
-          <MessageInput
-            channelId={selectedChannel.id}
-            onSend={sendMessage}
-            replyMessage={replyTo || undefined}        // <-- truyền xuống input
-            onCancelReply={() => setReplyTo(null)}     // <-- hủy reply
-            editMessage={editTo || undefined}          // <-- truyền xuống edit
-            onCancelEdit={() => setEditTo(null)}       // <-- hủy edit
-          />
-        )}
+          {selectedChannel && (
+            <div className="flex-shrink-0">
+              <MessageInput
+                channelId={selectedChannel.id}
+                onSend={sendMessage}
+                replyMessage={replyTo || undefined}        // <-- truyền xuống input
+                onCancelReply={() => setReplyTo(null)}     // <-- hủy reply
+                editMessage={editTo || undefined}          // <-- truyền xuống edit
+                onCancelEdit={() => setEditTo(null)}       // <-- hủy edit
+              />
+            </div>
+          )}
+        </div>
 
         {/* GitHub Detail Modal */}
         {showGithubDetail && (

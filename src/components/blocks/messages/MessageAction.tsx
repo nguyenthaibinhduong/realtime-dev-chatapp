@@ -88,7 +88,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         <div
             className={cn(
                 "absolute top-1/2 -translate-y-1/2 flex items-center gap-2 transition-all duration-100 z-[1100] pointer-events-auto",
-                isMe ? "-left-48" : "-right-48"
+                isMe ? "-left-40" : "-right-40"
             )}
         >
 
