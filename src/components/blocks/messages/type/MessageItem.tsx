@@ -1,10 +1,11 @@
 import { memo, useEffect, useState, useRef } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { MessageActions, MessageActionType } from "@/components/blocks/messages/MessageAction";
 import Attachment from "../Attachment";
 import attachmentService from "@/services/attachmentService";
+import AvatarUser from "@/components/common/AvartarUser";
 
 interface MessageItemProps {
     message: any;
@@ -18,7 +19,7 @@ interface MessageItemProps {
     onHover: (id: string | null) => void;
     onCodeShare?: (params: any) => void;
     onMessageAction?: (type: MessageActionType, messageId: string, messageData?: any) => void;
-    onJumpToMessage?: (id: string) => void; // <-- added
+    onJumpToMessage?: (id: string) => void;
 }
 
 const MessageItem = memo(({
@@ -33,12 +34,15 @@ const MessageItem = memo(({
     onHover,
     onCodeShare,
     onMessageAction,
-    onJumpToMessage, // <-- added
+    onJumpToMessage,
 }: MessageItemProps) => {
     const [showSentStatus, setShowSentStatus] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     const isHovered = hoveredId === String(message.id);
+
+    // Check if message is removed
+    const isRemovedMessage = message?.type === 'remove';
 
     // Detect file-upload messages
     const isFileUploadWithAttachments =
@@ -77,7 +81,7 @@ const MessageItem = memo(({
 
     // Status label
     let statusLabel = null;
-    if (isMe && message.status && message.type !== 'notification') {
+    if (isMe && message.status && message.type !== 'notification' && !isRemovedMessage) {
         if (message.status === "pending") {
             statusLabel = (
                 <div className="flex items-center gap-1">
@@ -115,7 +119,9 @@ const MessageItem = memo(({
 
     // immediate hover: no timers, precise show/hide
     const handleMouseEnter = () => {
-        onHover(String(message.id));
+        if (!isRemovedMessage) {
+            onHover(String(message.id));
+        }
     };
     const handleMouseLeave = () => {
         onHover(null);
@@ -123,7 +129,7 @@ const MessageItem = memo(({
 
     return (
         <div
-            data-message-id={message.id} // giúp debug/scroll đến message
+            data-message-id={message.id}
             className={cn(
                 "flex gap-1 group px-3 py-1.5 transition-all duration-100 rounded-md",
                 isMe ? "flex-row-reverse" : "flex-row"
@@ -133,12 +139,7 @@ const MessageItem = memo(({
         >
             {/* Avatar */}
             {showSenderInfo && !isMe ? (
-                <Avatar className="h-9 w-9 flex-shrink-0 ring-2 ring-gray-700 shadow-sm">
-                    <AvatarImage src={message.sender?.avatar} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-semibold">
-                        {message.sender?.username?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                </Avatar>
+                <AvatarUser user={message?.sender} isMe={isMe} size={8} />
             ) : !isMe ? (
                 <div className="w-9 flex-shrink-0" />
             ) : null}
@@ -149,153 +150,177 @@ const MessageItem = memo(({
                 isMe ? "items-end" : "items-start"
             )}>
                 {/* Sender name */}
-                {showSenderInfo && !isMe && (
+                {showSenderInfo && !isMe && !isRemovedMessage && (
                     <span className="text-[11px] font-medium text-gray-400 px-2 mb-0.5">
                         {message.sender?.username || 'Unknown'}
                     </span>
                 )}
 
-                {/* Message bubble with relative positioning for actions */}
-                <div className="relative">
-                    {/* Message Actions */}
-                    <MessageActions
-                        isMe={isMe}
-                        isHovered={isHovered}
-                        messageId={String(message.id)}
-                        canEdit={isMe && message.status === 'sent'}
-                        canDelete={isMe}
-                        isPinned={message.isPinned}
-                        isLiked={message.isLiked}
-                        likeCount={message.likeCount || 0}
-                        onAction={handleAction}
-                        onMenuOpenChange={() => { /* optional - no timers needed */ }}
-                    />
-
-                    {/* Message bubble */}
+                {/* Removed Message Display */}
+                {isRemovedMessage ? (
                     <div className={cn(
-                        "relative break-words transition-all duration-200",
-                        isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
-                        !hasOnlyImages && (
-                            isMe
-                                ? "bg-blue-600 text-white shadow-sm px-3 py-2"
-                                : "bg-gray-800 text-gray-100 border border-gray-700 shadow-sm px-3 py-2"
-                        ),
-                        isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-600",
-                        isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700",
-                        hasOnlyImages && "bg-transparent"
+                        "relative flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed transition-all duration-200",
+                        isMe
+                            ? "bg-gray-800/30 border-gray-700/50 text-gray-500"
+                            : "bg-gray-900/30 border-gray-700/50 text-gray-500"
                     )}>
-
-                        {/* Reply preview cho type: reply-message */}
-                        {message.type === 'reply-message' && message.replyTo && (
-                            <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); onJumpToMessage?.(String(message.replyTo.id)); }}
-                                className={cn(
-                                    "mb-2 w-full text-left group/reply rounded-md border px-2 py-1.5",
-                                    isMe ? "border-blue-400/30 bg-blue-900 hover:bg-blue-600/30"
-                                        : "border-gray-700 bg-gray-900/40 hover:bg-gray-900/60"
-                                )}
-                                title="Đi tới tin nhắn đã được trả lời"
-                            >
-                                <div className="flex items-start gap-2">
-                                    <div className={cn("w-0.5 rounded", isMe ? "bg-blue-300" : "bg-blue-500")} />
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-[12px]">
-                                            <span className="opacity-80">Trả lời </span>
-                                            <span className="font-semibold">{message.replyTo.sender}</span>
-                                        </div>
-                                        {message.replyTo.text ? (
-                                            <div className="text-[12px] opacity-80 truncate">
-                                                {message.replyTo.text}
-                                            </div>
-                                        ) : null}
-                                    </div>
-                                </div>
-                            </button>
-                        )}
-
-                        {message.text && (
-                            <p className={cn(
-                                "text-[14px] leading-relaxed whitespace-pre-wrap break-words",
-                                isMe ? "text-white" : "text-gray-200"
-                            )}>
-                                {message.text}
+                        <div className="flex-1">
+                            <p className="text-[13px] italic">
+                                {isMe ? "Bạn đã xóa tin nhắn này" : "Tin nhắn đã bị xóa"}
                             </p>
-                        )}
-
-                        {isFileUploadWithAttachments && message.attachments && (
-                            <AttachmentList
-                                attachments={message.attachments}
-                                isFileUploadWithAttachments={isFileUploadWithAttachments}
-                                isMe={isMe}
-                                hasText={!!message.text}
-                            />
-                        )}
-
-                        {message.status === "uploading" && message.attachments && (
-                            <div className="space-y-2 mt-2">
-                                {message.attachments.map((att: any, idx: number) => (
-                                    <UploadingAttachment
-                                        key={idx}
-                                        att={att}
-                                        isFileUpload={message.type === 'file-upload'}
-                                        isMe={isMe}
-                                    />
-                                ))}
-                            </div>
-                        )}
-
-                        {!hasOnlyImages && (
                             <div className={cn(
                                 "flex items-center gap-1 mt-1",
                                 isMe ? "justify-end" : "justify-start"
                             )}>
-                                <span className={cn(
-                                    "text-[10px] font-medium",
-                                    isMe ? "text-blue-200" : "text-gray-400"
-                                )}>
+                                <span className="text-[10px] font-medium text-gray-600">
                                     {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}
                                 </span>
-                                {/* {isMe && message.status === "sent" && (
-                                    <span className="text-blue-200 text-[10px]">✓</span>
-                                )} */}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    /* Normal Message Display */
+                    <div className="relative">
+                        {/* Message Actions */}
+                        <MessageActions
+                            isMe={isMe}
+                            isHovered={isHovered}
+                            messageId={String(message.id)}
+                            canEdit={isMe && message.status === 'sent'}
+                            canDelete={isMe}
+                            isPinned={message.isPinned}
+                            isLiked={message.isLiked}
+                            likeCount={message.likeCount || 0}
+                            onAction={handleAction}
+                            onMenuOpenChange={() => { }}
+                        />
+
+                        {/* Message bubble */}
+                        <div className={cn(
+                            "relative break-words transition-all duration-200",
+                            isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
+                            !hasOnlyImages && (
+                                isMe
+                                    ? "bg-blue-600 text-white shadow-sm px-3 py-2"
+                                    : "bg-gray-800 text-gray-100 border border-gray-700 shadow-sm px-3 py-2"
+                            ),
+                            isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-600",
+                            isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700",
+                            hasOnlyImages && "bg-transparent"
+                        )}>
+
+                            {/* Reply preview cho type: reply-message */}
+                            {message.type === 'reply-message' && message.replyTo && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); onJumpToMessage?.(String(message.replyTo.id)); }}
+                                    className={cn(
+                                        "mb-2 w-full text-left group/reply rounded-md border px-2 py-1.5",
+                                        isMe ? "border-blue-400/30 bg-blue-900 hover:bg-blue-600/30"
+                                            : "border-gray-700 bg-gray-900/40 hover:bg-gray-900/60"
+                                    )}
+                                    title="Đi tới tin nhắn đã được trả lời"
+                                >
+                                    <div className="flex items-start gap-2">
+                                        <div className={cn("w-0.5 rounded", isMe ? "bg-blue-300" : "bg-blue-500")} />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-[12px]">
+                                                <span className="opacity-80">Trả lời </span>
+                                                <span className="font-semibold">{message.replyTo.sender}</span>
+                                            </div>
+                                            {message.replyTo.text ? (
+                                                <div className="text-[12px] opacity-80 truncate">
+                                                    {message.replyTo.text}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                </button>
+                            )}
+
+                            {message.text && (
+                                <p className={cn(
+                                    "text-[14px] leading-relaxed whitespace-pre-wrap break-words",
+                                    isMe ? "text-white" : "text-gray-200"
+                                )}>
+                                    {message.text}
+                                </p>
+                            )}
+
+                            {isFileUploadWithAttachments && message.attachments && (
+                                <AttachmentList
+                                    attachments={message.attachments}
+                                    isFileUploadWithAttachments={isFileUploadWithAttachments}
+                                    isMe={isMe}
+                                    hasText={!!message.text}
+                                />
+                            )}
+
+                            {message.status === "uploading" && message.attachments && (
+                                <div className="space-y-2 mt-2">
+                                    {message.attachments.map((att: any, idx: number) => (
+                                        <UploadingAttachment
+                                            key={idx}
+                                            att={att}
+                                            isFileUpload={message.type === 'file-upload'}
+                                            isMe={isMe}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            {!hasOnlyImages && (
+                                <div className={cn(
+                                    "flex items-center gap-1 mt-1",
+                                    isMe ? "justify-end" : "justify-start"
+                                )}>
+                                    <span className={cn(
+                                        "text-[10px] font-medium",
+                                        isMe ? "text-blue-200" : "text-gray-400"
+                                    )}>
+                                        {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {hasOnlyImages && (
+                            <div className={cn(
+                                "flex items-center gap-1 mt-1 px-2",
+                                isMe ? "justify-end" : "justify-start"
+                            )}>
+                                <span className="text-[10px] font-medium text-gray-400">
+                                    {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </span>
+                                {isMe && message.status === "sent" && (
+                                    <span className="text-gray-400 text-[10px]">✓</span>
+                                )}
+                            </div>
+                        )}
+
+                        {message.likeCount > 0 && !isHovered && (
+                            <div className={cn(
+                                "absolute -bottom-2 flex items-center gap-1 px-2 py-0.5 z-10",
+                                "bg-gray-700/90 backdrop-blur-sm rounded-full shadow-md border border-gray-600",
+                                isMe ? "right-2" : "left-2"
+                            )}>
+                                <span className="text-xs">❤️</span>
+                                <span className="text-[10px] font-semibold text-gray-200">
+                                    {message.likeCount}
+                                </span>
                             </div>
                         )}
                     </div>
-
-                    {hasOnlyImages && (
-                        <div className={cn(
-                            "flex items-center gap-1 mt-1 px-2",
-                            isMe ? "justify-end" : "justify-start"
-                        )}>
-                            <span className="text-[10px] font-medium text-gray-400">
-                                {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
-                            </span>
-                            {isMe && message.status === "sent" && (
-                                <span className="text-gray-400 text-[10px]">✓</span>
-                            )}
-                        </div>
-                    )}
-
-                    {message.likeCount > 0 && !isHovered && (
-                        <div className={cn(
-                            "absolute -bottom-2 flex items-center gap-1 px-2 py-0.5 z-10",
-                            "bg-gray-700/90 backdrop-blur-sm rounded-full shadow-md border border-gray-600",
-                            isMe ? "right-2" : "left-2"
-                        )}>
-                            <span className="text-xs">❤️</span>
-                            <span className="text-[10px] font-semibold text-gray-200">
-                                {message.likeCount}
-                            </span>
-                        </div>
-                    )}
-                </div>
+                )}
 
                 {statusLabel && (
                     <div className={cn(
@@ -311,6 +336,7 @@ const MessageItem = memo(({
 });
 
 MessageItem.displayName = "MessageItem";
+
 // Attachment List Component
 const AttachmentList = memo(({
     attachments,
@@ -335,7 +361,6 @@ const AttachmentList = memo(({
                     key={att.key || att.id}
                     className={cn(
                         "overflow-hidden",
-                        // Bo góc nhỏ hơn giống Zalo
                         allImages ? "rounded-lg" : "rounded-md",
                         isFileUploadWithAttachments ? 'w-full' : 'inline-block'
                     )}
@@ -385,7 +410,6 @@ const UploadingAttachment = memo(({
     return (
         <div className={cn(
             "relative overflow-hidden backdrop-blur-sm border shadow-sm",
-            // Bo góc nhỏ hơn
             isImage ? "rounded-lg" : "rounded-md",
             isMe
                 ? "bg-blue-600/20 border-blue-500/30"
@@ -393,7 +417,6 @@ const UploadingAttachment = memo(({
             isFileUpload ? 'w-full p-3' : 'max-w-xs p-3'
         )}>
             <div className="flex items-center gap-3">
-                {/* File icon */}
                 <div className="flex-shrink-0">
                     <div className={cn(
                         "h-10 w-10 rounded-lg flex items-center justify-center",
@@ -415,7 +438,6 @@ const UploadingAttachment = memo(({
                     </div>
                 </div>
 
-                {/* File info */}
                 <div className="flex-1 min-w-0">
                     <div className={cn(
                         "text-sm font-medium truncate mb-1",
@@ -432,7 +454,6 @@ const UploadingAttachment = memo(({
                         </div>
                     )}
 
-                    {/* Progress bar */}
                     <div className="relative w-full h-1.5 bg-gray-600/50 rounded-full overflow-hidden">
                         <div
                             className={cn(
@@ -443,7 +464,6 @@ const UploadingAttachment = memo(({
                         />
                     </div>
 
-                    {/* Progress text */}
                     <div className="flex justify-between items-center mt-1.5">
                         <span className={cn(
                             "text-[10px] font-medium",

@@ -2,6 +2,7 @@ import { memo, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Code } from "lucide-react";
+import AvatarUser from "@/components/common/AvartarUser";
 
 interface CodeShareMessageProps {
     message: any;
@@ -58,15 +59,7 @@ const CodeShareMessage = memo(({
             {/* Avatar người gửi */}
             {!isMe && showSenderInfo && (
                 <div className="mr-3 flex flex-col items-center justify-center">
-                    <Avatar
-                        className="h-8 w-8 flex-shrink-0 cursor-pointer"
-                        onMouseEnter={() => onHover(message.id)}
-                        onMouseLeave={() => onHover(null)}
-                    >
-                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                            {message?.sender?.username?.[0]?.toUpperCase() || "U"}
-                        </AvatarFallback>
-                    </Avatar>
+                    <AvatarUser user={message?.sender} isMe={isMe} size={24} />
                     {hoveredId === message.id && (
                         <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
                             {message?.sender?.username}

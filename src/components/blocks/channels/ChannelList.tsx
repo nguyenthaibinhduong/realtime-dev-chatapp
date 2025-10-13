@@ -5,6 +5,8 @@ import { Avatar, AvatarFallback } from "../../ui/avatar";
 import { Channel } from "@/types/channel";
 import { OnlineDot } from "../auth/OnlineDot";
 import { useAuth } from "@/hooks/useAuth";
+import AvatarUser from "@/components/common/AvartarUser";
+import AvatarGroup, { AvatarGroupGrid } from "@/components/common/AvatarGroup";
 
 interface ChannelListProps {
     channels: Channel[];
@@ -15,23 +17,16 @@ interface ChannelListProps {
 
 
 
-const getChannelIcon = (channel: Channel, userId?: any) => {
-    if (channel.type === "group-private") return <Lock className="h-4 w-4 mr-2 text-red-500" />;
-    if (channel.type === "group") return <Globe className="h-4 w-4 mr-2 text-blue-500" />;
+const getChannelIcon = (channel: Channel, user?: any) => {
+    if (channel.type === "group" || channel.type === "group-private") return <AvatarGroupGrid users={channel.members} tile={18} />;
     if (channel.type === "personal") {
         return (
             <div className="relative mr-2">
-                <Avatar className="h-6 w-6">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                        {channel.name?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                </Avatar>
+                <AvatarUser user={user} size={8} />
                 {/* Chấm online */}
                 {
-                    userId && channel.members && (
-
-
-                        <OnlineDot userId={userId} />
+                    user?.id && channel.members && (
+                        <OnlineDot userId={user?.id} />
 
                     )
                 }
@@ -90,10 +85,10 @@ export const ChannelList = ({
                         </div>
                         {list.map((channel) => {
                             // Nếu là kênh personal, lấy ra user trong members có id khác với user.id hiện tại
-                            let otherUserId: string | number | undefined;
+                            let otherUser: any;
                             if (channel.type === "personal" && channel.members && user?.id) {
                                 const otherMember = channel.members.find((m: any) => m.id !== user.id);
-                                otherUserId = otherMember?.id;
+                                otherUser = otherMember;
                             }
                             // Nếu là kênh đang chọn thì không hiển thị số unread
                             // const isSelected = selectedChannel?.id === channel.id;
@@ -102,18 +97,18 @@ export const ChannelList = ({
                                 <Button
                                     key={channel.id}
                                     variant="ghost"
-                                    className={`w-full justify-between px-2 py-1.5 h-auto font-normal flex items-center
+                                    className={`w-full justify-between px-2 py-2 my-1 h-auto font-normal flex items-center
                                         ${selectedChannel?.id === channel.id
-                                            ? 'bg-[hsl(var(--chat-selected))] text-white'
+                                            ? 'bg-gray-800 text-gray-100 border border-gray-700 shadow-sm'
                                             : unread > 0
                                                 ? 'font-bold text-white'
-                                                : 'text-sidebar-foreground hover:text-white hover:bg-[hsl(var(--chat-selected))]'
+                                                : 'text-sidebar-foreground hover:bg-gray-800 hover:text-gray-100  shadow-sm'
                                         }`}
                                     onClick={() => onSelectChannel(channel)}
                                 >
                                     <div className="flex items-center gap-2">
                                         {channel.type === "personal"
-                                            ? getChannelIcon(channel, otherUserId)
+                                            ? getChannelIcon(channel, otherUser)
                                             : getChannelIcon(channel)}
                                         <span className="truncate">{channel.name}</span>
                                     </div>

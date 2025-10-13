@@ -281,16 +281,48 @@ export default function ChatLayout() {
       chatSocketService.onMessage((msg: any) => {
         console.log("New socket message received:", msg);
         setMessages((prev: any) => {
-          // Nếu có tin nhắn cùng fakeID thì replace, nếu không thì thêm mới
-          const idx = prev.findIndex(
-            (p: any) => String(p.fakeID) === String(msg.fakeID)
-          );
-          if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
-            const updated = [...prev];
-            updated[idx] = msg;
-            return updated;
+          // ✅ Xử lý tin nhắn bị xóa (type === 'remove')
+
+
+          // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
+          if (msg.isUpdate) {
+            if (msg.type === 'remove') {
+              // Tìm và cập nhật tin nhắn thành trạng thái đã xóa
+              const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+              if (idx !== -1) {
+                const updated = [...prev];
+                updated[idx] = {
+                  ...updated[idx],
+                  ...msg,
+                  type: 'remove',
+                  text: msg.text || 'Tin nhắn đã bị xóa',
+                };
+                return updated;
+              }
+              return prev;
+            } else {
+              const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+              if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+                const updated = [...prev];
+                updated[idx] = msg;
+                return updated;
+              }
+              return prev;
+            }
+          } else {
+            const idx = prev.findIndex(
+              (p: any) => String(p.fakeID) === String(msg.fakeID)
+            );
+            if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+              const updated = [...prev];
+              updated[idx] = msg;
+              return updated;
+            }
+
+            // Thêm tin nhắn mới vào cuối
+            return [...prev, msg];
           }
-          return [...prev, msg];
+
         });
       });
     }
@@ -305,17 +337,64 @@ export default function ChatLayout() {
       chatSocketService.onMessage((msg: any) => {
         console.log("New socket message received:", msg);
         setMessages((prev: any) => {
-          // Nếu có tin nhắn cùng fakeID thì replace, nếu không thì thêm mới
-
-          const idx = prev.findIndex(
-            (p: any) => String(p.fakeID) === String(msg.fakeID)
-          );
-          if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
-            const updated = [...prev];
-            updated[idx] = msg;
-            return updated;
+          // ✅ Xử lý tin nhắn bị xóa (type === 'remove')
+          if (msg.type === 'remove') {
+            // Tìm và cập nhật tin nhắn thành trạng thái đã xóa
+            const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+            if (idx !== -1) {
+              const updated = [...prev];
+              updated[idx] = {
+                ...updated[idx],
+                ...msg,
+                type: 'remove',
+                text: msg.text || 'Tin nhắn đã bị xóa',
+              };
+              return updated;
+            }
+            return prev;
           }
-          return [...prev, msg];
+
+          // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
+          if (msg.isUpdate) {
+            if (msg.type === 'remove') {
+              // Tìm và cập nhật tin nhắn thành trạng thái đã xóa
+              const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+              if (idx !== -1) {
+                const updated = [...prev];
+                updated[idx] = {
+                  ...updated[idx],
+                  ...msg,
+                  type: 'remove',
+                  text: msg.text || 'Tin nhắn đã bị xóa',
+                };
+                return updated;
+              }
+              return prev;
+            } else {
+              const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+              if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+                const updated = [...prev];
+                updated[idx] = msg;
+                return updated;
+              }
+              return prev;
+            }
+          } else {
+
+            // ✅ Xử lý tin nhắn mới (tìm theo fakeID nếu có)
+            const idx = prev.findIndex(
+              (p: any) => String(p.fakeID) === String(msg.fakeID)
+            );
+            if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+              const updated = [...prev];
+              updated[idx] = msg;
+              return updated;
+            }
+
+            // Thêm tin nhắn mới vào cuối
+            return [...prev, msg];
+          }
+
         });
       });
     }
