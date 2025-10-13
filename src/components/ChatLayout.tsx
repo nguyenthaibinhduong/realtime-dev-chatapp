@@ -279,11 +279,8 @@ export default function ChatLayout() {
     if (selectedChannel?.id) {
       chatSocketService.joinRoom(selectedChannel?.id);
       chatSocketService.onMessage((msg: any) => {
-        console.log("New socket message received:", msg);
+        console.log("New socket message received (A):", msg);
         setMessages((prev: any) => {
-          // ✅ Xử lý tin nhắn bị xóa (type === 'remove')
-
-
           // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
           if (msg.isUpdate) {
             if (msg.type === 'remove') {
@@ -294,6 +291,7 @@ export default function ChatLayout() {
                 updated[idx] = {
                   ...updated[idx],
                   ...msg,
+                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
                   type: 'remove',
                   text: msg.text || 'Tin nhắn đã bị xóa',
                 };
@@ -301,10 +299,27 @@ export default function ChatLayout() {
               }
               return prev;
             } else {
+              // Cập nhật tin nhắn (bao gồm pin/unpin)
               const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
-              if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+              if (idx !== -1) {
                 const updated = [...prev];
-                updated[idx] = msg;
+                // Merge để preserve các thuộc tính quan trọng và cập nhật isPin
+                updated[idx] = {
+                  ...updated[idx], // Giữ lại thuộc tính cũ
+                  ...msg,          // Cập nhật với data mới từ socket (bao gồm isPin)
+                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
+                  updated_at: msg.updated_at || new Date().toISOString(), // Đảm bảo có timestamp mới
+                };
+
+                console.log('🔄 Socket A - Updated message pin status:', {
+                  messageId: msg.id,
+                  oldPin: prev[idx].isPin,
+                  newPin: msg.isPin,
+                  finalPin: updated[idx].isPin,
+                  sender: updated[idx].sender?.name || updated[idx].sender?.username,
+                  timestamp: updated[idx].updated_at
+                });
+
                 return updated;
               }
               return prev;
@@ -346,6 +361,7 @@ export default function ChatLayout() {
               updated[idx] = {
                 ...updated[idx],
                 ...msg,
+                sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
                 type: 'remove',
                 text: msg.text || 'Tin nhắn đã bị xóa',
               };
@@ -364,6 +380,7 @@ export default function ChatLayout() {
                 updated[idx] = {
                   ...updated[idx],
                   ...msg,
+                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
                   type: 'remove',
                   text: msg.text || 'Tin nhắn đã bị xóa',
                 };
@@ -371,10 +388,27 @@ export default function ChatLayout() {
               }
               return prev;
             } else {
+              // Cập nhật tin nhắn (bao gồm pin/unpin)
               const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
               if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
                 const updated = [...prev];
-                updated[idx] = msg;
+                // Merge để preserve các thuộc tính quan trọng và cập nhật isPin
+                updated[idx] = {
+                  ...updated[idx], // Giữ lại thuộc tính cũ
+                  ...msg,          // Cập nhật với data mới từ socket (bao gồm isPin)
+                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
+                  updated_at: msg.updated_at || new Date().toISOString(), // Đảm bảo có timestamp mới
+                };
+
+                console.log('🔄 Socket B - Updated message pin status:', {
+                  messageId: msg.id,
+                  oldPin: prev[idx].isPin,
+                  newPin: msg.isPin,
+                  finalPin: updated[idx].isPin,
+                  sender: updated[idx].sender?.name || updated[idx].sender?.username,
+                  timestamp: updated[idx].updated_at
+                });
+
                 return updated;
               }
               return prev;

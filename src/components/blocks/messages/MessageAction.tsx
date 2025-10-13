@@ -126,9 +126,9 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                     open && "bg-gray-700"
                                 )}
                                 title="Thêm"
-                                onClick={(e) => { e.stopPropagation(); /* allow Radix toggle via onOpenChange */ }}
-                                onMouseEnter={(e) => { e.stopPropagation(); handleOpenChange(true); }}
-                                onMouseLeave={(e) => { e.stopPropagation(); /* leave will be handled by content mouse events */ }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                }}
                             >
                                 <MoreHorizontal className="h-4 w-4" />
                             </button>
@@ -140,8 +140,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                 sideOffset={12}
                                 align={isMe ? "start" : "end"}
                                 className="w-64 p-2 backdrop-blur-xl rounded-2xl shadow-2xl border z-[1200] bg-gray-900/98 border-gray-700/70"
-                                onMouseEnter={(e) => { e.stopPropagation(); handleOpenChange(true); }}
-                                onMouseLeave={(e) => { e.stopPropagation(); handleOpenChange(false); }}
                             >
                                 {moreActions.map((action, idx) => (
                                     <React.Fragment key={action.type}>

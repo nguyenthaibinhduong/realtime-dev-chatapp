@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const AvatarUser = ({ user, isMe = false, size = 8 }: { user: any, isMe?: boolean, size?: string | number }) => {
     const navigate = useNavigate();
-    const url = isMe ? "/profile" : `/users/${user?.id}`;
+    const url = isMe ? "/settings" : `/users/${user?.id}`;
     return (
         <Avatar
             className={`h-${size} w-${size} hover:cursor-pointer`}

@@ -432,15 +432,7 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
         </div>
       )}
 
-      <p className="mt-2 text-xs text-muted-foreground">
-        Tip: dùng{" "}
-        <kbd className="rounded bg-muted px-1 py-0.5 text-[10px]">```</kbd> hoặc{" "}
-        <Code2 className="inline h-4 w-4 align-text-bottom" /> để bật soạn thảo
-        code. Nhấn{" "}
-        <kbd className="rounded bg-muted px-1 py-0.5 text-[10px]">Shift</kbd> +{" "}
-        <kbd className="rounded bg-muted px-1 py-0.5 text-[10px]">Enter</kbd> để
-        xuống dòng.
-      </p>
+
     </div>
   );
 };

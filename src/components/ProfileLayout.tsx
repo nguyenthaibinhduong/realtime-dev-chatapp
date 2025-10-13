@@ -292,7 +292,7 @@ const ProfileLayout: React.FC = () => {
                       variant="outline"
                       size="sm"
                       disabled={loading}
-                      className="w-40 h-10 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                      className="max-w-44 h-10 px-3 border border-purple-500/50 text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 hover:text-purple-300"
                     >
                       <Unlink className="w-4 h-4" />
                       Hủy liên kết
@@ -351,13 +351,25 @@ const ProfileLayout: React.FC = () => {
               </p>
               <Button
                 variant="outline"
-                className="w-44 h-10 px-3 flex text-black items-center justify-center gap-2 border-gray-600/50  hover:bg-gray-800/50"
                 onClick={handleUpdatePassword}
                 aria-label="Đổi mật khẩu"
+                className="
+                  w-44 h-10 px-3 inline-flex items-center justify-center gap-2
+                font-medium
+                  border border-sky-500/30
+                  bg-sky-600/10 hover:bg-sky-600/20
+                  text-sky-600 hover:text-sky-400
+                  active:scale-[.99]
+                  focus-visible:outline-none
+                  focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-sky-400
+                  dark:focus-visible:ring-sky-500
+                  transition-all
+                "
               >
-                <Key className="w-4 h-4 text-black" />
+                <Key className="w-4 h-4" />
                 Đổi mật khẩu
               </Button>
+
             </div>
             <div className="w-full flex justify-between gap-x-4">
               <p className="text-sm text-white mb-2">

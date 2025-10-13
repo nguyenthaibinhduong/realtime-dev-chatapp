@@ -37,9 +37,20 @@ const MessageItem = memo(({
     onJumpToMessage,
 }: MessageItemProps) => {
     const [showSentStatus, setShowSentStatus] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const menuCloseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const isHovered = hoveredId === String(message.id);
+
+    // Cleanup timers on unmount
+    useEffect(() => {
+        return () => {
+            if (menuCloseTimerRef.current) {
+                clearTimeout(menuCloseTimerRef.current);
+            }
+        };
+    }, []);
 
     // Check if message is removed
     const isRemovedMessage = message?.type === 'remove';
@@ -119,12 +130,41 @@ const MessageItem = memo(({
 
     // immediate hover: no timers, precise show/hide
     const handleMouseEnter = () => {
+        // Clear any pending menu close timer when hovering back
+        if (menuCloseTimerRef.current) {
+            clearTimeout(menuCloseTimerRef.current);
+            menuCloseTimerRef.current = null;
+        }
+
         if (!isRemovedMessage) {
             onHover(String(message.id));
         }
     };
     const handleMouseLeave = () => {
-        onHover(null);
+        // Clear any pending menu close timer
+        if (menuCloseTimerRef.current) {
+            clearTimeout(menuCloseTimerRef.current);
+        }
+
+        // If menu is open, set timer to close it after leaving message area
+        if (isMenuOpen) {
+            menuCloseTimerRef.current = setTimeout(() => {
+                setIsMenuOpen(false);
+                onHover(null);
+            }, 300);
+        } else {
+            onHover(null);
+        }
+    };
+
+    // Handle menu open/close state
+    const handleMenuOpenChange = (open: boolean) => {
+        setIsMenuOpen(open);
+        // If menu closes, also clear hover state
+        if (!open) {
+            // Add small delay to prevent flicker
+            setTimeout(() => onHover(null), 50);
+        }
     };
 
     return (
@@ -191,11 +231,11 @@ const MessageItem = memo(({
                             messageId={String(message.id)}
                             canEdit={isMe && message.status === 'sent'}
                             canDelete={isMe}
-                            isPinned={message.isPinned}
+                            isPinned={message.isPin || message.isPinned}
                             isLiked={message.isLiked}
                             likeCount={message.likeCount || 0}
-                            onAction={handleAction}
-                            onMenuOpenChange={() => { }}
+                            onAction={onMessageAction}
+                            onMenuOpenChange={handleMenuOpenChange}
                         />
 
                         {/* Message bubble */}
