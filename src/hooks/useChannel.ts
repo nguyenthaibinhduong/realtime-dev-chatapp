@@ -183,8 +183,8 @@ export const useChannelActions = (): UseChannelActionsResult => {
 
       try {
         const response = await ChatAPI.addMembers({
-          channelId,
-          memberIds,
+          channel_id: channelId,
+          member_ids: memberIds,
         });
 
         if (response.status === 200) {

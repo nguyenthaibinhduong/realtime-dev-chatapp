@@ -53,7 +53,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
 
   const {
     users,
@@ -72,7 +72,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     if (open && channelId) {
       fetchNonMembers(true);
     }
-  }, [open, channelId]);
+  }, [open, channelId, filters]);
 
   // Apply search filter with debounce
   useEffect(() => {
@@ -83,11 +83,6 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, open]);
-
-  useEffect(() => {
-    if (!open) return;
-    fetchNonMembers(true);
-  }, [filters, open]);
 
   // Filter users based on search query (client-side additional filter)
   const filteredUsers = useMemo(() => {
@@ -125,7 +120,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
       if (success) {
         setSelectedUserIds([]);
         setSearchQuery("");
-        setDialogOpen(false);
+        setAddMemberDialogOpen(false);
         onOpenChange(false);
         onSuccess?.();
       }
@@ -133,19 +128,6 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
       setIsSubmitting(false);
     }
   };
-
-  const handleClose = () => {
-    if (!isSubmitting) {
-      setSelectedUserIds([]);
-      setSearchQuery("");
-      setDialogOpen(false);
-      onOpenChange(false);
-    }
-  };
-
-  const selectedUsers = useMemo(() => {
-    return users.filter((user) => selectedUserIds.includes(user.id));
-  }, [users, selectedUserIds]);
 
   const handleLoadMore = () => {
     if (hasMore && !loading) {
@@ -158,25 +140,23 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
       {/* Button to open dialog */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-gray-300">
-          Chọn người dùng
+          Quản lý thành viên kênh
         </Label>
         <Button
           variant="outline"
-          onClick={() => setDialogOpen(true)}
+          onClick={() => setAddMemberDialogOpen(true)}
           className="w-full justify-between bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800 hover:text-white"
         >
           <span className="flex items-center gap-2">
             <Users className="h-4 w-4 text-zinc-400" />
-            {selectedUserIds.length > 0
-              ? `Đã chọn ${selectedUserIds.length} người`
-              : "Chọn người dùng..."}
+            Thêm thành viên
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </div>
 
-      {/* User Selection Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Add member Dialog */}
+      <Dialog open={addMemberDialogOpen} onOpenChange={setAddMemberDialogOpen}>
         <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800 text-white">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
@@ -334,13 +314,12 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
               )}
             </ScrollArea>
           </div>
-
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setDialogOpen(false)}
+              onClick={() => setAddMemberDialogOpen(false)}
               disabled={isSubmitting}
-              className="border-zinc-700 text-white hover:bg-zinc-800"
+              className="border-zinc-700 text-black hover:bg-zinc-800 hover:text-white"
             >
               Hủy
             </Button>
@@ -361,45 +340,6 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Selected Users Display */}
-      {selectedUserIds.length > 0 && (
-        <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-blue-400" />
-              <span className="text-sm font-medium text-blue-400">
-                Đã chọn {selectedUserIds.length} người
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedUserIds([])}
-              className="h-7 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-900/30"
-            >
-              Xóa tất cả
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {selectedUsers.map((user) => (
-              <Badge
-                key={user.id}
-                className="bg-blue-900/40 text-blue-300 border-blue-800/50 pl-1 pr-2 py-1 gap-1.5"
-              >
-                <AvatarUser user={user} size={5} />
-                {user.username}
-                <button
-                  onClick={() => handleToggleUser(user.id)}
-                  className="ml-1 hover:text-blue-100"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
