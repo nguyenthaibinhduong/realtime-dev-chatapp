@@ -1,6 +1,6 @@
 import { Notification } from "@/types/notifications";
 import { get, post, apiget, apipost } from "./Http";
-import { unlink } from "fs";
+import { rename, unlink } from "fs";
 
 export const AuthAPI = {
   // Không cần auth
@@ -46,6 +46,26 @@ export const ChatAPI = {
     apiget(`channels/search-chat`, {
       params: { type, key, limit },
     }),
+  //Channel
+  fetchNonMemberUsers: async (params: {
+    channelId: string | number;
+    username?: string;
+    limit?: number;
+    cursor?: number;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params.username) queryParams.append("username", params.username);
+    if (params.limit) queryParams.append("limit", params.limit.toString());
+    if (params.cursor) queryParams.append("cursor", params.cursor.toString());
+
+    return apiget(
+      `/channels/${params.channelId}/list-non-members?${queryParams.toString()}`
+    );
+  },
+  addMembers: async (data: any) => apipost(`channels/add-members`, data),
+  removeMember: async (data: any) => apipost(`channels/remove-member`, data),
+  leaveChannel: async (data: any) => apipost(`channels/leave-channel`, data),
+  renameChannel: async (data: any) => apipost(`channels/rename-channel`, data),
 };
 
 export const UploadApi = {
