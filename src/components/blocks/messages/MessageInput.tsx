@@ -7,12 +7,20 @@ import { Button } from "@/components/ui/button";
 interface MessageInputProps {
   channelId: string;
   // onSend may be async (returns Promise) so the input can await uploads/sending
-  onSend?: (content: string, files?: File[], meta?: { replyTo?: ReplyMessage }) => void | Promise<void>;
+  onSend?: (content: string, files?: File[], meta?: { replyTo?: ReplyMessage; editTo?: EditMessage }) => void | Promise<void>;
   replyMessage?: ReplyMessage; // <-- thêm
   onCancelReply?: () => void;  // <-- thêm
+  editMessage?: EditMessage; // <-- thêm edit
+  onCancelEdit?: () => void;  // <-- thêm edit
 }
 
 export type ReplyMessage = {
+  id: string;
+  sender: string;
+  text?: string;
+};
+
+export type EditMessage = {
   id: string;
   sender: string;
   text?: string;
@@ -27,7 +35,7 @@ type Lang =
   | "css"
   | "plaintext";
 
-export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }: MessageInputProps) => {
+export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, editMessage, onCancelEdit }: MessageInputProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -48,6 +56,20 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
   useEffect(() => {
     if (!isCodeMode) taRef.current?.focus();
   }, [channelId, isCodeMode]);
+
+  // Load edit message content when editMessage changes
+  useEffect(() => {
+    if (editMessage?.text) {
+      setNewMessage(editMessage.text);
+      // Focus input
+      setTimeout(() => {
+        if (taRef.current) {
+          taRef.current.focus();
+          taRef.current.setSelectionRange(editMessage.text.length, editMessage.text.length);
+        }
+      }, 100);
+    }
+  }, [editMessage]);
 
   const onFiles = (list: FileList | null) => {
     const selected = Array.from(list || []);
@@ -99,7 +121,7 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
   const isAutoCode = isCodeMode || newMessage.trim().startsWith("```");
   const canSend =
     (isCodeMode ? code.trim().length > 0 : newMessage.trim().length > 0) ||
-    files.length > 0;
+    (files.length > 0 && !editMessage); // Không cho upload file khi edit
 
   const [isSending, setIsSending] = useState(false);
 
@@ -117,7 +139,10 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
 
     try {
       setIsSending(true);
-      const res = onSend?.(content, files, { replyTo: replyMessage }); // <-- truyền kèm replyTo
+      const res = onSend?.(content, files, {
+        replyTo: replyMessage,
+        editTo: editMessage
+      }); // <-- truyền kèm replyTo và editTo
       if (res && typeof (res as any).then === "function") {
         await res;
       }
@@ -204,7 +229,7 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
   return (
     <div className="border-t border-border p-2">
       {/* Reply preview */}
-      {replyMessage && (
+      {replyMessage && !editMessage && (
         <div className="mb-2 rounded-md bg-[#1f2937] text-gray-200 px-3 py-2 relative">
           <div className="flex items-start gap-2">
             <div className="w-1 rounded bg-blue-500 mt-0.5" />
@@ -229,35 +254,65 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
         </div>
       )}
 
+      {/* Edit preview */}
+      {editMessage && !replyMessage && (
+        <div className="mb-2 rounded-md bg-[#374151] text-gray-200 px-3 py-2 relative">
+          <div className="flex items-start gap-2">
+            <div className="w-1 rounded bg-orange-500 mt-0.5" />
+            <div className="flex-1">
+              <div className="text-sm">
+                <span className="opacity-80">Chỉnh sửa tin nhắn của </span>
+                <span className="font-semibold">{editMessage.sender}</span>
+              </div>
+              {editMessage.text ? (
+                <div className="text-xs opacity-80 line-clamp-1">{editMessage.text}</div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              className="ml-2 opacity-70 hover:opacity-100"
+              onClick={onCancelEdit}
+              title="Hủy chỉnh sửa"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Nhóm nút và khung chat nằm cùng hàng, icon bên trái (giữ styling) */}
       <div className="flex items-start gap-2">
         <div className="flex items-center gap-1 py-2">
-          <label
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
-            title="Ảnh"
-          >
-            <Image className="h-4 w-4 text-muted-foreground hover:text-white" />
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => onFiles(e.target.files)}
-            />
-          </label>
+          {!editMessage && (
+            <>
+              <label
+                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
+                title="Ảnh"
+              >
+                <Image className="h-4 w-4 text-muted-foreground hover:text-white" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => onFiles(e.target.files)}
+                />
+              </label>
 
-          <label
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
-            title="Tệp đính kèm"
-          >
-            <Paperclip className="h-4 w-4 text-muted-foreground hover:text-white" />
-            <input
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => onFiles(e.target.files)}
-            />
-          </label>
+              <label
+                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
+                title="Tệp đính kèm"
+              >
+                <Paperclip className="h-4 w-4 text-muted-foreground hover:text-white" />
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => onFiles(e.target.files)}
+                />
+              </label>
+            </>
+          )}
 
           <button
             type="button"
@@ -377,7 +432,9 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
                   placeholder={
                     isAutoCode
                       ? "Soạn thảo code..."
-                      : `Nhắn tin đến #${channelId}...`
+                      : editMessage
+                        ? "Chỉnh sửa tin nhắn..."
+                        : `Nhắn tin đến #${channelId}...`
                   }
                   className="w-full resize-none bg-transparent pr-10 text-sm  text-white placeholder:text-muted-foreground focus:outline-none"
                   style={{ minHeight: 32, maxHeight: 120 }}

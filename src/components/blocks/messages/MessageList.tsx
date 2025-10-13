@@ -49,6 +49,7 @@ type Props = MessageListProps & {
   }>;
   type?: string;
   onReplySelect?: (reply: { id: string; sender: string; text?: string }) => void; // <-- thêm
+  onEditSelect?: (edit: { id: string; sender: string; text?: string }) => void; // <-- thêm edit
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -58,6 +59,7 @@ export const MessageList: React.FC<Props> = ({
   loadOlder,
   type,
   onReplySelect, // <-- thêm
+  onEditSelect, // <-- thêm edit
 }) => {
   const { user } = useAuth();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -151,9 +153,14 @@ export const MessageList: React.FC<Props> = ({
   }, [channelId, messages, toast]);
 
   const handleEdit = useCallback((messageId: string) => {
-    console.log('Edit message:', messageId);
-    // TODO: Set edit mode in message input
-  }, []);
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+    onEditSelect?.({
+      id: String(msg.id),
+      sender: msg.sender?.username || msg.sender?.name || "Unknown",
+      text: msg.text || "",
+    });
+  }, [messages, onEditSelect]);
 
   const handleDelete = useCallback(async (messageId: string) => {
     const msg: any = messages.find((m) => String(m.id) === String(messageId));
