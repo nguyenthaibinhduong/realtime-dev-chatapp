@@ -17,4 +17,5 @@ export interface Member {
   email: string;
   isMine?: boolean;
   isOwner?: boolean;
+  avartar?: string;
 }

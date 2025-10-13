@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { MessageListProps } from "@/types/message";
 import { RepoChatDialog } from "../github/RepoChatDialog";
 import { CodeViewerDialog } from "../github/RepoDetailModal";
@@ -14,7 +14,11 @@ import { useMessageActions } from "@/hooks/useMessage";
 import { MessageActionType } from "@/components/blocks/messages/MessageAction";
 import { chatSocketService } from "@/services/chatSocketService";
 import { toast } from "@/hooks/useToast";
-import { id } from "date-fns/locale";
+import { PinnedMessages } from "./PinnedMessages";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Share2 } from "lucide-react";
+import { ChannelSearch } from "../channels/ChannelSearch";
+import { Button } from "@/components/ui/button";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -45,6 +49,8 @@ type Props = MessageListProps & {
   }>;
   type?: string;
   onReplySelect?: (reply: { id: string; sender: string; text?: string }) => void; // <-- thêm
+  onEditSelect?: (edit: { id: string; sender: string; text?: string }) => void; // <-- thêm edit
+  hasInputPreview?: boolean; // <-- thêm để biết có reply/edit preview không
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -54,6 +60,8 @@ export const MessageList: React.FC<Props> = ({
   loadOlder,
   type,
   onReplySelect, // <-- thêm
+  onEditSelect, // <-- thêm edit
+  hasInputPreview = false, // <-- thêm
 }) => {
   const { user } = useAuth();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -62,6 +70,9 @@ export const MessageList: React.FC<Props> = ({
   const [openGitModal, setOpenGitModal] = useState(false);
   const [codeOpen, setCodeOpen] = useState(false);
   const [codeShareParams, setCodeShareParams] = useState<any>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareChannelId, setShareChannelId] = useState<string | null>(null);
+  const [shareMessageId, setShareMessageId] = useState<string | null>(null);
 
   // Custom hooks
   const { sentStatusIds } = useMessageStatus(messages, user?.id);
@@ -81,10 +92,44 @@ export const MessageList: React.FC<Props> = ({
 
   // Message action handlers
   const handleLike = useCallback(async (messageId: string) => {
-    console.log('Like message:', messageId);
-    // TODO: Implement API call
-    // await chatAPI.likeMessage(channelId, messageId);
-  }, [channelId]);
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+
+    // Kiểm tra xem user đã like chưa
+    const currentLikeData = msg.like_data || {};
+    const currentLikes = currentLikeData.users || [];
+    const userAlreadyLiked = currentLikes.some((like: any) => like.userId === user?.id);
+
+    let updatedLikes;
+    let updatedCount;
+
+    if (userAlreadyLiked) {
+      // Bỏ like - xóa user khỏi danh sách
+      updatedLikes = currentLikes.filter((like: any) => like.userId !== user?.id);
+      updatedCount = Math.max(0, (currentLikeData.count || 0) - 1);
+    } else {
+      // Thêm like - thêm user vào danh sách
+      updatedLikes = [...currentLikes, {
+        userId: user?.id,
+        username: user?.username || user?.name || 'Unknown',
+        likedAt: new Date().toISOString(),
+      }];
+      updatedCount = (currentLikeData.count || 0) + 1;
+    }
+
+    chatSocketService.sendMessage({
+      id: messageId,
+      isUpdate: true,
+      likeData: {
+        count: updatedCount,
+        users: updatedLikes,
+      },
+      isLiked: !userAlreadyLiked,
+      likeCount: updatedCount,
+      channelId: channelId,
+      type: 'message',
+    });
+  }, [messages, channelId, user]);
 
   const handleReply = useCallback((messageId: string) => {
     const msg: any = messages.find((m) => String(m.id) === String(messageId));
@@ -96,21 +141,62 @@ export const MessageList: React.FC<Props> = ({
     });
   }, [messages, onReplySelect]);
 
-  const handleForward = useCallback((messageId: string) => {
-    console.log('Forward message:', messageId);
-    // TODO: Open forward dialog
-  }, []);
+  const handleForward = (messageId: string) => {
+    setShareMessageId(messageId);
+    setShowShareModal(true);
+  };
+  const handleSelectChannel = (channel: any) => setShareChannelId(String(channel.id));
+  const handleDoShare = (shareType: 'current' | 'other') => {
+    const messageId = shareMessageId;
+    if (!messageId) return;
+    let channel_id = "";
+    if (shareType === "current") channel_id = localStorage.getItem("selectedChannelId") || "";
+    else channel_id = shareChannelId || "";
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+    chatSocketService.sendMessage({
+      channelId: channel_id,
+      text: msg.text,
+      type: msg.type,
+    });
+    toast({
+      title: "Đã chia sẻ tin nhắn vào kênh chat.",
+    });
+    setShowShareModal(false);
+    setShareMessageId(null);
+  };
+
 
   const handlePin = useCallback(async (messageId: string) => {
-    console.log('Pin message:', messageId);
-    // TODO: Implement API call
-    // await chatAPI.pinMessage(channelId, messageId);
-  }, [channelId]);
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+
+    // Hiển thị toast ngay lập tức
+    toast({
+      title: "Đang ghim tin nhắn...",
+      description: "Tin nhắn sẽ được ghim lên đầu",
+      duration: 1000,
+    });
+
+    chatSocketService.sendMessage({
+      id: messageId,
+      isUpdate: true,
+      isPin: true,
+      text: msg.text,
+      channelId: channelId,
+      type: 'message',
+    });
+  }, [channelId, messages, toast]);
 
   const handleEdit = useCallback((messageId: string) => {
-    console.log('Edit message:', messageId);
-    // TODO: Set edit mode in message input
-  }, []);
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+    onEditSelect?.({
+      id: String(msg.id),
+      sender: msg.sender?.username || msg.sender?.name || "Unknown",
+      text: msg.text || "",
+    });
+  }, [messages, onEditSelect]);
 
   const handleDelete = useCallback(async (messageId: string) => {
     const msg: any = messages.find((m) => String(m.id) === String(messageId));
@@ -142,7 +228,7 @@ export const MessageList: React.FC<Props> = ({
   const { handleAction } = useMessageActions({
     onLike: handleLike,
     onReply: handleReply,
-    onForward: handleForward,
+    onForward: (messageId: string) => handleForward(messageId),
     onPin: handlePin,
     onEdit: handleEdit,
     onDelete: handleDelete,
@@ -183,6 +269,43 @@ export const MessageList: React.FC<Props> = ({
       window.setTimeout(() => setHoveredId(null), 1600);
     }
   }, []);
+
+
+
+  // Separate pinned and regular messages with real-time updates
+  const { pinnedMessages } = useMemo(() => {
+    const pinned: any[] = [];
+
+    // Sắp xếp messages theo thời gian để đảm bảo tin nhắn mới nhất được xử lý đúng
+    const sortedMessages = [...messages].sort((a, b) =>
+      new Date(a.created_at || a.send_at).getTime() - new Date(b.created_at || b.send_at).getTime()
+    );
+    sortedMessages.forEach((message: any) => {
+      if (message.isPin === true) {
+        pinned.push(message);
+      }
+    });
+    return {
+      pinnedMessages: pinned,
+    };
+  }, [messages]);
+
+  // Handle unpin action with immediate UI update
+  const handleUnpin = useCallback(async (messageId: string) => {
+
+    // Gửi socket message để unpin
+    const msg: any = messages.find((m) => String(m.id) === String(messageId));
+    if (!msg) return;
+
+    chatSocketService.sendMessage({
+      id: messageId,
+      isUpdate: true,
+      isPin: false, // Đặt thành false để bỏ ghim
+      text: msg.text,
+      channelId: channelId,
+      type: 'message',
+    });
+  }, [channelId, messages]);
 
   // Memoized message items
   const messageItems = useMemo(() => {
@@ -238,13 +361,38 @@ export const MessageList: React.FC<Props> = ({
     });
   }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction, scrollToMessage]);
 
+  const PinItems = useMemo(() => {
+    if (pinnedMessages.length > 0) {
+      // Tạo key unique dựa trên pin messages để force re-render khi có thay đổi
+      const pinKey = pinnedMessages.map(m => `${m.id}-${m.isPin}-${m.updated_at || m.created_at}`).join('|');
+
+      return (
+        <div className="mb-4 absolute top-0 left-0 right-0 z-[99]">
+          <PinnedMessages
+            key={pinKey} // Force re-render khi có thay đổi pin status
+            messages={pinnedMessages}
+            onUnpin={handleUnpin}
+            onJumpToMessage={scrollToMessage}
+          />
+        </div>
+      );
+    }
+    return null;
+  }, [pinnedMessages, handleUnpin, scrollToMessage]);
+
   return (
     <ScrollArea
-      className="flex-1 p-4"
-      style={{ height: "75vh", minHeight: "75vh", maxHeight: "75vh" }}
+      className="p-4 overflow-auto"
+      style={{
+        height: hasInputPreview ? "calc(100vh - 25vh)" : "calc(100vh - 20vh)",
+        transition: "height 0.3s ease-in-out"
+      }}
       ref={scrollAreaRef}
     >
       <div>
+        {/* Pinned Messages Section */}
+        {PinItems}
+
         <LoadMoreIndicator loading={loadingMore} />
 
         <div className="space-y-2">
@@ -270,6 +418,51 @@ export const MessageList: React.FC<Props> = ({
             json_data_code={codeShareParams.json_code_data}
           />
         )}
+
+        <Dialog
+          open={showShareModal}
+          onOpenChange={(v) => {
+            setShowShareModal(v);
+            if (!v) {
+              setShareChannelId(null);
+              setShareMessageId(null);
+            }
+          }}
+        >
+          <DialogContent
+            className="bg-black rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center"
+            style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)", position: "fixed" }}
+          >
+            <button
+              className="absolute top-3 right-3 text-zinc-400 hover:text-white text-xl"
+              onClick={() => {
+                setShowShareModal(false);
+                setShareChannelId(null);
+                setShareMessageId(null);
+              }}
+              aria-label="Đóng"
+              type="button"
+            >
+              ×
+            </button>
+            <div className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-blue-500" />
+              Chia sẻ code cho kênh
+            </div>
+            <div className="mb-4 w-full">
+              <div className="text-xs text-gray-600 mb-2 text-center">Chọn kênh để chia sẻ</div>
+              <ChannelSearch onSelectChannel={handleSelectChannel} isShare={true} />
+              <Button className="w-full mt-4 bg-blue-600 text-white" onClick={() => handleDoShare("current")}>
+                Chia sẻ cho kênh hiện tại
+              </Button>
+              {shareChannelId && (
+                <Button className="w-full mt-4 bg-white text-black hover:bg-blue-600 hover:text-white" onClick={() => handleDoShare("other")}>
+                  Chia sẻ cho kênh này
+                </Button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </ScrollArea>
   );

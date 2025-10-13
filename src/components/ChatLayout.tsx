@@ -51,6 +51,7 @@ export default function ChatLayout() {
     [key: string]: { progress: number; total: number };
   }>({});
   const [replyTo, setReplyTo] = useState<{ id: string; sender: string; text?: string } | null>(null);
+  const [editTo, setEditTo] = useState<{ id: string; sender: string; text?: string } | null>(null);
 
   // ✅ Register notification handlers
   useEffect(() => {
@@ -279,11 +280,8 @@ export default function ChatLayout() {
     if (selectedChannel?.id) {
       chatSocketService.joinRoom(selectedChannel?.id);
       chatSocketService.onMessage((msg: any) => {
-        console.log("New socket message received:", msg);
+        console.log("New socket message received (A):", msg);
         setMessages((prev: any) => {
-          // ✅ Xử lý tin nhắn bị xóa (type === 'remove')
-
-
           // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
           if (msg.isUpdate) {
             if (msg.type === 'remove') {
@@ -294,6 +292,7 @@ export default function ChatLayout() {
                 updated[idx] = {
                   ...updated[idx],
                   ...msg,
+                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
                   type: 'remove',
                   text: msg.text || 'Tin nhắn đã bị xóa',
                 };
@@ -301,10 +300,27 @@ export default function ChatLayout() {
               }
               return prev;
             } else {
+              // Cập nhật tin nhắn (bao gồm pin/unpin)
               const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
-              if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+              if (idx !== -1) {
                 const updated = [...prev];
-                updated[idx] = msg;
+                // Merge để preserve các thuộc tính quan trọng và cập nhật isPin
+                updated[idx] = {
+                  ...updated[idx], // Giữ lại thuộc tính cũ
+                  ...msg,          // Cập nhật với data mới từ socket (bao gồm isPin)
+                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
+                  updated_at: msg.updated_at || new Date().toISOString(), // Đảm bảo có timestamp mới
+                };
+
+                console.log('🔄 Socket A - Updated message pin status:', {
+                  messageId: msg.id,
+                  oldPin: prev[idx].isPin,
+                  newPin: msg.isPin,
+                  finalPin: updated[idx].isPin,
+                  sender: updated[idx].sender?.name || updated[idx].sender?.username,
+                  timestamp: updated[idx].updated_at
+                });
+
                 return updated;
               }
               return prev;
@@ -346,6 +362,7 @@ export default function ChatLayout() {
               updated[idx] = {
                 ...updated[idx],
                 ...msg,
+                sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
                 type: 'remove',
                 text: msg.text || 'Tin nhắn đã bị xóa',
               };
@@ -364,6 +381,7 @@ export default function ChatLayout() {
                 updated[idx] = {
                   ...updated[idx],
                   ...msg,
+                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
                   type: 'remove',
                   text: msg.text || 'Tin nhắn đã bị xóa',
                 };
@@ -371,10 +389,27 @@ export default function ChatLayout() {
               }
               return prev;
             } else {
+              // Cập nhật tin nhắn (bao gồm pin/unpin)
               const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
               if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
                 const updated = [...prev];
-                updated[idx] = msg;
+                // Merge để preserve các thuộc tính quan trọng và cập nhật isPin
+                updated[idx] = {
+                  ...updated[idx], // Giữ lại thuộc tính cũ
+                  ...msg,          // Cập nhật với data mới từ socket (bao gồm isPin)
+                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
+                  updated_at: msg.updated_at || new Date().toISOString(), // Đảm bảo có timestamp mới
+                };
+
+                console.log('🔄 Socket B - Updated message pin status:', {
+                  messageId: msg.id,
+                  oldPin: prev[idx].isPin,
+                  newPin: msg.isPin,
+                  finalPin: updated[idx].isPin,
+                  sender: updated[idx].sender?.name || updated[idx].sender?.username,
+                  timestamp: updated[idx].updated_at
+                });
+
                 return updated;
               }
               return prev;
@@ -524,7 +559,7 @@ export default function ChatLayout() {
 
   // Send message via socket
   const sendMessage = useCallback(
-    async (content: string, files: File[], meta?: { replyTo?: { id: string; sender: string; text?: string } }) => {
+    async (content: string, files: File[], meta?: { replyTo?: { id: string; sender: string; text?: string }; editTo?: { id: string; sender: string; text?: string } }) => {
       if (!selectedChannel?.id || (!content.trim() && (!files || files.length === 0))) return;
 
       let attachments: UploadResult[] = [];
@@ -615,30 +650,44 @@ export default function ChatLayout() {
         }
       }
 
-      // Xác định type gửi
-      const computedType =
-        meta?.replyTo
-          ? "reply-message"
-          : (attachments.length > 0 ? "file-upload" : "message");
+      // Xác định type và các thông số gửi
+      if (meta?.editTo) {
+        // ✅ Chế độ chỉnh sửa tin nhắn
+        chatSocketService.sendMessage({
+          id: meta.editTo.id,
+          channelId: selectedChannel.id,
+          text: content.trim(),
+          type: "message",
+          isUpdate: true,
+        });
 
-      // ✅ Gửi tin nhắn qua socket
-      chatSocketService.sendMessage({
-        channelId: selectedChannel.id,
-        text: content.trim(),
-        type: computedType,
-        channelData: selectedChannel,
-        ...(attachments.length > 0 && { presignedAttachments: attachments }),
-        ...(meta?.replyTo && {
-          replyTo: {
-            id: meta.replyTo.id,
-            sender: meta.replyTo.sender,
-            text: meta.replyTo.text,
-          },
-        }),
-      });
+        // Clear edit mode sau khi gửi
+        setEditTo(null);
+      } else {
+        // ✅ Tin nhắn mới hoặc reply
+        const computedType =
+          meta?.replyTo
+            ? "reply-message"
+            : (attachments.length > 0 ? "file-upload" : "message");
 
-      // clear reply sau khi gửi
-      if (meta?.replyTo) setReplyTo(null);
+        chatSocketService.sendMessage({
+          channelId: selectedChannel.id,
+          text: content.trim(),
+          type: computedType,
+          channelData: selectedChannel,
+          ...(attachments.length > 0 && { presignedAttachments: attachments }),
+          ...(meta?.replyTo && {
+            replyTo: {
+              id: meta.replyTo.id,
+              sender: meta.replyTo.sender,
+              text: meta.replyTo.text,
+            },
+          }),
+        });
+
+        // Clear reply sau khi gửi
+        if (meta?.replyTo) setReplyTo(null);
+      }
     },
     [selectedChannel, user, toast]
   );
@@ -845,21 +894,23 @@ export default function ChatLayout() {
         )
       }
     >
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         {selectedChannel && (
           <ChannelHeader channel={selectedChannel} members={members} />
         )}
 
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-col h-full">
           {messages.length === 0 ? (
-            <div className="text-center">
-              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">
-                Chat Coming Soon
-              </h3>
-              <p className="text-muted-foreground">
-                Chat functionality will be implemented with the new backend API
-              </p>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">
+                  Chat Coming Soon
+                </h3>
+                <p className="text-muted-foreground">
+                  Chat functionality will be implemented with the new backend API
+                </p>
+              </div>
             </div>
           ) : (
             <MessageList
@@ -869,18 +920,24 @@ export default function ChatLayout() {
               loadOlder={loadOlder}
               type={selectedChannel?.type}
               onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
+              onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
+              hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
             />
           )}
-        </div>
 
-        {selectedChannel && (
-          <MessageInput
-            channelId={selectedChannel.id}
-            onSend={sendMessage}
-            replyMessage={replyTo || undefined}        // <-- truyền xuống input
-            onCancelReply={() => setReplyTo(null)}     // <-- hủy reply
-          />
-        )}
+          {selectedChannel && (
+            <div className="flex-shrink-0">
+              <MessageInput
+                channelId={selectedChannel.id}
+                onSend={sendMessage}
+                replyMessage={replyTo || undefined}        // <-- truyền xuống input
+                onCancelReply={() => setReplyTo(null)}     // <-- hủy reply
+                editMessage={editTo || undefined}          // <-- truyền xuống edit
+                onCancelEdit={() => setEditTo(null)}       // <-- hủy edit
+              />
+            </div>
+          )}
+        </div>
 
         {/* GitHub Detail Modal */}
         {showGithubDetail && (

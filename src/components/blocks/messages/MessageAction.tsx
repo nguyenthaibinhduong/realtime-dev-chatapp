@@ -9,7 +9,6 @@ import {
     DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import {
-    Heart,
     Reply,
     Forward,
     Pin,
@@ -46,8 +45,6 @@ interface MessageActionsProps {
     canEdit?: boolean;
     canDelete?: boolean;
     isPinned?: boolean;
-    isLiked?: boolean;
-    likeCount?: number;
     onAction?: (type: MessageActionType, messageId: string) => void;
     onMenuOpenChange?: (open: boolean) => void; // notify parent to keep hovered state
 }
@@ -60,8 +57,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     canEdit = true,
     canDelete = true,
     isPinned = false,
-    isLiked = false,
-    likeCount = 0,
     onAction = () => { },
     onMenuOpenChange,
 }) => {
@@ -70,17 +65,16 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     const quickActions: MessageAction[] = [
         { type: 'reply', icon: <Reply className="h-4 w-4" />, label: 'Trả lời' },
         { type: 'forward', icon: <Share2 className="h-4 w-4" />, label: 'Chuyển tiếp' },
-        { type: 'like', icon: <Heart className={cn("h-4 w-4", isLiked && "fill-red-500 text-red-500")} />, label: isLiked ? 'Bỏ thích' : 'Thích' },
     ];
 
     const moreActions: any[] = [
         { type: 'copy', icon: <Copy className="h-4 w-4" />, label: 'Sao chép', description: 'Sao chép nội dung' },
         { type: 'pin', icon: isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />, label: isPinned ? 'Bỏ ghim' : 'Ghim', description: 'Ghim tin nhắn' },
         ...(isMe ? [
-            { type: 'edit' as MessageActionType, icon: <Edit className="h-4 w-4" />, label: 'Chỉnh sửa', condition: canEdit },
-            { type: 'delete' as MessageActionType, icon: <Trash2 className="h-4 w-4" />, label: 'Xóa', variant: 'danger' as const, condition: canDelete },
+            ...(canEdit ? [{ type: 'edit' as MessageActionType, icon: <Edit className="h-4 w-4" />, label: 'Chỉnh sửa' }] : []),
+            ...(canDelete ? [{ type: 'delete' as MessageActionType, icon: <Trash2 className="h-4 w-4" />, label: 'Xóa', variant: 'danger' as const }] : []),
         ] : []),
-    ].filter(a => a.condition !== false);
+    ];
 
     // notify parent when dropdown open state changes
     const handleOpenChange = (val: boolean) => {
@@ -88,21 +82,15 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         onMenuOpenChange?.(val);
     };
 
-    if (!isHovered && likeCount === 0) return null;
+    if (!isHovered) return null;
 
     return (
         <div
             className={cn(
                 "absolute top-1/2 -translate-y-1/2 flex items-center gap-2 transition-all duration-100 z-[1100] pointer-events-auto",
-                isMe ? "-left-48" : "-right-48"
+                isMe ? "-left-40" : "-right-40"
             )}
         >
-            {likeCount > 0 && !isHovered && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-gray-800/95 backdrop-blur-md rounded-full border border-gray-700/60 shadow-lg">
-                    <Heart className="h-3 w-3 fill-red-500 text-red-500" />
-                    <span className="text-xs font-semibold text-gray-200">{likeCount}</span>
-                </div>
-            )}
 
             {isHovered && (
                 <div className={cn("flex items-center gap-2", isMe ? "flex-row-reverse" : "flex-row")}>
@@ -126,9 +114,9 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                     open && "bg-gray-700"
                                 )}
                                 title="Thêm"
-                                onClick={(e) => { e.stopPropagation(); /* allow Radix toggle via onOpenChange */ }}
-                                onMouseEnter={(e) => { e.stopPropagation(); handleOpenChange(true); }}
-                                onMouseLeave={(e) => { e.stopPropagation(); /* leave will be handled by content mouse events */ }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                }}
                             >
                                 <MoreHorizontal className="h-4 w-4" />
                             </button>
@@ -140,8 +128,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                 sideOffset={12}
                                 align={isMe ? "start" : "end"}
                                 className="w-64 p-2 backdrop-blur-xl rounded-2xl shadow-2xl border z-[1200] bg-gray-900/98 border-gray-700/70"
-                                onMouseEnter={(e) => { e.stopPropagation(); handleOpenChange(true); }}
-                                onMouseLeave={(e) => { e.stopPropagation(); handleOpenChange(false); }}
                             >
                                 {moreActions.map((action, idx) => (
                                     <React.Fragment key={action.type}>

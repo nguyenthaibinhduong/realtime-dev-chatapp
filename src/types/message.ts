@@ -13,6 +13,7 @@ export interface Message {
   json_data:string | null;
   send_at: string;
   isMine: boolean;
+  isPin?: boolean;
   attachments?: {
     id: number | string;
     fileUrl: string;

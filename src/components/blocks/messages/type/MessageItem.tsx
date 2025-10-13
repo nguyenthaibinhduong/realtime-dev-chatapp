@@ -1,7 +1,7 @@
 import { memo, useEffect, useState, useRef } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, Heart } from "lucide-react";
 import { MessageActions, MessageActionType } from "@/components/blocks/messages/MessageAction";
 import Attachment from "../Attachment";
 import attachmentService from "@/services/attachmentService";
@@ -37,9 +37,20 @@ const MessageItem = memo(({
     onJumpToMessage,
 }: MessageItemProps) => {
     const [showSentStatus, setShowSentStatus] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const menuCloseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const isHovered = hoveredId === String(message.id);
+
+    // Cleanup timers on unmount
+    useEffect(() => {
+        return () => {
+            if (menuCloseTimerRef.current) {
+                clearTimeout(menuCloseTimerRef.current);
+            }
+        };
+    }, []);
 
     // Check if message is removed
     const isRemovedMessage = message?.type === 'remove';
@@ -119,12 +130,41 @@ const MessageItem = memo(({
 
     // immediate hover: no timers, precise show/hide
     const handleMouseEnter = () => {
+        // Clear any pending menu close timer when hovering back
+        if (menuCloseTimerRef.current) {
+            clearTimeout(menuCloseTimerRef.current);
+            menuCloseTimerRef.current = null;
+        }
+
         if (!isRemovedMessage) {
             onHover(String(message.id));
         }
     };
     const handleMouseLeave = () => {
-        onHover(null);
+        // Clear any pending menu close timer
+        if (menuCloseTimerRef.current) {
+            clearTimeout(menuCloseTimerRef.current);
+        }
+
+        // If menu is open, set timer to close it after leaving message area
+        if (isMenuOpen) {
+            menuCloseTimerRef.current = setTimeout(() => {
+                setIsMenuOpen(false);
+                onHover(null);
+            }, 300);
+        } else {
+            onHover(null);
+        }
+    };
+
+    // Handle menu open/close state
+    const handleMenuOpenChange = (open: boolean) => {
+        setIsMenuOpen(open);
+        // If menu closes, also clear hover state
+        if (!open) {
+            // Add small delay to prevent flicker
+            setTimeout(() => onHover(null), 50);
+        }
     };
 
     return (
@@ -189,13 +229,11 @@ const MessageItem = memo(({
                             isMe={isMe}
                             isHovered={isHovered}
                             messageId={String(message.id)}
-                            canEdit={isMe && message.status === 'sent'}
+                            canEdit={isMe && message.type !== 'remove'}
                             canDelete={isMe}
-                            isPinned={message.isPinned}
-                            isLiked={message.isLiked}
-                            likeCount={message.likeCount || 0}
-                            onAction={handleAction}
-                            onMenuOpenChange={() => { }}
+                            isPinned={message.isPin || message.isPinned}
+                            onAction={onMessageAction}
+                            onMenuOpenChange={handleMenuOpenChange}
                         />
 
                         {/* Message bubble */}
@@ -307,18 +345,34 @@ const MessageItem = memo(({
                             </div>
                         )}
 
-                        {message.likeCount > 0 && !isHovered && (
-                            <div className={cn(
-                                "absolute -bottom-2 flex items-center gap-1 px-2 py-0.5 z-10",
-                                "bg-gray-700/90 backdrop-blur-sm rounded-full shadow-md border border-gray-600",
-                                isMe ? "right-2" : "left-2"
-                            )}>
-                                <span className="text-xs">❤️</span>
-                                <span className="text-[10px] font-semibold text-gray-200">
-                                    {message.likeCount}
-                                </span>
-                            </div>
-                        )}
+                        {/* Like Button - Always visible at bottom left for non-removed messages */}
+                        {/* {!isRemovedMessage && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onMessageAction?.('like', String(message.id));
+                                }}
+                                className={cn(
+                                    "absolute -bottom-2 left-0 flex items-center gap-1 px-1.5 py-1.5 z-20 transition-all duration-200",
+                                    "bg-gray-800/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-700/60",
+                                    "hover:scale-105 hover:bg-gray-700/95 active:scale-95 hover:shadow-xl",
+                                    message.isLiked && "bg-red-500/15 border-red-500/40 shadow-red-500/20"
+                                )}
+                                title={message.isLiked ? "Bỏ thích" : "Thích"}
+                            >
+                                <Heart className={cn(
+                                    "h-3 w-3 transition-all duration-200",
+                                    message.isLiked
+                                        ? "fill-red-400 text-red-400 scale-110"
+                                        : "text-gray-400 hover:text-red-400 hover:fill-red-400"
+                                )} />
+                                {(message.likeCount > 0) && (
+                                    <span className="text-[10px] font-semibold text-gray-200 min-w-[10px] text-center">
+                                        {message.likeCount}
+                                    </span>
+                                )}
+                            </button>
+                        )} */}
                     </div>
                 )}
 

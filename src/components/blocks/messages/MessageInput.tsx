@@ -7,12 +7,20 @@ import { Button } from "@/components/ui/button";
 interface MessageInputProps {
   channelId: string;
   // onSend may be async (returns Promise) so the input can await uploads/sending
-  onSend?: (content: string, files?: File[], meta?: { replyTo?: ReplyMessage }) => void | Promise<void>;
+  onSend?: (content: string, files?: File[], meta?: { replyTo?: ReplyMessage; editTo?: EditMessage }) => void | Promise<void>;
   replyMessage?: ReplyMessage; // <-- thêm
   onCancelReply?: () => void;  // <-- thêm
+  editMessage?: EditMessage; // <-- thêm edit
+  onCancelEdit?: () => void;  // <-- thêm edit
 }
 
 export type ReplyMessage = {
+  id: string;
+  sender: string;
+  text?: string;
+};
+
+export type EditMessage = {
   id: string;
   sender: string;
   text?: string;
@@ -27,7 +35,7 @@ type Lang =
   | "css"
   | "plaintext";
 
-export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }: MessageInputProps) => {
+export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, editMessage, onCancelEdit }: MessageInputProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -48,6 +56,20 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
   useEffect(() => {
     if (!isCodeMode) taRef.current?.focus();
   }, [channelId, isCodeMode]);
+
+  // Load edit message content when editMessage changes
+  useEffect(() => {
+    if (editMessage?.text) {
+      setNewMessage(editMessage.text);
+      // Focus input
+      setTimeout(() => {
+        if (taRef.current) {
+          taRef.current.focus();
+          taRef.current.setSelectionRange(editMessage.text.length, editMessage.text.length);
+        }
+      }, 100);
+    }
+  }, [editMessage]);
 
   const onFiles = (list: FileList | null) => {
     const selected = Array.from(list || []);
@@ -99,7 +121,7 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
   const isAutoCode = isCodeMode || newMessage.trim().startsWith("```");
   const canSend =
     (isCodeMode ? code.trim().length > 0 : newMessage.trim().length > 0) ||
-    files.length > 0;
+    (files.length > 0 && !editMessage); // Không cho upload file khi edit
 
   const [isSending, setIsSending] = useState(false);
 
@@ -117,7 +139,10 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
 
     try {
       setIsSending(true);
-      const res = onSend?.(content, files, { replyTo: replyMessage }); // <-- truyền kèm replyTo
+      const res = onSend?.(content, files, {
+        replyTo: replyMessage,
+        editTo: editMessage
+      }); // <-- truyền kèm replyTo và editTo
       if (res && typeof (res as any).then === "function") {
         await res;
       }
@@ -202,245 +227,273 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply }:
   };
 
   return (
-    <div className="border-t border-border p-2">
-      {/* Reply preview */}
-      {replyMessage && (
-        <div className="mb-2 rounded-md bg-[#1f2937] text-gray-200 px-3 py-2 relative">
-          <div className="flex items-start gap-2">
-            <div className="w-1 rounded bg-blue-500 mt-0.5" />
-            <div className="flex-1">
-              <div className="text-sm">
-                <span className="opacity-80">Trả lời </span>
-                <span className="font-semibold">{replyMessage.sender}</span>
+    <div className="border-t border-border transition-all duration-200">
+      {/* Preview Section với animation */}
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${(replyMessage || editMessage) ? 'max-h-12 opacity-100 px-3 py-1' : 'max-h-0 opacity-0 p-0'
+        }`}>
+        {/* Reply preview */}
+        {replyMessage && !editMessage && (
+          <div className="mb-1 rounded-md bg-[#1f2937] text-gray-200 px-2 py-1.5 relative">
+            <div className="flex items-start gap-2">
+              <div className="w-1 rounded bg-blue-500 mt-0.5" />
+              <div className="flex-1">
+                <div className="text-xs">
+                  <span className="opacity-80">Trả lời </span>
+                  <span className="font-semibold">{replyMessage.sender}</span>
+                </div>
+                {replyMessage.text ? (
+                  <div className="text-[11px] opacity-80 line-clamp-1">{replyMessage.text}</div>
+                ) : null}
               </div>
-              {replyMessage.text ? (
-                <div className="text-xs opacity-80 line-clamp-1">{replyMessage.text}</div>
-              ) : null}
+              <button
+                type="button"
+                className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
+                onClick={onCancelReply}
+                title="Hủy trả lời"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
+          </div>
+        )}
+
+        {/* Edit preview */}
+        {editMessage && !replyMessage && (
+          <div className="mb-1 rounded-md bg-[#374151] text-gray-200 px-2 py-1.5 relative">
+            <div className="flex items-start gap-2">
+              <div className="w-1 rounded bg-orange-500 mt-0.5" />
+              <div className="flex-1">
+                <div className="text-xs">
+                  <span className="opacity-80">Chỉnh sửa tin nhắn của </span>
+                  <span className="font-semibold">{editMessage.sender}</span>
+                </div>
+                {editMessage.text ? (
+                  <div className="text-[11px] opacity-80 line-clamp-1">{editMessage.text}</div>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
+                onClick={onCancelEdit}
+                title="Hủy chỉnh sửa"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Input Section */}
+      <div className="px-3 py-1.5">
+        {/* Nhóm nút và khung chat nằm cùng hàng, icon bên trái (giữ styling) */}
+        <div className="flex items-start gap-2">
+          <div className="flex items-center gap-1 py-1">
+            {!editMessage && (
+              <>
+                <label
+                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
+                  title="Ảnh"
+                >
+                  <Image className="h-3.5 w-3.5 text-muted-foreground hover:text-white" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => onFiles(e.target.files)}
+                  />
+                </label>
+
+                <label
+                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
+                  title="Tệp đính kèm"
+                >
+                  <Paperclip className="h-3.5 w-3.5 text-muted-foreground hover:text-white" />
+                  <input
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => onFiles(e.target.files)}
+                  />
+                </label>
+              </>
+            )}
+
             <button
               type="button"
-              className="ml-2 opacity-70 hover:opacity-100"
-              onClick={onCancelReply}
-              title="Hủy trả lời"
+              onClick={() => {
+                // Khi bật code mode lần đầu, chuyển nội dung hiện tại vào editor
+                if (!isCodeMode && newMessage.trim())
+                  setCode(newMessage.replace(/^```[^\n]*\n?|\n?```$/g, ""));
+                setIsCodeMode((v) => !v);
+              }}
+              title={isAutoCode ? "Đang ở chế độ code" : "Bật chế độ code"}
+              className={`flex h-6 w-6 items-center justify-center rounded hover:bg-primary/80 transition-colors ${isAutoCode ? "bg-primary text-white" : ""
+                }`}
             >
-              <X className="h-4 w-4" />
+              <Code2
+                className={`h-3.5 w-3.5 ${isAutoCode ? "text-white" : "text-muted-foreground"}`}
+              />
             </button>
           </div>
-        </div>
-      )}
 
-      {/* Nhóm nút và khung chat nằm cùng hàng, icon bên trái (giữ styling) */}
-      <div className="flex items-start gap-2">
-        <div className="flex items-center gap-1 py-2">
-          <label
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
-            title="Ảnh"
-          >
-            <Image className="h-4 w-4 text-muted-foreground hover:text-white" />
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => onFiles(e.target.files)}
-            />
-          </label>
+          {/* Khung chat nhỏ lại, nằm cùng hàng với nút (giữ styling khung) */}
+          <div className="relative flex-1">
+            <div
+              className={`rounded border border-border bg-[hsl(var(--chat-input))] px-2 shadow-sm ${isAutoCode ? "py-1.5" : "py-2"
+                } flex ${isAutoCode ? "flex-col" : "items-center"}`}
+            >
+              {/* ======= CODE MODE: Monaco giữ nguyên phong cách khung của bạn ======= */}
+              {isAutoCode ? (
+                <>
+                  {/* Mini toolbar nhưng giữ phong cách tối giản */}
+                  <div className="mb-1.5 flex items-center gap-1.5">
+                    <select
+                      value={lang}
+                      onChange={(e) => setLang(e.target.value as Lang)}
+                      className="h-6 rounded border border-border bg-muted px-1.5 text-[11px] text-muted-foreground hover:bg-muted/80"
+                      title="Ngôn ngữ"
+                    >
+                      <option value="javascript">JavaScript</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="json">JSON</option>
+                      <option value="markdown">Markdown</option>
+                      <option value="html">HTML</option>
+                      <option value="css">CSS</option>
+                      <option value="plaintext">Plain text</option>
+                    </select>
 
-          <label
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
-            title="Tệp đính kèm"
-          >
-            <Paperclip className="h-4 w-4 text-muted-foreground hover:text-white" />
-            <input
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => onFiles(e.target.files)}
-            />
-          </label>
+                    <button
+                      type="button"
+                      onClick={() => setWrap((w) => !w)}
+                      className="h-6 rounded border border-border bg-muted px-1.5 text-[11px] text-muted-foreground hover:bg-muted/80"
+                      title="Word wrap"
+                    >
+                      {wrap ? "Wrap: On" : "Wrap: Off"}
+                    </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              // Khi bật code mode lần đầu, chuyển nội dung hiện tại vào editor
-              if (!isCodeMode && newMessage.trim())
-                setCode(newMessage.replace(/^```[^\n]*\n?|\n?```$/g, ""));
-              setIsCodeMode((v) => !v);
-            }}
-            title={isAutoCode ? "Đang ở chế độ code" : "Bật chế độ code"}
-            className={`flex h-7 w-7 items-center justify-center rounded hover:bg-primary/80 transition-colors ${isAutoCode ? "bg-primary text-white" : ""
-              }`}
-          >
-            <Code2
-              className={`h-4 w-4 ${isAutoCode ? "text-white" : "text-muted-foreground"}`}
-            />
-          </button>
-        </div>
+                    <button
+                      type="button"
+                      onClick={formatCode}
+                      disabled={!canFormat}
+                      className="h-6 rounded border border-border bg-muted px-1.5 text-[11px] text-muted-foreground hover:bg-muted/80 disabled:opacity-60"
+                      title={
+                        canFormat
+                          ? "Format (Prettier)"
+                          : "Ngôn ngữ này chưa hỗ trợ format"
+                      }
+                    >
+                      Format
+                    </button>
+                  </div>
 
-        {/* Khung chat nhỏ lại, nằm cùng hàng với nút (giữ styling khung) */}
-        <div className="relative flex-1">
-          <div
-            className={`rounded border border-border bg-[hsl(var(--chat-input))] px-2 shadow-sm ${isAutoCode ? "pt-2" : "pt-3"
-              } flex ${isAutoCode ? "flex-col" : "items-center"}`}
-          >
-            {/* ======= CODE MODE: Monaco giữ nguyên phong cách khung của bạn ======= */}
-            {isAutoCode ? (
-              <>
-                {/* Mini toolbar nhưng giữ phong cách tối giản */}
-                <div className="mb-2 flex items-center gap-2">
-                  <select
-                    value={lang}
-                    onChange={(e) => setLang(e.target.value as Lang)}
-                    className="h-7 rounded border border-border bg-muted px-2 text-[12px] text-muted-foreground hover:bg-muted/80"
-                    title="Ngôn ngữ"
-                  >
-                    <option value="javascript">JavaScript</option>
-                    <option value="typescript">TypeScript</option>
-                    <option value="json">JSON</option>
-                    <option value="markdown">Markdown</option>
-                    <option value="html">HTML</option>
-                    <option value="css">CSS</option>
-                    <option value="plaintext">Plain text</option>
-                  </select>
+                  <div className="relative">
+                    <MonacoEditor
+                      height={160}
+                      language={
+                        lang === "plaintext" ? "plaintext" : (lang as any)
+                      }
+                      theme="vs-dark"
+                      value={code}
+                      onChange={(v) => setCode(v || "")}
+                      options={{
+                        fontLigatures: true,
+                        fontSize: 13,
+                        lineNumbers: "on",
+                        minimap: { enabled: false },
+                        wordWrap: wrap ? "on" : "off",
+                        tabSize: 2,
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        renderLineHighlight: "all",
+                      }}
+                    />
 
-                  <button
-                    type="button"
-                    onClick={() => setWrap((w) => !w)}
-                    className="h-7 rounded border border-border bg-muted px-2 text-[12px] text-muted-foreground hover:bg-muted/80"
-                    title="Word wrap"
-                  >
-                    {wrap ? "Wrap: On" : "Wrap: Off"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={formatCode}
-                    disabled={!canFormat}
-                    className="h-7 rounded border border-border bg-muted px-2 text-[12px] text-muted-foreground hover:bg-muted/80 disabled:opacity-60"
-                    title={
-                      canFormat
-                        ? "Format (Prettier)"
-                        : "Ngôn ngữ này chưa hỗ trợ format"
+                    {/* Nút Gửi giữ vị trí/size như của bạn */}
+                    {canSend && (
+                      <Button
+                        type="button"
+                        onClick={handleSend}
+                        size="icon"
+                        className="absolute -top-8 right-0 h-8 w-8 rounded"
+                        aria-label="Gửi"
+                        title="Gửi"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                // ======= CHAT MODE: giữ nguyên textarea + styling hiện tại =======
+                <>
+                  <textarea
+                    ref={taRef}
+                    rows={1}
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onPaste={handlePaste}
+                    onKeyDown={handleKeyDown}
+                    placeholder={
+                      isAutoCode
+                        ? "Soạn thảo code..."
+                        : editMessage
+                          ? "Chỉnh sửa tin nhắn..."
+                          : `Nhắn tin đến #${channelId}...`
                     }
-                  >
-                    Format
-                  </button>
-                </div>
-
-                <div className="relative">
-                  <MonacoEditor
-                    height={220}
-                    language={
-                      lang === "plaintext" ? "plaintext" : (lang as any)
-                    }
-                    theme="vs-dark"
-                    value={code}
-                    onChange={(v) => setCode(v || "")}
-                    options={{
-                      fontLigatures: true,
-                      fontSize: 13,
-                      lineNumbers: "on",
-                      minimap: { enabled: false },
-                      wordWrap: wrap ? "on" : "off",
-                      tabSize: 2,
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                      renderLineHighlight: "all",
-                    }}
+                    className="w-full resize-none bg-transparent pr-10 text-sm  text-white placeholder:text-muted-foreground focus:outline-none"
+                    style={{ minHeight: 32, maxHeight: 120 }}
                   />
-
-                  {/* Nút Gửi giữ vị trí/size như của bạn */}
                   {canSend && (
                     <Button
                       type="button"
                       onClick={handleSend}
                       size="icon"
-                      className="absolute bottom-2 right-2 h-7 w-7 rounded"
+                      className="absolute bottom-2 right-2 h-8 w-8 rounded"
                       aria-label="Gửi"
                       title="Gửi"
+                      disabled={isSending}
                     >
-                      <Send className="h-4 w-4" />
+                      <Send className="h-3.5 w-3.5" />
                     </Button>
                   )}
-                </div>
-              </>
-            ) : (
-              // ======= CHAT MODE: giữ nguyên textarea + styling hiện tại =======
-              <>
-                <textarea
-                  ref={taRef}
-                  rows={1}
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onPaste={handlePaste}
-                  onKeyDown={handleKeyDown}
-                  placeholder={
-                    isAutoCode
-                      ? "Soạn thảo code..."
-                      : `Nhắn tin đến #${channelId}...`
-                  }
-                  className="w-full resize-none bg-transparent pr-10 text-sm  text-white placeholder:text-muted-foreground focus:outline-none"
-                  style={{ minHeight: 32, maxHeight: 120 }}
-                />
-                {canSend && (
-                  <Button
-                    type="button"
-                    onClick={handleSend}
-                    size="icon"
-                    className="absolute bottom-2 right-2 h-7 w-7 rounded"
-                    aria-label="Gửi"
-                    title="Gửi"
-
-                    disabled={isSending}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                )}
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Preview file (giữ nguyên) */}
+        {previews.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {previews.map((url, idx) => (
+              <div key={idx} className="relative">
+                {files[idx].type.startsWith("image") ? (
+                  <img
+                    src={url}
+                    alt="preview"
+                    className="h-16 w-16 rounded border object-cover"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded border bg-muted text-[10px] text-muted-foreground/90 flex items-center justify-center p-1 text-center">
+                    {files[idx].name}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFile(idx)}
+                  className="absolute -right-1 -top-1 rounded-full bg-black/60 p-1"
+                  aria-label="Xóa tệp"
+                  title="Xóa tệp"
+                >
+                  <X className="h-3 w-3 text-white" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Preview file (giữ nguyên) */}
-      {previews.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {previews.map((url, idx) => (
-            <div key={idx} className="relative">
-              {files[idx].type.startsWith("image") ? (
-                <img
-                  src={url}
-                  alt="preview"
-                  className="h-16 w-16 rounded border object-cover"
-                />
-              ) : (
-                <div className="h-16 w-16 rounded border bg-muted text-[10px] text-muted-foreground/90 flex items-center justify-center p-1 text-center">
-                  {files[idx].name}
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => handleRemoveFile(idx)}
-                className="absolute -right-1 -top-1 rounded-full bg-black/60 p-1"
-                aria-label="Xóa tệp"
-                title="Xóa tệp"
-              >
-                <X className="h-3 w-3 text-white" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <p className="mt-2 text-xs text-muted-foreground">
-        Tip: dùng{" "}
-        <kbd className="rounded bg-muted px-1 py-0.5 text-[10px]">```</kbd> hoặc{" "}
-        <Code2 className="inline h-4 w-4 align-text-bottom" /> để bật soạn thảo
-        code. Nhấn{" "}
-        <kbd className="rounded bg-muted px-1 py-0.5 text-[10px]">Shift</kbd> +{" "}
-        <kbd className="rounded bg-muted px-1 py-0.5 text-[10px]">Enter</kbd> để
-        xuống dòng.
-      </p>
     </div>
   );
 };
