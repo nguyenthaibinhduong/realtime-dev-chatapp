@@ -10,9 +10,10 @@ interface MasterLayoutProps {
     menu: React.ReactNode;
     sidebar?: React.ReactNode;
     children: React.ReactNode;
+    children_right?: React.ReactNode;
 }
 
-export default function MasterLayout({ menu, sidebar, children }: MasterLayoutProps) {
+export default function MasterLayout({ menu, sidebar, children, children_right }: MasterLayoutProps) {
     const isMobile = useIsMobile();
 
     // ✅ Hook tự động xử lý notifications với navigation support
@@ -27,8 +28,8 @@ export default function MasterLayout({ menu, sidebar, children }: MasterLayoutPr
             {
                 sidebar && !isMobile &&
                 <ResizablePanel
-                    defaultSize={isMobile ? 0 : 22}
-                    minSize={isMobile ? 0 : 28}
+                    defaultSize={isMobile ? 0 : 24}
+                    minSize={isMobile ? 0 : 22}
                     maxSize={isMobile ? 0 : 50}
                     className={`flex flex-col transition-all duration-300 ${isMobile ? "w-0 min-w-0 max-w-0" : ""}`}
                     style={isMobile ? { width: 0, minWidth: 0, maxWidth: 0, padding: 0, overflow: "hidden" } : {}}
@@ -41,9 +42,28 @@ export default function MasterLayout({ menu, sidebar, children }: MasterLayoutPr
             <ResizableHandle withHandle className="opacity-0" />
 
             {/* Main Content */}
-            <ResizablePanel minSize={30} className="flex-1 flex flex-col">
+            <ResizablePanel
+                minSize={children_right ? 30 : 40}
+                defaultSize={children_right ? 70 : 100}
+                className="flex flex-col"
+            >
                 {children}
             </ResizablePanel>
+
+            {/* Handle between main and right panel */}
+            {children_right && <ResizableHandle withHandle />}
+
+            {/* Right Panel for Tools */}
+            {children_right && (
+                <ResizablePanel
+                    minSize={15}
+                    defaultSize={30}
+                    maxSize={50}
+                    className="flex flex-col border-l border-border"
+                >
+                    {children_right}
+                </ResizablePanel>
+            )}
         </ResizablePanelGroup>
     );
 }

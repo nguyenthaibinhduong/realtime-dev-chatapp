@@ -9,6 +9,9 @@ import {
   User,
   Github,
   Paperclip,
+  Wrench,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import { Separator } from "../../ui/separator";
 import { useEffect, useState } from "react";
@@ -20,6 +23,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { Badge } from "../../ui/badge";
 import { Channel, Member } from "@/types/channel";
@@ -32,10 +42,13 @@ import { RepoChatDialog } from "../github/RepoChatDialog";
 import { AttachmentModal } from "../attachments/AttachmentModal";
 import AvatarUser from "@/components/common/AvartarUser";
 import { AvatarGroupGrid } from "@/components/common/AvatarGroup";
+import { ToolType, TOOL_CONFIGS } from "../tools";
 
 interface ChannelHeaderProps {
   channel: Channel;
   members: Member[];
+  selectedTool?: ToolType;
+  onToolChange?: (tool: ToolType) => void;
 }
 
 const getChannelIcon = (channel: Channel, user?: any) => {
@@ -70,7 +83,7 @@ const getChannelTypeLabel = (type: string) => {
   }
 };
 
-export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
+export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: ChannelHeaderProps) => {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState("members");
   const [otherUser, setOtherUser] = useState<any>();
@@ -88,7 +101,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
 
 
   return (
-    <div className="h-14 border-b border-border bg-card px-6 flex items-center justify-between">
+    <div className="h-14 border-b border-border bg-card px-6 py-2 flex items-center justify-between">
       <div className="flex items-center">
         {channel.type === "personal"
           ? getChannelIcon(channel, otherUser)
@@ -96,7 +109,7 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
         <h2 className="font-semibold text-foreground ml-2">{channel.name}</h2>
         {channel.member_count > 2 && (
           <>
-            <Separator orientation="vertical" className="mx-3 h-4" />
+            <Separator orientation="vertical" className="mx-3 h-4 " />
             <p className="text-sm text-muted-foreground">
               {channel.member_count} thành viên
             </p>
@@ -122,39 +135,94 @@ export const ChannelHeader = ({ channel, members }: ChannelHeaderProps) => {
           members={members}
         />
 
+        {/* Tools Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={`p-2 rounded-lg hover:bg-muted transition-colors duration-200 group ${selectedTool ? 'bg-blue-500/10 text-blue-400' : ''
+                }`}
+              title="Tools"
+            >
+              <div className="flex items-center gap-1">
+                <Wrench className={`h-5 w-5 transition-colors ${selectedTool
+                  ? 'text-blue-400'
+                  : 'text-muted-foreground group-hover:text-foreground'
+                  }`} />
+                {selectedTool && (
+                  <ChevronDown className="h-3 w-3 text-blue-400" />
+                )}
+              </div>
+              <span className="sr-only">Tools</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 bg-gray-900 border-gray-700">
+            {Object.values(TOOL_CONFIGS).map((tool) => (
+              <DropdownMenuItem
+                key={tool.id}
+                onClick={() => onToolChange?.(selectedTool === tool.id ? null : tool.id)}
+                className={`cursor-pointer hover:bg-gray-800 ${selectedTool === tool.id ? 'bg-blue-900/50 text-blue-300' : 'text-gray-300'
+                  }`}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <span className="text-lg">{tool.icon}</span>
+                  <div className="flex-1">
+                    <div className="font-medium">{tool.name}</div>
+                    <div className="text-xs text-gray-500">{tool.description}</div>
+                  </div>
+                  {selectedTool === tool.id && (
+                    <X className="h-4 w-4" />
+                  )}
+                </div>
+              </DropdownMenuItem>
+            ))}
+            {selectedTool && (
+              <>
+                <DropdownMenuSeparator className="bg-gray-700" />
+                <DropdownMenuItem
+                  onClick={() => onToolChange?.(null)}
+                  className="cursor-pointer hover:bg-gray-800 text-red-400"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Đóng tất cả tools
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         {/* Nút mở modal kết nối repo git */}
         <button
-          className="p-2 rounded-lg hover:bg-muted transition-colors duration-200"
+          className="p-2 rounded-lg  hover:bg-muted transition-colors duration-200"
           title="Chức năng GitHub"
           onClick={() => setOpenGitModal(true)}
         >
-          <Github className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+          <Github className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           <span className="sr-only">Kết nối repo Git</span>
         </button>
         <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <button
-              className="p-2 rounded-lg hover:bg-zinc-800 transition-colors duration-200"
+              className="p-2 rounded-lg  hover:bg-muted transition-colors duration-200"
               title="Xem thành viên"
               onClick={() => {
                 setTab("members");
                 setOpen(true);
               }}
             >
-              <Users className="h-5 w-5 text-zinc-400 hover:text-white" />
+              <Users className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             </button>
           </DialogTrigger>
           <DialogTrigger asChild>
             <button
-              className="p-2 rounded-lg hover:bg-zinc-800 transition-colors duration-200"
+              className="p-2 rounded-lg  hover:bg-muted transition-colors duration-200"
               title="Thông tin kênh"
               onClick={() => {
                 setTab("info");
                 setOpen(true);
               }}
             >
-              <Info className="h-5 w-5 text-zinc-400 hover:text-white" />
+              <Info className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             </button>
           </DialogTrigger>
 

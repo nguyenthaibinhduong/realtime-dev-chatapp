@@ -26,6 +26,7 @@ import { Channel, Member } from "@/types/channel";
 import { chatSocketService } from "@/services/chatSocketService";
 import { useIsMobile } from "@/hooks/useMobile";
 import attachmentService, { UploadResult } from "@/services/attachmentService";
+import { Tool1, Tool2, Tool3, ToolType } from "./blocks/tools";
 
 export default function ChatLayout() {
   const { toast } = useToast();
@@ -52,6 +53,21 @@ export default function ChatLayout() {
   }>({});
   const [replyTo, setReplyTo] = useState<{ id: string; sender: string; text?: string } | null>(null);
   const [editTo, setEditTo] = useState<{ id: string; sender: string; text?: string } | null>(null);
+  const [selectedTool, setSelectedTool] = useState<ToolType>(null);
+
+  // Function to render selected tool component
+  const renderToolComponent = () => {
+    switch (selectedTool) {
+      case 'tool1':
+        return <Tool1 />;
+      case 'tool2':
+        return <Tool2 />;
+      case 'tool3':
+        return <Tool3 />;
+      default:
+        return null;
+    }
+  };
 
   // ✅ Register notification handlers
   useEffect(() => {
@@ -893,10 +909,16 @@ export default function ChatLayout() {
           </SidebarLayout>
         )
       }
+      children_right={renderToolComponent()}
     >
       <div className="flex-1 flex flex-col h-full">
         {selectedChannel && (
-          <ChannelHeader channel={selectedChannel} members={members} />
+          <ChannelHeader
+            channel={selectedChannel}
+            members={members}
+            selectedTool={selectedTool}
+            onToolChange={setSelectedTool}
+          />
         )}
 
         <div className="flex flex-col h-full">

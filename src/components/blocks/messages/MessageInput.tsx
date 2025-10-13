@@ -229,20 +229,20 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
   return (
     <div className="border-t border-border transition-all duration-200">
       {/* Preview Section với animation */}
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${(replyMessage || editMessage) ? 'max-h-12 opacity-100 px-3 py-1' : 'max-h-0 opacity-0 p-0'
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${(replyMessage || editMessage) ? 'max-h-24 opacity-100 p-2 pb-0' : 'max-h-0 opacity-0 p-0'
         }`}>
         {/* Reply preview */}
         {replyMessage && !editMessage && (
-          <div className="mb-1 rounded-md bg-[#1f2937] text-gray-200 px-2 py-1.5 relative">
+          <div className="mb-2 rounded-md bg-[#1f2937] text-gray-200 px-3 py-2 relative">
             <div className="flex items-start gap-2">
               <div className="w-1 rounded bg-blue-500 mt-0.5" />
               <div className="flex-1">
-                <div className="text-xs">
+                <div className="text-sm">
                   <span className="opacity-80">Trả lời </span>
                   <span className="font-semibold">{replyMessage.sender}</span>
                 </div>
                 {replyMessage.text ? (
-                  <div className="text-[11px] opacity-80 line-clamp-1">{replyMessage.text}</div>
+                  <div className="text-xs opacity-80 line-clamp-1">{replyMessage.text}</div>
                 ) : null}
               </div>
               <button
@@ -259,16 +259,16 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
 
         {/* Edit preview */}
         {editMessage && !replyMessage && (
-          <div className="mb-1 rounded-md bg-[#374151] text-gray-200 px-2 py-1.5 relative">
+          <div className="mb-2 rounded-md bg-[#374151] text-gray-200 px-3 py-2 relative">
             <div className="flex items-start gap-2">
               <div className="w-1 rounded bg-orange-500 mt-0.5" />
               <div className="flex-1">
-                <div className="text-xs">
+                <div className="text-sm">
                   <span className="opacity-80">Chỉnh sửa tin nhắn của </span>
                   <span className="font-semibold">{editMessage.sender}</span>
                 </div>
                 {editMessage.text ? (
-                  <div className="text-[11px] opacity-80 line-clamp-1">{editMessage.text}</div>
+                  <div className="text-xs opacity-80 line-clamp-1">{editMessage.text}</div>
                 ) : null}
               </div>
               <button
@@ -285,17 +285,18 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
       </div>
 
       {/* Input Section */}
-      <div className="px-3 py-1.5">
+      <div className="p-2">{/* Nhóm nút và khung chat nằm cùng hàng, icon bên trái (giữ styling) */}
+
         {/* Nhóm nút và khung chat nằm cùng hàng, icon bên trái (giữ styling) */}
         <div className="flex items-start gap-2">
-          <div className="flex items-center gap-1 py-1">
+          <div className="flex items-center gap-1 py-2">
             {!editMessage && (
               <>
                 <label
-                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
                   title="Ảnh"
                 >
-                  <Image className="h-3.5 w-3.5 text-muted-foreground hover:text-white" />
+                  <Image className="h-4 w-4 text-muted-foreground hover:text-white" />
                   <input
                     type="file"
                     accept="image/*"
@@ -306,10 +307,10 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
                 </label>
 
                 <label
-                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
                   title="Tệp đính kèm"
                 >
-                  <Paperclip className="h-3.5 w-3.5 text-muted-foreground hover:text-white" />
+                  <Paperclip className="h-4 w-4 text-muted-foreground hover:text-white" />
                   <input
                     type="file"
                     multiple
@@ -329,11 +330,11 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
                 setIsCodeMode((v) => !v);
               }}
               title={isAutoCode ? "Đang ở chế độ code" : "Bật chế độ code"}
-              className={`flex h-6 w-6 items-center justify-center rounded hover:bg-primary/80 transition-colors ${isAutoCode ? "bg-primary text-white" : ""
+              className={`flex h-7 w-7 items-center justify-center rounded hover:bg-primary/80 transition-colors ${isAutoCode ? "bg-primary text-white" : ""
                 }`}
             >
               <Code2
-                className={`h-3.5 w-3.5 ${isAutoCode ? "text-white" : "text-muted-foreground"}`}
+                className={`h-4 w-4 ${isAutoCode ? "text-white" : "text-muted-foreground"}`}
               />
             </button>
           </div>
@@ -341,18 +342,18 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
           {/* Khung chat nhỏ lại, nằm cùng hàng với nút (giữ styling khung) */}
           <div className="relative flex-1">
             <div
-              className={`rounded border border-border bg-[hsl(var(--chat-input))] px-2 shadow-sm ${isAutoCode ? "py-1.5" : "py-2"
+              className={`rounded border border-border bg-[hsl(var(--chat-input))] px-2 shadow-sm ${isAutoCode ? "pt-2" : "pt-3"
                 } flex ${isAutoCode ? "flex-col" : "items-center"}`}
             >
               {/* ======= CODE MODE: Monaco giữ nguyên phong cách khung của bạn ======= */}
               {isAutoCode ? (
                 <>
                   {/* Mini toolbar nhưng giữ phong cách tối giản */}
-                  <div className="mb-1.5 flex items-center gap-1.5">
+                  <div className="mb-2 flex items-center gap-2">
                     <select
                       value={lang}
                       onChange={(e) => setLang(e.target.value as Lang)}
-                      className="h-6 rounded border border-border bg-muted px-1.5 text-[11px] text-muted-foreground hover:bg-muted/80"
+                      className="h-7 rounded border border-border bg-muted px-2 text-[12px] text-muted-foreground hover:bg-muted/80"
                       title="Ngôn ngữ"
                     >
                       <option value="javascript">JavaScript</option>
@@ -367,7 +368,7 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
                     <button
                       type="button"
                       onClick={() => setWrap((w) => !w)}
-                      className="h-6 rounded border border-border bg-muted px-1.5 text-[11px] text-muted-foreground hover:bg-muted/80"
+                      className="h-7 rounded border border-border bg-muted px-2 text-[12px] text-muted-foreground hover:bg-muted/80"
                       title="Word wrap"
                     >
                       {wrap ? "Wrap: On" : "Wrap: Off"}
@@ -377,7 +378,7 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
                       type="button"
                       onClick={formatCode}
                       disabled={!canFormat}
-                      className="h-6 rounded border border-border bg-muted px-1.5 text-[11px] text-muted-foreground hover:bg-muted/80 disabled:opacity-60"
+                      className="h-7 rounded border border-border bg-muted px-2 text-[12px] text-muted-foreground hover:bg-muted/80 disabled:opacity-60"
                       title={
                         canFormat
                           ? "Format (Prettier)"
@@ -390,7 +391,7 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
 
                   <div className="relative">
                     <MonacoEditor
-                      height={160}
+                      height={220}
                       language={
                         lang === "plaintext" ? "plaintext" : (lang as any)
                       }
@@ -416,7 +417,7 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
                         type="button"
                         onClick={handleSend}
                         size="icon"
-                        className="absolute -top-8 right-0 h-8 w-8 rounded"
+                        className="absolute bottom-2 right-2 h-7 w-7 rounded"
                         aria-label="Gửi"
                         title="Gửi"
                       >
@@ -450,12 +451,13 @@ export const MessageInput = ({ channelId, onSend, replyMessage, onCancelReply, e
                       type="button"
                       onClick={handleSend}
                       size="icon"
-                      className="absolute bottom-2 right-2 h-8 w-8 rounded"
+                      className="absolute bottom-2 right-2 h-7 w-7 rounded"
                       aria-label="Gửi"
                       title="Gửi"
+
                       disabled={isSending}
                     >
-                      <Send className="h-3.5 w-3.5" />
+                      <Send className="h-4 w-4" />
                     </Button>
                   )}
                 </>

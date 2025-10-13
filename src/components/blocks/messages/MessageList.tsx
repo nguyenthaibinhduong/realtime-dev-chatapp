@@ -384,7 +384,7 @@ export const MessageList: React.FC<Props> = ({
     <ScrollArea
       className="p-4 overflow-auto"
       style={{
-        height: hasInputPreview ? "calc(100vh - 25vh)" : "calc(100vh - 20vh)",
+        height: hasInputPreview ? "calc(100vh - 24vh)" : "calc(100vh - 20vh)",
         transition: "height 0.3s ease-in-out"
       }}
       ref={scrollAreaRef}
