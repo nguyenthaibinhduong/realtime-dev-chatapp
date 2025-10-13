@@ -12,6 +12,7 @@ import {
   Wrench,
   ChevronDown,
   X,
+  Settings,
 } from "lucide-react";
 import { Separator } from "../../ui/separator";
 import { useEffect, useState } from "react";
@@ -43,6 +44,7 @@ import { AttachmentModal } from "../attachments/AttachmentModal";
 import AvatarUser from "@/components/common/AvartarUser";
 import { AvatarGroupGrid } from "@/components/common/AvatarGroup";
 import { ToolType, TOOL_CONFIGS } from "../tools";
+import ChannelUpdate from "./ChannelSettings";
 
 interface ChannelHeaderProps {
   channel: Channel;
@@ -52,18 +54,14 @@ interface ChannelHeaderProps {
 }
 
 const getChannelIcon = (channel: Channel, user?: any) => {
-  if (channel.type === "group" || channel.type === "group-private") return <AvatarGroupGrid users={channel.members} tile={18} />;
+  if (channel.type === "group" || channel.type === "group-private")
+    return <AvatarGroupGrid users={channel.members} tile={18} />;
   if (channel.type === "personal") {
     return (
       <div className="relative mr-2">
         <AvatarUser user={user} size={8} />
         {/* Chấm online */}
-        {
-          user?.id && channel.members && (
-            <OnlineDot userId={user?.id} />
-
-          )
-        }
+        {user?.id && channel.members && <OnlineDot userId={user?.id} />}
       </div>
     );
   }
@@ -90,6 +88,7 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
   const { user } = useAuth();
   const [openGitModal, setOpenGitModal] = useState(false);
   const [openAttachmentModal, setOpenAttachmentModal] = useState(false);
+  const [openSettingsModal, setOpenSettingsModal] = useState(false);
 
   useEffect(() => {
     if (channel.type === "personal" && members && user?.id) {
@@ -98,7 +97,6 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
     }
     console.log("Other User ID:", otherUser);
   }, [channel, members, user]);
-
 
   return (
     <div className="h-14 border-b border-border bg-card px-6 py-2 flex items-center justify-between">
@@ -236,7 +234,6 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                     {channel.type === "personal"
                       ? getChannelIcon(channel, otherUser)
                       : getChannelIcon(channel)}
-
                   </div>
                   <div>
                     <DialogTitle className="text-2xl font-bold text-white tracking-tight">
@@ -252,7 +249,7 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
 
             {/* Tabs với thiết kế tối */}
             <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 bg-zinc-900 rounded-xl p-1 shadow-sm border border-zinc-800">
+              <TabsList className="grid w-full grid-cols-3 bg-zinc-900 rounded-xl p-1 shadow-sm border border-zinc-800">
                 <TabsTrigger
                   value="members"
                   className="rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-zinc-800 data-[state=active]:text-white data-[state=active]:shadow-md text-zinc-300"
@@ -267,6 +264,13 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                   <Info className="h-4 w-4 mr-2" />
                   Thông tin
                 </TabsTrigger>
+                <TabsTrigger
+                  value="settings"
+                  className="rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-zinc-800 data-[state=active]:text-white data-[state=active]:shadow-md text-zinc-300"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Cài đặt kênh
+                </TabsTrigger>
               </TabsList>
 
               {/* Members Tab */}
@@ -275,6 +279,7 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                   <h3 className="text-lg font-semibold mb-4 text-white">
                     Danh sách thành viên ({members.length})
                   </h3>
+
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {members.map((member: any) => (
                       <div
@@ -401,6 +406,18 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                       </Badge>
                     </div>
                   )}
+                </div>
+              </TabsContent>
+
+              {/* Channel Settings */}
+              <TabsContent value="settings">
+                <div className="p-4">
+                  <ChannelUpdate
+                    open={true}
+                    onOpenChange={setOpenSettingsModal}
+                    channelId={channel.id}
+                    channelName={channel.name}
+                  />
                 </div>
               </TabsContent>
             </Tabs>

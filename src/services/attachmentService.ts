@@ -321,6 +321,28 @@ class AttachmentService {
       throw error;
     }
   }
+
+  getMimeTypeCategory(mimeType: string): string | null {
+    if (mimeType.startsWith("image/")) return "image";
+    if (mimeType.startsWith("video/")) return "video";
+    if (mimeType.startsWith("audio/")) return "audio";
+    if (
+      mimeType.includes("pdf") ||
+      mimeType.includes("word") ||
+      mimeType.includes("document") ||
+      mimeType.includes("text")
+    )
+      return "document";
+    if (
+      mimeType.includes("zip") ||
+      mimeType.includes("rar") ||
+      mimeType.includes("7z") ||
+      mimeType.includes("tar") ||
+      mimeType.includes("gz")
+    )
+      return "archive";
+    return "other";
+  }
 }
 
 export const attachmentService = new AttachmentService();
