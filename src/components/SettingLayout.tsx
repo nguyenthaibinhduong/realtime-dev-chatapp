@@ -9,6 +9,7 @@ import GithubRegisterLayout from "./GithubRegisterLayout";
 import { TestLayout, EditorLayout } from "./SandBoxLayout";
 import CodeEditorJudge0 from "./MonacoEditorLayout";
 import TestNotiLayout from "./TestLayout";
+import ApiTool from "./blocks/tools/api-tool/ApiTool";
 
 type SettingItem = {
   id: string;
@@ -67,7 +68,7 @@ export default function SettingLayout() {
         {
           id: "TestLayout",
           label: "TestLayout",
-          component: <TestNotiLayout />,
+          component: <ApiTool />,
         },
       ],
     },

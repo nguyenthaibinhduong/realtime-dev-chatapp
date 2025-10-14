@@ -26,7 +26,7 @@ import { Channel, Member } from "@/types/channel";
 import { chatSocketService } from "@/services/chatSocketService";
 import { useIsMobile } from "@/hooks/useMobile";
 import attachmentService, { UploadResult } from "@/services/attachmentService";
-import { Tool1, Tool2, Tool3, ToolType } from "./blocks/tools";
+import { ApiTool, Tool1, Tool2, Tool3, ToolType } from "./blocks/tools";
 
 export default function ChatLayout() {
   const { toast } = useToast();
@@ -51,19 +51,29 @@ export default function ChatLayout() {
   const [uploadingFiles, setUploadingFiles] = useState<{
     [key: string]: { progress: number; total: number };
   }>({});
-  const [replyTo, setReplyTo] = useState<{ id: string; sender: string; text?: string } | null>(null);
-  const [editTo, setEditTo] = useState<{ id: string; sender: string; text?: string } | null>(null);
+  const [replyTo, setReplyTo] = useState<{
+    id: string;
+    sender: string;
+    text?: string;
+  } | null>(null);
+  const [editTo, setEditTo] = useState<{
+    id: string;
+    sender: string;
+    text?: string;
+  } | null>(null);
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
 
   // Function to render selected tool component
   const renderToolComponent = () => {
     switch (selectedTool) {
-      case 'tool1':
+      case "tool1":
         return <Tool1 />;
-      case 'tool2':
+      case "tool2":
         return <Tool2 />;
-      case 'tool3':
+      case "tool3":
         return <Tool3 />;
+      case "apiTool":
+        return <ApiTool />;
       default:
         return null;
     }
@@ -76,12 +86,14 @@ export default function ChatLayout() {
       const { channelId, channel, messageId } = data;
 
       // Find channel in current list or use provided channel data
-      let targetChannel = channels.find(c => String(c.id) === String(channelId));
+      let targetChannel = channels.find(
+        (c) => String(c.id) === String(channelId)
+      );
       if (!targetChannel && channel) {
         targetChannel = channel;
         // Optionally add channel to list if not present
-        setChannels(prev => {
-          const exists = prev.find(c => String(c.id) === String(channelId));
+        setChannels((prev) => {
+          const exists = prev.find((c) => String(c.id) === String(channelId));
           return exists ? prev : [...prev, channel];
         });
       }
@@ -91,18 +103,23 @@ export default function ChatLayout() {
 
         // Update URL params
         const newParams = new URLSearchParams(searchParams);
-        newParams.set('channel', String(channelId));
+        newParams.set("channel", String(channelId));
         if (messageId) {
-          newParams.set('message', String(messageId));
+          newParams.set("message", String(messageId));
         }
         setSearchParams(newParams);
 
         // Scroll to specific message if provided
         if (messageId) {
           setTimeout(() => {
-            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            const messageElement = document.querySelector(
+              `[data-message-id="${messageId}"]`
+            );
             if (messageElement) {
-              messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              messageElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
             }
           }, 500);
         }
@@ -154,25 +171,33 @@ export default function ChatLayout() {
     };
 
     // Register all handlers
-    registerHandler('navigateToChannel', handleNavigateToChannel);
-    registerHandler('openGithubDetail', handleOpenGithubDetail);
-    registerHandler('openSystemDetail', handleOpenSystemDetail);
-    registerHandler('openNotificationDetail', handleOpenNotificationDetail);
+    registerHandler("navigateToChannel", handleNavigateToChannel);
+    registerHandler("openGithubDetail", handleOpenGithubDetail);
+    registerHandler("openSystemDetail", handleOpenSystemDetail);
+    registerHandler("openNotificationDetail", handleOpenNotificationDetail);
 
     // Cleanup handlers on unmount
     return () => {
-      unregisterHandler('navigateToChannel');
-      unregisterHandler('openGithubDetail');
-      unregisterHandler('openSystemDetail');
-      unregisterHandler('openNotificationDetail');
+      unregisterHandler("navigateToChannel");
+      unregisterHandler("openGithubDetail");
+      unregisterHandler("openSystemDetail");
+      unregisterHandler("openNotificationDetail");
     };
-  }, [channels, registerHandler, unregisterHandler, toast, isMobile, searchParams, setSearchParams]);
+  }, [
+    channels,
+    registerHandler,
+    unregisterHandler,
+    toast,
+    isMobile,
+    searchParams,
+    setSearchParams,
+  ]);
 
   // ✅ Handle URL params on mount
   useEffect(() => {
-    const channelParam = searchParams.get('channel');
+    const channelParam = searchParams.get("channel");
     if (channelParam && channels.length > 0) {
-      const targetChannel = channels.find(c => String(c.id) === channelParam);
+      const targetChannel = channels.find((c) => String(c.id) === channelParam);
       if (targetChannel && targetChannel.id !== selectedChannel?.id) {
         handleSelectChannel(targetChannel);
       }
@@ -300,41 +325,46 @@ export default function ChatLayout() {
         setMessages((prev: any) => {
           // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
           if (msg.isUpdate) {
-            if (msg.type === 'remove') {
+            if (msg.type === "remove") {
               // Tìm và cập nhật tin nhắn thành trạng thái đã xóa
-              const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+              const idx = prev.findIndex(
+                (p: any) => String(p.id) === String(msg.id)
+              );
               if (idx !== -1) {
                 const updated = [...prev];
                 updated[idx] = {
                   ...updated[idx],
                   ...msg,
                   sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
-                  type: 'remove',
-                  text: msg.text || 'Tin nhắn đã bị xóa',
+                  type: "remove",
+                  text: msg.text || "Tin nhắn đã bị xóa",
                 };
                 return updated;
               }
               return prev;
             } else {
               // Cập nhật tin nhắn (bao gồm pin/unpin)
-              const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+              const idx = prev.findIndex(
+                (p: any) => String(p.id) === String(msg.id)
+              );
               if (idx !== -1) {
                 const updated = [...prev];
                 // Merge để preserve các thuộc tính quan trọng và cập nhật isPin
                 updated[idx] = {
                   ...updated[idx], // Giữ lại thuộc tính cũ
-                  ...msg,          // Cập nhật với data mới từ socket (bao gồm isPin)
+                  ...msg, // Cập nhật với data mới từ socket (bao gồm isPin)
                   sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
                   updated_at: msg.updated_at || new Date().toISOString(), // Đảm bảo có timestamp mới
                 };
 
-                console.log('🔄 Socket A - Updated message pin status:', {
+                console.log("🔄 Socket A - Updated message pin status:", {
                   messageId: msg.id,
                   oldPin: prev[idx].isPin,
                   newPin: msg.isPin,
                   finalPin: updated[idx].isPin,
-                  sender: updated[idx].sender?.name || updated[idx].sender?.username,
-                  timestamp: updated[idx].updated_at
+                  sender:
+                    updated[idx].sender?.name || updated[idx].sender?.username,
+                  timestamp: updated[idx].updated_at,
                 });
 
                 return updated;
@@ -345,7 +375,10 @@ export default function ChatLayout() {
             const idx = prev.findIndex(
               (p: any) => String(p.fakeID) === String(msg.fakeID)
             );
-            if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+            if (
+              idx !== -1 &&
+              String(prev[idx].channelId) === String(msg.channelId)
+            ) {
               const updated = [...prev];
               updated[idx] = msg;
               return updated;
@@ -354,7 +387,6 @@ export default function ChatLayout() {
             // Thêm tin nhắn mới vào cuối
             return [...prev, msg];
           }
-
         });
       });
     }
@@ -370,17 +402,19 @@ export default function ChatLayout() {
         console.log("New socket message received:", msg);
         setMessages((prev: any) => {
           // ✅ Xử lý tin nhắn bị xóa (type === 'remove')
-          if (msg.type === 'remove') {
+          if (msg.type === "remove") {
             // Tìm và cập nhật tin nhắn thành trạng thái đã xóa
-            const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+            const idx = prev.findIndex(
+              (p: any) => String(p.id) === String(msg.id)
+            );
             if (idx !== -1) {
               const updated = [...prev];
               updated[idx] = {
                 ...updated[idx],
                 ...msg,
                 sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
-                type: 'remove',
-                text: msg.text || 'Tin nhắn đã bị xóa',
+                type: "remove",
+                text: msg.text || "Tin nhắn đã bị xóa",
               };
               return updated;
             }
@@ -389,41 +423,49 @@ export default function ChatLayout() {
 
           // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
           if (msg.isUpdate) {
-            if (msg.type === 'remove') {
+            if (msg.type === "remove") {
               // Tìm và cập nhật tin nhắn thành trạng thái đã xóa
-              const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+              const idx = prev.findIndex(
+                (p: any) => String(p.id) === String(msg.id)
+              );
               if (idx !== -1) {
                 const updated = [...prev];
                 updated[idx] = {
                   ...updated[idx],
                   ...msg,
                   sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
-                  type: 'remove',
-                  text: msg.text || 'Tin nhắn đã bị xóa',
+                  type: "remove",
+                  text: msg.text || "Tin nhắn đã bị xóa",
                 };
                 return updated;
               }
               return prev;
             } else {
               // Cập nhật tin nhắn (bao gồm pin/unpin)
-              const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
-              if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+              const idx = prev.findIndex(
+                (p: any) => String(p.id) === String(msg.id)
+              );
+              if (
+                idx !== -1 &&
+                String(prev[idx].channelId) === String(msg.channelId)
+              ) {
                 const updated = [...prev];
                 // Merge để preserve các thuộc tính quan trọng và cập nhật isPin
                 updated[idx] = {
                   ...updated[idx], // Giữ lại thuộc tính cũ
-                  ...msg,          // Cập nhật với data mới từ socket (bao gồm isPin)
+                  ...msg, // Cập nhật với data mới từ socket (bao gồm isPin)
                   sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
                   updated_at: msg.updated_at || new Date().toISOString(), // Đảm bảo có timestamp mới
                 };
 
-                console.log('🔄 Socket B - Updated message pin status:', {
+                console.log("🔄 Socket B - Updated message pin status:", {
                   messageId: msg.id,
                   oldPin: prev[idx].isPin,
                   newPin: msg.isPin,
                   finalPin: updated[idx].isPin,
-                  sender: updated[idx].sender?.name || updated[idx].sender?.username,
-                  timestamp: updated[idx].updated_at
+                  sender:
+                    updated[idx].sender?.name || updated[idx].sender?.username,
+                  timestamp: updated[idx].updated_at,
                 });
 
                 return updated;
@@ -431,12 +473,14 @@ export default function ChatLayout() {
               return prev;
             }
           } else {
-
             // ✅ Xử lý tin nhắn mới (tìm theo fakeID nếu có)
             const idx = prev.findIndex(
               (p: any) => String(p.fakeID) === String(msg.fakeID)
             );
-            if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+            if (
+              idx !== -1 &&
+              String(prev[idx].channelId) === String(msg.channelId)
+            ) {
               const updated = [...prev];
               updated[idx] = msg;
               return updated;
@@ -445,7 +489,6 @@ export default function ChatLayout() {
             // Thêm tin nhắn mới vào cuối
             return [...prev, msg];
           }
-
         });
       });
     }
@@ -494,15 +537,15 @@ export default function ChatLayout() {
       localStorage.setItem("selectedChannelId", String(channel.id));
       // Update URL
       const newParams = new URLSearchParams(searchParams);
-      newParams.set('channel', String(channel.id));
-      newParams.delete('message'); // Clear message param when switching channels
+      newParams.set("channel", String(channel.id));
+      newParams.delete("message"); // Clear message param when switching channels
       setSearchParams(newParams);
     } else {
       localStorage.removeItem("selectedChannelId");
       // Clear URL params
       const newParams = new URLSearchParams(searchParams);
-      newParams.delete('channel');
-      newParams.delete('message');
+      newParams.delete("channel");
+      newParams.delete("message");
       setSearchParams(newParams);
     }
   };
@@ -575,8 +618,19 @@ export default function ChatLayout() {
 
   // Send message via socket
   const sendMessage = useCallback(
-    async (content: string, files: File[], meta?: { replyTo?: { id: string; sender: string; text?: string }; editTo?: { id: string; sender: string; text?: string } }) => {
-      if (!selectedChannel?.id || (!content.trim() && (!files || files.length === 0))) return;
+    async (
+      content: string,
+      files: File[],
+      meta?: {
+        replyTo?: { id: string; sender: string; text?: string };
+        editTo?: { id: string; sender: string; text?: string };
+      }
+    ) => {
+      if (
+        !selectedChannel?.id ||
+        (!content.trim() && (!files || files.length === 0))
+      )
+        return;
 
       let attachments: UploadResult[] = [];
 
@@ -681,10 +735,11 @@ export default function ChatLayout() {
         setEditTo(null);
       } else {
         // ✅ Tin nhắn mới hoặc reply
-        const computedType =
-          meta?.replyTo
-            ? "reply-message"
-            : (attachments.length > 0 ? "file-upload" : "message");
+        const computedType = meta?.replyTo
+          ? "reply-message"
+          : attachments.length > 0
+            ? "file-upload"
+            : "message";
 
         chatSocketService.sendMessage({
           channelId: selectedChannel.id,
@@ -930,7 +985,8 @@ export default function ChatLayout() {
                   Chat Coming Soon
                 </h3>
                 <p className="text-muted-foreground">
-                  Chat functionality will be implemented with the new backend API
+                  Chat functionality will be implemented with the new backend
+                  API
                 </p>
               </div>
             </div>
@@ -952,10 +1008,10 @@ export default function ChatLayout() {
               <MessageInput
                 channelId={selectedChannel.id}
                 onSend={sendMessage}
-                replyMessage={replyTo || undefined}        // <-- truyền xuống input
-                onCancelReply={() => setReplyTo(null)}     // <-- hủy reply
-                editMessage={editTo || undefined}          // <-- truyền xuống edit
-                onCancelEdit={() => setEditTo(null)}       // <-- hủy edit
+                replyMessage={replyTo || undefined} // <-- truyền xuống input
+                onCancelReply={() => setReplyTo(null)} // <-- hủy reply
+                editMessage={editTo || undefined} // <-- truyền xuống edit
+                onCancelEdit={() => setEditTo(null)} // <-- hủy edit
               />
             </div>
           )}
