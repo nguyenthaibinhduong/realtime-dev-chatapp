@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { convertKeyValueToObject } from "../../../utils/helpers";
+import prettyBytes from "pretty-bytes";
+import {
+  convertKeyValueToObject,
+  convertObjectToKeyValue,
+} from "../../../utils/helpers";
 import UrlEditor from "../../Panes/RequestUrl/UrlEditor";
 import RequestTabGroup from "../../Tab-Groups/RequestTabGroup";
 import { toast } from "@/hooks/useToast";
+import { saveRequestToHistory } from "../../../utils/requestHistory";
 
 interface KeyPair {
   id: string;
@@ -26,12 +31,16 @@ interface RequestProps {
   setResponse: (response: any) => void;
   setLoading: (loading: boolean) => void;
   loading: boolean;
+  historyItem?: any;
+  onHistoryLoaded?: () => void;
 }
 
 export default function Request({
   setResponse,
   setLoading,
   loading,
+  historyItem,
+  onHistoryLoaded,
 }: RequestProps) {
   const [url, setUrl] = useState(
     "https://jsonplaceholder.typicode.com/todos/1"
@@ -47,6 +56,47 @@ export default function Request({
     },
   ]);
   const [body, setBody] = useState("{\n  \n}");
+
+  // Load history item when provided
+  useEffect(() => {
+    if (historyItem) {
+      setUrl(historyItem.url);
+      setReqMethod(historyItem.method);
+
+      // Convert headers object to key-value pairs
+      const historyHeaders = convertObjectToKeyValue(historyItem.headers);
+      setHeaders(
+        historyHeaders.length > 0
+          ? historyHeaders
+          : [
+              {
+                id: uuidv4(),
+                keyItem: "Content-Type",
+                valueItem: "application/json",
+                enabled: true,
+              },
+            ]
+      );
+
+      // Convert params object to key-value pairs
+      const historyParams = convertObjectToKeyValue(historyItem.params);
+      setQueryParams(
+        historyParams.length > 0 ? historyParams : keyPairInitState
+      );
+
+      // Set body
+      if (historyItem.body) {
+        setBody(historyItem.body);
+      } else {
+        setBody("{\n  \n}");
+      }
+
+      // Notify parent that history has been loaded
+      if (onHistoryLoaded) {
+        onHistoryLoaded();
+      }
+    }
+  }, [historyItem]);
 
   const handleOnInputSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +146,11 @@ export default function Request({
       const endTime = performance.now();
       const duration = Math.round(endTime - startTime);
 
+      // Calculate response size
+      const dataSize = JSON.stringify(response.data).length;
+      const headersSize = JSON.stringify(response.headers).length;
+      const size = prettyBytes(dataSize + headersSize);
+
       // Add custom data for time tracking
       const responseWithCustomData = {
         ...response,
@@ -105,6 +160,23 @@ export default function Request({
       };
 
       setResponse(responseWithCustomData);
+
+      // Save to history
+      saveRequestToHistory({
+        url,
+        method: reqMethod,
+        headers: convertKeyValueToObject(headers),
+        params: convertKeyValueToObject(queryParams),
+        body: requestBody || "",
+        response: {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+          data: response.data,
+          time: `${duration}ms`,
+          size,
+        },
+      });
 
       toast({
         title: "Success",
@@ -118,6 +190,11 @@ export default function Request({
 
       // Handle error response
       if (error.response) {
+        // Calculate response size
+        const dataSize = JSON.stringify(error.response.data).length;
+        const headersSize = JSON.stringify(error.response.headers).length;
+        const size = prettyBytes(dataSize + headersSize);
+
         const errorResponseWithCustomData = {
           ...error.response,
           customData: {
@@ -125,6 +202,23 @@ export default function Request({
           },
         };
         setResponse(errorResponseWithCustomData);
+
+        // Save error response to history
+        saveRequestToHistory({
+          url,
+          method: reqMethod,
+          headers: convertKeyValueToObject(headers),
+          params: convertKeyValueToObject(queryParams),
+          body: requestBody || "",
+          response: {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            headers: error.response.headers,
+            data: error.response.data,
+            time: `${duration}ms`,
+            size,
+          },
+        });
       } else {
         setResponse({
           status: 0,
@@ -135,6 +229,26 @@ export default function Request({
           headers: {},
           customData: {
             time: `${duration}ms`,
+          },
+        });
+
+        // Save network error to history
+        saveRequestToHistory({
+          url,
+          method: reqMethod,
+          headers: convertKeyValueToObject(headers),
+          params: convertKeyValueToObject(queryParams),
+          body: requestBody || "",
+          response: {
+            status: 0,
+            statusText: "Network Error",
+            headers: {},
+            data: {
+              error: true,
+              message: error.message || "Network error",
+            },
+            time: `${duration}ms`,
+            size: "0 B",
           },
         });
       }

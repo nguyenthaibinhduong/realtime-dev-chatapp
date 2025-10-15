@@ -3,7 +3,7 @@ const convertKeyValueToObject = (keyPairs) => {
     const key = pair.keyItem;
     const value = pair.valueItem;
 
-    if (key === '') return data;
+    if (key === "") return data;
     return {
       ...data,
       [key]: value,
@@ -11,4 +11,13 @@ const convertKeyValueToObject = (keyPairs) => {
   }, {});
 };
 
-export { convertKeyValueToObject };
+const convertObjectToKeyValue = (obj: Record<string, string>) => {
+  return Object.entries(obj).map(([key, value]) => ({
+    id: crypto.randomUUID(),
+    keyItem: key,
+    valueItem: value,
+    enabled: true,
+  }));
+};
+
+export { convertKeyValueToObject, convertObjectToKeyValue };
