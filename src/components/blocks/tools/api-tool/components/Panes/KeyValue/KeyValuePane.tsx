@@ -63,10 +63,10 @@ export default function KeyValuePane({
           variant="outline"
           size="sm"
           onClick={onKeyPairAdd}
-          className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+          className="border-zinc-700 text-black hover:bg-zinc-800 hover:text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add Parameter
+          Thêm tham số
         </Button>
       </div>
 
@@ -74,9 +74,9 @@ export default function KeyValuePane({
         <div className="space-y-1 pr-4">
           {paneValue.length === 0 ? (
             <div className="text-center py-8 text-zinc-500">
-              <p className="text-sm">No parameters yet</p>
+              <p className="text-sm">Chưa có tham số nào</p>
               <p className="text-xs mt-1">
-                Click "Add Parameter" to get started
+                Click "Thêm tham số" để bắt đầu thêm tham số mới
               </p>
             </div>
           ) : (

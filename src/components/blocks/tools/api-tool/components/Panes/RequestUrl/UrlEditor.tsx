@@ -60,38 +60,44 @@ export default function UrlEditor({
   const currentMethod = requestMethods.find((m) => m.method === reqMethod);
 
   return (
-    <form className="flex gap-2" onSubmit={onInputSend}>
-      <Select value={reqMethod} onValueChange={setReqMethod}>
-        <SelectTrigger className="w-32 bg-zinc-800 border-zinc-700 text-white">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-zinc-800 border-zinc-700">
-          {requestMethods.map((option) => (
-            <SelectItem
-              key={option.slug}
-              value={option.method}
-              className="text-white hover:bg-zinc-700"
-            >
-              <Badge className={cn("font-mono", option.color)}>
-                {option.method}
-              </Badge>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <form className="grid grid-cols-1 gap-y-2" onSubmit={onInputSend}>
 
-      <Input
-        placeholder="https://api.example.com/endpoint"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        className="flex-1 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !loading) {
-            onInputSend(e);
-          }
-        }}
-      />
 
+      <div className="flex gap-2">
+        <div >
+          <Select value={reqMethod} onValueChange={setReqMethod}>
+            <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 text-white">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-zinc-800 border-zinc-700 ">
+              {requestMethods.map((option) => (
+                <SelectItem
+                  key={option.slug}
+                  value={option.method}
+                  className="text-white hover:bg-zinc-700"
+                >
+                  <Badge className={cn("font-mono", option.color)}>
+                    {option.method}
+                  </Badge>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+
+        <Input
+          placeholder="https://api.example.com/endpoint"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="flex-1 w-2/3 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !loading) {
+              onInputSend(e);
+            }
+          }}
+        />
+      </div>
       <Button
         type="button"
         onClick={onInputSend}
@@ -107,6 +113,9 @@ export default function UrlEditor({
           </>
         )}
       </Button>
+
+
     </form>
+
   );
 }

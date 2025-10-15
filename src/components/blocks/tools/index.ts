@@ -10,8 +10,8 @@ export type ToolType = "tool1" | "tool2" | "tool3" | "apiTool" | null;
 export const TOOL_CONFIGS = {
   tool1: {
     id: "tool1" as const,
-    name: "System Monitor",
-    description: "Monitor system resources",
+    name: "Kiểm thử API",
+    description: "Chức năng kiểm thử API",
     icon: "⚙️",
   },
   tool2: {
