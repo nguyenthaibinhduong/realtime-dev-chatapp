@@ -189,6 +189,7 @@ export default function NotificationLayout() {
 
   return (
     <MasterLayout
+      isNotificationsEnabled={true}
       menu={<MenubarLayout selected="notifications" />}
       sidebar={
         <NotificationsList
