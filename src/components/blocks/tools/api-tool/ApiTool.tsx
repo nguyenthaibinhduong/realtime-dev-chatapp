@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Request from "./components/Workspace/Request/RequestPanel";
 import Response from "./components/Workspace/Response/ResponsePanel";
 import HistoryPanel from "./components/History/HistoryPanel";
@@ -8,7 +8,11 @@ import Layout from "./components/Layout/Layout";
 import { type RequestHistoryItem } from "./utils/requestHistory";
 import { toast } from "@/hooks/useToast";
 
-const ApiTool: React.FC = () => {
+type ApiToolProps = {
+  initialHistoryItem?: any;
+};
+
+const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem }) => {
   const [response, setResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState("request");
@@ -35,6 +39,56 @@ const ApiTool: React.FC = () => {
       description: "Request loaded from history",
     });
   };
+
+  // Normalize arbitrary shared payload into RequestHistoryItem-like shape
+  const normalizeToHistoryItem = (i: any): RequestHistoryItem => {
+    const method = (i.method || i.request?.method || "GET").toUpperCase();
+    const url = i.url || i.request?.url || "";
+    const headers = i.headers || i.request?.headers || {};
+    const body = i.body || i.request?.body || null;
+    const params = i.params || i.request?.params || {};
+
+    return {
+      id: i.id || String(Date.now()),
+      name: i.name || url || "Shared Request",
+      // keep nested request for other consumers
+      request: {
+        method,
+        url,
+        headers,
+        body,
+      },
+      // top-level fields for RequestPanel compatibility
+      method,
+      url,
+      headers,
+      params,
+      body,
+      response: {
+        status: i.response?.status || i.status || 0,
+        statusText: i.response?.statusText || "",
+        data: i.response?.data || i.response?.body || null,
+        headers: i.response?.headers || {},
+        time: i.response?.time || "",
+      },
+      createdAt: i.createdAt || new Date().toISOString(),
+    } as unknown as RequestHistoryItem;
+  };
+
+  // If parent passes an initialHistoryItem (e.g., from a shared tool message), load it
+  useEffect(() => {
+    if (initialHistoryItem) {
+      try {
+        const normalized = normalizeToHistoryItem(initialHistoryItem);
+        handleSelectHistory(normalized);
+      } catch (err) {
+        // swallow
+        // eslint-disable-next-line no-console
+        console.warn("Failed to load initial history item", err);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialHistoryItem]);
 
   return (
     <Layout>

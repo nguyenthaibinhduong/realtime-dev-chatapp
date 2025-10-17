@@ -70,7 +70,7 @@ export default function ToolShareMessage({ item, onOpenTool, isMe = false, showS
 
     const method = (item.method || "GET").toUpperCase();
     const url = data.url || "—";
-    const status = data.response?.status;
+    const status = data.onOpenTool?.status;
     const time = data.response?.time || "—";
     const size = data.response?.size || "—";
     const responseData = data.response?.data || "—";

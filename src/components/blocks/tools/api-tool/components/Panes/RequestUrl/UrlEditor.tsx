@@ -101,7 +101,8 @@ export default function UrlEditor({
       <Button
         type="button"
         onClick={onInputSend}
-        disabled={loading || !url.trim()}
+        // guard against url being undefined/null
+        disabled={loading || !(typeof url === "string" && url.trim().length > 0)}
         className="bg-blue-600 hover:bg-blue-700"
       >
         {loading ? (

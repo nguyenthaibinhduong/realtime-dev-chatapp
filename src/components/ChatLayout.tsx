@@ -62,6 +62,7 @@ export default function ChatLayout() {
     text?: string;
   } | null>(null);
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
+  const [toolInitialItem, setToolInitialItem] = useState<any>(null);
 
   // Function to render selected tool component
   const renderToolComponent = () => {
@@ -73,7 +74,7 @@ export default function ChatLayout() {
       case "tool3":
         return <Tool3 />;
       case "apiTool":
-        return <ApiTool />;
+        return <ApiTool initialHistoryItem={toolInitialItem} />;
       default:
         return null;
     }
@@ -1002,8 +1003,9 @@ export default function ChatLayout() {
               hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
               onOpenTool={(data: any) => {
                 // Mở API tool với data từ tin nhắn được chia sẻ
+                setToolInitialItem(data);
                 setSelectedTool("apiTool");
-                // TODO: Truyền data vào ApiTool component để restore state
+                // eslint-disable-next-line no-console
                 console.log("Opening API tool with data:", data);
               }}
             />
