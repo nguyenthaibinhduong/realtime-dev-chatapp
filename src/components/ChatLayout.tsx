@@ -1000,6 +1000,12 @@ export default function ChatLayout() {
               onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
               onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
               hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
+              onOpenTool={(data: any) => {
+                // Mở API tool với data từ tin nhắn được chia sẻ
+                setSelectedTool("apiTool");
+                // TODO: Truyền data vào ApiTool component để restore state
+                console.log("Opening API tool with data:", data);
+              }}
             />
           )}
 

@@ -31,6 +31,8 @@ import {
   Share2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { chatSocketService } from "@/services/chatSocketService";
+import { toast } from "@/hooks/useToast";
 
 interface HistoryPanelProps {
   onSelectHistory?: (item: RequestHistoryItem) => void;
@@ -97,7 +99,16 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
   };
 
   const handleShare = (item: RequestHistoryItem) => {
-    console.log("Share functionality to be implemented", item);
+    chatSocketService.sendMessage({
+      channelId: localStorage.getItem("selectedChannelId") || "",
+      text: `Thông tin request đã được chia sẻ:\n\n**${item.method} ${item.url}**\n- Status: ${item.response.status}\n- Time: ${item.response.time}\n- Size: ${item.response.size}\n\nBạn có thể xem chi tiết trong lịch sử request.`,
+      type: "tool",
+      json_data: JSON.stringify({ ...item, timeshared: new Date().toISOString() }),
+    });
+    toast({
+      title: "Thông tin request đã được chia sẻ",
+      description: `Thông tin request đã được chia sẻ:\n\n**${item.method} ${item.url}**\n- Status: ${item.response.status}\n- Time: ${item.response.time}\n- Size: ${item.response.size}\n\nBạn có thể xem chi tiết trong lịch sử request.`,
+    });
   };
 
   const formatDate = (timestamp: number) => {

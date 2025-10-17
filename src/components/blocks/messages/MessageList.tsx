@@ -19,6 +19,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Share2 } from "lucide-react";
 import { ChannelSearch } from "../channels/ChannelSearch";
 import { Button } from "@/components/ui/button";
+import ToolShareMessage from "./type/ToolShareMessage";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -51,6 +52,7 @@ type Props = MessageListProps & {
   onReplySelect?: (reply: { id: string; sender: string; text?: string }) => void; // <-- thêm
   onEditSelect?: (edit: { id: string; sender: string; text?: string }) => void; // <-- thêm edit
   hasInputPreview?: boolean; // <-- thêm để biết có reply/edit preview không
+  onOpenTool?: (data: any) => void; // <-- thêm để mở tool với data
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -62,6 +64,7 @@ export const MessageList: React.FC<Props> = ({
   onReplySelect, // <-- thêm
   onEditSelect, // <-- thêm edit
   hasInputPreview = false, // <-- thêm
+  onOpenTool, // <-- thêm
 }) => {
   const { user } = useAuth();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -326,7 +329,7 @@ export const MessageList: React.FC<Props> = ({
       }
 
       // Code share message
-      if (message.type === "code-share") {
+      if (message?.type === "code-share") {
         return (
           <CodeShareMessage
             key={message.id}
@@ -339,6 +342,21 @@ export const MessageList: React.FC<Props> = ({
           />
         );
       }
+
+      else if (message?.type === "tool") {
+        return (
+          <ToolShareMessage
+            key={message.id}
+            item={message}
+            onOpenTool={onOpenTool}
+            isMe={isMe}
+            showSenderInfo={showSenderInfo}
+            hoveredId={hoveredId}
+            onHover={setHoveredId}
+          />
+        );
+      }
+
 
       // Regular message
       return (
@@ -359,7 +377,7 @@ export const MessageList: React.FC<Props> = ({
         />
       );
     });
-  }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction, scrollToMessage]);
+  }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction, scrollToMessage, onOpenTool]);
 
   const PinItems = useMemo(() => {
     if (pinnedMessages.length > 0) {
