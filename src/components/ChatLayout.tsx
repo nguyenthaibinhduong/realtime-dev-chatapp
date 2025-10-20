@@ -74,15 +74,14 @@ export default function ChatLayout() {
         return (
           <Tool2
             onSendCode={(code: string, language: string) => {
-              // Gửi tin nhắn với type code-card
               const username = user?.username || user?.name || user?.email?.split('@')[0] || 'Unknown';
 
               chatSocketService.sendMessage({
                 channelId: selectedChannel?.id,
-                text: `${username} đã gửi một đoạn code`,  // <-- Text hiển thị thông tin
+                text: `${username} đã gửi một đoạn code`,
                 type: "code-card",
                 channelData: selectedChannel,
-                json_data: {  // <-- Code data trong json_data
+                json_data: {
                   codeData: {
                     code: code,
                     language: language,
@@ -102,7 +101,15 @@ export default function ChatLayout() {
       case "tool3":
         return <Tool3 />;
       case "apiTool":
-        return <ApiTool initialHistoryItem={toolInitialItem} />;
+        return (
+          <ApiTool
+            initialHistoryItem={toolInitialItem}
+            onClose={() => {  // <-- Thêm onClose handler
+              setSelectedTool(null);
+              setToolInitialItem(null);
+            }}
+          />
+        );
       default:
         return null;
     }
@@ -112,7 +119,7 @@ export default function ChatLayout() {
   const handleOpenTool = useCallback((data: any) => {
     console.log("🚀 handleOpenTool received:", data); // Debug log
 
-    if (data.type =="code-editor") {
+    if (data.type == "code-editor") {
       console.log("🔧 Opening Tool2 with code data:", { code: data.code, language: data.language });
       setToolInitialData({
         code: data.code,

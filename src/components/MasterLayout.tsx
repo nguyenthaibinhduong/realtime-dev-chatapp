@@ -77,19 +77,18 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
                     minSize={30}
                     defaultSize={55}
                     maxSize={60}
-                    className="flex flex-col border-l border-border relative pt-5 max-h-screen"
+                    className="flex flex-col border-l border-border relative pt-5 px-2 max-h-screen"
                 >
                     {/* Absolute top-right close icon */}
-                    <div className="absolute top-2 right-3 z-50">
+                    {/* <div className="absolute top-2 right-3 z-50">
                         <button
                             aria-label="Close tools"
                             onClick={() => setShowRight(false)}
                             className="w-8 h-8 rounded-md bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center"
                         >
-                            {/* using Icon component if available; fallback to › char */}
                             <SimpleIcon name="close" className="text-zinc-200" />
                         </button>
-                    </div>
+                    </div> */}
 
                     {children_right}
                 </ResizablePanel>

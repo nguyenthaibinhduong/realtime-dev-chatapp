@@ -7,12 +7,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "./components/Layout/Layout";
 import { type RequestHistoryItem } from "./utils/requestHistory";
 import { toast } from "@/hooks/useToast";
+import { X, Globe } from "lucide-react"; // <-- Thêm icons
+import { Button } from "@/components/ui/button"; // <-- Thêm Button
 
 type ApiToolProps = {
   initialHistoryItem?: any;
+  onClose?: () => void; // <-- Thêm onClose prop
 };
 
-const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem }) => {
+const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem, onClose }) => {
   const [response, setResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState("request");
@@ -87,6 +90,31 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem }) => {
 
   return (
     <Layout>
+      {/* Header với close button */}
+      <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800 mb-4">
+        <div className="flex items-center space-x-2">
+          <Globe className="h-5 w-5 text-blue-400" />
+          <span className="text-white font-medium">API Testing Tool</span>
+          {initialHistoryItem && (
+            <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">
+              Loaded from share
+            </span>
+          )}
+        </div>
+
+        {onClose && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-zinc-800"
+            title="Đóng API Tool"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
       <Tabs
         value={selectedTab}
         onValueChange={setSelectedTab}
