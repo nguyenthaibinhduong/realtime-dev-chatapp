@@ -171,7 +171,7 @@ const MessageItem = memo(({
         <div
             data-message-id={message.id}
             className={cn(
-                "flex gap-1 group px-3 py-1.5 transition-all duration-100 rounded-md",
+                "flex gap-1 group py-1 transition-all duration-100 rounded-md",
                 isMe ? "flex-row-reverse" : "flex-row"
             )}
             onMouseEnter={handleMouseEnter}
@@ -181,12 +181,12 @@ const MessageItem = memo(({
             {showSenderInfo && !isMe ? (
                 <AvatarUser user={message?.sender} isMe={isMe} size={8} />
             ) : !isMe ? (
-                <div className="w-9 flex-shrink-0" />
+                <div className="w-8 flex-shrink-0" />
             ) : null}
 
             {/* Message content container */}
             <div className={cn(
-                "relative flex flex-col gap-1 max-w-[65%] min-w-[100px]",
+                "relative flex flex-col max-w-[65%] min-w-[100px]",
                 isMe ? "items-end" : "items-start"
             )}>
                 {/* Sender name */}

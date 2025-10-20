@@ -63,6 +63,7 @@ export default function ChatLayout() {
   } | null>(null);
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
   const [toolInitialItem, setToolInitialItem] = useState<any>(null);
+  const [toolInitialData, setToolInitialData] = useState<any>(null);
 
   // Function to render selected tool component
   const renderToolComponent = () => {
@@ -70,7 +71,34 @@ export default function ChatLayout() {
       case "tool1":
         return <Tool1 />;
       case "tool2":
-        return <Tool2 />;
+        return (
+          <Tool2
+            onSendCode={(code: string, language: string) => {
+              // Gửi tin nhắn với type code-card
+              const username = user?.username || user?.name || user?.email?.split('@')[0] || 'Unknown';
+
+              chatSocketService.sendMessage({
+                channelId: selectedChannel?.id,
+                text: `${username} đã gửi một đoạn code`,  // <-- Text hiển thị thông tin
+                type: "code-card",
+                channelData: selectedChannel,
+                json_data: {  // <-- Code data trong json_data
+                  codeData: {
+                    code: code,
+                    language: language,
+                    author: username
+                  }
+                }
+              });
+            }}
+            onClose={() => {
+              setSelectedTool(null);
+              setToolInitialData(null);
+            }}
+            initialCode={toolInitialData?.code}
+            initialLanguage={toolInitialData?.language}
+          />
+        );
       case "tool3":
         return <Tool3 />;
       case "apiTool":
@@ -79,6 +107,24 @@ export default function ChatLayout() {
         return null;
     }
   };
+
+  // Handle opening tool with data - FIX: Sửa logic check
+  const handleOpenTool = useCallback((data: any) => {
+    console.log("🚀 handleOpenTool received:", data); // Debug log
+
+    if (data.type =="code-editor") {
+      console.log("🔧 Opening Tool2 with code data:", { code: data.code, language: data.language });
+      setToolInitialData({
+        code: data.code,
+        language: data.language
+      });
+      setSelectedTool("tool2");
+    } else {
+      console.log("🔧 Opening API Tool with data:", data);
+      setToolInitialItem(data);
+      setSelectedTool("apiTool");
+    }
+  }, []);
 
   // ✅ Register notification handlers
   useEffect(() => {
@@ -1001,13 +1047,7 @@ export default function ChatLayout() {
               onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
               onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
               hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
-              onOpenTool={(data: any) => {
-                // Mở API tool với data từ tin nhắn được chia sẻ
-                setToolInitialItem(data);
-                setSelectedTool("apiTool");
-                // eslint-disable-next-line no-console
-                console.log("Opening API tool with data:", data);
-              }}
+              onOpenTool={handleOpenTool}
             />
           )}
 
@@ -1016,10 +1056,15 @@ export default function ChatLayout() {
               <MessageInput
                 channelId={selectedChannel.id}
                 onSend={sendMessage}
-                replyMessage={replyTo || undefined} // <-- truyền xuống input
-                onCancelReply={() => setReplyTo(null)} // <-- hủy reply
-                editMessage={editTo || undefined} // <-- truyền xuống edit
-                onCancelEdit={() => setEditTo(null)} // <-- hủy edit
+                replyMessage={replyTo || undefined}
+                onCancelReply={() => setReplyTo(null)}
+                editMessage={editTo || undefined}
+                onCancelEdit={() => setEditTo(null)}
+                onToggleCodeEditor={() => {
+                  // Toggle logic: nếu đang mở tool2 thì đóng, không thì mở
+                  setSelectedTool(selectedTool === "tool2" ? null : "tool2");
+                }}
+                isCodeEditorOpen={selectedTool === "tool2"} // <-- Pass trạng thái
               />
             </div>
           )}

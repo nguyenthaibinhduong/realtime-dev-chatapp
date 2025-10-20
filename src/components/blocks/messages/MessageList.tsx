@@ -20,6 +20,7 @@ import { Share2 } from "lucide-react";
 import { ChannelSearch } from "../channels/ChannelSearch";
 import { Button } from "@/components/ui/button";
 import ToolShareMessage from "./type/ToolShareMessage";
+import CodeCardMessage from "./type/CodeCardMessage";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -61,10 +62,10 @@ export const MessageList: React.FC<Props> = ({
   onPrependMessages,
   loadOlder,
   type,
-  onReplySelect, // <-- thêm
-  onEditSelect, // <-- thêm edit
-  hasInputPreview = false, // <-- thêm
-  onOpenTool, // <-- thêm
+  onReplySelect,
+  onEditSelect,
+  hasInputPreview = false,
+  onOpenTool,
 }) => {
   const { user } = useAuth();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -310,6 +311,16 @@ export const MessageList: React.FC<Props> = ({
     });
   }, [channelId, messages]);
 
+  // Add handleOpenInTool function - FIX: Đảm bảo đúng data structure
+  const handleOpenInTool = useCallback((code: string, language: string) => {
+    console.log("📝 MessageList - handleOpenInTool called:", { code, language }); // Debug log
+    onOpenTool?.({
+      type: "code-editor", // <-- Đảm bảo type đúng
+      code,
+      language
+    });
+  }, [onOpenTool]);
+
   // Memoized message items
   const messageItems = useMemo(() => {
     return messages.map((message: any, idx: number) => {
@@ -324,6 +335,22 @@ export const MessageList: React.FC<Props> = ({
             key={message.id}
             message={message}
             onViewRepo={() => setOpenGitModal(true)}
+          />
+        );
+      }
+
+      // Code card message - Đã có sẵn, chỉ cần đảm bảo handleOpenInTool hoạt động
+      if (message?.type === "code-card") {
+        return (
+          <CodeCardMessage
+            key={message.id}
+            message={message}
+            isMe={isMe}
+            showSenderInfo={showSenderInfo}
+            hoveredId={hoveredId}
+            onHover={setHoveredId}
+            onMessageAction={handleMessageAction}
+            onOpenInTool={handleOpenInTool} // <-- Đã được định nghĩa ở trên
           />
         );
       }
@@ -343,7 +370,8 @@ export const MessageList: React.FC<Props> = ({
         );
       }
 
-      else if (message?.type === "tool") {
+      // Tool share message
+      if (message?.type === "tool") {
         return (
           <ToolShareMessage
             key={message.id}
@@ -356,7 +384,6 @@ export const MessageList: React.FC<Props> = ({
           />
         );
       }
-
 
       // Regular message
       return (
@@ -373,11 +400,11 @@ export const MessageList: React.FC<Props> = ({
           onHover={setHoveredId}
           onCodeShare={handleCodeShare}
           onMessageAction={handleMessageAction}
-          onJumpToMessage={scrollToMessage} // <-- added
+          onJumpToMessage={scrollToMessage}
         />
       );
     });
-  }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction, scrollToMessage, onOpenTool]);
+  }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction, scrollToMessage, onOpenTool, handleOpenInTool]);
 
   const PinItems = useMemo(() => {
     if (pinnedMessages.length > 0) {

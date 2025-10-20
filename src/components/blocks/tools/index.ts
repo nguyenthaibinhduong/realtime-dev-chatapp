@@ -8,17 +8,23 @@ export { ApiTool } from "./api-tool";
 export type ToolType = "tool1" | "tool2" | "tool3" | "apiTool" | null;
 
 export const TOOL_CONFIGS = {
-  tool1: {
-    id: "tool1" as const,
-    name: "Kiểm thử API",
-    description: "Chức năng kiểm thử API",
-    icon: "⚙️",
+   apiTool: {
+    id: "apiTool" as const,
+    name: "API Tool",
+    description: "Test and debug APIs",
+    icon: "🛠️",
   },
+  // tool1: {
+  //   id: "tool1" as const,
+  //   name: "API Tool",
+  //   description: "Test and debug APIs",
+  //   icon: "🛠️",
+  // },
   tool2: {
     id: "tool2" as const,
-    name: "Database Manager",
-    description: "Manage databases",
-    icon: "🗄️",
+    name: "Code Snippet Sender",
+    description: "Send code snippets for execution",
+    icon: "💻",
   },
   tool3: {
     id: "tool3" as const,
@@ -27,10 +33,5 @@ export const TOOL_CONFIGS = {
     icon: "📊",
   },
 
-  apiTool: {
-    id: "apiTool" as const,
-    name: "API Tool",
-    description: "Test and debug APIs",
-    icon: "🛠️",
-  },
+
 };

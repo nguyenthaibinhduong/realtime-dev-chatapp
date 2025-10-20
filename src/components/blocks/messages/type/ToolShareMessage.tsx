@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useMemo } from "react";
+import AvatarUser from "@/components/common/AvartarUser";
 
 type ToolShareData = {
     method?: string;
@@ -79,23 +80,16 @@ export default function ToolShareMessage({ item, onOpenTool, isMe = false, showS
         <div className={`flex my-3 ${computedIsMe ? "justify-end" : "justify-start"}`}>
             {/* Avatar */}
             {!computedIsMe && showSenderInfo ? (
-                <div className="mr-3 flex flex-col items-center justify-center relative">
-                    {/* small avatar component used in other messages */}
-                    {/* AvatarUser is used elsewhere; import above exists in other message types */}
-                    {/* We render a simple avatar fallback here to avoid extra imports */}
-                    <div
-                        onMouseEnter={() => onHover?.(String(item.id || item._id || ''))}
-                        onMouseLeave={() => onHover?.(null)}
-                        className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-xs text-zinc-300"
-                    >
-                        {item?.userName?.[0] || item?.sender?.username?.[0] || "?"}
-                    </div>
-                    {hoveredId === String(item.id || item._id || '') && (
+
+                <div className="mr-3 flex flex-col items-center justify-center">
+                    <AvatarUser user={item?.sender} isMe={isMe} />
+                    {hoveredId === item.id && (
                         <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
-                            {item?.sender?.username || item?.userName}
+                            {item?.sender?.username}
                         </div>
                     )}
                 </div>
+
             ) : !computedIsMe ? (
                 <div className="w-9 flex-shrink-0" />
             ) : null}

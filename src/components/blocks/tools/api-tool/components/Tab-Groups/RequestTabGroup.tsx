@@ -48,7 +48,7 @@ export default function RequestTabGroup({
           value="query-params"
           className="
             text-xs sm:text-sm px-2 py-1 rounded-md
-            text-zinc-300 hover:text-white hover:bg-zinc-800
+            text-white hover:text-white hover:bg-zinc-800
             data-[state=active]:bg-blue-600 data-[state=active]:text-white
             outline-none focus-visible:ring-2 focus-visible:ring-blue-500
             transition

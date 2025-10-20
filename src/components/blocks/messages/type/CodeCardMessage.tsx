@@ -1,0 +1,280 @@
+import { memo, useState } from "react";
+import { cn } from "@/lib/utils";
+import { MessageActions, MessageActionType } from "@/components/blocks/messages/MessageAction";
+import AvatarUser from "@/components/common/AvartarUser";
+import { Code2, Copy, ExternalLink, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+interface CodeCardMessageProps {
+    message: any;
+    isMe: boolean;
+    showSenderInfo: boolean;
+    hoveredId: string | null;
+    onHover: (id: string | null) => void;
+    onMessageAction?: (type: MessageActionType, messageId: string, messageData?: any) => void;
+    onOpenInTool?: (code: string, language: string) => void;
+}
+
+const CodeCardMessage = memo(({
+    message,
+    isMe,
+    showSenderInfo,
+    hoveredId,
+    onHover,
+    onMessageAction,
+    onOpenInTool
+}: CodeCardMessageProps) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const isHovered = hoveredId === String(message.id);
+
+    // Get code data from json_data.codeData
+    const getCodeData = () => {
+        if (message.json_data?.codeData) {
+            return {
+                code: message.json_data.codeData.code || '',
+                language: message.json_data.codeData.language || 'plaintext',
+                author: message.json_data.codeData.author || message.sender?.username || 'Unknown'
+            };
+        }
+
+        // Fallback - empty code
+        return {
+            code: '',
+            language: 'plaintext',
+            author: message.sender?.username || 'Unknown'
+        };
+    };
+
+    const { code, language, author } = getCodeData();
+
+    // Return early if no code
+    if (!code.trim()) {
+        return (
+            <div className="text-gray-400 italic p-2 text-sm">
+                [Code không khả dụng]
+            </div>
+        );
+    }
+
+    const codeLines = code.split('\n');
+    const totalLines = codeLines.length;
+    const PREVIEW_LINES = 5; // Hiển thị 5 dòng đầu thay vì 10
+    const previewLines = isExpanded ? codeLines : codeLines.slice(0, PREVIEW_LINES);
+    const hasMoreLines = totalLines > PREVIEW_LINES;
+
+    // Language display mapping
+    const languageMap: Record<string, { icon: string; name: string; color: string }> = {
+        javascript: { icon: "🟨", name: "JavaScript", color: "text-yellow-400" },
+        typescript: { icon: "🔷", name: "TypeScript", color: "text-blue-400" },
+        python: { icon: "🐍", name: "Python", color: "text-green-400" },
+        java: { icon: "☕", name: "Java", color: "text-orange-400" },
+        cpp: { icon: "🔷", name: "C++", color: "text-blue-400" },
+        go: { icon: "🔵", name: "Go", color: "text-cyan-400" },
+        html: { icon: "🌐", name: "HTML", color: "text-orange-400" },
+        css: { icon: "🎨", name: "CSS", color: "text-blue-400" },
+        json: { icon: "📄", name: "JSON", color: "text-gray-400" },
+        markdown: { icon: "📝", name: "Markdown", color: "text-gray-400" },
+        plaintext: { icon: "📄", name: "Plain Text", color: "text-gray-400" }
+    };
+
+    const langInfo = languageMap[language] || languageMap.plaintext;
+
+    const handleAction = (actionType: MessageActionType) => {
+        onMessageAction?.(actionType, String(message.id), message);
+    };
+
+    const handleCopyCode = async () => {
+        try {
+            await navigator.clipboard.writeText(code);
+            // You might want to show a toast here
+            console.log('Code copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy code:', err);
+        }
+    };
+
+    const handleOpenInTool = () => {
+        console.log("🚀 CodeCard - Opening code in Tool2:", { code, language }); // Debug log
+        onOpenInTool?.(code, language);
+    };
+
+    const handleMouseEnter = () => {
+        onHover(String(message.id));
+    };
+
+    const handleMouseLeave = () => {
+        onHover(null);
+    };
+
+    return (
+        <div
+            data-message-id={message.id}
+            className={cn(
+                "flex gap-1 group px-3 py-1.5 transition-all duration-100 rounded-md",
+                isMe ? "flex-row-reverse" : "flex-row"
+            )}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            {/* Avatar */}
+            {showSenderInfo && !isMe ? (
+                <AvatarUser user={message?.sender} isMe={isMe} size={8} />
+            ) : !isMe ? (
+                <div className="w-9 flex-shrink-0" />
+            ) : null}
+
+            {/* Message content container */}
+            <div className={cn(
+                "relative flex flex-col gap-1",
+                // Giới hạn chiều rộng của card
+                "w-full max-w-[600px] min-w-[350px]",
+                isMe ? "items-end ml-auto" : "items-start mr-auto"
+            )}>
+                {/* Sender name */}
+                {showSenderInfo && !isMe && (
+                    <span className="text-[11px] font-medium text-gray-400 px-2 mb-0.5">
+                        {message.sender?.username || 'Unknown'}
+                    </span>
+                )}
+
+                <div className="relative w-full">
+                    {/* Message Actions */}
+                    <MessageActions
+                        isMe={isMe}
+                        isHovered={isHovered}
+                        messageId={String(message.id)}
+                        canEdit={isMe && message.status === 'sent'}
+                        canDelete={isMe}
+                        isPinned={message.isPinned}
+                        onAction={handleAction}
+                        onMenuOpenChange={() => { }}
+                    />
+
+                    {/* Code Card - with controlled width */}
+                    <div className={cn(
+                        "relative transition-all duration-200 rounded-lg border shadow-lg overflow-hidden w-full",
+                        isMe
+                            ? "bg-black border-blue-600/30"
+                            : "bg-black border-gray-700/50",
+                        isHovered && "shadow-xl border-gray-600/70"
+                    )}>
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-4 py-3 bg-gray-800/70 border-b border-gray-700/50">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <Code2 className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <span className="text-sm font-medium text-white truncate">
+                                        {message.text || `${author} đã chia sẻ code`}
+                                    </span>
+                                    <Badge variant="outline" className={cn("text-xs border-gray-600 flex-shrink-0", langInfo.color)}>
+                                        {langInfo.icon} {langInfo.name}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                                {/* Toggle preview/full view */}
+                                {hasMoreLines && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setIsExpanded(!isExpanded)}
+                                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                        title={isExpanded ? "Thu gọn" : "Xem toàn bộ"}
+                                    >
+                                        {isExpanded ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                                    </Button>
+                                )}
+
+                                {/* Copy code */}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleCopyCode}
+                                    className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                    title="Copy toàn bộ code"
+                                >
+                                    <Copy className="h-3.5 w-3.5" />
+                                </Button>
+
+                                {/* Open in Tool2 */}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleOpenInTool}
+                                    className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                    title="Chỉnh sửa trong Code Editor"
+                                >
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Code Preview */}
+                        <div className="relative">
+                            <pre className={cn(
+                                "text-sm text-gray-300 font-mono p-4 bg-gray-950/50",
+                                "overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800",
+                                isExpanded ? "max-h-96 overflow-y-auto" : "max-h-32 overflow-y-hidden"
+                            )}>
+                                <code className={`language-${language} whitespace-pre`}>
+                                    {previewLines.join('\n')}
+                                </code>
+                            </pre>
+
+                            {/* Gradient overlay when collapsed */}
+                            {hasMoreLines && !isExpanded && (
+                                <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-gray-950/95 to-transparent flex items-end justify-center pb-2">
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={() => setIsExpanded(true)}
+                                        className="h-7 text-xs bg-gray-800/90 hover:bg-gray-700/90 text-gray-300 border border-gray-600/50"
+                                    >
+                                        +{totalLines - PREVIEW_LINES} dòng nữa
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between px-4 py-2 bg-gray-800/50 border-t border-gray-700/30">
+                            <div className="flex items-center gap-3 text-xs text-gray-400 min-w-0 flex-1">
+                                <span className="flex items-center gap-1 flex-shrink-0">
+                                    <Code2 className="h-3 w-3" />
+                                    {totalLines} dòng
+                                </span>
+                                <span className="flex-shrink-0">•</span>
+                                <span className="flex-shrink-0">{new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</span>
+                                {author && (
+                                    <>
+                                        <span className="flex-shrink-0">•</span>
+                                        <span className="truncate">by {author}</span>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Quick action - Open in Tool2 */}
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleOpenInTool}
+                                className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 flex-shrink-0 ml-2"
+                            >
+                                Chỉnh sửa
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+CodeCardMessage.displayName = "CodeCardMessage";
+
+export default CodeCardMessage;

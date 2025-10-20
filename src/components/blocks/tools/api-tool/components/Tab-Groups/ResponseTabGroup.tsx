@@ -20,12 +20,12 @@ export default function ResponseTabGroup({
   return (
     <Tabs defaultValue="body" className="mt-4">
       <TabsList className="bg-zinc-800 border-zinc-700">
-        <TabsTrigger value="body" className="data-[state=active]:bg-zinc-700">
+        <TabsTrigger value="body" className="data-[state=active]:bg-white data-[state=active]:text-black">
           Response Body
         </TabsTrigger>
         <TabsTrigger
           value="headers"
-          className="data-[state=active]:bg-zinc-700"
+          className="data-[state=active]:bg-white data-[state=active]:text-black"
         >
           Response Headers
         </TabsTrigger>

@@ -18,7 +18,10 @@ interface ChannelListProps {
 
 
 const getChannelIcon = (channel: Channel, user?: any) => {
-    if (channel.type === "group" || channel.type === "group-private") return <AvatarGroupGrid users={channel.members} tile={18} />;
+    if (channel.type === "group") return '#';
+    if (channel.type === "group-private") {
+        return <Lock className="h-4 w-4 mr-2 text-muted-foreground" />;
+    }
     if (channel.type === "personal") {
         return (
             <div className="relative mr-2">

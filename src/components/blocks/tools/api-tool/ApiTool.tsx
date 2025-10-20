@@ -33,11 +33,6 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem }) => {
         time: item.response.time,
       },
     });
-
-    toast({
-      title: "History Loaded",
-      description: "Request loaded from history",
-    });
   };
 
   // Normalize arbitrary shared payload into RequestHistoryItem-like shape
@@ -97,16 +92,16 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem }) => {
         onValueChange={setSelectedTab}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 bg-zinc-800">
+        <TabsList className="grid w-full grid-cols-2 bg-zinc-800 px-5">
           <TabsTrigger
             value="request"
-            className="data-[state=active]:bg-zinc-700"
+            className="data-[state=active]:bg-white data-[state=active]:text-black"
           >
             Request / Response
           </TabsTrigger>
           <TabsTrigger
             value="history"
-            className="data-[state=active]:bg-zinc-700"
+            className="data-[state=active]:bg-white data-[state=active]:text-black"
           >
             History
           </TabsTrigger>
