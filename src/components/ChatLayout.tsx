@@ -117,7 +117,7 @@ export default function ChatLayout() {
 
   // Handle opening tool with data - FIX: Sửa logic check
   const handleOpenTool = useCallback((data: any) => {
-    console.log("🚀 handleOpenTool received:", data); // Debug log
+    //console.log("🚀 handleOpenTool received:", data); // Debug log
 
     if (data.type == "code-editor") {
       console.log("🔧 Opening Tool2 with code data:", { code: data.code, language: data.language });

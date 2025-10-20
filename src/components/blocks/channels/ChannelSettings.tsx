@@ -157,8 +157,8 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
       {/* Add member Dialog */}
       <Dialog open={addMemberDialogOpen} onOpenChange={setAddMemberDialogOpen}>
-        <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800 text-white">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[80vh] bg-zinc-900 border-zinc-800 text-white flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-xl font-semibold">
               Chọn người dùng để thêm vào kênh
             </DialogTitle>
@@ -167,9 +167,9 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-4">
-            {/* Search Input */}
-            <div className="relative">
+          <div className="flex flex-col gap-4 flex-1 min-h-0">
+            {/* Search Input - Fixed */}
+            <div className="relative flex-shrink-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <Input
                 placeholder="Tìm theo tên hoặc email..."
@@ -207,7 +207,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
             </div>
 
             {/* Users List */}
-            <ScrollArea className="h-[400px]">
+            <div className="h-[300px] overflow-y-auto">
               {loading && users.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
@@ -312,7 +312,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                   )}
                 </div>
               )}
-            </ScrollArea>
+            </div>
           </div>
           <DialogFooter>
             <Button
