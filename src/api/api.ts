@@ -92,6 +92,7 @@ export const NotificationAPI = {
     apiget(
       `/notifications?page=${data.page}&limit=${data.limit}&type=${data.type || ""}`
     ),
+  getCountUnreadNotifications: async () => apipost(`notifications/count-unread`),
   markAsRead: async (id: string) =>
     apipost(`/notifications/mark-as-read`, { id }),
   deleteNotification: async (id: string) =>

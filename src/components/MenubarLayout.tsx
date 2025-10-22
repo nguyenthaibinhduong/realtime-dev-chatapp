@@ -18,6 +18,10 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import NotificationBadge from "./blocks/notifications/NotificationBadge";
+import { useEffect, useState } from "react";
+import { NotificationAPI } from "@/api/api";
+import { log } from "console";
+import { chatSocketService } from "@/services/chatSocketService";
 
 export default function MenubarLayout({
   onSelect,
@@ -29,11 +33,33 @@ export default function MenubarLayout({
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      const res = await NotificationAPI.getCountUnreadNotifications();
+      console.log("Unread Count:", res.data);
+      setUnreadCount(res.data);
+    };
+
+    fetchUnreadCount();
+  }, []);
+
+  useEffect(() => {
+    const handler = (notify: any) => {
+      setUnreadCount((prev) => prev + 1);
+    };
+    chatSocketService.onNotification(handler);
+    return () => chatSocketService.offNotification(handler);
+  }, []);
+
+
+
 
   const handleLogout = async () => {
     await signOut();
   };
-  const unreadCount = 5; // Giả sử có 5 thông báo chưa đọc, thay bằng logic thực tế
+  // Giả sử có 5 thông báo chưa đọc, thay bằng logic thực tế
 
   const items = [
 

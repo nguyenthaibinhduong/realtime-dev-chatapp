@@ -31,7 +31,7 @@ export default function GithubRegisterLayout() {
     const handleRedirect = async () => {
         try {
             setRedirecting(true);
-            if (!user?.github_installation_id && !user?.github_verified) {
+            if (!user.github_installation_id && (!user.github_verified || !user.github_avatar)) {
                 const { url }: any = await authService.loginUpdateWithGitHub();
                 window.location.href = url;
             } else {
