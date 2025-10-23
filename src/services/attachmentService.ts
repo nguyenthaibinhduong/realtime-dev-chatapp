@@ -343,6 +343,68 @@ class AttachmentService {
       return "archive";
     return "other";
   }
+
+  async uploadAvatar(
+    file: File,
+    onProgress?: (progress: number) => void
+  ): Promise<string> {
+    try {
+      onProgress?.(10); // Start progress
+
+      // 1. Get presigned URL for avatar
+      console.log("Getting avatar presigned URL for:", file.name);
+      const presignedResponse = await UploadApi.getAvatarPresignedUrl({
+        filename: file.name,
+        contentType: file.type,
+      });
+
+      console.log("Avatar presigned response:", presignedResponse);
+
+      const { signedUrl, key } = presignedResponse.data;
+      console.log("Avatar upload URL:", signedUrl);
+      console.log("Avatar key:", key);
+
+      onProgress?.(30); // Got presigned URL
+
+      // 2. Upload file to R2 using presigned URL
+      console.log("Starting avatar upload to R2...");
+      const uploadResponse = await fetch(signedUrl, {
+        method: "PUT",
+        body: file, // Binary data
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      console.log("Avatar upload response status:", uploadResponse.status);
+      console.log("Avatar upload response ok:", uploadResponse.ok);
+
+      onProgress?.(80); // Upload completed
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error("Avatar upload failed response:", errorText);
+        throw new Error(
+          `Avatar upload failed: ${uploadResponse.status} ${uploadResponse.statusText} - ${errorText}`
+        );
+      }
+
+      onProgress?.(90); // Upload done, now get final URL
+
+      // 3. Get the final avatar URL using the key
+      console.log("Getting final avatar URL for key:", key);
+      const avatarUrlResponse = await UploadApi.getAvatarUrl({ key });
+      const avatarUrl = avatarUrlResponse.data; // Giả sử response.data là URL string
+      console.log("Final avatar URL:", avatarUrl);
+
+      onProgress?.(100); // Complete
+
+      return avatarUrl;
+    } catch (error) {
+      console.error("Upload avatar error", error);
+      throw error;
+    }
+  }
 }
 
 export const attachmentService = new AttachmentService();

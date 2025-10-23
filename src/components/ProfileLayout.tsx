@@ -31,12 +31,15 @@ import {
   LogOut,
   Unlink,
   AlertTriangle,
+  Upload,
 } from "lucide-react";
 import { AuthAPI, GithubAPI } from "@/api/api";
 import { useToast } from "@/hooks/useToast";
 import authService from "@/services/authService";
 import { UpdatePassword } from "./blocks/auth/UpdatePassword";
 import AvatarUser from "./common/AvartarUser";
+import attachmentService from "@/services/attachmentService";
+import { UpdateAvatar } from "./blocks/auth/UpdateAvatar";
 
 const ProfileLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +52,7 @@ const ProfileLayout: React.FC = () => {
   );
   const [loading, setLoading] = useState(false);
   const [showUpdatePassword, setShowUpdatePassword] = useState(false);
+  const [showUpdateAvatar, setShowUpdateAvatar] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -158,7 +162,15 @@ const ProfileLayout: React.FC = () => {
       <Card className="shadow-2xl bg-transparent border-black backdrop-blur-sm">
         <CardHeader className="text-center pb-6 border-b border-gray-700/50">
           <div className="flex flex-col items-center gap-4">
-            <AvatarUser user={user} isMe={user?.id === user?.id} size={24} />
+            <div
+              className="cursor-pointer relative group"
+              onClick={() => setShowUpdateAvatar(true)}
+            >
+              <AvatarUser user={user} isMe={user?.id === user?.id} size={24} />
+              <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                <Upload className="w-8 h-8 text-white transition-opacity" />
+              </div>
+            </div>
             <div>
               <CardTitle className="text-2xl text-gray-100">
                 Hồ sơ cá nhân
@@ -283,7 +295,6 @@ const ProfileLayout: React.FC = () => {
                     </span>
                   )}
                 </div>
-
               </div>
               {isGithubLinked && (
                 <AlertDialog>
@@ -347,7 +358,8 @@ const ProfileLayout: React.FC = () => {
           <div className="w-full mx-auto flex flex-col items-center gap-6">
             <div className="w-full flex justify-between gap-x-4">
               <p className="text-sm text text-white mb-2">
-                Thay đổi mật khẩu định kỳ để bảo vệ tài khoản. Sử dụng mật khẩu mạnh (≥12 ký tự).
+                Thay đổi mật khẩu định kỳ để bảo vệ tài khoản. Sử dụng mật khẩu
+                mạnh (≥12 ký tự).
               </p>
               <Button
                 variant="outline"
@@ -369,11 +381,11 @@ const ProfileLayout: React.FC = () => {
                 <Key className="w-4 h-4" />
                 Đổi mật khẩu
               </Button>
-
             </div>
             <div className="w-full flex justify-between gap-x-4">
               <p className="text-sm text-white mb-2">
-                Đăng xuất sẽ kết thúc phiên hiện tại trên thiết bị này. Lưu công việc trước khi thoát.
+                Đăng xuất sẽ kết thúc phiên hiện tại trên thiết bị này. Lưu công
+                việc trước khi thoát.
               </p>
               <Button
                 variant="destructive"
@@ -392,6 +404,10 @@ const ProfileLayout: React.FC = () => {
       <UpdatePassword
         open={showUpdatePassword}
         onOpenChange={setShowUpdatePassword}
+      />
+      <UpdateAvatar
+        open={showUpdateAvatar}
+        onOpenChange={setShowUpdateAvatar}
       />
     </div>
   );

@@ -73,6 +73,11 @@ export const UploadApi = {
     apipost("upload/get-presigned-url", data),
 
   getObjectUrl: async (data: any) => apipost("upload/get-object-url", data),
+
+  getAvatarPresignedUrl: async (data: any) =>
+    apipost("upload/get-avatar-presigned-url", data),
+
+  getAvatarUrl: async (data: any) => apipost("upload/get-avatar-url", data),
 };
 
 export const GithubAPI = {
@@ -92,7 +97,8 @@ export const NotificationAPI = {
     apiget(
       `/notifications?page=${data.page}&limit=${data.limit}&type=${data.type || ""}`
     ),
-  getCountUnreadNotifications: async () => apipost(`notifications/count-unread`),
+  getCountUnreadNotifications: async () =>
+    apipost(`notifications/count-unread`),
   markAsRead: async (id: string) =>
     apipost(`/notifications/mark-as-read`, { id }),
   deleteNotification: async (id: string) =>
