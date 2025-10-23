@@ -16,6 +16,8 @@ import GitHubRegister from "./pages/GitHubRegister";
 import SettingsPage from "./pages/Setting";
 import GithubRegisterLayout from "./components/GithubRegisterLayout";
 import GitHubPage from "./pages/GitHubPage";
+import Blogs from "./pages/Blogs";
+import Error from "./pages/Error";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +39,9 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
               <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/blogs" element={<Blogs />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/error" element={<Error />} />
             </Routes>
           </TooltipProvider>
         </NotificationProvider>
