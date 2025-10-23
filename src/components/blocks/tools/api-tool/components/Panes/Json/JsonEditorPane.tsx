@@ -13,6 +13,40 @@ interface JsonEditorPanelProps {
   isEditable?: boolean;
 }
 
+const customTheme = EditorView.theme({
+  "&": {
+    color: "white",
+    backgroundColor: "#1e1e1e",
+  },
+  ".cm-content": {
+    caretColor: "white",
+    color: "white",
+  },
+  ".cm-cursor, .cm-dropCursor": {
+    borderLeftColor: "white",
+  },
+  "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
+    {
+      backgroundColor: "#3e4451",
+    },
+  ".cm-activeLine": {
+    backgroundColor: "#2c313c",
+  },
+  ".cm-gutters": {
+    backgroundColor: "#1e1e1e",
+    color: "#6b7280",
+    border: "none",
+  },
+  ".cm-activeLineGutter": {
+    backgroundColor: "#2c313c",
+  },
+  ".cm-string": { color: "#98c379" },
+  ".cm-number": { color: "#d19a66" },
+  ".cm-bool": { color: "#56b6c2" },
+  ".cm-null": { color: "#c678dd" },
+  ".cm-property": { color: "#e06c75" },
+});
+
 const createExtensions = (
   isEditable: boolean,
   onChange: (value: string) => void
@@ -23,6 +57,7 @@ const createExtensions = (
     json(),
     linter(jsonParseLinter()),
     oneDark,
+    customTheme,
     EditorView.editable.of(isEditable),
     EditorState.tabSize.of(2),
     EditorView.updateListener.of((update) => {
