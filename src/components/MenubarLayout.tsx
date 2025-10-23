@@ -7,6 +7,9 @@ import {
   LogOut,
   GitBranch,
   GitFork,
+  Newspaper,
+
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -88,6 +91,14 @@ export default function MenubarLayout({
       ),
       label: "Notifications",
       link: "/notifications",
+    },
+
+    {
+
+      key: "blogs",
+      icon: <Newspaper className="h-5 w-5" />,
+      label: "Blogs",
+      link: "/blogs",
     },
     {
       key: "settings",
