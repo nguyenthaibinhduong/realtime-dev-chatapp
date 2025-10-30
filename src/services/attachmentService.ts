@@ -391,15 +391,9 @@ class AttachmentService {
 
       onProgress?.(90); // Upload done, now get final URL
 
-      // 3. Get the final avatar URL using the key
-      console.log("Getting final avatar URL for key:", key);
-      const avatarUrlResponse = await UploadApi.getAvatarUrl({ key });
-      const avatarUrl = avatarUrlResponse.data; // Giả sử response.data là URL string
-      console.log("Final avatar URL:", avatarUrl);
-
       onProgress?.(100); // Complete
 
-      return avatarUrl;
+      return key;
     } catch (error) {
       console.error("Upload avatar error", error);
       throw error;

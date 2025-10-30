@@ -10,6 +10,7 @@ import { TestLayout, EditorLayout } from "./SandBoxLayout";
 import CodeEditorJudge0 from "./MonacoEditorLayout";
 import TestNotiLayout from "./TestLayout";
 import ApiTool from "./blocks/tools/api-tool/ApiTool";
+import AILayout from "./AILayout";
 
 type SettingItem = {
   id: string;
@@ -69,6 +70,11 @@ export default function SettingLayout() {
           id: "TestLayout",
           label: "TestLayout",
           component: <ApiTool />,
+        },
+        {
+          id: "ai-tool",
+          label: "AI Tool",
+          component: <AILayout />,
         },
       ],
     },
