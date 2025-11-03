@@ -88,6 +88,23 @@ export const GithubAPI = {
   removeReposToChannel: async (data: any) =>
     apipost(`/channels/remove-repositories`, data),
   unlinkGithub: async () => apipost(`/github-app/uninstall`),
+  getCommitAnalysis: async (params: {
+    owner: string;
+    repo: string;
+    sha: string;
+    prompt?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params.prompt) {
+      queryParams.append("prompt", params.prompt);
+    }
+
+    return apiget(
+      `/github/commit-analysis/${params.owner}/${params.repo}/${params.sha}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
+    );
+  },
 };
 
 export const NotificationAPI = {
