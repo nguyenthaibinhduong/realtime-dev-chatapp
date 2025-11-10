@@ -94,6 +94,72 @@ export const MessageList: React.FC<Props> = ({
     setHasMore,
   });
 
+  // ✅ Auto scroll to bottom when new messages arrive
+  const [previousMessageCount, setPreviousMessageCount] = useState(0);
+
+  useEffect(() => {
+    if (messages.length === 0) {
+      setPreviousMessageCount(0);
+      return;
+    }
+
+    // Only auto-scroll if messages count increased (new message added)
+    if (messages.length <= previousMessageCount) {
+      setPreviousMessageCount(messages.length);
+      return;
+    }
+
+    // Get the latest message
+    const latestMessage: any = messages[messages.length - 1];
+    if (!latestMessage) return;
+
+    // Check if the latest message belongs to current channel
+    const messageChannelId = String(latestMessage.channelId || latestMessage.channel_id);
+    const currentChannelId = String(channelId);
+
+    if (messageChannelId !== currentChannelId) {
+      console.log("🚫 Not scrolling - message from different channel:", {
+        messageChannel: messageChannelId,
+        currentChannel: currentChannelId
+      });
+      setPreviousMessageCount(messages.length);
+      return;
+    }
+
+    // Check if this is a really new message (created recently)
+    const messageTime = new Date(latestMessage.created_at || latestMessage.send_at);
+    const now = new Date();
+    const timeDiff = now.getTime() - messageTime.getTime();
+
+    // Only auto-scroll for messages created within last 30 seconds (to avoid scrolling on page load)
+    if (timeDiff > 30000) {
+      console.log("🚫 Not scrolling - message too old:", {
+        messageTime: messageTime.toISOString(),
+        timeDiff: timeDiff + "ms"
+      });
+      setPreviousMessageCount(messages.length);
+      return;
+    }
+
+    // Scroll to bottom smoothly
+    if (messagesEndRef.current) {
+      console.log("📜 Auto-scrolling to new message:", {
+        messageId: latestMessage.id,
+        sender: latestMessage.sender?.name || latestMessage.sender?.username,
+        time: messageTime.toISOString()
+      });
+
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end"
+        });
+      }, 100); // Small delay to ensure DOM is updated
+    }
+
+    setPreviousMessageCount(messages.length);
+  }, [messages, channelId, messagesEndRef, previousMessageCount]);
+
   // Message action handlers
   const handleLike = useCallback(async (messageId: string) => {
     const msg: any = messages.find((m) => String(m.id) === String(messageId));

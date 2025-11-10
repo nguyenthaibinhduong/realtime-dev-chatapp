@@ -6,7 +6,6 @@ import { Channel } from "@/types/channel";
 import { OnlineDot } from "../auth/OnlineDot";
 import { useAuth } from "@/hooks/useAuth";
 import AvatarUser from "@/components/common/AvartarUser";
-import AvatarGroup, { AvatarGroupGrid } from "@/components/common/AvatarGroup";
 
 interface ChannelListProps {
     channels: Channel[];
@@ -113,7 +112,12 @@ export const ChannelList = ({
                                         {channel.type === "personal"
                                             ? getChannelIcon(channel, otherUser)
                                             : getChannelIcon(channel)}
-                                        <span className="truncate">{channel.name}</span>
+                                        <span className="truncate">
+                                            {channel.type === "personal" && otherUser
+                                                ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
+                                                : channel.name
+                                            }
+                                        </span>
                                     </div>
                                     {unread > 0 && (
                                         <span className="ml-2 text-xs bg-red-600 text-white rounded-full px-2 py-0.5">

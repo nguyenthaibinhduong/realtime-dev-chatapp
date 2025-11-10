@@ -36,9 +36,6 @@ import { Badge } from "../../ui/badge";
 import { Channel, Member } from "@/types/channel";
 import { OnlineDot } from "../auth/OnlineDot";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { GithubAPI } from "@/api/api";
-import { toast } from "@/hooks/useToast";
 import { RepoChatDialog } from "../github/RepoChatDialog";
 import { AttachmentModal } from "../attachments/AttachmentModal";
 import AvatarUser from "@/components/common/AvartarUser";
@@ -104,7 +101,12 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
         {channel.type === "personal"
           ? getChannelIcon(channel, otherUser)
           : getChannelIcon(channel)}
-        <h2 className="font-semibold text-foreground ml-2">{channel.name}</h2>
+        <h2 className="font-semibold text-foreground ml-2">
+          {channel.type === "personal" && otherUser
+            ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
+            : channel.name
+          }
+        </h2>
         {channel.member_count > 2 && (
           <>
             <Separator orientation="vertical" className="mx-3 h-4 " />
@@ -237,7 +239,10 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                   </div>
                   <div>
                     <DialogTitle className="text-2xl font-bold text-white tracking-tight">
-                      {channel.name}
+                      {channel.type === "personal" && otherUser
+                        ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
+                        : channel.name
+                      }
                     </DialogTitle>
                     <p className="text-zinc-400 text-sm font-medium">
                       {getChannelTypeLabel(channel.type)}
@@ -328,7 +333,10 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                       <div className="w-10 h-10 bg-gradient-to-br from-zinc-700 to-zinc-900 rounded-lg flex items-center justify-center">
                         <Avatar className="h-12 w-12 rounded-xl">
                           <AvatarFallback className="bg-blue-800 text-white text-md">
-                            {channel.name?.[0]?.toUpperCase() || "U"}
+                            {channel.type === "personal" && otherUser
+                              ? (otherUser.username?.[0] || otherUser.name?.[0] || otherUser.email?.[0] || "U").toUpperCase()
+                              : (channel.name?.[0]?.toUpperCase() || "U")
+                            }
                           </AvatarFallback>
                         </Avatar>
                         {/* Chấm online */}
@@ -416,7 +424,10 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                     open={true}
                     onOpenChange={setOpenSettingsModal}
                     channelId={channel.id}
-                    channelName={channel.name}
+                    channelName={channel.type === "personal" && otherUser
+                      ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
+                      : channel.name
+                    }
                   />
                 </div>
               </TabsContent>
