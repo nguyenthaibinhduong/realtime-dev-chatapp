@@ -28,7 +28,7 @@ const AvatarUser = ({
       onClick={() => navigate(url)}
     >
       <AvatarImage
-        src={avatarUrl || user?.github_avatar || undefined}
+        src={avatarUrl || user?.github_avatar || 'https://i.pravatar.cc/150?u=' + user?.id}
         alt={(user?.username as string) || (user?.email as string) || "User"}
       />
       <AvatarFallback className="bg-primary text-primary-foreground">

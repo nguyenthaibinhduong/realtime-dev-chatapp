@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -8,6 +9,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import attachmentService from "@/services/attachmentService";
 
 /**
  * Avatar Group — UX/UI chuẩn, accessible, Dark/Light ready
@@ -53,7 +55,25 @@ function sizeStyle(size: AvatarSize): React.CSSProperties | undefined {
 }
 
 const displayName = (u?: User) => u?.username || u?.email || "User";
-const avatarSrc = (u?: User) => u?.avatar ?? u?.github_avatar ?? undefined;
+
+// Hook để lấy avatar URL
+const useAvatarUrl = (user?: User) => {
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (user?.avatar) {
+            attachmentService.getObjectUrl(user.avatar).then(setAvatarUrl);
+        } else {
+            setAvatarUrl(null);
+        }
+    }, [user?.avatar]);
+
+    return avatarUrl;
+};
+
+const avatarSrc = (u?: User, avatarUrl?: string | null) => {
+    return avatarUrl || u?.github_avatar || `https://i.pravatar.cc/150?u=${u?.id}` || undefined;
+};
 
 /** Common props */
 export type BaseGroupProps = {
@@ -67,6 +87,38 @@ export type BaseGroupProps = {
     /** Bắt sự kiện click avatar (chạy sau điều hướng mặc định nếu return void) */
     onAvatarClick?: (u: User) => void;
 };
+
+/** Component Avatar với URL từ attachmentService */
+function AvatarWithUrl({ 
+    user, 
+    className, 
+    imageClassName,
+    fallbackClassName,
+    children 
+}: { 
+    user: User; 
+    className?: string; 
+    imageClassName?: string;
+    fallbackClassName?: string;
+    children?: React.ReactNode;
+}) {
+    const avatarUrl = useAvatarUrl(user);
+    const name = displayName(user);
+    
+    return (
+        <Avatar className={className}>
+            <AvatarImage 
+                className={imageClassName}
+                src={avatarSrc(user, avatarUrl)} 
+                alt={name} 
+            />
+            <AvatarFallback className={fallbackClassName || "bg-muted text-muted-foreground font-medium"}>
+                {name?.[0]?.toUpperCase() ?? "U"}
+            </AvatarFallback>
+            {children}
+        </Avatar>
+    );
+}
 
 /** Accessible trigger wrapper for Avatar (handles click + keyboard) */
 function AvatarButton({
@@ -160,12 +212,10 @@ export function AvatarGroupStack({
                     };
 
                     const core = (
-                        <Avatar className={cn("ring-2 ring-background", cls ?? "h-10 w-10", "rounded-full")}>
-                            <AvatarImage src={avatarSrc(u)} alt={name} />
-                            <AvatarFallback className="bg-muted text-muted-foreground font-medium">
-                                {name?.[0]?.toUpperCase() ?? "U"}
-                            </AvatarFallback>
-                        </Avatar>
+                        <AvatarWithUrl 
+                            user={u} 
+                            className={cn("ring-2 ring-background", cls ?? "h-10 w-10", "rounded-full")} 
+                        />
                     );
 
                     const trigger = (
@@ -281,12 +331,11 @@ export function AvatarGroupSquare({
                     };
 
                     const tile = (
-                        <Avatar className="h-full w-full rounded-none">
-                            <AvatarImage className="object-cover" src={avatarSrc(u)} alt={name} />
-                            <AvatarFallback className="bg-muted text-muted-foreground font-medium">
-                                {name?.[0]?.toUpperCase() ?? "U"}
-                            </AvatarFallback>
-                        </Avatar>
+                        <AvatarWithUrl 
+                            user={u} 
+                            className="h-full w-full rounded-none"
+                            imageClassName="object-cover"
+                        />
                     );
 
                     const trigger = (
@@ -372,12 +421,12 @@ export function AvatarGroupGrids({
                     };
 
                     const circle = (
-                        <Avatar className="h-full w-full rounded-full ring-2 ring-background border border-border">
-                            <AvatarImage className="object-cover" src={avatarSrc(u)} alt={name} />
-                            <AvatarFallback className="bg-muted text-foreground/90">
-                                {name?.[0]?.toUpperCase() ?? "U"}
-                            </AvatarFallback>
-                        </Avatar>
+                        <AvatarWithUrl 
+                            user={u} 
+                            className="h-full w-full rounded-full ring-2 ring-background border border-border"
+                            imageClassName="object-cover"
+                            fallbackClassName="bg-muted text-foreground/90"
+                        />
                     );
 
                     const trigger = (
@@ -477,12 +526,12 @@ export function AvatarGroupGridStacked({
                     };
 
                     const circle = (
-                        <Avatar className="h-full w-full rounded-full ring-2 ring-background border border-border shadow-sm">
-                            <AvatarImage className="object-cover" src={avatarSrc(u)} alt={name} />
-                            <AvatarFallback className="bg-muted text-foreground/90">
-                                {name?.[0]?.toUpperCase() ?? "U"}
-                            </AvatarFallback>
-                        </Avatar>
+                        <AvatarWithUrl 
+                            user={u} 
+                            className="h-full w-full rounded-full ring-2 ring-background border border-border shadow-sm"
+                            imageClassName="object-cover"
+                            fallbackClassName="bg-muted text-foreground/90"
+                        />
                     );
 
                     const trigger = (
@@ -611,12 +660,11 @@ export function AvatarGroupGrid({
                     onAvatarClick?.(u);
                 };
                 const img = (
-                    <Avatar className="h-full w-full rounded-full ">
-                        <AvatarImage className="object-cover" src={avatarSrc(u)} alt={name} />
-                        <AvatarFallback className="bg-muted text-muted-foreground font-medium">
-                            {name?.[0]?.toUpperCase() ?? "U"}
-                        </AvatarFallback>
-                    </Avatar>
+                    <AvatarWithUrl 
+                        user={u} 
+                        className="h-full w-full rounded-full"
+                        imageClassName="object-cover"
+                    />
                 );
                 return (
                     <button

@@ -5,7 +5,8 @@ import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import "highlight.js/styles/github-dark.css";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sparkles, Loader2, AlertCircle, X, RefreshCw, FileCode2, Brain, Zap } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export interface CommitAnalysisProps {
@@ -19,10 +20,13 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const fetchCommitAnalysis = async () => {
     setLoading(true);
     setError(null);
+    setIsOpen(true);
+
     try {
       const response = await GithubAPI.getCommitAnalysis({
         owner: props.owner,
@@ -40,181 +44,263 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
     }
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    // Clear state when closing
+    setTimeout(() => {
+      setAnalysis(null);
+      setError(null);
+    }, 300);
+  };
+
   return (
-    <div className="space-y-4">
-      {/* Analyze Button */}
-      {!analysis && (
-        <Button
-          onClick={fetchCommitAnalysis}
-          disabled={loading}
-          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Đang phân tích...
-            </>
-          ) : (
-            <>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Phân tích commit với AI
-            </>
-          )}
-        </Button>
-      )}
+    <>
+      {/* Compact Analyze Button */}
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={fetchCommitAnalysis}
+        disabled={loading}
+        className="h-8 border-emerald-300 text-black bg-gradient-to-r from-emerald-50 to-blue-50 hover:from-emerald-100 hover:to-blue-100 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 hover:scale-105"
+      >
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+        ) : (
+          <Brain className="h-4 w-4 mr-2 text-emerald-600" />
+        )}
+        {loading ? "Phân tích..." : "Phân tích AI"}
+      </Button>
 
-      {/* Error State */}
-      {error && (
-        <Alert
-          variant="destructive"
-          className="bg-red-900/20 border-red-900 text-red-400"
-        >
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Loading Skeleton */}
-      {loading && (
-        <div className="space-y-3 animate-pulse">
-          <div className="h-4 bg-zinc-700 rounded w-3/4"></div>
-          <div className="h-4 bg-zinc-700 rounded w-full"></div>
-          <div className="h-4 bg-zinc-700 rounded w-5/6"></div>
-          <div className="h-4 bg-zinc-700 rounded w-2/3"></div>
-        </div>
-      )}
-
-      {/* Analysis Result */}
-      {analysis && !loading && (
-        <div className="space-y-4">
-          {/* Header with re-analyze button */}
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-700">
-            <h4 className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-purple-400" />
-              Kết quả phân tích
-            </h4>
-            <Button
-              onClick={fetchCommitAnalysis}
-              variant="ghost"
-              size="sm"
-              className="h-8 text-xs text-zinc-400 hover:text-white"
-            >
-              Phân tích lại
-            </Button>
-          </div>
-
-          {/* Markdown Content */}
-          <div className="prose prose-invert prose-sm max-w-none">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight]}
-              components={{
-                h1: ({ node, ...props }) => (
-                  <h1
-                    className="text-2xl font-bold mb-3 mt-4 text-zinc-100"
-                    {...props}
-                  />
-                ),
-                h2: ({ node, ...props }) => (
-                  <h2
-                    className="text-xl font-bold mb-2 mt-4 text-zinc-200"
-                    {...props}
-                  />
-                ),
-                h3: ({ node, ...props }) => (
-                  <h3
-                    className="text-lg font-bold mb-2 mt-3 text-zinc-300"
-                    {...props}
-                  />
-                ),
-                p: ({ node, ...props }) => (
-                  <p className="mb-3 leading-7 text-zinc-300" {...props} />
-                ),
-                ul: ({ node, ...props }) => (
-                  <ul
-                    className="list-disc list-inside mb-3 space-y-1 text-zinc-300"
-                    {...props}
-                  />
-                ),
-                ol: ({ node, ...props }) => (
-                  <ol
-                    className="list-decimal list-inside mb-3 space-y-1 text-zinc-300"
-                    {...props}
-                  />
-                ),
-                li: ({ node, ...props }) => (
-                  <li className="ml-4 text-zinc-300" {...props} />
-                ),
-                code: ({
-                  node,
-                  inline,
-                  className,
-                  children,
-                  ...props
-                }: any) => {
-                  return inline ? (
-                    <code
-                      className="bg-zinc-800 text-purple-400 px-1.5 py-0.5 rounded text-sm font-mono"
-                      {...props}
-                    >
-                      {children}
-                    </code>
-                  ) : (
-                    <code
-                      className={`${className} block bg-zinc-950 text-zinc-100 p-4 rounded-lg overflow-x-auto border border-zinc-800`}
-                      {...props}
-                    >
-                      {children}
-                    </code>
-                  );
-                },
-                pre: ({ node, ...props }) => (
-                  <pre
-                    className="bg-zinc-950 rounded-lg overflow-hidden mb-3 border border-zinc-800"
-                    {...props}
-                  />
-                ),
-                blockquote: ({ node, ...props }) => (
-                  <blockquote
-                    className="border-l-4 border-purple-500 pl-4 italic my-3 text-zinc-400"
-                    {...props}
-                  />
-                ),
-                a: ({ node, ...props }) => (
-                  <a
-                    className="text-blue-400 hover:text-blue-300 hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    {...props}
-                  />
-                ),
-                table: ({ node, ...props }) => (
-                  <div className="overflow-x-auto mb-3">
-                    <table
-                      className="min-w-full border border-zinc-700"
-                      {...props}
-                    />
+      {/* Analysis Modal */}
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="w-full max-w-4xl h-[85vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden">
+          <DialogHeader className="px-6 py-4 border-b border-zinc-800 bg-gradient-to-r from-zinc-950 to-zinc-900">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg">
+                    <Brain className="h-7 w-7 text-white" />
                   </div>
-                ),
-                th: ({ node, ...props }) => (
-                  <th
-                    className="border border-zinc-700 px-4 py-2 bg-zinc-800 font-semibold text-zinc-200"
-                    {...props}
-                  />
-                ),
-                td: ({ node, ...props }) => (
-                  <td
-                    className="border border-zinc-700 px-4 py-2 text-zinc-300"
-                    {...props}
-                  />
-                ),
-              }}
-            >
-              {analysis}
-            </ReactMarkdown>
+                  <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                    <Sparkles className="h-2.5 w-2.5 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+                    <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                      Phân tích Commit AI
+                    </span>
+                    <Zap className="h-5 w-5 text-amber-400 animate-pulse" />
+                  </DialogTitle>
+                  <div className="text-sm text-zinc-400 mt-1 flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 font-mono text-emerald-400">
+                      {props.sha.slice(0, 7)}
+                    </span>
+                    <span className="text-zinc-500">•</span>
+                    <span className="text-zinc-300">{props.owner}/{props.repo}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {analysis && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchCommitAnalysis}
+                    disabled={loading}
+                    className="bg-zinc-900 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                    Phân tích lại
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClose}
+                  className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-auto">
+            {/* Loading State */}
+            {loading && !analysis && (
+              <div className="flex flex-col items-center justify-center h-full space-y-6 p-8">
+                <div className="relative">
+                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+                    <Brain className="h-10 w-10 text-white animate-pulse" />
+                  </div>
+                  <div className="absolute -top-1 -right-1">
+                    <Loader2 className="h-8 w-8 text-amber-400 animate-spin" />
+                  </div>
+                </div>
+                <div className="text-center space-y-2">
+                  <h3 className="text-lg font-semibold text-white">Đang phân tích commit...</h3>
+                  <p className="text-sm text-zinc-400 max-w-md">
+                    AI đang xem xét các thay đổi trong commit và chuẩn bị phân tích chi tiết
+                  </p>
+                </div>
+                <div className="space-y-3 animate-pulse w-full max-w-md">
+                  <div className="h-3 bg-zinc-700 rounded-full"></div>
+                  <div className="h-3 bg-zinc-700 rounded-full w-4/5"></div>
+                  <div className="h-3 bg-zinc-700 rounded-full w-3/5"></div>
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="flex flex-col items-center justify-center h-full space-y-6 p-8">
+                <div className="h-20 w-20 rounded-full bg-red-900/20 border-2 border-red-600 flex items-center justify-center">
+                  <AlertCircle className="h-10 w-10 text-red-400" />
+                </div>
+                <div className="text-center space-y-2">
+                  <h3 className="text-lg font-semibold text-red-400">Lỗi phân tích</h3>
+                  <p className="text-sm text-zinc-400 max-w-md">{error}</p>
+                </div>
+                <Button
+                  onClick={fetchCommitAnalysis}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Thử lại
+                </Button>
+              </div>
+            )}
+
+            {/* Success State */}
+            {analysis && !loading && (
+              <div className="p-6">
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FileCode2 className="h-5 w-5 text-emerald-400" />
+                    <h3 className="text-lg font-semibold text-white">Kết quả phân tích</h3>
+                  </div>
+                  <div className="h-px bg-gradient-to-r from-purple-600 via-blue-600 to-transparent"></div>
+                </div>
+
+                {/* Markdown Content with enhanced styling */}
+                <div className="prose prose-invert prose-lg max-w-none">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                    components={{
+                      h1: ({ node, ...props }) => (
+                        <h1
+                          className="text-3xl font-bold mb-4 mt-6 text-white bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"
+                          {...props}
+                        />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <h2
+                          className="text-2xl font-bold mb-3 mt-5 text-zinc-100 border-b border-zinc-700 pb-2"
+                          {...props}
+                        />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <h3
+                          className="text-xl font-semibold mb-3 mt-4 text-zinc-200 flex items-center gap-2"
+                          {...props}
+                        />
+                      ),
+                      p: ({ node, ...props }) => (
+                        <p className="mb-4 leading-8 text-zinc-300 text-base" {...props} />
+                      ),
+                      ul: ({ node, ...props }) => (
+                        <ul
+                          className="list-none mb-4 space-y-2 text-zinc-300"
+                          {...props}
+                        />
+                      ),
+                      ol: ({ node, ...props }) => (
+                        <ol
+                          className="list-decimal list-inside mb-4 space-y-2 text-zinc-300"
+                          {...props}
+                        />
+                      ),
+                      li: ({ node, children, ...props }) => (
+                        <li className="ml-0 text-zinc-300 flex items-start gap-3 p-2 rounded-lg hover:bg-zinc-900/30 transition-colors" {...props}>
+                          <span className="inline-flex items-center justify-center w-1.5 h-1.5 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 mt-3 flex-shrink-0"></span>
+                          <span className="flex-1">{children}</span>
+                        </li>
+                      ),
+                      code: ({
+                        node,
+                        inline,
+                        className,
+                        children,
+                        ...props
+                      }: any) => {
+                        return inline ? (
+                          <code
+                            className="bg-zinc-800 text-purple-300 px-2 py-1 rounded-md text-sm font-mono border border-zinc-700"
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        ) : (
+                          <code
+                            className={`${className} block bg-zinc-950 text-zinc-100 p-6 rounded-xl overflow-x-auto border border-zinc-700 shadow-lg`}
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        );
+                      },
+                      pre: ({ node, ...props }) => (
+                        <pre
+                          className="bg-zinc-950 rounded-xl overflow-hidden mb-4 border border-zinc-700 shadow-lg"
+                          {...props}
+                        />
+                      ),
+                      blockquote: ({ node, ...props }) => (
+                        <blockquote
+                          className="border-l-4 border-gradient-to-b from-purple-500 to-blue-500 bg-zinc-900/30 pl-6 py-4 my-4 text-zinc-400 italic rounded-r-lg"
+                          {...props}
+                        />
+                      ),
+                      a: ({ node, ...props }) => (
+                        <a
+                          className="text-blue-400 hover:text-blue-300 hover:underline font-medium transition-colors"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          {...props}
+                        />
+                      ),
+                      table: ({ node, ...props }) => (
+                        <div className="overflow-x-auto mb-4 rounded-lg border border-zinc-700">
+                          <table
+                            className="min-w-full"
+                            {...props}
+                          />
+                        </div>
+                      ),
+                      th: ({ node, ...props }) => (
+                        <th
+                          className="border border-zinc-700 px-6 py-3 bg-zinc-800 font-semibold text-zinc-200 text-left"
+                          {...props}
+                        />
+                      ),
+                      td: ({ node, ...props }) => (
+                        <td
+                          className="border border-zinc-700 px-6 py-3 text-zinc-300"
+                          {...props}
+                        />
+                      ),
+                    }}
+                  >
+                    {analysis}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

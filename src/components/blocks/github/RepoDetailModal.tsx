@@ -494,11 +494,10 @@ export function CodeViewerDialog({
                   {dirChildren.files.map((f) => (
                     <button
                       key={f}
-                      className={`w-full text-left px-3 py-1.5 hover:bg-zinc-900 ${
-                        selPath === (dialogPath ? `${dialogPath}/${f}` : f)
+                      className={`w-full text-left px-3 py-1.5 hover:bg-zinc-900 ${selPath === (dialogPath ? `${dialogPath}/${f}` : f)
                           ? "bg-zinc-900 text-zinc-100"
                           : "text-zinc-300"
-                      }`}
+                        }`}
                       onClick={() =>
                         handleSelectFile(dialogPath ? `${dialogPath}/${f}` : f)
                       }
@@ -572,7 +571,7 @@ export function CodeViewerDialog({
                         else
                           setOutput(
                             result.stdout ||
-                              "✅ Program executed successfully (no output)"
+                            "✅ Program executed successfully (no output)"
                           );
                       } catch {
                         setOutput("🚨 Failed to execute.");
@@ -1105,67 +1104,68 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
               >
                 {commitLoading
                   ? Array.from({ length: 5 }).map((_, i) => (
-                      <li key={i} className="px-4 py-3 flex items-center gap-3">
-                        <SkeletonLine
-                          width="24px"
-                          height="24px"
-                          className="rounded-full mr-3"
-                        />
-                        <div className="flex-1 space-y-1">
-                          <SkeletonLine width="80px" height="14px" />
-                          <SkeletonLine width="180px" height="14px" />
-                          <SkeletonLine width="120px" height="12px" />
-                        </div>
-                        <SkeletonLine width="60px" height="14px" />
-                      </li>
-                    ))
+                    <li key={i} className="px-4 py-3 flex items-center gap-3">
+                      <SkeletonLine
+                        width="24px"
+                        height="24px"
+                        className="rounded-full mr-3"
+                      />
+                      <div className="flex-1 space-y-1">
+                        <SkeletonLine width="80px" height="14px" />
+                        <SkeletonLine width="180px" height="14px" />
+                        <SkeletonLine width="120px" height="12px" />
+                      </div>
+                      <SkeletonLine width="60px" height="14px" />
+                    </li>
+                  ))
                   : commits.map((c) => (
-                      <li key={c.sha} className="px-4 py-3 hover:bg-zinc-900">
-                        <div className="flex items-center justify-between gap-3 flex-wrap">
-                          <div className="min-w-0 flex items-center gap-3">
-                            {c.author?.avatar_url && (
-                              <img
-                                src={c.author.avatar_url}
-                                alt={c.author?.login || "avatar"}
-                                className="h-6 w-6 rounded-full border border-zinc-700"
-                                loading="lazy"
-                              />
-                            )}
-                            <div className="min-w-0">
-                              <div className="font-mono text-emerald-400 text-sm">
-                                {c.sha.slice(0, 7)}
-                              </div>
-                              <div className="text-sm truncate">
-                                {c.commit?.message}
-                              </div>
-                              <div className="text-xs text-zinc-400 truncate">
-                                {c.author?.login && (
-                                  <a
-                                    href={`https://github.com/${c.author.login}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="hover:underline text-zinc-300"
-                                  >
-                                    @{c.commit?.author?.name || c.author.login}
-                                  </a>
-                                )}
-                                {c.commit?.author?.email && (
-                                  <span className="ml-2 opacity-80">
-                                    {c.commit.author.email}
-                                  </span>
-                                )}
-                              </div>
+                    <li key={c.sha} className="px-4 py-3 hover:bg-zinc-900">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div className="min-w-0 flex items-center gap-3">
+                          {c.author?.avatar_url && (
+                            <img
+                              src={c.author.avatar_url}
+                              alt={c.author?.login || "avatar"}
+                              className="h-6 w-6 rounded-full border border-zinc-700"
+                              loading="lazy"
+                            />
+                          )}
+                          <div className="min-w-0">
+                            <div className="font-mono text-emerald-400 text-sm">
+                              {c.sha.slice(0, 7)}
+                            </div>
+                            <div className="text-sm truncate">
+                              {c.commit?.message}
+                            </div>
+                            <div className="text-xs text-zinc-400 truncate">
+                              {c.author?.login && (
+                                <a
+                                  href={`https://github.com/${c.author.login}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="hover:underline text-zinc-300"
+                                >
+                                  @{c.commit?.author?.name || c.author.login}
+                                </a>
+                              )}
+                              {c.commit?.author?.email && (
+                                <span className="ml-2 opacity-80">
+                                  {c.commit.author.email}
+                                </span>
+                              )}
                             </div>
                           </div>
-                          <div className="text-xs text-zinc-400">
-                            {fmt(c.commit?.author?.date)}
-                          </div>
                         </div>
-                        <div className="mt-2 flex items-center gap-2">
+                        <div className="text-xs text-zinc-400">
+                          {fmt(c.commit?.author?.date)}
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 border-zinc-700 text-zinc-700"
+                            className="h-8 border-zinc-700 text-black bg-white hover:bg-zinc-100"
                             onClick={() => {
                               // 👇 mở commit view: nhớ branch hiện tại + reset path về root
                               setMode("commit");
@@ -1177,24 +1177,28 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                           >
                             <GitCommit className="h-4 w-4 mr-2" /> Mở Commit
                           </Button>
-                          {c.html_url && (
-                            <a
-                              href={c.html_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs text-sky-400 hover:underline"
-                            >
-                              Mở trên GitHub
-                            </a>
-                          )}
+
+                          <CommitAnalysisComponent
+                            owner={repo?.owner?.login}
+                            repo={repo?.name}
+                            sha={c.sha}
+                          />
                         </div>
-                        <CommitAnalysisComponent
-                          owner={repo?.owner?.login}
-                          repo={repo?.name}
-                          sha={c.sha}
-                        />
-                      </li>
-                    ))}
+
+                        {c.html_url && (
+                          <a
+                            href={c.html_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-sky-400 hover:text-sky-300 hover:underline flex items-center gap-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            GitHub
+                          </a>
+                        )}
+                      </div>
+                    </li>
+                  ))}
 
                 {!commitLoading && !commits.length && (
                   <li className="px-4 py-6 text-sm text-zinc-500">

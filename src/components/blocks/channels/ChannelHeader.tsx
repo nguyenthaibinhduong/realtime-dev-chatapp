@@ -39,7 +39,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { RepoChatDialog } from "../github/RepoChatDialog";
 import { AttachmentModal } from "../attachments/AttachmentModal";
 import AvatarUser from "@/components/common/AvartarUser";
-import { AvatarGroupGrid } from "@/components/common/AvatarGroup";
+import { AvatarGroupGrid, AvatarGroupStack } from "@/components/common/AvatarGroup";
 import { ToolType, TOOL_CONFIGS } from "../tools";
 import ChannelUpdate from "./ChannelSettings";
 
@@ -51,8 +51,10 @@ interface ChannelHeaderProps {
 }
 
 const getChannelIcon = (channel: Channel, user?: any) => {
-  if (channel.type === "group" || channel.type === "group-private")
-    return <AvatarGroupGrid users={channel.members} tile={18} />;
+  if (channel.type === "group") 
+    return <Globe className="h-4 w-4 mr-2 text-green-500" />;
+  if (channel.type === "group-private") 
+    return <Lock className="h-4 w-4 mr-2 text-orange-500" />;
   if (channel.type === "personal") {
     return (
       <div className="relative mr-2">
@@ -110,9 +112,20 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
         {channel.member_count > 2 && (
           <>
             <Separator orientation="vertical" className="mx-3 h-4 " />
-            <p className="text-sm text-muted-foreground">
-              {channel.member_count} thành viên
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-muted-foreground">
+                {channel.member_count} thành viên
+              </p>
+              <AvatarGroupStack 
+                users={channel.members || members} 
+                size="xs" 
+                max={5} 
+                overlap={true} 
+                overlapOffset={6}
+                currentUserId={user?.id}
+                tooltip={true}
+              />
+            </div>
           </>
         )}
       </div>
@@ -233,9 +246,24 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
               <DialogHeader>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 flex items-center justify-center">
-                    {channel.type === "personal"
-                      ? getChannelIcon(channel, otherUser)
-                      : getChannelIcon(channel)}
+                    {channel.type === "personal" ? (
+                      <div className="relative">
+                        <AvatarUser user={otherUser} size={12} />
+                        {otherUser?.id && <OnlineDot userId={otherUser?.id} />}
+                      </div>
+                    ) : channel.type === "group" ? (
+                      <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                        <Globe className="h-6 w-6 text-green-500" />
+                      </div>
+                    ) : channel.type === "group-private" ? (
+                      <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                        <Lock className="h-6 w-6 text-orange-500" />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 bg-zinc-700 rounded-xl flex items-center justify-center">
+                        <Hash className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <DialogTitle className="text-2xl font-bold text-white tracking-tight">
@@ -330,20 +358,29 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                   {/* Channel Type */}
                   <div className="flex items-center justify-between p-4 bg-zinc-800 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-zinc-700 to-zinc-900 rounded-lg flex items-center justify-center">
-                        <Avatar className="h-12 w-12 rounded-xl">
-                          <AvatarFallback className="bg-blue-800 text-white text-md">
-                            {channel.type === "personal" && otherUser
-                              ? (otherUser.username?.[0] || otherUser.name?.[0] || otherUser.email?.[0] || "U").toUpperCase()
-                              : (channel.name?.[0]?.toUpperCase() || "U")
-                            }
-                          </AvatarFallback>
-                        </Avatar>
-                        {/* Chấm online */}
-                        {channel.type == "personal" && otherUser && (
-                          <OnlineDot userId={otherUser} />
-                        )}
-                      </div>
+                      {channel.type === "personal" && otherUser ? (
+                        <div className="relative">
+                          <Avatar className="h-12 w-12 rounded-xl">
+                            <AvatarImage src={otherUser.avatar || otherUser.github_avatar} alt={otherUser.username} />
+                            <AvatarFallback className="bg-blue-800 text-white text-md">
+                              {(otherUser.username?.[0] || otherUser.name?.[0] || otherUser.email?.[0] || "U").toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <OnlineDot userId={otherUser.id} />
+                        </div>
+                      ) : channel.type === "group" ? (
+                        <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                          <Globe className="h-6 w-6 text-green-500" />
+                        </div>
+                      ) : channel.type === "group-private" ? (
+                        <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                          <Lock className="h-6 w-6 text-orange-500" />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 bg-zinc-700 rounded-xl flex items-center justify-center">
+                          <Hash className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-medium text-zinc-400">
                           Loại kênh
