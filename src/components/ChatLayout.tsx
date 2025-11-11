@@ -404,25 +404,61 @@ export default function ChatLayout() {
 
   // Socket join/leave + onMessage
   const joinChannelSocketA = useCallback(() => {
-    if (selectedChannel?.id) {
-      chatSocketService.joinRoom(selectedChannel?.id);
-      chatSocketService.onMessage((msg: any) => {
-        console.log("New socket message received (A):", msg);
+    if (!selectedChannel?.id) return () => { };
 
-        // ✅ FILTER: Chỉ xử lý tin nhắn thuộc về channel hiện tại
-        const msgChannelId = String(msg.channelId || msg.channel_id);
-        const currentChannelId = String(selectedChannel?.id);
+    const currentChannelId = selectedChannel.id;
+    console.log("🔌 Joining socket room for channel:", currentChannelId);
 
-        if (msgChannelId !== currentChannelId) {
-          console.log("🚫 Ignoring message from different channel:", {
+    chatSocketService.joinRoom(currentChannelId);
+
+    const messageHandler = (msg: any) => {
+      console.log("📨 New socket message received:", msg);
+
+      // ✅ FILTER: Relaxed channel filtering
+      const msgChannelId = String(msg.channelId || msg.channel_id || '');
+      const capturedChannelId = String(currentChannelId);
+
+      // Chỉ reject nếu message có channelId và khác với current channel
+      if (msgChannelId && msgChannelId !== capturedChannelId) {
+        console.log("🚫 Ignoring message from different channel:", {
+          messageChannel: msgChannelId,
+          currentChannel: capturedChannelId
+        });
+        return;
+      }
+
+      setMessages((prev: any) => {
+        // ✅ Additional safety check với localStorage (less strict)
+        const currentStoredChannelId = localStorage.getItem("selectedChannelId");
+        if (currentStoredChannelId && msgChannelId && String(msgChannelId) !== String(currentStoredChannelId)) {
+          console.log("🚫 Second check - message channel mismatch:", {
             messageChannel: msgChannelId,
-            currentChannel: currentChannelId
+            storedChannel: currentStoredChannelId
           });
-          return;
+          return prev;
         }
 
-        setMessages((prev: any) => {
-          // ✅ Xử lý tin nhắn bị xóa (type === 'remove') - ưu tiên trước
+        // ✅ Xử lý tin nhắn bị xóa (type === 'remove') - ưu tiên trước
+        if (msg.type === "remove") {
+          const idx = prev.findIndex(
+            (p: any) => String(p.id) === String(msg.id)
+          );
+          if (idx !== -1) {
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              ...msg,
+              sender: updated[idx].sender || msg.sender,
+              type: "remove",
+              text: msg.text || "Tin nhắn đã bị xóa",
+            };
+            return updated;
+          }
+          return prev;
+        }
+
+        // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
+        if (msg.isUpdate) {
           if (msg.type === "remove") {
             const idx = prev.findIndex(
               (p: any) => String(p.id) === String(msg.id)
@@ -439,78 +475,68 @@ export default function ChatLayout() {
               return updated;
             }
             return prev;
-          }
-
-          // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
-          if (msg.isUpdate) {
-            if (msg.type === "remove") {
-              // Tìm và cập nhật tin nhắn thành trạng thái đã xóa
-              const idx = prev.findIndex(
-                (p: any) => String(p.id) === String(msg.id)
-              );
-              if (idx !== -1) {
-                const updated = [...prev];
-                updated[idx] = {
-                  ...updated[idx],
-                  ...msg,
-                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
-                  type: "remove",
-                  text: msg.text || "Tin nhắn đã bị xóa",
-                };
-                return updated;
-              }
-              return prev;
-            } else {
-              // Cập nhật tin nhắn (bao gồm pin/unpin)
-              const idx = prev.findIndex(
-                (p: any) => String(p.id) === String(msg.id)
-              );
-              if (idx !== -1) {
-                const updated = [...prev];
-                // Merge để preserve các thuộc tính quan trọng và cập nhật isPin
-                updated[idx] = {
-                  ...updated[idx], // Giữ lại thuộc tính cũ
-                  ...msg, // Cập nhật với data mới từ socket (bao gồm isPin)
-                  sender: updated[idx].sender || msg.sender, // Giữ lại thông tin sender
-                  updated_at: msg.updated_at || new Date().toISOString(), // Đảm bảo có timestamp mới
-                };
-
-                console.log("🔄 Socket A - Updated message pin status:", {
-                  messageId: msg.id,
-                  oldPin: prev[idx].isPin,
-                  newPin: msg.isPin,
-                  finalPin: updated[idx].isPin,
-                  sender:
-                    updated[idx].sender?.name || updated[idx].sender?.username,
-                  timestamp: updated[idx].updated_at,
-                });
-
-                return updated;
-              }
-              return prev;
-            }
           } else {
             const idx = prev.findIndex(
-              (p: any) => String(p.fakeID) === String(msg.fakeID)
+              (p: any) => String(p.id) === String(msg.id)
             );
-            if (
-              idx !== -1 &&
-              String(prev[idx].channelId) === String(msg.channelId)
-            ) {
+            if (idx !== -1) {
               const updated = [...prev];
-              updated[idx] = msg;
+              updated[idx] = {
+                ...updated[idx],
+                ...msg,
+                sender: updated[idx].sender || msg.sender,
+                updated_at: msg.updated_at || new Date().toISOString(),
+              };
               return updated;
             }
-
-            // Thêm tin nhắn mới vào cuối
-            return [...prev, msg];
+            return prev;
           }
-        });
+        } else {
+          // Kiểm tra tin nhảin thay thế (fakeID match)
+          const idx = prev.findIndex(
+            (p: any) => String(p.fakeID) === String(msg.fakeID)
+          );
+          if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+            console.log("🔄 Replacing fake message with real message:", {
+              fakeID: msg.fakeID,
+              realID: msg.id,
+              channelId: msg.channelId
+            });
+            const updated = [...prev];
+            updated[idx] = msg;
+            return updated;
+          }
+
+          // Kiểm tra trùng lặp tin nhắn
+          const existingIdx = prev.findIndex(
+            (p: any) => String(p.id) === String(msg.id) && msg.id
+          );
+          if (existingIdx !== -1) {
+            console.log("🚫 Duplicate message ignored:", {
+              messageId: msg.id,
+              channelId: msg.channelId
+            });
+            return prev;
+          }
+
+          // Thêm tin nhắn mới vào cuối
+          console.log("✅ Adding new message to current channel:", {
+            messageId: msg.id,
+            channelId: msg.channelId,
+            currentChannelId: currentChannelId,
+            text: msg.text?.substring(0, 50) + "..."
+          });
+          return [...prev, msg];
+        }
       });
-    }
+    };
+
+    chatSocketService.onMessage(messageHandler);
+
     return () => {
-      chatSocketService.leaveRoom(selectedChannel?.id);
-      chatSocketService.offMessage();
+      console.log("🔌 Leaving socket room for channel:", currentChannelId);
+      chatSocketService.leaveRoom(currentChannelId);
+      chatSocketService.offMessage(messageHandler);
     };
   }, [selectedChannel]);
 
@@ -549,8 +575,14 @@ export default function ChatLayout() {
 
   const handleSelectChannel = (channel: Channel | null) => {
     setSelectedChannel(channel);
+
     if (channel) {
       localStorage.setItem("selectedChannelId", String(channel.id));
+      console.log("🔄 Switching to channel:", {
+        channelId: channel.id,
+        channelName: channel.name
+      });
+
       // Update URL
       const newParams = new URLSearchParams(searchParams);
       newParams.set("channel", String(channel.id));
@@ -558,22 +590,45 @@ export default function ChatLayout() {
       setSearchParams(newParams);
     } else {
       localStorage.removeItem("selectedChannelId");
+      console.log("🔄 Clearing selected channel");
+
+      // Clear messages chỉ khi không có channel nào được chọn
+      setMessages([]);
+      setMembers([]);
+
       // Clear URL params
       const newParams = new URLSearchParams(searchParams);
       newParams.delete("channel");
       newParams.delete("message");
       setSearchParams(newParams);
     }
-  };
-
-  // Initial load messages for selected channel (server trả ASC: cũ→mới)
+  };  // Initial load messages for selected channel (server trả ASC: cũ→mới)
   const loadMessages = useCallback(
     async (channelId: string) => {
-      const res = await ChatAPI.fetchMessage(channelId);
-      if (res?.data) {
-        setMessages(Array.isArray(res.data.items) ? res.data.items : []);
-        setMembers(Array.isArray(res.data.members) ? res.data.members : []);
-      } else {
+      console.log("📥 Loading messages for channel:", channelId);
+      try {
+        const res = await ChatAPI.fetchMessage(channelId);
+        console.log("📥 Messages response:", res);
+
+        if (res?.data) {
+          const messagesData = Array.isArray(res.data.items) ? res.data.items : [];
+          const membersData = Array.isArray(res.data.members) ? res.data.members : [];
+
+          console.log("📥 Setting messages:", {
+            messagesCount: messagesData.length,
+            membersCount: membersData.length,
+            channelId
+          });
+
+          setMessages(messagesData);
+          setMembers(membersData);
+        } else {
+          console.log("📥 No data in response, clearing messages");
+          setMessages([]);
+          setMembers([]);
+        }
+      } catch (error) {
+        console.error("📥 Error loading messages:", error);
         setMessages([]);
         setMembers([]);
       }
@@ -600,7 +655,7 @@ export default function ChatLayout() {
       if (res && res.status && [200, 201].includes(res.status) && res.data) {
         // console.log('joinfromSearch', res);
         handleSelectChannelFromSearch(res.data.channel);
-        // localStorage.setItem("selectedChannelId", res.data.channel.id);
+        localStorage.setItem("selectedChannelId", res.data.channel.id);
 
         await loadChannels();
         setOpenSearchModal(false);
@@ -1010,32 +1065,49 @@ export default function ChatLayout() {
         )}
 
         <div className="flex flex-col h-full">
-          {messages.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">
-                  Chat Coming Soon
-                </h3>
-                <p className="text-muted-foreground">
-                  Chat functionality will be implemented with the new backend
-                  API
-                </p>
+          {(() => {
+            const filteredMessages = messages.filter((msg: any) => {
+              const msgChannelId = String(msg.channelId || msg.channel_id || '');
+              const currentChannelId = String(selectedChannel?.id || '');
+              return !msgChannelId || !currentChannelId || msgChannelId === currentChannelId;
+            });
+
+            console.log("💬 Render check:", {
+              totalMessages: messages.length,
+              filteredMessages: filteredMessages.length,
+              selectedChannelId: selectedChannel?.id,
+              hasSelectedChannel: !!selectedChannel
+            });
+
+            return filteredMessages.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-white mb-2">
+                    {selectedChannel ? "No messages yet" : "Select a channel to start chatting"}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {selectedChannel
+                      ? "Be the first to send a message in this channel"
+                      : "Choose a channel from the sidebar to view messages"
+                    }
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <MessageList
-              messages={messages}
-              channelId={String(selectedChannel?.id)}
-              onPrependMessages={handlePrependMessages}
-              loadOlder={loadOlder}
-              type={selectedChannel?.type}
-              onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
-              onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
-              hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
-              onOpenTool={handleOpenTool}
-            />
-          )}
+            ) : (
+              <MessageList
+                messages={filteredMessages}
+                channelId={String(selectedChannel?.id)}
+                onPrependMessages={handlePrependMessages}
+                loadOlder={loadOlder}
+                type={selectedChannel?.type}
+                onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
+                onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
+                hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
+                onOpenTool={handleOpenTool}
+              />
+            );
+          })()}
 
           {selectedChannel && (
             <div className="flex-shrink-0">
