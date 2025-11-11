@@ -2,7 +2,7 @@ import RssPage from "./common/RssPage";
 
 function BlogsLayout() {
     return (
-        <RssPage rssUrl="https://www.wired.com/feed/rss" />
+        <RssPage rssUrl="https://vnexpress.net/rss/so-hoa.rss" />
 
     );
 }
