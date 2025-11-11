@@ -51,20 +51,32 @@ interface ChannelHeaderProps {
 }
 
 const getChannelIcon = (channel: Channel, user?: any) => {
-  if (channel.type === "group") 
-    return <Globe className="h-4 w-4 mr-2 text-green-500" />;
-  if (channel.type === "group-private") 
-    return <Lock className="h-4 w-4 mr-2 text-orange-500" />;
+  if (channel.type === "group")
+    return (
+      <div className="w-9 h-9 bg-green-500/15 border border-green-500/30 rounded-xl flex items-center justify-center">
+        <Globe className="h-5 w-5 text-green-400" />
+      </div>
+    );
+  if (channel.type === "group-private")
+    return (
+      <div className="w-9 h-9 bg-orange-500/15 border border-orange-500/30 rounded-xl flex items-center justify-center">
+        <Lock className="h-5 w-5 text-orange-400" />
+      </div>
+    );
   if (channel.type === "personal") {
     return (
-      <div className="relative mr-2">
-        <AvatarUser user={user} size={8} />
+      <div className="relative">
+        <AvatarUser user={user} size={9} />
         {/* Chấm online */}
         {user?.id && channel.members && <OnlineDot userId={user?.id} />}
       </div>
     );
   }
-  return <Hash className="h-4 w-4 mr-2 text-muted-foreground" />;
+  return (
+    <div className="w-9 h-9 bg-zinc-700/50 border border-zinc-600/30 rounded-xl flex items-center justify-center">
+      <Hash className="h-5 w-5 text-zinc-400" />
+    </div>
+  );
 };
 
 const getChannelTypeLabel = (type: string) => {
@@ -98,30 +110,36 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
   }, [channel, members, user]);
 
   return (
-    <div className="h-14 border-b border-border bg-card px-6 py-2 flex items-center justify-between">
-      <div className="flex items-center">
-        {channel.type === "personal"
-          ? getChannelIcon(channel, otherUser)
-          : getChannelIcon(channel)}
-        <h2 className="font-semibold text-foreground ml-2">
-          {channel.type === "personal" && otherUser
-            ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
-            : channel.name
-          }
-        </h2>
+    <div className="h-14 border-b border-zinc-700/50 bg-zinc-950/95 backdrop-blur-md px-6 py-0 flex items-center justify-between shadow-sm">
+      <div className="flex items-center min-w-0 flex-1">
+        <div className="flex items-center gap-3">
+          {channel.type === "personal"
+            ? getChannelIcon(channel, otherUser)
+            : getChannelIcon(channel)}
+          <h2 className="font-semibold text-white text-lg truncate">
+            {channel.type === "personal" && otherUser
+              ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
+              : channel.name
+            }
+          </h2>
+        </div>
+
         {channel.member_count > 2 && (
           <>
-            <Separator orientation="vertical" className="mx-3 h-4 " />
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-muted-foreground">
-                {channel.member_count} thành viên
-              </p>
-              <AvatarGroupStack 
-                users={channel.members || members} 
-                size="xs" 
-                max={5} 
-                overlap={true} 
-                overlapOffset={6}
+            <Separator orientation="vertical" className="mx-4 h-5 bg-zinc-600/40" />
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800/50 rounded-full border border-zinc-700/30">
+                <Users className="h-3.5 w-3.5 text-zinc-400" />
+                <span className="text-sm font-medium text-zinc-300">
+                  {channel.member_count}
+                </span>
+              </div>
+              <AvatarGroupStack
+                users={channel.members || members}
+                size="sm"
+                max={4}
+                overlap={true}
+                overlapOffset={8}
                 currentUserId={user?.id}
                 tooltip={true}
               />
@@ -129,14 +147,14 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
           </>
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {/* Nút mở attachment modal */}
         <button
-          className="p-2 rounded-lg hover:bg-muted transition-colors duration-200 group"
+          className="p-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
           title="Xem tệp đính kèm"
           onClick={() => setOpenAttachmentModal(true)}
         >
-          <Paperclip className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <Paperclip className="h-4.5 w-4.5 text-zinc-400 group-hover:text-zinc-200 transition-colors" />
           <span className="sr-only">Xem tệp đính kèm</span>
         </button>
 
@@ -152,48 +170,54 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className={`p-2 rounded-lg hover:bg-muted transition-colors duration-200 group ${selectedTool ? 'bg-blue-500/10 text-blue-400' : ''
+              className={`p-2.5 rounded-xl border transition-all duration-200 group ${selectedTool
+                  ? 'bg-blue-500/15 border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20'
+                  : 'hover:bg-zinc-800/60 border-transparent hover:border-zinc-600/30'
                 }`}
-              title="Tools"
+              title="AI Tools"
             >
-              <div className="flex items-center gap-1">
-                <Wrench className={`h-5 w-5 transition-colors ${selectedTool
-                  ? 'text-blue-400'
-                  : 'text-muted-foreground group-hover:text-foreground'
+              <div className="flex items-center gap-1.5">
+                <Wrench className={`h-4.5 w-4.5 transition-colors ${selectedTool
+                    ? 'text-blue-400'
+                    : 'text-zinc-400 group-hover:text-zinc-200'
                   }`} />
                 {selectedTool && (
                   <ChevronDown className="h-3 w-3 text-blue-400" />
                 )}
               </div>
-              <span className="sr-only">Tools</span>
+              <span className="sr-only">AI Tools</span>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-gray-900 border-gray-700">
+          <DropdownMenuContent align="end" className="w-64 bg-zinc-900/95 backdrop-blur-md border-zinc-700/50 shadow-2xl">
             {Object.values(TOOL_CONFIGS).map((tool) => (
               <DropdownMenuItem
                 key={tool.id}
                 onClick={() => onToolChange?.(selectedTool === tool.id ? null : tool.id)}
-                className={`cursor-pointer hover:bg-gray-800 ${selectedTool === tool.id ? 'bg-blue-900/50 text-blue-300' : 'text-gray-300'
+                className={`cursor-pointer transition-all duration-200 ${selectedTool === tool.id
+                    ? 'bg-blue-500/20 border-l-2 border-blue-400 text-blue-300'
+                    : 'hover:bg-zinc-800/70 text-zinc-200'
                   }`}
               >
-                <div className="flex items-center gap-3 w-full">
+                <div className="flex items-center gap-3 w-full py-1">
                   <span className="text-lg">{tool.icon}</span>
-                  <div className="flex-1">
-                    <div className="font-medium">{tool.name}</div>
-                    <div className="text-xs text-gray-500">{tool.description}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{tool.name}</div>
+                    <div className="text-xs text-zinc-400 truncate">{tool.description}</div>
                   </div>
                   {selectedTool === tool.id && (
-                    <X className="h-4 w-4" />
+                    <div className="flex-shrink-0">
+                      <X className="h-4 w-4 text-blue-400" />
+                    </div>
                   )}
                 </div>
               </DropdownMenuItem>
             ))}
             {selectedTool && (
               <>
-                <DropdownMenuSeparator className="bg-gray-700" />
+                <DropdownMenuSeparator className="bg-zinc-700/50" />
                 <DropdownMenuItem
                   onClick={() => onToolChange?.(null)}
-                  className="cursor-pointer hover:bg-gray-800 text-red-400"
+                  className="cursor-pointer hover:bg-red-500/20 text-red-400 font-medium"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Đóng tất cả tools
@@ -203,39 +227,43 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Separator */}
+        <div className="w-px h-6 bg-zinc-700/40 mx-1" />
+
         {/* Nút mở modal kết nối repo git */}
         <button
-          className="p-2 rounded-lg  hover:bg-muted transition-colors duration-200"
-          title="Chức năng GitHub"
+          className="p-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
+          title="GitHub Integration"
           onClick={() => setOpenGitModal(true)}
         >
-          <Github className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <Github className="h-4.5 w-4.5 text-zinc-400 group-hover:text-zinc-200 transition-colors" />
           <span className="sr-only">Kết nối repo Git</span>
         </button>
         <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <button
-              className="p-2 rounded-lg  hover:bg-muted transition-colors duration-200"
+              className="p-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
               title="Xem thành viên"
               onClick={() => {
                 setTab("members");
                 setOpen(true);
               }}
             >
-              <Users className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+              <Users className="h-4.5 w-4.5 text-zinc-400 group-hover:text-zinc-200 transition-colors" />
             </button>
           </DialogTrigger>
           <DialogTrigger asChild>
             <button
-              className="p-2 rounded-lg  hover:bg-muted transition-colors duration-200"
+              className="p-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
               title="Thông tin kênh"
               onClick={() => {
                 setTab("info");
                 setOpen(true);
               }}
             >
-              <Info className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+              <Info className="h-4.5 w-4.5 text-zinc-400 group-hover:text-zinc-200 transition-colors" />
             </button>
           </DialogTrigger>
 

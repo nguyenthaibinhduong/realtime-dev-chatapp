@@ -22,9 +22,10 @@ interface MasterLayoutProps {
     children: React.ReactNode;
     children_right?: React.ReactNode;
     isNotificationsEnabled?: boolean;
+    showSidebar?: boolean;
 }
 
-export default function MasterLayout({ menu, sidebar, children, children_right, isNotificationsEnabled }: MasterLayoutProps) {
+export default function MasterLayout({ menu, sidebar, children, children_right, isNotificationsEnabled, showSidebar = true }: MasterLayoutProps) {
     const isMobile = useIsMobile();
 
     // local toggle to show/hide right tools panel
@@ -44,20 +45,19 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
 
             {/* Sidebar */}
             {
-                sidebar && !isMobile &&
+                sidebar && showSidebar &&
                 <ResizablePanel
-                    defaultSize={isMobile ? 0 : isNotificationsEnabled ? 45 : 24}
-                    minSize={isMobile ? 0 : isNotificationsEnabled ? 30 : 22}
-                    maxSize={isMobile ? 0 : 50}
-                    className={`flex flex-col  ${isMobile ? "w-0 min-w-0 max-w-0" : ""}`}
-                    style={isMobile ? { width: 0, minWidth: 0, maxWidth: 0, padding: 0, overflow: "hidden" } : {}}
+                    defaultSize={isNotificationsEnabled ? 45 : 24}
+                    minSize={isNotificationsEnabled ? 30 : 22}
+                    maxSize={50}
+                    className="flex flex-col"
                 >
                     {sidebar ?? <div className="flex-1">No Sidebar</div>}
                 </ResizablePanel>
             }
 
             {/* Handle */}
-            <ResizableHandle withHandle className="opacity-0" />
+            {sidebar && showSidebar && <ResizableHandle withHandle className="opacity-0" />}
 
             {/* Main Content */}
             <ResizablePanel

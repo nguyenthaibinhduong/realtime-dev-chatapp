@@ -32,7 +32,7 @@ export default function ChatLayout() {
   const { toast } = useToast();
   const { user } = useAuth();
   const isMobile = useIsMobile();
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(!isMobile); // Desktop mặc định hiện, mobile mặc định ẩn
   const { registerHandler, unregisterHandler } = useNotificationActions();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -796,130 +796,38 @@ export default function ChatLayout() {
     });
   }, []);
 
+  // Toggle sidebar function
+  const handleToggleSidebar = useCallback(() => {
+    setShowSidebar(prev => !prev);
+  }, []);
+
   // Khi chọn kênh trên mobile thì ẩn sidebar
   const handleSelectChannelMobile = (channel: Channel | null) => {
     handleSelectChannel(channel);
-    if (isMobile) setShowSidebar(false);
+    if (isMobile && showSidebar) {
+      setShowSidebar(false); // Auto-hide sidebar khi chọn kênh trên mobile
+    }
   };
+
+  // Đồng bộ showSidebar với responsive - chỉ khi thay đổi từ mobile sang desktop
+  useEffect(() => {
+    // Khi chuyển từ mobile sang desktop, mặc định hiện sidebar
+    if (!isMobile) {
+      setShowSidebar(true);
+    }
+  }, [isMobile]); // Chỉ phụ thuộc vào isMobile, không phụ thuộc showSidebar
 
   return (
     <MasterLayout
-      menu={<MenubarLayout />}
+      menu={
+        <MenubarLayout
+          onToggleSidebar={handleToggleSidebar}
+          showSidebar={showSidebar}
+        />
+      }
+      showSidebar={!isMobile && showSidebar} // Desktop only
       sidebar={
-        isMobile ? (
-          <div>
-            <button
-              ref={navBtnRef}
-              className="fixed z-50 bg-primary text-white rounded-full p-2 shadow flex items-center justify-center"
-              style={{
-                left: navBtnPos.x,
-                top: navBtnPos.y,
-                width: 48,
-                height: 48,
-                touchAction: "none",
-                transition: draggingRef.current ? "none" : "box-shadow 0.2s",
-              }}
-              onClick={() => setShowSidebar((v) => !v)}
-              aria-label="Mở danh sách kênh"
-              onMouseDown={handleNavBtnMouseDown}
-              onTouchStart={handleNavBtnTouchStart}
-            >
-              <span className="flex items-center justify-center w-8 h-8 rounded-full">
-                <svg width={24} height={24} fill="none" viewBox="0 0 24 24">
-                  <rect
-                    x={4}
-                    y={6}
-                    width={16}
-                    height={2}
-                    rx={1}
-                    fill="currentColor"
-                  />
-                  <rect
-                    x={4}
-                    y={11}
-                    width={16}
-                    height={2}
-                    rx={1}
-                    fill="currentColor"
-                  />
-                  <rect
-                    x={4}
-                    y={16}
-                    width={16}
-                    height={2}
-                    rx={1}
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-            </button>
-            {showSidebar && (
-              <div
-                className="fixed inset-0 bg-black/60 z-40"
-                onClick={() => setShowSidebar(false)}
-              >
-                <div
-                  className="absolute top-0 left-0 h-full w-[80vw] max-w-xs bg-[#18181b] shadow-lg overflow-y-auto"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <SidebarLayout>
-                    <div className="flex items-center justify-between px-3 pt-2">
-                      <Dialog
-                        open={openSearchModal}
-                        onOpenChange={setOpenSearchModal}
-                      >
-                        <DialogTrigger asChild>
-                          <div
-                            className="flex items-center w-full bg-[#222] rounded px-3 py-2 cursor-pointer hover:bg-[#333] transition"
-                            title="Tìm kiếm kênh"
-                            onClick={() => setOpenSearchModal(true)}
-                            style={{ minHeight: 40 }}
-                          >
-                            <Search className="h-5 w-5 text-white mr-2" />
-                            <span className="text-white opacity-80 text-sm">
-                              Tìm kiếm ...
-                            </span>
-                          </div>
-                        </DialogTrigger>
-                        <DialogContent
-                          className="w-full max-w-2xl bg-[#18181b] text-white border-none"
-                          style={{
-                            background: "#18181b",
-                            color: "#fff",
-                            height: "85vh",
-                          }}
-                        >
-                          <DialogHeader>
-                            <DialogTitle className="text-white">
-                              Tìm kiếm kênh , người dùng
-                            </DialogTitle>
-                          </DialogHeader>
-                          <div className="px-3 pt-2 h-[70vh]">
-                            <ChannelSearch
-                              onSelectChannel={handleSelectChannelFromSearch}
-                              onJoinChannel={handleJoinChannelFromSearch}
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                    <ScrollArea className="flex-1 px-3">
-                      <ChannelSection
-                        channels={channels}
-                        selectedChannel={selectedChannel}
-                        onSelectChannel={handleSelectChannelMobile}
-                        onShowChannelTypeMenu={handleShowChannelTypeMenu}
-                        showChannelTypeMenu={showChannelTypeMenu}
-                        onChannelCreated={loadChannels}
-                        unreadMap={unreadMap} // truyền vào
-                      />
-                    </ScrollArea>
-                  </SidebarLayout>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
+        !isMobile ? ( // Desktop only
           <SidebarLayout>
             <div className="flex items-center justify-between px-3 pt-2">
               <Dialog open={openSearchModal} onOpenChange={setOpenSearchModal}>
@@ -970,10 +878,127 @@ export default function ChatLayout() {
               />
             </ScrollArea>
           </SidebarLayout>
-        )
+        ) : null // Mobile không có sidebar trong MasterLayout
       }
       children_right={renderToolComponent()}
     >
+      {/* Mobile Sidebar Overlay - Độc lập với MasterLayout */}
+      {isMobile && (
+        <div>
+          <button
+            ref={navBtnRef}
+            className="fixed z-50 bg-primary text-white rounded-full p-2 shadow flex items-center justify-center"
+            style={{
+              left: navBtnPos.x,
+              top: navBtnPos.y,
+              width: 48,
+              height: 48,
+              touchAction: "none",
+              transition: draggingRef.current ? "none" : "box-shadow 0.2s",
+            }}
+            onClick={() => setShowSidebar((v) => !v)}
+            aria-label="Mở danh sách kênh"
+            onMouseDown={handleNavBtnMouseDown}
+            onTouchStart={handleNavBtnTouchStart}
+          >
+            <span className="flex items-center justify-center w-8 h-8 rounded-full">
+              <svg width={24} height={24} fill="none" viewBox="0 0 24 24">
+                <rect
+                  x={4}
+                  y={6}
+                  width={16}
+                  height={2}
+                  rx={1}
+                  fill="currentColor"
+                />
+                <rect
+                  x={4}
+                  y={11}
+                  width={16}
+                  height={2}
+                  rx={1}
+                  fill="currentColor"
+                />
+                <rect
+                  x={4}
+                  y={16}
+                  width={16}
+                  height={2}
+                  rx={1}
+                  fill="currentColor"
+                />
+              </svg>
+            </span>
+          </button>
+          {showSidebar && (
+            <div
+              className="fixed inset-0 bg-black/60 z-40"
+              onClick={() => setShowSidebar(false)}
+            >
+              <div
+                className="absolute top-0 left-0 h-full w-[80vw] max-w-xs bg-[#18181b] shadow-lg overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <SidebarLayout>
+                  <div className="flex items-center justify-between px-3 pt-2">
+                    <Dialog
+                      open={openSearchModal}
+                      onOpenChange={setOpenSearchModal}
+                    >
+                      <DialogTrigger asChild>
+                        <div
+                          className="flex items-center w-full bg-[#222] rounded px-3 py-2 cursor-pointer hover:bg-[#333] transition"
+                          title="Tìm kiếm kênh"
+                          onClick={() => setOpenSearchModal(true)}
+                          style={{ minHeight: 40 }}
+                        >
+                          <Search className="h-5 w-5 text-white mr-2" />
+                          <span className="text-white opacity-80 text-sm">
+                            Tìm kiếm ...
+                          </span>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent
+                        className="w-full max-w-2xl bg-[#18181b] text-white border-none"
+                        style={{
+                          background: "#18181b",
+                          color: "#fff",
+                          height: "85vh",
+                        }}
+                      >
+                        <DialogHeader>
+                          <DialogTitle className="text-white">
+                            Tìm kiếm kênh , người dùng
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="px-3 pt-2 h-[70vh]">
+                          <ChannelSearch
+                            onSelectChannel={handleSelectChannelFromSearch}
+                            onJoinChannel={handleJoinChannelFromSearch}
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  <ScrollArea className="flex-1 px-3">
+                    <ChannelSection
+                      channels={channels}
+                      selectedChannel={selectedChannel}
+                      onSelectChannel={handleSelectChannelMobile}
+                      onShowChannelTypeMenu={handleShowChannelTypeMenu}
+                      showChannelTypeMenu={showChannelTypeMenu}
+                      onChannelCreated={loadChannels}
+                      unreadMap={unreadMap} // truyền vào
+                    />
+                  </ScrollArea>
+                </SidebarLayout>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Main Content */}
       <div className="flex-1 flex flex-col h-full">
         {selectedChannel && (
           <ChannelHeader
