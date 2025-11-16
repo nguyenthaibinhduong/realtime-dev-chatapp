@@ -38,18 +38,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-
-
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         // Check if user is authenticated (with improved check that considers refresh tokens)
         const userFromToken: any = await authService.getProfile();
         if (userFromToken) {
-          setUser(localStorage.getItem("app_user") ? JSON.parse(localStorage.getItem("app_user") as string) : userFromToken);
-        } else
-          console.error("Failed to get profile");
-
+          setUser(
+            localStorage.getItem("app_user")
+              ? JSON.parse(localStorage.getItem("app_user") as string)
+              : userFromToken
+          );
+        } else console.error("Failed to get profile");
       } catch (error) {
         console.error("Auth initialization error:", error);
       } finally {
@@ -59,10 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     initializeAuth();
-
   }, []);
-
-
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
@@ -71,8 +68,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.status && response.data) {
         setUser(response.data.user);
-
-
 
         toast({
           title: "Đăng nhập thành công",
@@ -109,7 +104,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
     try {
@@ -125,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         toast({
           title: "Đăng ký thành công",
-          description: "Chào mừng bạn đến với ứng dụng!",
+          description: "Vui lòng xác nhận email của bạn để tiếp tục.",
         });
 
         return { error: null };
@@ -158,8 +152,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-
-
   // Check if user is authenticated
   const isAuthenticated = () => !!user;
 
@@ -184,7 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signOut,
         isAuthenticated,
         refreshToken,
-        setUser
+        setUser,
       }}
     >
       {children}
