@@ -5,9 +5,24 @@ import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import "highlight.js/styles/github-dark.css";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sparkles, Loader2, AlertCircle, X, RefreshCw, FileCode2, Brain, Zap } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Sparkles,
+  Loader2,
+  AlertCircle,
+  X,
+  RefreshCw,
+  FileCode2,
+  Brain,
+  Zap,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { BASE_INSTRUCTIONS_VN } from "./promts/commitAnalysisPrompt";
 
 export interface CommitAnalysisProps {
   owner: string;
@@ -32,7 +47,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
         owner: props.owner,
         repo: props.repo,
         sha: props.sha,
-        prompt: props.prompt || "Phân tích các thay đổi trong commit này",
+        prompt: props.prompt || BASE_INSTRUCTIONS_VN,
       });
 
       setAnalysis(response.data);
@@ -97,7 +112,9 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                       {props.sha.slice(0, 7)}
                     </span>
                     <span className="text-zinc-500">•</span>
-                    <span className="text-zinc-300">{props.owner}/{props.repo}</span>
+                    <span className="text-zinc-300">
+                      {props.owner}/{props.repo}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -110,7 +127,9 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                     disabled={loading}
                     className="bg-zinc-900 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
                   >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                    <RefreshCw
+                      className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+                    />
                     Phân tích lại
                   </Button>
                 )}
@@ -139,9 +158,12 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                   </div>
                 </div>
                 <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold text-white">Đang phân tích commit...</h3>
+                  <h3 className="text-lg font-semibold text-white">
+                    Đang phân tích commit...
+                  </h3>
                   <p className="text-sm text-zinc-400 max-w-md">
-                    AI đang xem xét các thay đổi trong commit và chuẩn bị phân tích chi tiết
+                    AI đang xem xét các thay đổi trong commit và chuẩn bị phân
+                    tích chi tiết
                   </p>
                 </div>
                 <div className="space-y-3 animate-pulse w-full max-w-md">
@@ -159,7 +181,9 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                   <AlertCircle className="h-10 w-10 text-red-400" />
                 </div>
                 <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold text-red-400">Lỗi phân tích</h3>
+                  <h3 className="text-lg font-semibold text-red-400">
+                    Lỗi phân tích
+                  </h3>
                   <p className="text-sm text-zinc-400 max-w-md">{error}</p>
                 </div>
                 <Button
@@ -178,7 +202,9 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-2">
                     <FileCode2 className="h-5 w-5 text-emerald-400" />
-                    <h3 className="text-lg font-semibold text-white">Kết quả phân tích</h3>
+                    <h3 className="text-lg font-semibold text-white">
+                      Kết quả phân tích
+                    </h3>
                   </div>
                   <div className="h-px bg-gradient-to-r from-purple-600 via-blue-600 to-transparent"></div>
                 </div>
@@ -208,7 +234,10 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                         />
                       ),
                       p: ({ node, ...props }) => (
-                        <p className="mb-4 leading-8 text-zinc-300 text-base" {...props} />
+                        <p
+                          className="mb-4 leading-8 text-zinc-300 text-base"
+                          {...props}
+                        />
                       ),
                       ul: ({ node, ...props }) => (
                         <ul
@@ -223,7 +252,10 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                         />
                       ),
                       li: ({ node, children, ...props }) => (
-                        <li className="ml-0 text-zinc-300 flex items-start gap-3 p-2 rounded-lg hover:bg-zinc-900/30 transition-colors" {...props}>
+                        <li
+                          className="ml-0 text-zinc-300 flex items-start gap-3 p-2 rounded-lg hover:bg-zinc-900/30 transition-colors"
+                          {...props}
+                        >
                           <span className="inline-flex items-center justify-center w-1.5 h-1.5 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 mt-3 flex-shrink-0"></span>
                           <span className="flex-1">{children}</span>
                         </li>
@@ -273,10 +305,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                       ),
                       table: ({ node, ...props }) => (
                         <div className="overflow-x-auto mb-4 rounded-lg border border-zinc-700">
-                          <table
-                            className="min-w-full"
-                            {...props}
-                          />
+                          <table className="min-w-full" {...props} />
                         </div>
                       ),
                       th: ({ node, ...props }) => (
