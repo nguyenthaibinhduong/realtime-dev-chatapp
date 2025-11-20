@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Image, Paperclip, X, Code2, FileText, Bug, Sparkles, LucideIcon } from "lucide-react";
+import { Send, Image, Paperclip, X, Code2, FileText, Bug, Sparkles, LucideIcon, Plus, Smile, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { BARequirementForm, BARequirementData } from "./BARequirementForm";
@@ -111,7 +111,9 @@ export const MessageInput = ({
   const [isSending, setIsSending] = useState(false);
   const [showBAForm, setShowBAForm] = useState(false);
   const [showTesterForm, setShowTesterForm] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Prevent multiple forms from opening at once
   const openBAForm = () => {
@@ -154,6 +156,20 @@ export const MessageInput = ({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowAttachMenu(false);
+      }
+    };
+
+    if (showAttachMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showAttachMenu]);
 
   // Load edit message content when editMessage changes
   useEffect(() => {
@@ -326,90 +342,151 @@ export const MessageInput = ({
           )}
         </div>
 
-        {/* Input Section - Compact Design */}
-        <div className="p-2">
-          <div className="w-full flex items-center gap-1.5">
-            {/* Action Buttons - All in one row */}
-            <div className="flex items-center gap-0.5">
-              {/* File Upload Buttons */}
-              {!editMessage && ACTION_BUTTONS.map((button) => (
-                <Tooltip key={button.id}>
-                  <TooltipTrigger asChild>
-                    <label className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded transition-colors ${button.activeColorClass}`}>
-                      <button.icon className={`h-4 w-4 transition-colors ${button.colorClass}`} />
-                      <input
-                        type="file"
-                        accept={button.accept}
-                        multiple={button.multiple}
-                        className="hidden"
-                        onChange={(e) => onFiles(e.target.files)}
-                      />
-                    </label>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p>{button.label}</p>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
-
-              {/* Code Editor Toggle */}
+        {/* Input Section - WhatsApp Style */}
+        <div className="p-3">
+          <div className="w-full flex items-end gap-2">
+            {/* Plus Button with Popup Menu */}
+            <div className="relative" ref={menuRef}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    onClick={handleCodeEditorToggle}
-                    className={`flex h-8 w-8 items-center justify-center rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 ${isCodeEditorOpen
-                      ? "bg-[#007acc] text-white shadow-md"
-                      : "hover:bg-primary/80 text-muted-foreground hover:text-white"
+                    onClick={() => setShowAttachMenu(!showAttachMenu)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${showAttachMenu
+                        ? "bg-[#00a884] text-white rotate-45"
+                        : "bg-gray-800 hover:bg-gray-700 text-gray-300"
                       }`}
                   >
-                    <Code2 className="h-4 w-4 transition-colors" />
+                    <Plus className="h-5 w-5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{isCodeEditorOpen ? "Đóng Code Editor" : "Mở Code Editor"}</p>
+                  <p>{showAttachMenu ? "Đóng menu" : "Đính kèm"}</p>
                 </TooltipContent>
               </Tooltip>
 
-              {/* <div className="w-px h-6 bg-border/50 mx-1" /> */}
+              {/* Popup Menu */}
+              {showAttachMenu && (
+                <div className="absolute bottom-full left-0 mb-2 bg-gray-900 rounded-xl shadow-2xl border border-gray-700 p-2 min-w-[200px] animate-in slide-in-from-bottom-2 duration-200">
+                  {/* File Upload Options */}
+                  {!editMessage && (
+                    <>
+                      <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors group">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors">
+                          <Image className="h-4 w-4 text-purple-400" />
+                        </div>
+                        <span className="text-sm text-gray-200 font-medium">Hình ảnh</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={(e) => {
+                            onFiles(e.target.files);
+                            setShowAttachMenu(false);
+                          }}
+                        />
+                      </label>
 
-              {/* Function Buttons */}
-              {FUNCTION_BUTTONS.map((button) => {
-                const isActive =
-                  (button.id === 'ba-requirement' && showBAForm) ||
-                  (button.id === 'debug-report' && showTesterForm);
+                      <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors group">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/20 group-hover:bg-blue-500/30 transition-colors">
+                          <Paperclip className="h-4 w-4 text-blue-400" />
+                        </div>
+                        <span className="text-sm text-gray-200 font-medium">Tệp đính kèm</span>
+                        <input
+                          type="file"
+                          multiple
+                          className="hidden"
+                          onChange={(e) => {
+                            onFiles(e.target.files);
+                            setShowAttachMenu(false);
+                          }}
+                        />
+                      </label>
 
-                const handleClick = () => {
-                  if (button.id === 'ba-requirement') openBAForm();
-                  else if (button.id === 'debug-report') openTesterForm();
-                };
+                      <div className="h-px bg-gray-700 my-2" />
+                    </>
+                  )}
 
-                return (
-                  <Tooltip key={button.id}>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={handleClick}
-                        disabled={button.disabled}
-                        className={`flex h-8 w-8 items-center justify-center rounded transition-all ${isActive
-                          ? button.activeColorClass
-                          : `${button.colorClass} ${button.disabled ? 'cursor-not-allowed' : `hover:bg-${button.id === 'ba-requirement' ? 'blue' : button.id === 'debug-report' ? 'red' : 'purple'}-950/50`}`
-                          }`}
-                      >
-                        <button.icon className="h-4 w-4 transition-colors" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p>{button.label}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
+                  {/* Code Editor */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleCodeEditorToggle();
+                      setShowAttachMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                  >
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isCodeEditorOpen
+                        ? "bg-[#007acc] text-white"
+                        : "bg-teal-500/20 group-hover:bg-teal-500/30"
+                      }`}>
+                      <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-white" : "text-teal-400"}`} />
+                    </div>
+                    <span className="text-sm text-gray-200 font-medium">Code Editor</span>
+                  </button>
+
+                  <div className="h-px bg-gray-700 my-2" />
+
+                  {/* Function Buttons */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openBAForm();
+                      setShowAttachMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                  >
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showBAForm
+                        ? "bg-blue-500 text-white"
+                        : "bg-blue-500/20 group-hover:bg-blue-500/30"
+                      }`}>
+                      <FileText className={`h-4 w-4 ${showBAForm ? "text-white" : "text-blue-400"}`} />
+                    </div>
+                    <span className="text-sm text-gray-200 font-medium">BA Requirement</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openTesterForm();
+                      setShowAttachMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                  >
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showTesterForm
+                        ? "bg-red-500 text-white"
+                        : "bg-red-500/20 group-hover:bg-red-500/30"
+                      }`}>
+                      <Bug className={`h-4 w-4 ${showTesterForm ? "text-white" : "text-red-400"}`} />
+                    </div>
+                    <span className="text-sm text-gray-200 font-medium">Debug Report</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-not-allowed opacity-40"
+                  >
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-500/20">
+                      <Sparkles className="h-4 w-4 text-purple-400" />
+                    </div>
+                    <span className="text-sm text-gray-200 font-medium">AI Assistant</span>
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Input Field - Compact */}
+            {/* Input Field - WhatsApp Style */}
             <div className="relative flex-1">
-              <div className="rounded border border-border bg-[hsl(var(--chat-input))] px-2 py-1.5 shadow-sm flex items-center">
+              <div className="rounded-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 px-4 py-2 shadow-lg flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors"
+                >
+                  <Smile className="h-5 w-5" />
+                </button>
+
                 <textarea
                   ref={taRef}
                   rows={1}
@@ -420,31 +497,48 @@ export const MessageInput = ({
                   placeholder={
                     editMessage
                       ? "Chỉnh sửa tin nhắn..."
-                      : `Nhắn tin đến #${channelId}...`
+                      : "Nhập tin nhắn"
                   }
-                  className="w-full resize-none bg-transparent pr-9 text-sm text-white placeholder:text-muted-foreground focus:outline-none"
-                  style={{ minHeight: 28, maxHeight: 100 }}
+                  className="w-full resize-none bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none"
+                  style={{ minHeight: 24, maxHeight: 100 }}
                 />
-                {canSend && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={handleSend}
-                        disabled={isSending}
-                        className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground transition-all disabled:opacity-50"
-                        aria-label="Gửi"
-                      >
-                        <Send className="h-3.5 w-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p>Gửi (Enter)</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
               </div>
             </div>
+
+            {/* Send/Mic Button - WhatsApp Style */}
+            {canSend ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleSend}
+                    disabled={isSending}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white transition-all disabled:opacity-50 shadow-lg"
+                    aria-label="Gửi"
+                  >
+                    <Send className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p>Gửi (Enter)</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 transition-all"
+                    aria-label="Ghi âm"
+                  >
+                    <Mic className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p>Ghi âm tin nhắn</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
 
           {/* Preview file */}

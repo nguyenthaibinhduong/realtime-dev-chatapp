@@ -21,6 +21,7 @@ import { ChannelSearch } from "../channels/ChannelSearch";
 import { Button } from "@/components/ui/button";
 import ToolShareMessage from "./type/ToolShareMessage";
 import CodeCardMessage from "./type/CodeCardMessage";
+import { url } from "inspector";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
@@ -493,9 +494,11 @@ export const MessageList: React.FC<Props> = ({
 
   return (
     <ScrollArea
-      className="p-4 overflow-auto"
+      className="p-4 overflow-auto bg-gradient-to-b from-gray-900 to-black"
       style={{
-        backgroundImage: pinnedMessages.length > 0 ? "linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0))" : undefined,
+        // backgroundImage: 'url(/src/assets/image/background.png)',
+        // backgroundRepeat: 'repeat',
+        // backgroundSize: '300px',
         height: hasInputPreview ? "calc(100vh - 24vh)" : "calc(100vh - 20vh)",
         transition: "height 0.3s ease-in-out"
       }}
