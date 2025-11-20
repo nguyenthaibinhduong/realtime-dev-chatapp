@@ -1112,6 +1112,7 @@ export default function ChatLayout() {
           {selectedChannel && (
             <div className="flex-shrink-0">
               <MessageInput
+                channelMembers={members}
                 channelId={selectedChannel.id}
                 onSend={sendMessage}
                 replyMessage={replyTo || undefined}

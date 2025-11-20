@@ -111,7 +111,7 @@ const CodeCardMessage = memo(({
         <div
             data-message-id={message.id}
             className={cn(
-                "flex gap-1 group px-3 py-1.5 transition-all duration-100 rounded-md",
+                "flex gap-1 group px-2 py-0.5 transition-all duration-100 rounded-md",
                 isMe ? "flex-row-reverse" : "flex-row"
             )}
             onMouseEnter={handleMouseEnter}
@@ -119,9 +119,11 @@ const CodeCardMessage = memo(({
         >
             {/* Avatar */}
             {showSenderInfo && !isMe ? (
-                <AvatarUser user={message?.sender} isMe={isMe} size={8} />
+                <div className="mr-2 flex-shrink-0">
+                    <AvatarUser user={message?.sender} isMe={isMe} size={8} />
+                </div>
             ) : !isMe ? (
-                <div className="w-9 flex-shrink-0" />
+                <div className="w-6 flex-shrink-0" />
             ) : null}
 
             {/* Message content container */}
@@ -133,7 +135,7 @@ const CodeCardMessage = memo(({
             )}>
                 {/* Sender name */}
                 {showSenderInfo && !isMe && (
-                    <span className="text-[11px] font-medium text-gray-400 px-2 mb-0.5">
+                    <span className="text-[9px] font-medium text-gray-400 px-1 mb-0.5">
                         {message.sender?.username || 'Unknown'}
                     </span>
                 )}
@@ -160,14 +162,14 @@ const CodeCardMessage = memo(({
                         isHovered && "shadow-xl border-gray-600/70"
                     )}>
                         {/* Header */}
-                        <div className="flex items-center justify-between px-4 py-3 bg-gray-800/70 border-b border-gray-700/50">
+                        <div className="flex items-center justify-between px-3 py-2 bg-gray-800/70 border-b border-gray-700/50">
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                                 <Code2 className="h-4 w-4 text-blue-400 flex-shrink-0" />
                                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                                    <span className="text-sm font-medium text-white truncate">
+                                    <span className="text-[11px] font-medium text-white truncate">
                                         {message.text || `${author} đã chia sẻ code`}
                                     </span>
-                                    <Badge variant="outline" className={cn("text-xs border-gray-600 flex-shrink-0", langInfo.color)}>
+                                    <Badge variant="outline" className={cn("text-[9px] border-gray-600 flex-shrink-0 px-1 py-0", langInfo.color)}>
                                         {langInfo.icon} {langInfo.name}
                                     </Badge>
                                 </div>
@@ -180,10 +182,10 @@ const CodeCardMessage = memo(({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => setIsExpanded(!isExpanded)}
-                                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                        className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
                                         title={isExpanded ? "Thu gọn" : "Xem toàn bộ"}
                                     >
-                                        {isExpanded ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                                        {isExpanded ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                                     </Button>
                                 )}
 
@@ -192,10 +194,10 @@ const CodeCardMessage = memo(({
                                     variant="ghost"
                                     size="sm"
                                     onClick={handleCopyCode}
-                                    className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                    className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
                                     title="Copy toàn bộ code"
                                 >
-                                    <Copy className="h-3.5 w-3.5" />
+                                    <Copy className="h-3 w-3" />
                                 </Button>
 
                                 {/* Open in Tool2 */}
@@ -203,10 +205,10 @@ const CodeCardMessage = memo(({
                                     variant="ghost"
                                     size="sm"
                                     onClick={handleOpenInTool}
-                                    className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                    className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
                                     title="Chỉnh sửa trong Code Editor"
                                 >
-                                    <ExternalLink className="h-3.5 w-3.5" />
+                                    <ExternalLink className="h-3 w-3" />
                                 </Button>
                             </div>
                         </div>
@@ -214,7 +216,7 @@ const CodeCardMessage = memo(({
                         {/* Code Preview */}
                         <div className="relative">
                             <pre className={cn(
-                                "text-sm text-gray-300 font-mono p-4 bg-gray-950/50",
+                                "text-[11px] text-gray-300 font-mono p-2 bg-gray-950/50",
                                 "overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800",
                                 isExpanded ? "max-h-96 overflow-y-auto" : "max-h-32 overflow-y-hidden"
                             )}>
@@ -239,8 +241,8 @@ const CodeCardMessage = memo(({
                         </div>
 
                         {/* Footer */}
-                        <div className="flex items-center justify-between px-4 py-2 bg-gray-800/50 border-t border-gray-700/30">
-                            <div className="flex items-center gap-3 text-xs text-gray-400 min-w-0 flex-1">
+                        <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800/50 border-t border-gray-700/30">
+                            <div className="flex items-center gap-2 text-[9px] text-gray-400 min-w-0 flex-1">
                                 <span className="flex items-center gap-1 flex-shrink-0">
                                     <Code2 className="h-3 w-3" />
                                     {totalLines} dòng
@@ -263,7 +265,7 @@ const CodeCardMessage = memo(({
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleOpenInTool}
-                                className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 flex-shrink-0 ml-2"
+                                className="h-5 px-1.5 text-[9px] text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 flex-shrink-0 ml-2"
                             >
                                 Chỉnh sửa
                             </Button>

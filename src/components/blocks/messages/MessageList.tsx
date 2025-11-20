@@ -495,6 +495,7 @@ export const MessageList: React.FC<Props> = ({
     <ScrollArea
       className="p-4 overflow-auto"
       style={{
+        backgroundImage: pinnedMessages.length > 0 ? "linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0))" : undefined,
         height: hasInputPreview ? "calc(100vh - 24vh)" : "calc(100vh - 20vh)",
         transition: "height 0.3s ease-in-out"
       }}

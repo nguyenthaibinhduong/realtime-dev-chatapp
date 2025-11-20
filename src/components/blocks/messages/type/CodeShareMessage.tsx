@@ -1,8 +1,19 @@
-import { memo, useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Code } from "lucide-react";
+import { cn } from "@/lib/utils";
 import AvatarUser from "@/components/common/AvartarUser";
+import {
+    formatMessageTime,
+    COLORS,
+    TYPOGRAPHY,
+    SPACING,
+    BORDERS,
+    SHADOWS,
+    TRANSITIONS,
+    getMessageContainerClasses,
+    LAYOUT
+} from "./messageStyles";
 
 interface CodeShareMessageProps {
     message: any;
@@ -34,15 +45,6 @@ const CodeShareMessage = memo(({
     const installation_id = jsonData.installation_id;
     const json_code_data = jsonData.code_text || "No code shared";
 
-
-
-    const formatTime = (date: string) => {
-        return new Date(date).toLocaleTimeString("vi-VN", {
-            hour: "2-digit",
-            minute: "2-digit",
-        });
-    };
-
     const handleClick = () => {
         onOpenCode({
             repo,
@@ -55,45 +57,61 @@ const CodeShareMessage = memo(({
     };
 
     return (
-        <div className={`flex my-4 ${isMe ? "justify-end" : "justify-start"}`}>
+        <div className={cn(
+            "flex my-3",
+            isMe ? "justify-end" : "justify-start"
+        )}>
             {/* Avatar người gửi */}
             {!isMe && showSenderInfo && (
-                <div className="mr-3 flex flex-col items-center justify-center">
-                    <AvatarUser user={message?.sender} isMe={isMe} size={24} />
-                    {hoveredId === message.id && (
-                        <div className="absolute left-1/2 -translate-x-1/2 top-10 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">
-                            {message?.sender?.username}
-                        </div>
-                    )}
+                <div className="mr-2 flex flex-col items-center justify-center">
+                    <AvatarUser user={message?.sender} isMe={isMe} size={8} />
                 </div>
             )}
 
             <div
                 onClick={handleClick}
-                className={`flex flex-col hover:cursor-pointer items-stretch w-full max-w-xl ${!isMe && showSenderInfo ? "" : "ml-10"}`}
+                className={cn(
+                    "flex flex-col cursor-pointer items-stretch w-full",
+                    LAYOUT.maxWidth.card,
+                    TRANSITIONS.normal,
+                    !isMe && !showSenderInfo && "ml-10"
+                )}
             >
                 {/* Tiêu đề repo */}
-                <div className="rounded-t-xl bg-blue-600 px-6 py-2 text-white font-semibold text-sm flex items-center gap-2">
+                <div className={cn(
+                    "rounded-t-lg bg-blue-600 px-3 py-1.5 flex items-center gap-2",
+                    COLORS.text.primary,
+                    TYPOGRAPHY.weight.semibold,
+                    TYPOGRAPHY.size.sm
+                )}>
                     <Code className="h-4 w-4 text-white" />
-                    <span>{repo?.full_name}</span>
-                    <span className="ml-auto font-mono text-blue-300">
+                    <span className="flex-1 truncate">{repo?.full_name}</span>
+                    <span className="font-mono text-blue-200 text-xs">
                         {codePath?.split("/").pop()}
                     </span>
                 </div>
 
                 {/* Nội dung */}
-                <div className="bg-zinc-900 border border-zinc-700 rounded-b-xl px-6 py-4 flex flex-col items-center shadow-lg">
+                <div className={cn(
+                    "rounded-b-lg px-3 py-2 flex flex-col items-center",
+                    COLORS.bg.card,
+                    COLORS.border.default,
+                    "border",
+                    SHADOWS.lg
+                )}>
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-blue-400">Chia sẻ code</span>
-                        <span className="text-xs text-zinc-400 ml-2">
-                            {formatTime(message.send_at || message.created_at)}
+                        <span className={cn(TYPOGRAPHY.weight.semibold, "text-blue-400")}>
+                            Chia sẻ code
+                        </span>
+                        <span className={cn(TYPOGRAPHY.size.xs, COLORS.text.mutedDark, "ml-2")}>
+                            {formatMessageTime(message.send_at || message.created_at)}
                         </span>
                     </div>
 
-                    <div className="text-sm text-white mb-2 text-center">
-                        <span className="font-semibold">{message?.sender?.username}</span>
+                    <div className={cn(TYPOGRAPHY.size.base, COLORS.text.primary, "mb-2 text-center")}>
+                        <span className={TYPOGRAPHY.weight.semibold}>{message?.sender?.username}</span>
                         <span className="mx-1">đã chia sẻ file</span>
-                        <span className="font-mono text-blue-300">{codePath?.split("/").pop()}</span>
+                        <span className="font-mono text-blue-400">{codePath?.split("/").pop()}</span>
                         <span className="mx-1">từ repo</span>
                         <span className="font-mono text-emerald-400">{repo?.full_name}</span>
                     </div>
@@ -101,7 +119,7 @@ const CodeShareMessage = memo(({
                     <div className="flex items-center gap-2 mt-2">
                         <Button
                             size="sm"
-                            className="bg-blue-600 text-white hover:bg-blue-700"
+                            className="bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                             onClick={handleClick}
                         >
                             <Code className="h-4 w-4 mr-1" /> Xem code

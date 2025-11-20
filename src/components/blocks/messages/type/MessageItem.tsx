@@ -171,7 +171,7 @@ const MessageItem = memo(({
         <div
             data-message-id={message.id}
             className={cn(
-                "flex gap-1 group py-1 transition-all duration-100 rounded-md",
+                "flex gap-1 group py-0.5 transition-all duration-100 rounded-md",
                 isMe ? "flex-row-reverse" : "flex-row"
             )}
             onMouseEnter={handleMouseEnter}
@@ -179,9 +179,11 @@ const MessageItem = memo(({
         >
             {/* Avatar */}
             {showSenderInfo && !isMe ? (
-                <AvatarUser user={message?.sender} isMe={isMe} size={8} />
+                <div className="mr-2 flex-shrink-0">
+                    <AvatarUser user={message?.sender} isMe={isMe} size={8} />
+                </div>
             ) : !isMe ? (
-                <div className="w-8 flex-shrink-0" />
+                <div className="w-10 flex-shrink-0" />
             ) : null}
 
             {/* Message content container */}
@@ -191,7 +193,7 @@ const MessageItem = memo(({
             )}>
                 {/* Sender name */}
                 {showSenderInfo && !isMe && !isRemovedMessage && (
-                    <span className="text-[11px] font-medium text-gray-400 px-2 mb-0.5">
+                    <span className="text-[9px] font-medium text-gray-400 px-1 mb-0.5">
                         {message.sender?.username || 'Unknown'}
                     </span>
                 )}
@@ -199,20 +201,20 @@ const MessageItem = memo(({
                 {/* Removed Message Display */}
                 {isRemovedMessage ? (
                     <div className={cn(
-                        "relative flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed transition-all duration-200",
+                        "relative flex items-center gap-2 px-2 py-1.5 rounded-lg border border-dashed transition-all duration-200",
                         isMe
                             ? "bg-gray-800/30 border-gray-700/50 text-gray-500"
                             : "bg-gray-900/30 border-gray-700/50 text-gray-500"
                     )}>
                         <div className="flex-1">
-                            <p className="text-[13px] italic">
+                            <p className="text-[11px] italic">
                                 {isMe ? "Bạn đã xóa tin nhắn này" : "Tin nhắn đã bị xóa"}
                             </p>
                             <div className={cn(
-                                "flex items-center gap-1 mt-1",
+                                "flex items-center gap-1 mt-0.5",
                                 isMe ? "justify-end" : "justify-start"
                             )}>
-                                <span className="text-[10px] font-medium text-gray-600">
+                                <span className="text-[9px] font-medium text-gray-600">
                                     {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
                                         hour: '2-digit',
                                         minute: '2-digit'
@@ -242,8 +244,8 @@ const MessageItem = memo(({
                             isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
                             !hasOnlyImages && (
                                 isMe
-                                    ? "bg-blue-600 text-white shadow-sm px-3 py-2"
-                                    : "bg-gray-800 text-gray-100 border border-gray-700 shadow-sm px-3 py-2"
+                                    ? "bg-blue-600 text-white shadow-sm px-2.5 py-1.5"
+                                    : "bg-gray-800 text-gray-100 border border-gray-700 shadow-sm px-2.5 py-1.5"
                             ),
                             isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-600",
                             isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700",
@@ -256,7 +258,7 @@ const MessageItem = memo(({
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); onJumpToMessage?.(String(message.replyTo.id)); }}
                                     className={cn(
-                                        "mb-2 w-full text-left group/reply rounded-md border px-2 py-1.5",
+                                        "mb-1.5 w-full text-left group/reply rounded-md border px-1.5 py-1",
                                         isMe ? "border-blue-400/30 bg-blue-900 hover:bg-blue-600/30"
                                             : "border-gray-700 bg-gray-900/40 hover:bg-gray-900/60"
                                     )}
@@ -265,12 +267,12 @@ const MessageItem = memo(({
                                     <div className="flex items-start gap-2">
                                         <div className={cn("w-0.5 rounded", isMe ? "bg-blue-300" : "bg-blue-500")} />
                                         <div className="flex-1 min-w-0">
-                                            <div className="text-[12px]">
+                                            <div className="text-[10px]">
                                                 <span className="opacity-80">Trả lời </span>
                                                 <span className="font-semibold">{message.replyTo.sender}</span>
                                             </div>
                                             {message.replyTo.text ? (
-                                                <div className="text-[12px] opacity-80 truncate">
+                                                <div className="text-[10px] opacity-80 truncate">
                                                     {message.replyTo.text}
                                                 </div>
                                             ) : null}
@@ -281,7 +283,7 @@ const MessageItem = memo(({
 
                             {message.text && (
                                 <p className={cn(
-                                    "text-[14px] leading-relaxed whitespace-pre-wrap break-words",
+                                    "text-[12px] leading-relaxed whitespace-pre-wrap break-words",
                                     isMe ? "text-white" : "text-gray-200"
                                 )}>
                                     {message.text}
@@ -312,11 +314,11 @@ const MessageItem = memo(({
 
                             {!hasOnlyImages && (
                                 <div className={cn(
-                                    "flex items-center gap-1 mt-1",
+                                    "flex items-center gap-1 mt-0.5",
                                     isMe ? "justify-end" : "justify-start"
                                 )}>
                                     <span className={cn(
-                                        "text-[10px] font-medium",
+                                        "text-[9px] font-medium",
                                         isMe ? "text-blue-200" : "text-gray-400"
                                     )}>
                                         {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
@@ -330,10 +332,10 @@ const MessageItem = memo(({
 
                         {hasOnlyImages && (
                             <div className={cn(
-                                "flex items-center gap-1 mt-1 px-2",
+                                "flex items-center gap-1 mt-0.5 px-1",
                                 isMe ? "justify-end" : "justify-start"
                             )}>
-                                <span className="text-[10px] font-medium text-gray-400">
+                                <span className="text-[9px] font-medium text-gray-400">
                                     {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
                                         hour: '2-digit',
                                         minute: '2-digit'
@@ -378,7 +380,7 @@ const MessageItem = memo(({
 
                 {statusLabel && (
                     <div className={cn(
-                        "px-2 flex items-center",
+                        "px-1 flex items-center",
                         isMe ? "justify-end" : "justify-start"
                     )}>
                         {statusLabel}

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 const AvatarUser = ({
   user,
   isMe = false,
-  size = 8,
+  size = 6,
 }: {
   user: any;
   isMe?: boolean;

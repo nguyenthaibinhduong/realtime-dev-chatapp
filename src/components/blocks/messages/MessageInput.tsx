@@ -1,6 +1,72 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Image, Paperclip, X, Code2 } from "lucide-react";
+import { Send, Image, Paperclip, X, Code2, FileText, Bug, Sparkles, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { BARequirementForm, BARequirementData } from "./BARequirementForm";
+import { TesterDebugForm, TesterDebugData } from "./TesterDebugForm";
+import { Member } from "@/types/channel";
+import { Message } from "@/types/message";
+
+// Button configuration
+interface ActionButton {
+  id: string;
+  icon: LucideIcon;
+  label: string;
+  colorClass: string;
+  activeColorClass: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  accept?: string;
+  multiple?: boolean;
+  isFileInput?: boolean;
+}
+
+const ACTION_BUTTONS: ActionButton[] = [
+  {
+    id: 'image',
+    icon: Image,
+    label: 'Ảnh',
+    colorClass: 'text-green-400/70 hover:text-green-300',
+    activeColorClass: 'hover:bg-green-950/50',
+    isFileInput: true,
+    accept: 'image/*',
+    multiple: true
+  },
+  {
+    id: 'attachment',
+    icon: Paperclip,
+    label: 'Tệp đính kèm',
+    colorClass: 'text-amber-400/70 hover:text-amber-300',
+    activeColorClass: 'hover:bg-amber-950/50',
+    isFileInput: true,
+    multiple: true
+  },
+];
+
+const FUNCTION_BUTTONS: ActionButton[] = [
+  {
+    id: 'ba-requirement',
+    icon: FileText,
+    label: 'BA Requirement',
+    colorClass: 'text-blue-400/70 hover:text-blue-300',
+    activeColorClass: 'bg-blue-950 text-blue-300 ring-2 ring-blue-500',
+  },
+  {
+    id: 'debug-report',
+    icon: Bug,
+    label: 'Debug Report',
+    colorClass: 'text-red-400/70 hover:text-red-300',
+    activeColorClass: 'bg-red-950 text-red-300 ring-2 ring-red-500',
+  },
+  {
+    id: 'ai-assistant',
+    icon: Sparkles,
+    label: 'AI Assistant (Coming Soon)',
+    colorClass: 'text-purple-400/40',
+    activeColorClass: '',
+    disabled: true
+  }
+];
 
 interface MessageInputProps {
   channelId: string;
@@ -11,6 +77,8 @@ interface MessageInputProps {
   onCancelEdit?: () => void;
   onToggleCodeEditor?: () => void; // <-- Thay đổi thành toggle
   isCodeEditorOpen?: boolean; // <-- Thêm state để biết trạng thái
+  channelMembers?: Array<Member | any>;
+  channelMessages?: Array<Message | any>;
 }
 
 export type ReplyMessage = {
@@ -33,25 +101,59 @@ export const MessageInput = ({
   editMessage,
   onCancelEdit,
   onToggleCodeEditor,
-  isCodeEditorOpen = false
+  isCodeEditorOpen = false,
+  channelMembers = [],
+  channelMessages = []
 }: MessageInputProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [showBAForm, setShowBAForm] = useState(false);
+  const [showTesterForm, setShowTesterForm] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
-  // auto height cho textarea
+  // Prevent multiple forms from opening at once
+  const openBAForm = () => {
+    setShowTesterForm(false);
+    setShowBAForm(true);
+  };
+
+  const openTesterForm = () => {
+    setShowBAForm(false);
+    setShowTesterForm(true);
+  };
+
+  // auto height cho textarea - compact version
   useEffect(() => {
     if (!taRef.current) return;
     const el = taRef.current;
-    el.style.height = "32px";
-    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+    el.style.height = "28px";
+    el.style.height = Math.min(el.scrollHeight, 100) + "px";
   }, [newMessage]);
 
   useEffect(() => {
     taRef.current?.focus();
   }, [channelId]);
+
+  // Keyboard shortcuts for forms
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Shift+B for BA Form
+      if (e.ctrlKey && e.shiftKey && e.key === 'B') {
+        e.preventDefault();
+        openBAForm();
+      }
+      // Ctrl+Shift+D for Debug Form
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        openTesterForm();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Load edit message content when editMessage changes
   useEffect(() => {
@@ -142,177 +244,258 @@ export const MessageInput = ({
     onToggleCodeEditor?.();
   };
 
+  // Handle BA Requirement submit
+  const handleBASubmit = (data: BARequirementData) => {
+    console.log("✅ BA Requirement submitted:", data);
+    // TODO: Send BA requirement as special message type
+    onSend?.(
+      `📋 **BA Requirement: ${data.projectName}**\n\n${data.requirements.map((r, i) => `${i + 1}. ${r}`).join('\n')}\n\n${data.notes ? `📝 Ghi chú: ${data.notes}` : ''}`,
+      data.attachments,
+      { replyTo: replyMessage }
+    );
+  };
+
+  // Handle Tester Debug submit
+  const handleTesterSubmit = (data: TesterDebugData) => {
+    console.log("✅ Tester Debug Report submitted:", data);
+    // TODO: Send debug report as special message type
+    const projectInfo = data.projectName || `Liên quan tin nhắn #${data.relatedMessageId}`;
+    onSend?.(
+      `🐛 **Debug Report: ${projectInfo}**\n\n${data.content}\n\n${data.notes ? `📝 Ghi chú: ${data.notes}` : ''}${data.driveLink ? `\n🔗 Drive: ${data.driveLink}` : ''}`,
+      data.attachments,
+      { replyTo: replyMessage }
+    );
+  };
+
   return (
-    <div className="border-t border-border transition-all duration-200">
-      {/* Preview Section với animation */}
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${(replyMessage || editMessage) ? 'max-h-24 opacity-100 p-2 pb-0' : 'max-h-0 opacity-0 p-0'
-        }`}>
-        {/* Reply preview */}
-        {replyMessage && !editMessage && (
-          <div className="mb-2 rounded-md bg-[#1f2937] text-gray-200 px-3 py-2 relative">
-            <div className="flex items-start gap-2">
-              <div className="w-1 rounded bg-blue-500 mt-0.5" />
-              <div className="flex-1">
-                <div className="text-sm">
-                  <span className="opacity-80">Trả lời </span>
-                  <span className="font-semibold">{replyMessage.sender}</span>
-                </div>
-                {replyMessage.text ? (
-                  <div className="text-xs opacity-80 line-clamp-1">{replyMessage.text}</div>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
-                onClick={onCancelReply}
-                title="Hủy trả lời"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Edit preview */}
-        {editMessage && !replyMessage && (
-          <div className="mb-2 rounded-md bg-[#374151] text-gray-200 px-3 py-2 relative">
-            <div className="flex items-start gap-2">
-              <div className="w-1 rounded bg-orange-500 mt-0.5" />
-              <div className="flex-1">
-                <div className="text-sm">
-                  <span className="opacity-80">Chỉnh sửa tin nhắn của </span>
-                  <span className="font-semibold">{editMessage.sender}</span>
-                </div>
-                {editMessage.text ? (
-                  <div className="text-xs opacity-80 line-clamp-1">{editMessage.text}</div>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
-                onClick={onCancelEdit}
-                title="Hủy chỉnh sửa"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Input Section */}
-      <div className="p-2">
-        <div className="flex items-start gap-2">
-          <div className="flex items-center gap-1 py-2">
-            {!editMessage && (
-              <>
-                <label
-                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
-                  title="Ảnh"
-                >
-                  <Image className="h-4 w-4 text-muted-foreground hover:text-white" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => onFiles(e.target.files)}
-                  />
-                </label>
-
-                <label
-                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded hover:bg-primary/80 transition-colors"
-                  title="Tệp đính kèm"
-                >
-                  <Paperclip className="h-4 w-4 text-muted-foreground hover:text-white" />
-                  <input
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => onFiles(e.target.files)}
-                  />
-                </label>
-              </>
-            )}
-
-            <button
-              type="button"
-              onClick={handleCodeEditorToggle}
-              title={isCodeEditorOpen ? "Đóng trình soạn thảo code" : "Mở trình soạn thảo code"}
-              className={`flex h-7 w-7 items-center justify-center rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 ${isCodeEditorOpen
-                  ? "bg-[#007acc] text-white shadow-md"
-                  : "hover:bg-primary/80 text-muted-foreground hover:text-white"
-                }`}
-            >
-              <Code2 className="h-4 w-4 transition-colors" />
-            </button>
-          </div>
-
-          {/* Khung chat */}
-          <div className="relative flex-1">
-            <div className="rounded border border-border bg-[hsl(var(--chat-input))] px-2 pt-3 shadow-sm flex items-center">
-              <textarea
-                ref={taRef}
-                rows={1}
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onPaste={handlePaste}
-                onKeyDown={handleKeyDown}
-                placeholder={
-                  editMessage
-                    ? "Chỉnh sửa tin nhắn..."
-                    : `Nhắn tin đến #${channelId}...`
-                }
-                className="w-full resize-none bg-transparent pr-10 text-sm text-white placeholder:text-muted-foreground focus:outline-none"
-                style={{ minHeight: 32, maxHeight: 120 }}
-              />
-              {canSend && (
-                <Button
-                  type="button"
-                  onClick={handleSend}
-                  size="icon"
-                  className="absolute bottom-2 right-2 h-7 w-7 rounded"
-                  aria-label="Gửi"
-                  title="Gửi"
-                  disabled={isSending}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Preview file */}
-        {previews.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {previews.map((url, idx) => (
-              <div key={idx} className="relative">
-                {files[idx].type.startsWith("image") ? (
-                  <img
-                    src={url}
-                    alt="preview"
-                    className="h-16 w-16 rounded border object-cover"
-                  />
-                ) : (
-                  <div className="h-16 w-16 rounded border bg-muted text-[10px] text-muted-foreground/90 flex items-center justify-center p-1 text-center">
-                    {files[idx].name}
+    <TooltipProvider delayDuration={300}>
+      <div className="border-t border-border transition-all duration-200">
+        {/* Preview Section với animation */}
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${(replyMessage || editMessage) ? 'max-h-24 opacity-100 p-2 pb-0' : 'max-h-0 opacity-0 p-0'
+          }`}>
+          {/* Reply preview */}
+          {replyMessage && !editMessage && (
+            <div className="mb-2 rounded-md bg-[#1f2937] text-gray-200 px-3 py-2 relative">
+              <div className="flex items-start gap-2">
+                <div className="w-1 rounded bg-blue-500 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-sm">
+                    <span className="opacity-80">Trả lời </span>
+                    <span className="font-semibold">{replyMessage.sender}</span>
                   </div>
-                )}
+                  {replyMessage.text ? (
+                    <div className="text-xs opacity-80 line-clamp-1">{replyMessage.text}</div>
+                  ) : null}
+                </div>
                 <button
                   type="button"
-                  onClick={() => handleRemoveFile(idx)}
-                  className="absolute -right-1 -top-1 rounded-full bg-black/60 p-1"
-                  aria-label="Xóa tệp"
-                  title="Xóa tệp"
+                  className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
+                  onClick={onCancelReply}
+                  title="Hủy trả lời"
                 >
-                  <X className="h-3 w-3 text-white" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
-            ))}
+            </div>
+          )}
+
+          {/* Edit preview */}
+          {editMessage && !replyMessage && (
+            <div className="mb-2 rounded-md bg-[#374151] text-gray-200 px-3 py-2 relative">
+              <div className="flex items-start gap-2">
+                <div className="w-1 rounded bg-orange-500 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-sm">
+                    <span className="opacity-80">Chỉnh sửa tin nhắn của </span>
+                    <span className="font-semibold">{editMessage.sender}</span>
+                  </div>
+                  {editMessage.text ? (
+                    <div className="text-xs opacity-80 line-clamp-1">{editMessage.text}</div>
+                  ) : null}
+                </div>
+                <button
+                  type="button"
+                  className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
+                  onClick={onCancelEdit}
+                  title="Hủy chỉnh sửa"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input Section - Compact Design */}
+        <div className="p-2">
+          <div className="w-full flex items-center gap-1.5">
+            {/* Action Buttons - All in one row */}
+            <div className="flex items-center gap-0.5">
+              {/* File Upload Buttons */}
+              {!editMessage && ACTION_BUTTONS.map((button) => (
+                <Tooltip key={button.id}>
+                  <TooltipTrigger asChild>
+                    <label className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded transition-colors ${button.activeColorClass}`}>
+                      <button.icon className={`h-4 w-4 transition-colors ${button.colorClass}`} />
+                      <input
+                        type="file"
+                        accept={button.accept}
+                        multiple={button.multiple}
+                        className="hidden"
+                        onChange={(e) => onFiles(e.target.files)}
+                      />
+                    </label>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{button.label}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+
+              {/* Code Editor Toggle */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleCodeEditorToggle}
+                    className={`flex h-8 w-8 items-center justify-center rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 ${isCodeEditorOpen
+                      ? "bg-[#007acc] text-white shadow-md"
+                      : "hover:bg-primary/80 text-muted-foreground hover:text-white"
+                      }`}
+                  >
+                    <Code2 className="h-4 w-4 transition-colors" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p>{isCodeEditorOpen ? "Đóng Code Editor" : "Mở Code Editor"}</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* <div className="w-px h-6 bg-border/50 mx-1" /> */}
+
+              {/* Function Buttons */}
+              {FUNCTION_BUTTONS.map((button) => {
+                const isActive =
+                  (button.id === 'ba-requirement' && showBAForm) ||
+                  (button.id === 'debug-report' && showTesterForm);
+
+                const handleClick = () => {
+                  if (button.id === 'ba-requirement') openBAForm();
+                  else if (button.id === 'debug-report') openTesterForm();
+                };
+
+                return (
+                  <Tooltip key={button.id}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={handleClick}
+                        disabled={button.disabled}
+                        className={`flex h-8 w-8 items-center justify-center rounded transition-all ${isActive
+                          ? button.activeColorClass
+                          : `${button.colorClass} ${button.disabled ? 'cursor-not-allowed' : `hover:bg-${button.id === 'ba-requirement' ? 'blue' : button.id === 'debug-report' ? 'red' : 'purple'}-950/50`}`
+                          }`}
+                      >
+                        <button.icon className="h-4 w-4 transition-colors" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>{button.label}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+
+            {/* Input Field - Compact */}
+            <div className="relative flex-1">
+              <div className="rounded border border-border bg-[hsl(var(--chat-input))] px-2 py-1.5 shadow-sm flex items-center">
+                <textarea
+                  ref={taRef}
+                  rows={1}
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onPaste={handlePaste}
+                  onKeyDown={handleKeyDown}
+                  placeholder={
+                    editMessage
+                      ? "Chỉnh sửa tin nhắn..."
+                      : `Nhắn tin đến #${channelId}...`
+                  }
+                  className="w-full resize-none bg-transparent pr-9 text-sm text-white placeholder:text-muted-foreground focus:outline-none"
+                  style={{ minHeight: 28, maxHeight: 100 }}
+                />
+                {canSend && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={handleSend}
+                        disabled={isSending}
+                        className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground transition-all disabled:opacity-50"
+                        aria-label="Gửi"
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>Gửi (Enter)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Preview file */}
+          {previews.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {previews.map((url, idx) => (
+                <div key={idx} className="relative">
+                  {files[idx].type.startsWith("image") ? (
+                    <img
+                      src={url}
+                      alt="preview"
+                      className="h-16 w-16 rounded border object-cover"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded border bg-muted text-[10px] text-muted-foreground/90 flex items-center justify-center p-1 text-center">
+                      {files[idx].name}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(idx)}
+                    className="absolute -right-1 -top-1 rounded-full bg-black/60 p-1"
+                    aria-label="Xóa tệp"
+                    title="Xóa tệp"
+                  >
+                    <X className="h-3 w-3 text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* BA Requirement Form Drawer */}
+        <BARequirementForm
+          open={showBAForm}
+          onOpenChange={setShowBAForm}
+          channelMembers={channelMembers}
+          channelMessages={channelMessages}
+          onSubmit={handleBASubmit}
+        />
+
+        {/* Tester Debug Form Drawer */}
+        <TesterDebugForm
+          open={showTesterForm}
+          onOpenChange={setShowTesterForm}
+          channelMembers={channelMembers}
+          channelMessages={channelMessages}
+          onSubmit={handleTesterSubmit}
+        />
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
