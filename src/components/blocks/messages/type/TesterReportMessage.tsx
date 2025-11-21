@@ -302,9 +302,9 @@ const TesterReportMessage = ({
                                 </div>
                                 <h3 className="text-base font-bold text-white uppercase tracking-wide">Mô tả lỗi</h3>
                             </div>
-                            <Card className="bg-gradient-to-br from-gray-900/50 to-gray-950/50 border border-gray-700/50 shadow-inner">
+                            <Card className="bg-black border border-gray-700/50 shadow-inner">
                                 <div
-                                    className="p-5 prose prose-invert prose-sm max-w-none leading-relaxed"
+                                    className="p-5 prose prose-invert prose-sm max-w-none text-gray-200 leading-relaxed"
                                     dangerouslySetInnerHTML={{ __html: content }}
                                 />
                             </Card>
