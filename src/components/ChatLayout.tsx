@@ -1113,7 +1113,7 @@ export default function ChatLayout() {
                     <div className="text-center">
                       <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-white mb-2">
-                        {selectedChannel ? "No messages yet" : "Select a channel to start chatting"}
+                        {selectedChannel ? "Chưa có tin nhắn nào" : "Chọn một kênh để bắt đầu trò chuyện"}
                       </h3>
                       <p className="text-muted-foreground">
                         {selectedChannel
