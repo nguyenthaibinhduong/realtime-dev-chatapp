@@ -2,7 +2,7 @@
 export interface Message {
   id: number | string;
   text: string;
-  type:"message" | "notification"|"system" | "code-share" | "file-upload" | "code-card";
+  type:'message'|'reply-message'|'remove'|'notification'| 'system'|'code-share'|'file-upload'|'code-card'|'tool'|'ba-require'|'tester-report';
   created_at: string;
   updated_at: string;
   sender: {

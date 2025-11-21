@@ -21,6 +21,8 @@ import { ChannelSearch } from "../channels/ChannelSearch";
 import { Button } from "@/components/ui/button";
 import ToolShareMessage from "./type/ToolShareMessage";
 import CodeCardMessage from "./type/CodeCardMessage";
+import TesterReportMessage from "./type/TesterReportMessage";
+import BARequireMessage from "./type/BaRequireMessage";
 import { url } from "inspector";
 
 function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
@@ -54,7 +56,8 @@ type Props = MessageListProps & {
   onReplySelect?: (reply: { id: string; sender: string; text?: string }) => void; // <-- thêm
   onEditSelect?: (edit: { id: string; sender: string; text?: string }) => void; // <-- thêm edit
   hasInputPreview?: boolean; // <-- thêm để biết có reply/edit preview không
-  onOpenTool?: (data: any) => void; // <-- thêm để mở tool với data
+  onOpenTool?: (data: any) => void;
+  members?: any[]; // <-- thêm members prop
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -67,6 +70,7 @@ export const MessageList: React.FC<Props> = ({
   onEditSelect,
   hasInputPreview = false,
   onOpenTool,
+  members,
 }) => {
   const { user } = useAuth();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -448,6 +452,38 @@ export const MessageList: React.FC<Props> = ({
             showSenderInfo={showSenderInfo}
             hoveredId={hoveredId}
             onHover={setHoveredId}
+          />
+        );
+      }
+
+      // BA Requirement message
+      if (message?.type === "ba-require") {
+        return (
+          <BARequireMessage
+            key={message.id}
+            message={message}
+            isMe={isMe}
+            showSenderInfo={showSenderInfo}
+            hoveredId={hoveredId}
+            onHover={setHoveredId}
+            channelMembers={members}
+            onMessageAction={handleMessageAction}
+          />
+        );
+      }
+
+      // Tester report message
+      if (message?.type === "tester-report") {
+        return (
+          <TesterReportMessage
+            key={message.id}
+            message={message}
+            isMe={isMe}
+            showSenderInfo={showSenderInfo}
+            hoveredId={hoveredId}
+            onHover={setHoveredId}
+            channelMembers={members}
+            onMessageAction={handleMessageAction}
           />
         );
       }

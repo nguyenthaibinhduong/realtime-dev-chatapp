@@ -27,6 +27,8 @@ import { chatSocketService } from "@/services/chatSocketService";
 import { useIsMobile } from "@/hooks/useMobile";
 import attachmentService, { UploadResult } from "@/services/attachmentService";
 import { ApiTool, Tool1, Tool2, Tool3, ToolType } from "./blocks/tools";
+import { el } from "date-fns/locale";
+import { json } from "stream/consumers";
 
 export default function ChatLayout() {
   const { toast } = useToast();
@@ -687,7 +689,9 @@ export default function ChatLayout() {
       meta?: {
         replyTo?: { id: string; sender: string; text?: string };
         editTo?: { id: string; sender: string; text?: string };
-      }
+      },
+      type?: any,
+      json_data?: any
     ) => {
       if (
         !selectedChannel?.id ||
@@ -786,6 +790,7 @@ export default function ChatLayout() {
       // Xác định type và các thông số gửi
       if (meta?.editTo) {
         // ✅ Chế độ chỉnh sửa tin nhắn
+
         chatSocketService.sendMessage({
           id: meta.editTo.id,
           channelId: selectedChannel.id,
@@ -793,6 +798,9 @@ export default function ChatLayout() {
           type: "message",
           isUpdate: true,
         });
+
+
+
 
         // Clear edit mode sau khi gửi
         setEditTo(null);
@@ -804,20 +812,39 @@ export default function ChatLayout() {
             ? "file-upload"
             : "message";
 
-        chatSocketService.sendMessage({
-          channelId: selectedChannel.id,
-          text: content.trim(),
-          type: computedType,
-          channelData: selectedChannel,
-          ...(attachments.length > 0 && { presignedAttachments: attachments }),
-          ...(meta?.replyTo && {
-            replyTo: {
-              id: meta.replyTo.id,
-              sender: meta.replyTo.sender,
-              text: meta.replyTo.text,
-            },
-          }),
-        });
+        if (type && ['ba-require', 'tester-report'].includes(type) && json_data) {
+          chatSocketService.sendMessage({
+            channelId: selectedChannel.id,
+            text: content.trim(),
+            type: type,
+            json_data: json_data,
+            ...(attachments.length > 0 && { presignedAttachments: attachments }),
+            ...(meta?.replyTo && {
+              replyTo: {
+                id: meta.replyTo.id,
+                sender: meta.replyTo.sender,
+                text: meta.replyTo.text,
+              },
+            }),
+          });
+        } else {
+          chatSocketService.sendMessage({
+            channelId: selectedChannel.id,
+            text: content.trim(),
+            type: computedType,
+            channelData: selectedChannel,
+            ...(attachments.length > 0 && { presignedAttachments: attachments }),
+            ...(meta?.replyTo && {
+              replyTo: {
+                id: meta.replyTo.id,
+                sender: meta.replyTo.sender,
+                text: meta.replyTo.text,
+              },
+            }),
+          });
+        }
+
+
 
         // Clear reply sau khi gửi
         if (meta?.replyTo) setReplyTo(null);
@@ -1066,7 +1093,7 @@ export default function ChatLayout() {
 
         <div className="flex flex-col h-full">
           {(() => {
-            const filteredMessages = messages.filter((msg: any) => {
+            const filteredMessages: any[] = messages.filter((msg: any) => {
               const msgChannelId = String(msg.channelId || msg.channel_id || '');
               const currentChannelId = String(selectedChannel?.id || '');
               return !msgChannelId || !currentChannelId || msgChannelId === currentChannelId;
@@ -1079,54 +1106,60 @@ export default function ChatLayout() {
               hasSelectedChannel: !!selectedChannel
             });
 
-            return filteredMessages.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">
-                    {selectedChannel ? "No messages yet" : "Select a channel to start chatting"}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {selectedChannel
-                      ? "Be the first to send a message in this channel"
-                      : "Choose a channel from the sidebar to view messages"
-                    }
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <MessageList
-                messages={filteredMessages}
-                channelId={String(selectedChannel?.id)}
-                onPrependMessages={handlePrependMessages}
-                loadOlder={loadOlder}
-                type={selectedChannel?.type}
-                onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
-                onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
-                hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
-                onOpenTool={handleOpenTool}
-              />
+            return (
+              <>
+                {filteredMessages.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-white mb-2">
+                        {selectedChannel ? "No messages yet" : "Select a channel to start chatting"}
+                      </h3>
+                      <p className="text-muted-foreground">
+                        {selectedChannel
+                          ? "Be the first to send a message in this channel"
+                          : "Choose a channel from the sidebar to view messages"
+                        }
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <MessageList
+                    messages={filteredMessages}
+                    channelId={String(selectedChannel?.id)}
+                    onPrependMessages={handlePrependMessages}
+                    loadOlder={loadOlder}
+                    type={selectedChannel?.type}
+                    onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
+                    onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
+                    hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
+                    onOpenTool={handleOpenTool}
+                    members={selectedChannel?.members}
+                  />
+                )}
+
+                {selectedChannel && (
+                  <div className="flex-shrink-0">
+                    <MessageInput
+                      channelMembers={members}
+                      channelMessages={filteredMessages}
+                      channelId={selectedChannel.id}
+                      onSend={sendMessage}
+                      replyMessage={replyTo || undefined}
+                      onCancelReply={() => setReplyTo(null)}
+                      editMessage={editTo || undefined}
+                      onCancelEdit={() => setEditTo(null)}
+                      onToggleCodeEditor={() => {
+                        // Toggle logic: nếu đang mở tool2 thì đóng, không thì mở
+                        setSelectedTool(selectedTool === "tool2" ? null : "tool2");
+                      }}
+                      isCodeEditorOpen={selectedTool === "tool2"} // <-- Pass trạng thái
+                    />
+                  </div>
+                )}
+              </>
             );
           })()}
-
-          {selectedChannel && (
-            <div className="flex-shrink-0">
-              <MessageInput
-                channelMembers={members}
-                channelId={selectedChannel.id}
-                onSend={sendMessage}
-                replyMessage={replyTo || undefined}
-                onCancelReply={() => setReplyTo(null)}
-                editMessage={editTo || undefined}
-                onCancelEdit={() => setEditTo(null)}
-                onToggleCodeEditor={() => {
-                  // Toggle logic: nếu đang mở tool2 thì đóng, không thì mở
-                  setSelectedTool(selectedTool === "tool2" ? null : "tool2");
-                }}
-                isCodeEditorOpen={selectedTool === "tool2"} // <-- Pass trạng thái
-              />
-            </div>
-          )}
         </div>
 
         {/* GitHub Detail Modal */}

@@ -6,6 +6,7 @@ import { BARequirementForm, BARequirementData } from "./BARequirementForm";
 import { TesterDebugForm, TesterDebugData } from "./TesterDebugForm";
 import { Member } from "@/types/channel";
 import { Message } from "@/types/message";
+import { json } from "stream/consumers";
 
 // Button configuration
 interface ActionButton {
@@ -70,7 +71,12 @@ const FUNCTION_BUTTONS: ActionButton[] = [
 
 interface MessageInputProps {
   channelId: string;
-  onSend?: (content: string, files?: File[], meta?: { replyTo?: ReplyMessage; editTo?: EditMessage }) => void | Promise<void>;
+  onSend?: (
+    content: string,
+    files?: File[],
+    meta?: { replyTo?: ReplyMessage; editTo?: EditMessage },
+    type?: any,
+    json_data?: any) => void | Promise<void>;
   replyMessage?: ReplyMessage;
   onCancelReply?: () => void;
   editMessage?: EditMessage;
@@ -78,7 +84,7 @@ interface MessageInputProps {
   onToggleCodeEditor?: () => void; // <-- Thay đổi thành toggle
   isCodeEditorOpen?: boolean; // <-- Thêm state để biết trạng thái
   channelMembers?: Array<Member | any>;
-  channelMessages?: Array<Message | any>;
+  channelMessages?: any[];
 }
 
 export type ReplyMessage = {
@@ -263,24 +269,30 @@ export const MessageInput = ({
   // Handle BA Requirement submit
   const handleBASubmit = (data: BARequirementData) => {
     console.log("✅ BA Requirement submitted:", data);
-    // TODO: Send BA requirement as special message type
     onSend?.(
       `📋 **BA Requirement: ${data.projectName}**\n\n${data.requirements.map((r, i) => `${i + 1}. ${r}`).join('\n')}\n\n${data.notes ? `📝 Ghi chú: ${data.notes}` : ''}`,
       data.attachments,
-      { replyTo: replyMessage }
+      { replyTo: replyMessage },
+      'ba-require',
+      data
     );
+    // Đóng form sau khi gửi
+    setShowBAForm(false);
   };
 
   // Handle Tester Debug submit
   const handleTesterSubmit = (data: TesterDebugData) => {
     console.log("✅ Tester Debug Report submitted:", data);
-    // TODO: Send debug report as special message type
     const projectInfo = data.projectName || `Liên quan tin nhắn #${data.relatedMessageId}`;
     onSend?.(
       `🐛 **Debug Report: ${projectInfo}**\n\n${data.content}\n\n${data.notes ? `📝 Ghi chú: ${data.notes}` : ''}${data.driveLink ? `\n🔗 Drive: ${data.driveLink}` : ''}`,
       data.attachments,
-      { replyTo: replyMessage }
+      { replyTo: replyMessage },
+      'tester-report',
+      data
     );
+    // Đóng form sau khi gửi
+    setShowTesterForm(false);
   };
 
   return (
@@ -353,8 +365,8 @@ export const MessageInput = ({
                     type="button"
                     onClick={() => setShowAttachMenu(!showAttachMenu)}
                     className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${showAttachMenu
-                        ? "bg-[#00a884] text-white rotate-45"
-                        : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                      ? "bg-[#00a884] text-white rotate-45"
+                      : "bg-gray-800 hover:bg-gray-700 text-gray-300"
                       }`}
                   >
                     <Plus className="h-5 w-5" />
@@ -418,8 +430,8 @@ export const MessageInput = ({
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
                   >
                     <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isCodeEditorOpen
-                        ? "bg-[#007acc] text-white"
-                        : "bg-teal-500/20 group-hover:bg-teal-500/30"
+                      ? "bg-[#007acc] text-white"
+                      : "bg-teal-500/20 group-hover:bg-teal-500/30"
                       }`}>
                       <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-white" : "text-teal-400"}`} />
                     </div>
@@ -438,8 +450,8 @@ export const MessageInput = ({
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
                   >
                     <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showBAForm
-                        ? "bg-blue-500 text-white"
-                        : "bg-blue-500/20 group-hover:bg-blue-500/30"
+                      ? "bg-blue-500 text-white"
+                      : "bg-blue-500/20 group-hover:bg-blue-500/30"
                       }`}>
                       <FileText className={`h-4 w-4 ${showBAForm ? "text-white" : "text-blue-400"}`} />
                     </div>
@@ -455,8 +467,8 @@ export const MessageInput = ({
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
                   >
                     <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showTesterForm
-                        ? "bg-red-500 text-white"
-                        : "bg-red-500/20 group-hover:bg-red-500/30"
+                      ? "bg-red-500 text-white"
+                      : "bg-red-500/20 group-hover:bg-red-500/30"
                       }`}>
                       <Bug className={`h-4 w-4 ${showTesterForm ? "text-white" : "text-red-400"}`} />
                     </div>
