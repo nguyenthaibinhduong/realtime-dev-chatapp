@@ -634,6 +634,45 @@
   resolved "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.2.8.tgz"
   integrity sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==
 
+"@formulajs/formulajs@^2.9.3":
+  version "2.9.3"
+  resolved "https://registry.yarnpkg.com/@formulajs/formulajs/-/formulajs-2.9.3.tgz#ea474062468067ca67c648087e21ac24e37d3fcc"
+  integrity sha512-WpgiuJaBl/Hcda9Ti8a7mlnw/vUZkJrtjABvojz6P6mo6d8EscudyA7iAt/kTLsgi0c8zfmzQd/Yjb4ASFkw+g==
+  dependencies:
+    bessel "^1.0.2"
+    jstat "^1.9.2"
+
+"@fortune-sheet/core@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@fortune-sheet/core/-/core-1.0.4.tgz#268b67b32a43b472ef455dac953db912db21b525"
+  integrity sha512-CDnUVebfvtT++CymNRw0qnY4sz6zYO3KZazlH+nG6otkRkZ05Bvt7NXqVhmKKSSxIvJR4R6h50abu/dVGBpjpw==
+  dependencies:
+    "@fortune-sheet/formula-parser" "^0.2.13"
+    dayjs "^1.11.0"
+    immer "^9.0.12"
+    lodash "^4.17.21"
+    numeral "^2.0.6"
+    uuid "^8.3.2"
+
+"@fortune-sheet/formula-parser@^0.2.13":
+  version "0.2.13"
+  resolved "https://registry.yarnpkg.com/@fortune-sheet/formula-parser/-/formula-parser-0.2.13.tgz#6c3521063a3331b92cb0232cba280110ad8fd2c1"
+  integrity sha512-za2ZVQ5ZfMSPCtL8MdqhCthPip7AoeU4MPyd5UDo4RCl9/arrv1Jz0y755mACVVi4suSZxrzWoJGDkLmofoSmw==
+  dependencies:
+    "@formulajs/formulajs" "^2.9.3"
+    tiny-emitter "^2.1.0"
+
+"@fortune-sheet/react@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@fortune-sheet/react/-/react-1.0.4.tgz#54b34706f91e2fabfe2dd7448015f48979673554"
+  integrity sha512-v+BU5mmp2hhUe4gRF+vOJ3j8zZkzHU0kzhTZzp+Nn00wA/RArMr+CO+SAluKlCPAsTZgPwmgOEK685WPqJ5XNw==
+  dependencies:
+    "@fortune-sheet/core" "^1.0.4"
+    "@types/regenerator-runtime" "^0.13.6"
+    immer "^9.0.12"
+    lodash "^4.17.21"
+    regenerator-runtime "^0.14.1"
+
 "@google/genai@^1.26.0":
   version "1.29.0"
   resolved "https://registry.yarnpkg.com/@google/genai/-/genai-1.29.0.tgz#b3dc2fcf8a4554dc3d4614a5eb5dd2d9f662cc61"
@@ -1954,6 +1993,11 @@
     "@types/prop-types" "*"
     csstype "^3.0.2"
 
+"@types/regenerator-runtime@^0.13.6":
+  version "0.13.8"
+  resolved "https://registry.yarnpkg.com/@types/regenerator-runtime/-/regenerator-runtime-0.13.8.tgz#14c4913f2e79886f73191889bda53ed3dd9ae4c0"
+  integrity sha512-jjKoBekfYDH331060tZhosdJVDnXIXx+T8Iw2h2T4HEds6Ddb2lr0JxD15+XPKlXwRHRNgZoY+4Fb2ykoqzHBg==
+
 "@types/trusted-types@^1.0.6":
   version "1.0.6"
   resolved "https://registry.npmjs.org/@types/trusted-types/-/trusted-types-1.0.6.tgz"
@@ -2207,6 +2251,11 @@ base64-js@^1.3.0, base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
+
+bessel@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/bessel/-/bessel-1.0.2.tgz#828812291e0b62e94959cdea43fac186e8a7202d"
+  integrity sha512-Al3nHGQGqDYqqinXhQzmwmcRToe/3WyBv4N8aZc5Pef8xw2neZlR9VPi84Sa23JtgWcucu18HxVZrnI0fn2etw==
 
 bignumber.js@^9.0.0:
   version "9.3.1"
@@ -2593,6 +2642,11 @@ date-fns@^3.6.0:
   version "3.6.0"
   resolved "https://registry.npmjs.org/date-fns/-/date-fns-3.6.0.tgz"
   integrity sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==
+
+dayjs@^1.11.0:
+  version "1.11.19"
+  resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.19.tgz#15dc98e854bb43917f12021806af897c58ae2938"
+  integrity sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==
 
 debug@4:
   version "4.4.3"
@@ -3481,6 +3535,11 @@ ignore@^5.2.0, ignore@^5.3.1:
   resolved "https://registry.npmjs.org/ignore/-/ignore-5.3.2.tgz"
   integrity sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==
 
+immer@^9.0.12:
+  version "9.0.21"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.21.tgz#1e025ea31a40f24fb064f1fef23e931496330176"
+  integrity sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==
+
 import-fresh@^3.2.1:
   version "3.3.0"
   resolved "https://registry.npmjs.org/import-fresh/-/import-fresh-3.3.0.tgz"
@@ -3696,6 +3755,11 @@ json-stable-stringify-without-jsonify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz"
   integrity sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==
+
+jstat@^1.9.2:
+  version "1.9.6"
+  resolved "https://registry.yarnpkg.com/jstat/-/jstat-1.9.6.tgz#60e801b0d4c26e37aab0f375d1859fe9d60e10c0"
+  integrity sha512-rPBkJbK2TnA8pzs93QcDDPlKcrtZWuuCo2dVR0TFLOJSxhqfWOVCSp8aV3/oSbn+4uY4yw1URtLpHQedtmXfug==
 
 jwa@^2.0.0:
   version "2.0.1"
@@ -4411,6 +4475,11 @@ normalize-range@^0.1.2:
   resolved "https://registry.npmjs.org/normalize-range/-/normalize-range-0.1.2.tgz"
   integrity sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==
 
+numeral@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/numeral/-/numeral-2.0.6.tgz#4ad080936d443c2561aed9f2197efffe25f4e506"
+  integrity sha512-qaKRmtYPZ5qdw4jWJD6bxEf1FJEqllJrwxCLIm0sQU/A7v2/czigzOb+C2uSiFsa9lBUzeH7M1oK+Q+OLxL3kA==
+
 object-assign@^4.0.1, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz"
@@ -4964,7 +5033,7 @@ refractor@^3.6.0:
     parse-entities "^2.0.0"
     prismjs "~1.27.0"
 
-regenerator-runtime@^0.14.0:
+regenerator-runtime@^0.14.0, regenerator-runtime@^0.14.1:
   version "0.14.1"
   resolved "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.14.1.tgz"
   integrity sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==
@@ -5408,6 +5477,11 @@ thenify-all@^1.0.0:
   integrity sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==
   dependencies:
     any-promise "^1.0.0"
+
+tiny-emitter@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/tiny-emitter/-/tiny-emitter-2.1.0.tgz#1d1a56edfc51c43e863cbb5382a72330e3555423"
+  integrity sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==
 
 tiny-invariant@^1.3.1:
   version "1.3.3"

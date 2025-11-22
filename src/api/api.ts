@@ -76,6 +76,8 @@ export const UploadApi = {
 
   getAvatarPresignedUrl: async (data: any) =>
     apipost("upload/get-avatar-presigned-url", data),
+  getSheetUrl: async (channelId: any) =>
+    apipost("upload/get-sheet-url", { channelId }),
 };
 
 export const GithubAPI = {
