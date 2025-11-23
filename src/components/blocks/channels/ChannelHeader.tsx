@@ -84,7 +84,7 @@ const getChannelTypeLabel = (type: string) => {
     case "group":
       return "Kênh công khai";
     case "group-private":
-      return "Kênh riêng tư";
+      return "Kênh dự án";
     case "personal":
       return "Chat cá nhân";
     default:
@@ -493,6 +493,7 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                       ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
                       : channel.name
                     }
+                    channelData={channel}
                   />
                 </div>
               </TabsContent>

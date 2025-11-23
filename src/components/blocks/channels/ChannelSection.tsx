@@ -174,7 +174,7 @@ export const ChannelSection = ({
                         </svg>
                       )}
                     </div>
-                    Kênh riêng tư
+                    Kênh dự án
                   </span>
                   <Badge variant="outline" className="text-xs bg-orange-500/10 border-orange-500/30 text-orange-400">
                     {channels.filter(c => c.type === 'group-private').length}
@@ -233,13 +233,13 @@ export const ChannelSection = ({
                   className="w-full px-4 py-2 text-left hover:bg-gray-800"
                   onClick={handleCreatePublic}
                 >
-                  Tạo kênh Public
+                  Tạo kênh công khai
                 </button>
                 <button
                   className="w-full px-4 py-2 text-left hover:bg-gray-800"
                   onClick={handleCreatePrivate}
                 >
-                  Tạo kênh Private
+                  Tạo kênh dự án
                 </button>
               </div>
             )}

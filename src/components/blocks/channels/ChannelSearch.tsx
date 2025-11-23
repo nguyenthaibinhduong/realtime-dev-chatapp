@@ -100,7 +100,7 @@ export function ChannelSearch({
     { value: null as FilterType, label: "Tất cả" },
     { value: "personal" as FilterType, label: "Cá nhân" },
     { value: "group" as FilterType, label: "Nhóm" },
-    { value: "group-private" as FilterType, label: "Riêng tư" },
+    { value: "group-private" as FilterType, label: "dự án" },
   ];
 
   return (
@@ -270,7 +270,7 @@ export function ChannelSearch({
         {!isLoading && filteredResults.privateChats.length > 0 && (
           <div>
             <div className="text-xs font-semibold text-muted-foreground mb-2 px-2">
-              Kênh riêng tư
+              Kênh dự án
             </div>
             <div className="space-y-2">
               {filteredResults.privateChats.map((channel) => (

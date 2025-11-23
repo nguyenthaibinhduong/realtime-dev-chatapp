@@ -41,6 +41,10 @@ class ChatSocketService {
     getSocket().emit("switch_channel", { oldChannelId, newChannelId });
   }
 
+  updateChannelSent(data: any) {  
+    getSocket().emit("update_channel", data);
+  }
+
   /** ================== MESSAGE ================== */
 
   sendMessage(data: any) {
@@ -65,6 +69,14 @@ class ChatSocketService {
 
   offChannel(callback?: (msg: any) => void) {
     getSocket().off("receiveChannel", callback);
+  }
+
+  onChannelUpdate(callback: (msg: any) => void) {
+    getSocket().on("updateChannel", callback);
+  }
+
+  offChannelUpdate(callback?: (msg: any) => void) {
+    getSocket().off("updateChannel", callback);
   }
 
   /** ================== UNREAD ================== */
