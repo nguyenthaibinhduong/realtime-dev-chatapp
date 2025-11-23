@@ -6,6 +6,12 @@ import {} from "@fortune-sheet/core";
 import { UploadApi } from "@/api/api";
 import { debounce } from "lodash";
 import { post } from "@/api/Http";
+import { Loader2 } from "lucide-react";
+import {
+  FortuneExcelHelper,
+  importToolBarItem,
+  exportToolBarItem,
+} from "@corbe30/fortune-excel";
 
 // Helper function to format data
 const formatSheet = (sheet: Sheet) => {
@@ -33,6 +39,11 @@ const formatSheet = (sheet: Sheet) => {
 
 export const FortuneSheet = () => {
   const [data, setData] = useState<Sheet[]>([{ name: "Sheet1", celldata: [] }]);
+  const [key, setKey] = useState(0);
+
+  const workbookRef = useRef();
+  const sheetRef = useRef();
+
   const [sheetUrl, setSheetUrl] = useState<string>("");
   const [signedUrl, setSignedUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -53,7 +64,9 @@ export const FortuneSheet = () => {
 
         console.log("response", response);
 
-        const sheetData = await fetch(response?.data?.sheetUrl);
+        const sheetData = await fetch(response?.data?.sheetUrl, {
+          cache: "no-store",
+        });
         if (sheetData.ok) {
           const sheetJson = await sheetData.json();
           //Format data
@@ -123,7 +136,28 @@ export const FortuneSheet = () => {
 
   return (
     <div className="h-full w-full">
-      <Workbook data={data} onChange={handleChange} />
+      {isLoading ? (
+        <Loader2 className=" text-blue-500 animate-spin mb-4" />
+      ) : (
+        <>
+          <FortuneExcelHelper
+            setKey={setKey}
+            setSheets={setData}
+            sheetRef={sheetRef}
+            config={{
+              import: { xlsx: true, csv: true },
+              export: { xlsx: true, csv: true },
+            }}
+          />
+          <Workbook
+            key={key}
+            data={data}
+            onChange={handleChange}
+            ref={workbookRef}
+            customToolbarItems={[importToolBarItem(), exportToolBarItem()]}
+          />
+        </>
+      )}
     </div>
   );
 };
