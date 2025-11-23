@@ -26,7 +26,14 @@ import { Channel, Member } from "@/types/channel";
 import { chatSocketService } from "@/services/chatSocketService";
 import { useIsMobile } from "@/hooks/useMobile";
 import attachmentService, { UploadResult } from "@/services/attachmentService";
-import { ApiTool, Tool1, Tool2, Tool3, ToolType } from "./blocks/tools";
+import {
+  ApiTool,
+  FortuneSheet,
+  Tool1,
+  Tool2,
+  Tool3,
+  ToolType,
+} from "./blocks/tools";
 import { el } from "date-fns/locale";
 import { json } from "stream/consumers";
 
@@ -76,7 +83,11 @@ export default function ChatLayout() {
         return (
           <Tool2
             onSendCode={(code: string, language: string) => {
-              const username = user?.username || user?.name || user?.email?.split('@')[0] || 'Unknown';
+              const username =
+                user?.username ||
+                user?.name ||
+                user?.email?.split("@")[0] ||
+                "Unknown";
 
               chatSocketService.sendMessage({
                 channelId: selectedChannel?.id,
@@ -87,9 +98,9 @@ export default function ChatLayout() {
                   codeData: {
                     code: code,
                     language: language,
-                    author: username
-                  }
-                }
+                    author: username,
+                  },
+                },
               });
             }}
             onClose={() => {
@@ -106,12 +117,15 @@ export default function ChatLayout() {
         return (
           <ApiTool
             initialHistoryItem={toolInitialItem}
-            onClose={() => {  // <-- Thêm onClose handler
+            onClose={() => {
+              // <-- Thêm onClose handler
               setSelectedTool(null);
               setToolInitialItem(null);
             }}
           />
         );
+      case "sheet":
+        return <FortuneSheet />;
       default:
         return null;
     }
@@ -122,10 +136,13 @@ export default function ChatLayout() {
     //console.log("🚀 handleOpenTool received:", data); // Debug log
 
     if (data.type == "code-editor") {
-      console.log("🔧 Opening Tool2 with code data:", { code: data.code, language: data.language });
+      console.log("🔧 Opening Tool2 with code data:", {
+        code: data.code,
+        language: data.language,
+      });
       setToolInitialData({
         code: data.code,
-        language: data.language
+        language: data.language,
       });
       setSelectedTool("tool2");
     } else {
@@ -346,14 +363,18 @@ export default function ChatLayout() {
 
         // Process each channel from API
         loadedChannels.forEach((apiChannel: any) => {
-          const existingIndex = mergedChannels.findIndex((c: any) =>
-            String(c.id) === String(apiChannel.id) ||
-            (c.fakeID && String(c.fakeID) === String(apiChannel.fakeID))
+          const existingIndex = mergedChannels.findIndex(
+            (c: any) =>
+              String(c.id) === String(apiChannel.id) ||
+              (c.fakeID && String(c.fakeID) === String(apiChannel.fakeID))
           );
 
           if (existingIndex !== -1) {
             // Update existing channel
-            mergedChannels[existingIndex] = { ...mergedChannels[existingIndex], ...apiChannel };
+            mergedChannels[existingIndex] = {
+              ...mergedChannels[existingIndex],
+              ...apiChannel,
+            };
           } else {
             // Add new channel
             mergedChannels.push(apiChannel);
@@ -363,7 +384,7 @@ export default function ChatLayout() {
         console.log("🔄 Smart merged channels:", {
           existing: prevChannels.length,
           fromAPI: loadedChannels.length,
-          final: mergedChannels.length
+          final: mergedChannels.length,
         });
 
         return mergedChannels;
@@ -379,7 +400,9 @@ export default function ChatLayout() {
 
         // Chọn kênh đã lưu hoặc kênh đầu tiên từ currentChannels
         const savedChannelId = localStorage.getItem("selectedChannelId");
-        const found = currentChannels.find((c) => String(c.id) === savedChannelId);
+        const found = currentChannels.find(
+          (c) => String(c.id) === savedChannelId
+        );
         setSelectedChannel(found || currentChannels[0] || null);
 
         return currentChannels; // Không thay đổi state, chỉ sử dụng để access
@@ -406,7 +429,7 @@ export default function ChatLayout() {
 
   // Socket join/leave + onMessage
   const joinChannelSocketA = useCallback(() => {
-    if (!selectedChannel?.id) return () => { };
+    if (!selectedChannel?.id) return () => {};
 
     const currentChannelId = selectedChannel.id;
     console.log("🔌 Joining socket room for channel:", currentChannelId);
@@ -417,25 +440,30 @@ export default function ChatLayout() {
       console.log("📨 New socket message received:", msg);
 
       // ✅ FILTER: Relaxed channel filtering
-      const msgChannelId = String(msg.channelId || msg.channel_id || '');
+      const msgChannelId = String(msg.channelId || msg.channel_id || "");
       const capturedChannelId = String(currentChannelId);
 
       // Chỉ reject nếu message có channelId và khác với current channel
       if (msgChannelId && msgChannelId !== capturedChannelId) {
         console.log("🚫 Ignoring message from different channel:", {
           messageChannel: msgChannelId,
-          currentChannel: capturedChannelId
+          currentChannel: capturedChannelId,
         });
         return;
       }
 
       setMessages((prev: any) => {
         // ✅ Additional safety check với localStorage (less strict)
-        const currentStoredChannelId = localStorage.getItem("selectedChannelId");
-        if (currentStoredChannelId && msgChannelId && String(msgChannelId) !== String(currentStoredChannelId)) {
+        const currentStoredChannelId =
+          localStorage.getItem("selectedChannelId");
+        if (
+          currentStoredChannelId &&
+          msgChannelId &&
+          String(msgChannelId) !== String(currentStoredChannelId)
+        ) {
           console.log("🚫 Second check - message channel mismatch:", {
             messageChannel: msgChannelId,
-            storedChannel: currentStoredChannelId
+            storedChannel: currentStoredChannelId,
           });
           return prev;
         }
@@ -498,11 +526,14 @@ export default function ChatLayout() {
           const idx = prev.findIndex(
             (p: any) => String(p.fakeID) === String(msg.fakeID)
           );
-          if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+          if (
+            idx !== -1 &&
+            String(prev[idx].channelId) === String(msg.channelId)
+          ) {
             console.log("🔄 Replacing fake message with real message:", {
               fakeID: msg.fakeID,
               realID: msg.id,
-              channelId: msg.channelId
+              channelId: msg.channelId,
             });
             const updated = [...prev];
             updated[idx] = msg;
@@ -516,7 +547,7 @@ export default function ChatLayout() {
           if (existingIdx !== -1) {
             console.log("🚫 Duplicate message ignored:", {
               messageId: msg.id,
-              channelId: msg.channelId
+              channelId: msg.channelId,
             });
             return prev;
           }
@@ -526,7 +557,7 @@ export default function ChatLayout() {
             messageId: msg.id,
             channelId: msg.channelId,
             currentChannelId: currentChannelId,
-            text: msg.text?.substring(0, 50) + "..."
+            text: msg.text?.substring(0, 50) + "...",
           });
           return [...prev, msg];
         }
@@ -552,7 +583,9 @@ export default function ChatLayout() {
     const handler = (channel: any) => {
       setChannels((prev) => {
         const idx = prev.findIndex(
-          (c: any) => String(c.fakeID) === String(channel.fakeID) || String(c.id) === String(channel.id)
+          (c: any) =>
+            String(c.fakeID) === String(channel.fakeID) ||
+            String(c.id) === String(channel.id)
         );
         if (idx !== -1) {
           const updated = [...prev];
@@ -582,7 +615,7 @@ export default function ChatLayout() {
       localStorage.setItem("selectedChannelId", String(channel.id));
       console.log("🔄 Switching to channel:", {
         channelId: channel.id,
-        channelName: channel.name
+        channelName: channel.name,
       });
 
       // Update URL
@@ -604,39 +637,40 @@ export default function ChatLayout() {
       newParams.delete("message");
       setSearchParams(newParams);
     }
-  };  // Initial load messages for selected channel (server trả ASC: cũ→mới)
-  const loadMessages = useCallback(
-    async (channelId: string) => {
-      console.log("📥 Loading messages for channel:", channelId);
-      try {
-        const res = await ChatAPI.fetchMessage(channelId);
-        console.log("📥 Messages response:", res);
+  }; // Initial load messages for selected channel (server trả ASC: cũ→mới)
+  const loadMessages = useCallback(async (channelId: string) => {
+    console.log("📥 Loading messages for channel:", channelId);
+    try {
+      const res = await ChatAPI.fetchMessage(channelId);
+      console.log("📥 Messages response:", res);
 
-        if (res?.data) {
-          const messagesData = Array.isArray(res.data.items) ? res.data.items : [];
-          const membersData = Array.isArray(res.data.members) ? res.data.members : [];
+      if (res?.data) {
+        const messagesData = Array.isArray(res.data.items)
+          ? res.data.items
+          : [];
+        const membersData = Array.isArray(res.data.members)
+          ? res.data.members
+          : [];
 
-          console.log("📥 Setting messages:", {
-            messagesCount: messagesData.length,
-            membersCount: membersData.length,
-            channelId
-          });
+        console.log("📥 Setting messages:", {
+          messagesCount: messagesData.length,
+          membersCount: membersData.length,
+          channelId,
+        });
 
-          setMessages(messagesData);
-          setMembers(membersData);
-        } else {
-          console.log("📥 No data in response, clearing messages");
-          setMessages([]);
-          setMembers([]);
-        }
-      } catch (error) {
-        console.error("📥 Error loading messages:", error);
+        setMessages(messagesData);
+        setMembers(membersData);
+      } else {
+        console.log("📥 No data in response, clearing messages");
         setMessages([]);
         setMembers([]);
       }
-    },
-    []
-  );
+    } catch (error) {
+      console.error("📥 Error loading messages:", error);
+      setMessages([]);
+      setMembers([]);
+    }
+  }, []);
 
   useEffect(() => {
     if (selectedChannel?.id) loadMessages(String(selectedChannel.id));
@@ -799,9 +833,6 @@ export default function ChatLayout() {
           isUpdate: true,
         });
 
-
-
-
         // Clear edit mode sau khi gửi
         setEditTo(null);
       } else {
@@ -812,13 +843,19 @@ export default function ChatLayout() {
             ? "file-upload"
             : "message";
 
-        if (type && ['ba-require', 'tester-report'].includes(type) && json_data) {
+        if (
+          type &&
+          ["ba-require", "tester-report"].includes(type) &&
+          json_data
+        ) {
           chatSocketService.sendMessage({
             channelId: selectedChannel.id,
             text: content.trim(),
             type: type,
             json_data: json_data,
-            ...(attachments.length > 0 && { presignedAttachments: attachments }),
+            ...(attachments.length > 0 && {
+              presignedAttachments: attachments,
+            }),
             ...(meta?.replyTo && {
               replyTo: {
                 id: meta.replyTo.id,
@@ -833,7 +870,9 @@ export default function ChatLayout() {
             text: content.trim(),
             type: computedType,
             channelData: selectedChannel,
-            ...(attachments.length > 0 && { presignedAttachments: attachments }),
+            ...(attachments.length > 0 && {
+              presignedAttachments: attachments,
+            }),
             ...(meta?.replyTo && {
               replyTo: {
                 id: meta.replyTo.id,
@@ -843,8 +882,6 @@ export default function ChatLayout() {
             }),
           });
         }
-
-
 
         // Clear reply sau khi gửi
         if (meta?.replyTo) setReplyTo(null);
@@ -880,7 +917,7 @@ export default function ChatLayout() {
 
   // Toggle sidebar function
   const handleToggleSidebar = useCallback(() => {
-    setShowSidebar(prev => !prev);
+    setShowSidebar((prev) => !prev);
   }, []);
 
   // Khi chọn kênh trên mobile thì ẩn sidebar
@@ -1094,16 +1131,22 @@ export default function ChatLayout() {
         <div className="flex flex-col h-full">
           {(() => {
             const filteredMessages: any[] = messages.filter((msg: any) => {
-              const msgChannelId = String(msg.channelId || msg.channel_id || '');
-              const currentChannelId = String(selectedChannel?.id || '');
-              return !msgChannelId || !currentChannelId || msgChannelId === currentChannelId;
+              const msgChannelId = String(
+                msg.channelId || msg.channel_id || ""
+              );
+              const currentChannelId = String(selectedChannel?.id || "");
+              return (
+                !msgChannelId ||
+                !currentChannelId ||
+                msgChannelId === currentChannelId
+              );
             });
 
             console.log("💬 Render check:", {
               totalMessages: messages.length,
               filteredMessages: filteredMessages.length,
               selectedChannelId: selectedChannel?.id,
-              hasSelectedChannel: !!selectedChannel
+              hasSelectedChannel: !!selectedChannel,
             });
 
             return (
@@ -1113,13 +1156,14 @@ export default function ChatLayout() {
                     <div className="text-center">
                       <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-white mb-2">
-                        {selectedChannel ? "Chưa có tin nhắn nào" : "Chọn một kênh để bắt đầu trò chuyện"}
+                        {selectedChannel
+                          ? "Chưa có tin nhắn nào"
+                          : "Chọn một kênh để bắt đầu trò chuyện"}
                       </h3>
                       <p className="text-muted-foreground">
                         {selectedChannel
                           ? "Be the first to send a message in this channel"
-                          : "Choose a channel from the sidebar to view messages"
-                        }
+                          : "Choose a channel from the sidebar to view messages"}
                       </p>
                     </div>
                   </div>
@@ -1151,7 +1195,9 @@ export default function ChatLayout() {
                       onCancelEdit={() => setEditTo(null)}
                       onToggleCodeEditor={() => {
                         // Toggle logic: nếu đang mở tool2 thì đóng, không thì mở
-                        setSelectedTool(selectedTool === "tool2" ? null : "tool2");
+                        setSelectedTool(
+                          selectedTool === "tool2" ? null : "tool2"
+                        );
                       }}
                       isCodeEditorOpen={selectedTool === "tool2"} // <-- Pass trạng thái
                     />
