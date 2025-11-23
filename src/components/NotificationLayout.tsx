@@ -202,6 +202,7 @@ export default function NotificationLayout() {
           hasMore={hasMore}
           onLoadMore={loadMore}
           onMarkAllAsRead={handleMarkAllAsRead}
+          onMarkAsRead={handleMarkAsRead}
         />
       }
     >

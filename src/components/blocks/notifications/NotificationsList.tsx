@@ -14,6 +14,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "path";
+import { NotificationAPI } from "@/api/api";
+import { on } from "events";
 
 interface NotificationsListProps {
   notifications: Notification[] | any[];
@@ -25,6 +27,7 @@ interface NotificationsListProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   onMarkAllAsRead?: () => void;
+  onMarkAsRead?: (id: string) => void;
 }
 
 // Skeleton Components
@@ -120,9 +123,9 @@ const NotificationItem = memo(
     const getNotificationDisplay = useMemo(() => {
       switch (notification.type) {
         case "message":
-          const messageType = notification.data?.type || 'message';
+          const messageType = notification.data?.type || "message";
           let messageTitle = `#${notification.data?.channel?.name || "kênh"}`;
-          let messageContent = '';
+          let messageContent = "";
 
           switch (messageType) {
             case "code-share":
@@ -131,8 +134,9 @@ const NotificationItem = memo(
               break;
             case "file-upload":
               messageTitle = `📁 ${notification.data?.channel?.name || "kênh"}`;
-              const attachmentCount = notification.data?.attachments?.length || 0;
-              messageContent = `${notification.data?.sender?.username || "Ai đó"} đã gửi ${attachmentCount} file${attachmentCount > 1 ? 's' : ''}`;
+              const attachmentCount =
+                notification.data?.attachments?.length || 0;
+              messageContent = `${notification.data?.sender?.username || "Ai đó"} đã gửi ${attachmentCount} file${attachmentCount > 1 ? "s" : ""}`;
               break;
             case "notification":
               messageTitle = `🔔 ${notification.data?.channel?.name || "kênh"}`;
@@ -155,11 +159,12 @@ const NotificationItem = memo(
           if (action === "created") {
             // Installation created
             const repoCount = notification.data?.repositories?.length || 0;
-            const owner = notification.data?.installation?.account?.login || "Unknown";
+            const owner =
+              notification.data?.installation?.account?.login || "Unknown";
 
             return {
               title: `🔧 GitHub App - ${owner}`,
-              content: `Đã cài đặt ứng dụng cho ${repoCount} repository${repoCount > 1 ? 's' : ''}`,
+              content: `Đã cài đặt ứng dụng cho ${repoCount} repository${repoCount > 1 ? "s" : ""}`,
               titleClass: "text-green-400 font-medium",
               metadata: {
                 action: "installation_created",
@@ -168,12 +173,21 @@ const NotificationItem = memo(
                 createdAt: notification.data?.installation?.created_at,
               },
             };
-          } else if (notification.data?.repository && notification.data?.commits) {
+          } else if (
+            notification.data?.repository &&
+            notification.data?.commits
+          ) {
             // Push event
             const repository = notification.data.repository.name;
-            const owner = notification.data.repository.owner?.login || notification.data.pusher?.name || "Unknown";
-            const commitMessage = notification.data.head_commit?.message || "No commit message";
-            const branch = notification.data.ref ? notification.data.ref.replace("refs/heads/", "") : "main";
+            const owner =
+              notification.data.repository.owner?.login ||
+              notification.data.pusher?.name ||
+              "Unknown";
+            const commitMessage =
+              notification.data.head_commit?.message || "No commit message";
+            const branch = notification.data.ref
+              ? notification.data.ref.replace("refs/heads/", "")
+              : "main";
             const commitsCount = notification.data.commits?.length || 1;
 
             return {
@@ -192,10 +206,10 @@ const NotificationItem = memo(
             // Other GitHub events
             return {
               title: `🐙 GitHub Event`,
-              content: `Action: ${action || 'unknown'}`,
+              content: `Action: ${action || "unknown"}`,
               titleClass: "text-green-400 font-medium",
               metadata: {
-                action: action || 'unknown',
+                action: action || "unknown",
               },
             };
           }
@@ -236,18 +250,18 @@ const NotificationItem = memo(
           !notification.read && "bg-blue-50/5",
           // Animation cho notification mới - nền trắng chữ đen
           isNewNotification &&
-          "bg-white text-black border-l-2 border-l-green-500"
+            "bg-white text-black border-l-2 border-l-green-500"
         )}
         onClick={() => onSelect(notification)}
         style={
           isNewNotification
             ? {
-              background: "white",
-              color: "black",
-              animation: "flash-white 0.8s ease-in-out 4",
-              border: "1px solid rgba(0,0,0,0.1)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            }
+                background: "white",
+                color: "black",
+                animation: "flash-white 0.8s ease-in-out 4",
+                border: "1px solid rgba(0,0,0,0.1)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }
             : undefined
         }
       >
@@ -288,9 +302,9 @@ const NotificationItem = memo(
                     style={
                       isNewNotification
                         ? {
-                          animation: "pulse 1s ease-in-out infinite",
-                          boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
-                        }
+                            animation: "pulse 1s ease-in-out infinite",
+                            boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
+                          }
                         : undefined
                     }
                   />
@@ -311,30 +325,42 @@ const NotificationItem = memo(
             </p>
 
             {/* GitHub specific metadata */}
-            {notification.type === "github" && getNotificationDisplay.metadata && (
-              <div className="flex items-center gap-3 text-xs text-sidebar-foreground/50">
-                {getNotificationDisplay.metadata.action === "push" && (
-                  <>
-                    <span>Branch: {getNotificationDisplay.metadata.branch}</span>
-                    <span>•</span>
-                    <span>By: {getNotificationDisplay.metadata.author}</span>
-                    {getNotificationDisplay.metadata.commitsCount > 1 && (
-                      <>
-                        <span>•</span>
-                        <span>{getNotificationDisplay.metadata.commitsCount} commits</span>
-                      </>
-                    )}
-                  </>
-                )}
-                {getNotificationDisplay.metadata.action === "installation_created" && (
-                  <>
-                    <span>Repositories: {getNotificationDisplay.metadata.repoCount}</span>
-                    <span>•</span>
-                    <span>Owner: {getNotificationDisplay.metadata.owner}</span>
-                  </>
-                )}
-              </div>
-            )}
+            {notification.type === "github" &&
+              getNotificationDisplay.metadata && (
+                <div className="flex items-center gap-3 text-xs text-sidebar-foreground/50">
+                  {getNotificationDisplay.metadata.action === "push" && (
+                    <>
+                      <span>
+                        Branch: {getNotificationDisplay.metadata.branch}
+                      </span>
+                      <span>•</span>
+                      <span>By: {getNotificationDisplay.metadata.author}</span>
+                      {getNotificationDisplay.metadata.commitsCount > 1 && (
+                        <>
+                          <span>•</span>
+                          <span>
+                            {getNotificationDisplay.metadata.commitsCount}{" "}
+                            commits
+                          </span>
+                        </>
+                      )}
+                    </>
+                  )}
+                  {getNotificationDisplay.metadata.action ===
+                    "installation_created" && (
+                    <>
+                      <span>
+                        Repositories:{" "}
+                        {getNotificationDisplay.metadata.repoCount}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Owner: {getNotificationDisplay.metadata.owner}
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
 
             {/* Thời gian chính xác */}
             <div
@@ -498,6 +524,7 @@ export default function NotificationsList({
   hasMore = true,
   onLoadMore,
   onMarkAllAsRead,
+  onMarkAsRead,
 }: NotificationsListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
@@ -540,9 +567,12 @@ export default function NotificationsList({
   // Memoized notification select handler
   const handleNotificationSelect = useCallback(
     (notification: any) => {
+      if (!notification.read && !notification.fakeID) {
+        onMarkAsRead?.(notification._id);
+      }
       onNotificationSelect?.(notification);
     },
-    [onNotificationSelect]
+    [onNotificationSelect, onMarkAsRead]
   );
 
   // Manual load more handler
@@ -651,7 +681,7 @@ export default function NotificationsList({
     () =>
       notifications.map((notification: any, index) => (
         <NotificationItem
-          key={`${notification._id}-${index}`}
+          key={`${notification._id}-${notification.read}-${index}`}
           notification={notification}
           isSelected={selectedNotification?._id === notification._id}
           onSelect={handleNotificationSelect}

@@ -8,7 +8,19 @@ import { formatExactTimeHelper } from "@/lib/utils";
 import { Notification } from "@/types/notifications";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Bell, Hash, MessageSquare, X, Check, GitBranch, Package, Settings, FileText, Share2, Upload } from "lucide-react";
+import {
+  Bell,
+  Hash,
+  MessageSquare,
+  X,
+  Check,
+  GitBranch,
+  Package,
+  Settings,
+  FileText,
+  Share2,
+  Upload,
+} from "lucide-react";
 
 interface NotificationDetailProps {
   notification: Notification | null;
@@ -19,7 +31,7 @@ interface NotificationDetailProps {
 //render notification content
 function renderNotification(notification: Notification): React.ReactNode {
   if (notification.type === "message") {
-    const messageType = notification.data?.type || 'message';
+    const messageType = notification.data?.type || "message";
     let typeLabel = "Tin nhắn";
     let iconBg = "bg-blue-600/20";
 
@@ -43,7 +55,6 @@ function renderNotification(notification: Notification): React.ReactNode {
         <Card className="max-w-3xl mx-auto bg-gray-900/50 border-gray-800 backdrop-blur-sm shadow-xl">
           <CardHeader className="pb-4 space-y-4">
             <div className="flex items-start gap-4">
-
               <AvatarUser user={notification.data?.sender} size={8} />
 
               <div className="flex-1 min-w-0">
@@ -51,7 +62,9 @@ function renderNotification(notification: Notification): React.ReactNode {
                   <h3 className="font-semibold text-white text-lg">
                     {notification.data?.sender?.username || "Unknown User"}
                   </h3>
-                  <Badge className={`${iconBg} text-blue-400 border-blue-600/30 hover:bg-blue-600/30`}>
+                  <Badge
+                    className={`${iconBg} text-blue-400 border-blue-600/30 hover:bg-blue-600/30`}
+                  >
                     {typeLabel}
                   </Badge>
                 </div>
@@ -70,9 +83,9 @@ function renderNotification(notification: Notification): React.ReactNode {
                 </div>
               </div>
 
-              {!notification.read && (
+              {/* {!notification.read && (
                 <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse ring-4 ring-blue-500/20" />
-              )}
+              )} */}
             </div>
           </CardHeader>
 
@@ -82,9 +95,11 @@ function renderNotification(notification: Notification): React.ReactNode {
             <div className="space-y-4">
               <div>
                 <h4 className="font-semibold mb-3 text-gray-300 text-sm uppercase tracking-wide">
-                  {messageType === "code-share" ? "Nội dung chia sẻ" :
-                    messageType === "file-upload" ? "Thông tin file" :
-                      "Nội dung tin nhắn"}
+                  {messageType === "code-share"
+                    ? "Nội dung chia sẻ"
+                    : messageType === "file-upload"
+                      ? "Thông tin file"
+                      : "Nội dung tin nhắn"}
                 </h4>
                 <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50 shadow-inner">
                   <p className="text-gray-200 leading-relaxed text-base">
@@ -92,34 +107,53 @@ function renderNotification(notification: Notification): React.ReactNode {
                   </p>
 
                   {/* Hiển thị thông tin đặc biệt cho từng loại */}
-                  {messageType === "code-share" && notification.data?.json_data && (
-                    <div className="mt-4 p-3 bg-gray-700/50 rounded border border-gray-600">
-                      <h5 className="text-sm font-medium text-gray-300 mb-2">Chi tiết chia sẻ:</h5>
-                      <pre className="text-xs text-gray-400 overflow-auto">
-                        {typeof notification.data.json_data === 'string'
-                          ? notification.data.json_data
-                          : JSON.stringify(notification.data.json_data, null, 2)}
-                      </pre>
-                    </div>
-                  )}
+                  {messageType === "code-share" &&
+                    notification.data?.json_data && (
+                      <div className="mt-4 p-3 bg-gray-700/50 rounded border border-gray-600">
+                        <h5 className="text-sm font-medium text-gray-300 mb-2">
+                          Chi tiết chia sẻ:
+                        </h5>
+                        <pre className="text-xs text-gray-400 overflow-auto">
+                          {typeof notification.data.json_data === "string"
+                            ? notification.data.json_data
+                            : JSON.stringify(
+                                notification.data.json_data,
+                                null,
+                                2
+                              )}
+                        </pre>
+                      </div>
+                    )}
 
-                  {messageType === "file-upload" && notification.data?.attachments && (
-                    <div className="mt-4 space-y-2">
-                      <h5 className="text-sm font-medium text-gray-300">Files đã tải lên:</h5>
-                      {notification.data.attachments.map((file: any, index: number) => (
-                        <div key={index} className="p-2 bg-gray-700/50 rounded border border-gray-600 text-sm">
-                          <div className="flex items-center gap-2 text-gray-300">
-                            <FileText className="w-4 h-4" />
-                            <span className="font-medium">{file.filename}</span>
-                            <span className="text-gray-400">({(file.fileSize / 1024).toFixed(1)} KB)</span>
-                          </div>
-                          <div className="text-xs text-gray-400 mt-1">
-                            Type: {file.mimeType}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {messageType === "file-upload" &&
+                    notification.data?.attachments && (
+                      <div className="mt-4 space-y-2">
+                        <h5 className="text-sm font-medium text-gray-300">
+                          Files đã tải lên:
+                        </h5>
+                        {notification.data.attachments.map(
+                          (file: any, index: number) => (
+                            <div
+                              key={index}
+                              className="p-2 bg-gray-700/50 rounded border border-gray-600 text-sm"
+                            >
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <FileText className="w-4 h-4" />
+                                <span className="font-medium">
+                                  {file.filename}
+                                </span>
+                                <span className="text-gray-400">
+                                  ({(file.fileSize / 1024).toFixed(1)} KB)
+                                </span>
+                              </div>
+                              <div className="text-xs text-gray-400 mt-1">
+                                Type: {file.mimeType}
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
                 </div>
               </div>
 
@@ -157,8 +191,11 @@ function renderNotification(notification: Notification): React.ReactNode {
                     GitHub Event
                   </h3>
                   <Badge className="bg-green-600/20 text-green-400 border-green-600/30 hover:bg-green-600/30">
-                    {action === "created" ? "Installation Created" :
-                      notification.data?.commits ? "Push Event" : "GitHub"}
+                    {action === "created"
+                      ? "Installation Created"
+                      : notification.data?.commits
+                        ? "Push Event"
+                        : "GitHub"}
                   </Badge>
                 </div>
 
@@ -203,39 +240,62 @@ function renderNotification(notification: Notification): React.ReactNode {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-gray-400">Repositories:</span>
-                          <span className="ml-2 text-white">{notification.data?.repositories?.length || 0}</span>
+                          <span className="ml-2 text-white">
+                            {notification.data?.repositories?.length || 0}
+                          </span>
                         </div>
                         <div>
-                          <span className="text-gray-400">Installation ID:</span>
-                          <span className="ml-2 text-white">{notification.data?.installation?.id}</span>
+                          <span className="text-gray-400">
+                            Installation ID:
+                          </span>
+                          <span className="ml-2 text-white">
+                            {notification.data?.installation?.id}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {notification.data?.repositories && notification.data.repositories.length > 0 && (
-                    <div>
-                      <h5 className="font-semibold mb-2 text-gray-300">Repositories được cài đặt:</h5>
-                      <div className="max-h-48 overflow-y-auto space-y-2">
-                        {notification.data.repositories.slice(0, 10).map((repo: any, index: number) => (
-                          <div key={index} className="p-2 bg-gray-800/30 rounded border border-gray-700/30 text-sm">
-                            <div className="flex items-center gap-2">
-                              <Package className="w-4 h-4 text-green-400" />
-                              <span className="text-white font-medium">{repo.full_name}</span>
-                              {repo.private && (
-                                <Badge variant="outline" className="text-xs text-white">Private</Badge>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                        {notification.data.repositories.length > 10 && (
-                          <p className="text-gray-400 text-sm">
-                            ... và {notification.data.repositories.length - 10} repository khác
-                          </p>
-                        )}
+                  {notification.data?.repositories &&
+                    notification.data.repositories.length > 0 && (
+                      <div>
+                        <h5 className="font-semibold mb-2 text-gray-300">
+                          Repositories được cài đặt:
+                        </h5>
+                        <div className="max-h-48 overflow-y-auto space-y-2">
+                          {notification.data.repositories
+                            .slice(0, 10)
+                            .map((repo: any, index: number) => (
+                              <div
+                                key={index}
+                                className="p-2 bg-gray-800/30 rounded border border-gray-700/30 text-sm"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Package className="w-4 h-4 text-green-400" />
+                                  <span className="text-white font-medium">
+                                    {repo.full_name}
+                                  </span>
+                                  {repo.private && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs text-white"
+                                    >
+                                      Private
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          {notification.data.repositories.length > 10 && (
+                            <p className="text-gray-400 text-sm">
+                              ... và{" "}
+                              {notification.data.repositories.length - 10}{" "}
+                              repository khác
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </>
               )}
 
@@ -256,27 +316,37 @@ function renderNotification(notification: Notification): React.ReactNode {
                         <div>
                           <span className="text-gray-400">Branch:</span>
                           <span className="ml-2 text-white">
-                            {notification.data.ref?.replace('refs/heads/', '') || 'main'}
+                            {notification.data.ref?.replace(
+                              "refs/heads/",
+                              ""
+                            ) || "main"}
                           </span>
                         </div>
                         <div>
                           <span className="text-gray-400">Commits:</span>
-                          <span className="ml-2 text-white">{notification.data.commits?.length || 0}</span>
+                          <span className="ml-2 text-white">
+                            {notification.data.commits?.length || 0}
+                          </span>
                         </div>
                         <div>
                           <span className="text-gray-400">Pusher:</span>
-                          <span className="ml-2 text-white">{notification.data.pusher?.name}</span>
+                          <span className="ml-2 text-white">
+                            {notification.data.pusher?.name}
+                          </span>
                         </div>
                       </div>
 
                       {notification.data.head_commit && (
                         <div className="p-3 bg-gray-700/50 rounded border border-gray-600">
-                          <h6 className="text-sm font-medium text-gray-300 mb-1">Latest Commit:</h6>
+                          <h6 className="text-sm font-medium text-gray-300 mb-1">
+                            Latest Commit:
+                          </h6>
                           <p className="text-gray-200 text-sm">
                             {notification.data.head_commit.message}
                           </p>
                           <div className="text-xs text-gray-400 mt-2">
-                            by {notification.data.head_commit.author?.name} • {notification.data.head_commit.id?.slice(0, 7)}
+                            by {notification.data.head_commit.author?.name} •{" "}
+                            {notification.data.head_commit.id?.slice(0, 7)}
                           </div>
                         </div>
                       )}
@@ -350,7 +420,7 @@ export default function NotificationDetail({
   const getNotificationIcon = () => {
     switch (notification.type) {
       case "message":
-        const messageType = notification.data?.type || 'message';
+        const messageType = notification.data?.type || "message";
         switch (messageType) {
           case "code-share":
             return <Share2 className="w-5 h-5 text-purple-400" />;
@@ -390,7 +460,7 @@ export default function NotificationDetail({
 
     let displayType: string = notification.type;
     if (notification.type === "message") {
-      const messageType = notification.data?.type || 'message';
+      const messageType = notification.data?.type || "message";
       switch (messageType) {
         case "code-share":
           displayType = "Code Share";
@@ -448,17 +518,6 @@ export default function NotificationDetail({
         </div>
 
         <div className="flex items-center gap-2">
-          {!notification.read && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleMarkAsRead}
-              className="text-sm bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700 transition-all duration-200"
-            >
-              <Check className="w-4 h-4 mr-2" />
-              Đánh dấu đã đọc
-            </Button>
-          )}
           {onClose && (
             <Button
               variant="ghost"
