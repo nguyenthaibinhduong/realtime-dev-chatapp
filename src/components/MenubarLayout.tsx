@@ -114,7 +114,7 @@ export default function MenubarLayout({
 
   return (
     <TooltipProvider>
-      <nav className="flex flex-col items-center gap-2 py-4 bg-zinc-950/95 backdrop-blur-md border-r border-zinc-700/50 min-h-screen w-14 shadow-lg">
+      <nav className="main-menubar flex flex-col items-center gap-2 py-4 bg-zinc-950/95 backdrop-blur-md border-r border-zinc-700/50 min-h-screen w-14 shadow-lg">
         {/* Toggle Sidebar Button */}
         <Tooltip>
           <TooltipTrigger asChild>

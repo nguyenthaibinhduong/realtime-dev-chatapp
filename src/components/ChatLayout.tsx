@@ -429,7 +429,7 @@ export default function ChatLayout() {
 
   // Socket join/leave + onMessage
   const joinChannelSocketA = useCallback(() => {
-    if (!selectedChannel?.id) return () => {};
+    if (!selectedChannel?.id) return () => { };
 
     const currentChannelId = selectedChannel.id;
     console.log("🔌 Joining socket room for channel:", currentChannelId);
