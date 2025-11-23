@@ -798,6 +798,11 @@ export default function ChatLayout() {
             key: result.key,
           }));
 
+          //remove attachments from json_data if any
+          if (json_data && json_data.attachments) {
+            delete json_data.attachments;
+          }
+
           // ✅ Xóa temporary message sau khi upload thành công
           setMessages((prev) => prev.filter((msg) => msg.id !== tempMessageId));
 

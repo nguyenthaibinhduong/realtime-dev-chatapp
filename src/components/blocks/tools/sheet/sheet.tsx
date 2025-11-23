@@ -124,15 +124,11 @@ export const FortuneSheet = () => {
 
   const handleChange = useCallback(
     (newData: Sheet[]) => {
-      setData(newData);
+      // setData(newData);
       debouncedSave(signedUrl, newData);
     },
     [signedUrl, debouncedSave]
   );
-
-  if (isLoading) {
-    return <div>Loading sheet...</div>;
-  }
 
   return (
     <div className="h-full w-full">
