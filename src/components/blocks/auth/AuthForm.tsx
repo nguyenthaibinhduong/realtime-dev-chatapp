@@ -95,12 +95,12 @@ export default function AuthForm() {
             {/* Content Container - Smaller and Compact */}
             <div className="relative z-10 w-full max-w-5xl flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
                 {/* Left Side - Introduction with Glass Effect */}
-                <div className="flex-1 text-white space-y-5 max-w-lg">
+                <div className="flex-1 text-black dark:text-white space-y-5 max-w-lg">
                     {/* Hero Section with Glass Card */}
                     <div className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl hover:bg-white/10 transition-all duration-300">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg shadow-blue-500/50">
-                                <MessageSquare className="h-6 w-6 text-white" />
+                                <MessageSquare className="h-6 w-6 text-black dark:text-white" />
                             </div>
                             <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                                 CodeSync Chat
@@ -153,7 +153,7 @@ export default function AuthForm() {
                 <Card className="w-full max-w-sm bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 shadow-2xl shadow-black/50 hover:shadow-blue-500/20 transition-all duration-300">
                     <CardHeader className="text-center pb-3 space-y-1">
                         <div className="inline-block mx-auto mb-2 p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-lg shadow-blue-500/50">
-                            <MessageSquare className="h-5 w-5 text-white" />
+                            <MessageSquare className="h-5 w-5 text-black dark:text-white" />
                         </div>
                         <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Chào mừng trở lại</CardTitle>
                         <CardDescription className="text-xs text-gray-400">
@@ -165,13 +165,13 @@ export default function AuthForm() {
                             <TabsList className="grid w-full grid-cols-2 bg-white/5 backdrop-blur-md border border-white/10 p-1">
                                 <TabsTrigger
                                     value="signin"
-                                    className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
+                                    className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
                                 >
                                     Đăng nhập
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="signup"
-                                    className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
+                                    className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
                                 >
                                     Đăng ký
                                 </TabsTrigger>
@@ -186,7 +186,7 @@ export default function AuthForm() {
                                             name="email"
                                             type="text"
                                             placeholder="your@email.com"
-                                            className="bg-white/5 backdrop-blur-md border-white/20 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                                            className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -197,7 +197,7 @@ export default function AuthForm() {
                                                 name="password"
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="••••••••"
-                                                className="bg-white/5 backdrop-blur-md border-white/20 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
+                                                className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
                                             />
                                             <Button
                                                 type="button"
@@ -224,7 +224,7 @@ export default function AuthForm() {
                                     </Button>
                                     <Button
                                         type="submit"
-                                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+                                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
@@ -247,7 +247,7 @@ export default function AuthForm() {
                                             type="text"
                                             placeholder="username"
                                             required
-                                            className="bg-white/5 backdrop-blur-md border-white/20 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                                            className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -258,7 +258,7 @@ export default function AuthForm() {
                                             type="email"
                                             placeholder="your@email.com"
                                             required
-                                            className="bg-white/5 backdrop-blur-md border-white/20 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                                            className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -271,7 +271,7 @@ export default function AuthForm() {
                                                 placeholder="••••••••"
                                                 required
                                                 minLength={6}
-                                                className="bg-white/5 backdrop-blur-md border-white/20 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
+                                                className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
                                             />
                                             <Button
                                                 type="button"
@@ -293,7 +293,7 @@ export default function AuthForm() {
                                     </p>
                                     <Button
                                         type="submit"
-                                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+                                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (

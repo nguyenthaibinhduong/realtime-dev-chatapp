@@ -129,13 +129,13 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
   return (
     <div className="space-y-4 h-full flex flex-col">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Request History</h2>
+        <h2 className="text-xl font-semibold text-black dark:text-white">Request History</h2>
         <div className="flex gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={loadHistory}
-            className="text-zinc-400 hover:text-white"
+            className="text-zinc-400 hover:text-black dark:text-white"
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -150,9 +150,10 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                   Clear All
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+              <AlertDialogContent className="bg-zinc-50
+dark:bg-zinc-900 border-zinc-800">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-white">
+                  <AlertDialogTitle className="text-black dark:text-white">
                     Clear History
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-zinc-400">
@@ -161,7 +162,7 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+                  <AlertDialogCancel className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white hover:bg-zinc-200 dark:bg-zinc-700">
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
@@ -183,14 +184,14 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
           placeholder="Search history..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-10 bg-zinc-800 border-zinc-700 text-white"
+          className="pl-10 pr-10 bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white"
         />
         {searchQuery && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setSearchQuery("")}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-zinc-700"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-zinc-200 dark:bg-zinc-700"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -198,7 +199,8 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
       </div>
 
       {filteredHistory.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">
+        <div className="flex flex-col items-center justify-center py-12 bg-zinc-50
+dark:bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">
           <Clock className="h-12 w-12 mb-2 opacity-50" />
           <p className="text-sm">
             {searchQuery ? "No matching requests found" : "No history yet"}
@@ -215,7 +217,8 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
             {filteredHistory.map((item) => (
               <div
                 key={item.id}
-                className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors group"
+                className="bg-zinc-50
+dark:bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors group"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -240,7 +243,7 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                         {formatDate(item.timestamp)}
                       </span>
                     </div>
-                    <p className="text-sm text-white truncate mb-1">
+                    <p className="text-sm text-black dark:text-white truncate mb-1">
                       {item.url}
                     </p>
                     <div className="flex items-center gap-3 text-xs text-zinc-400">
@@ -255,7 +258,7 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => onSelectHistory(item)}
-                          className="h-8 w-8 p-0 text-zinc-400 hover:text-white"
+                          className="h-8 w-8 p-0 text-zinc-400 hover:text-black dark:text-white"
                         >
                           <ArrowRight className="h-4 w-4" />
                         </Button>
@@ -263,7 +266,7 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                           variant="default"
                           size="sm"
                           onClick={() => handleShare(item)}
-                          className="h-8 w-8 p-0 text-white hover:bg-blue-800"
+                          className="h-8 w-8 p-0 text-black dark:text-white hover:bg-blue-800"
                         >
                           <Share2 className="h-4 w-4" />
                         </Button>

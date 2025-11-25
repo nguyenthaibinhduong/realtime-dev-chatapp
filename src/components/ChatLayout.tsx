@@ -1071,27 +1071,25 @@ export default function ChatLayout() {
               <Dialog open={openSearchModal} onOpenChange={setOpenSearchModal}>
                 <DialogTrigger asChild>
                   <div
-                    className="flex items-center w-full bg-[#222] rounded px-3 py-2 cursor-pointer hover:bg-[#333] transition"
+                    className="flex items-center w-full bg-gray-200 dark:bg-gray-800 rounded px-3 py-2 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition"
                     title="Tìm kiếm kênh"
                     onClick={() => setOpenSearchModal(true)}
                     style={{ minHeight: 40 }}
                   >
-                    <Search className="h-5 w-5 text-white mr-2" />
-                    <span className="text-white opacity-80 text-sm">
+                    <Search className="h-5 w-5 text-gray-700 dark:text-white mr-2" />
+                    <span className="text-gray-700 dark:text-white opacity-80 text-sm">
                       Tìm kiếm ...
                     </span>
                   </div>
                 </DialogTrigger>
                 <DialogContent
-                  className="w-full max-w-2xl bg-[#18181b] text-white border-none"
+                  className="w-full max-w-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700"
                   style={{
-                    background: "#18181b",
-                    color: "#fff",
                     height: "85vh",
                   }}
                 >
                   <DialogHeader>
-                    <DialogTitle className="text-white">
+                    <DialogTitle className="text-gray-900 dark:text-white">
                       Tìm kiếm kênh , người dùng
                     </DialogTitle>
                   </DialogHeader>
@@ -1125,7 +1123,7 @@ export default function ChatLayout() {
         <div>
           <button
             ref={navBtnRef}
-            className="fixed z-50 bg-primary text-white rounded-full p-2 shadow flex items-center justify-center"
+            className="fixed z-50 bg-primary text-black dark:text-white rounded-full p-2 shadow flex items-center justify-center"
             style={{
               left: navBtnPos.x,
               top: navBtnPos.y,
@@ -1170,11 +1168,11 @@ export default function ChatLayout() {
           </button>
           {showSidebar && (
             <div
-              className="fixed inset-0 bg-black/60 z-40"
+              className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40"
               onClick={() => setShowSidebar(false)}
             >
               <div
-                className="absolute top-0 left-0 h-full w-[80vw] max-w-xs bg-[#18181b] shadow-lg overflow-y-auto"
+                className="absolute top-0 left-0 h-full w-[80vw] max-w-xs bg-white dark:bg-gray-900 shadow-lg overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
               >
                 <SidebarLayout>
@@ -1185,19 +1183,19 @@ export default function ChatLayout() {
                     >
                       <DialogTrigger asChild>
                         <div
-                          className="flex items-center w-full bg-[#222] rounded px-3 py-2 cursor-pointer hover:bg-[#333] transition"
+                          className="flex items-center w-full bg-gray-200 dark:bg-gray-800 rounded px-3 py-2 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition"
                           title="Tìm kiếm kênh"
                           onClick={() => setOpenSearchModal(true)}
                           style={{ minHeight: 40 }}
                         >
-                          <Search className="h-5 w-5 text-white mr-2" />
-                          <span className="text-white opacity-80 text-sm">
+                          <Search className="h-5 w-5 text-gray-700 dark:text-white mr-2" />
+                          <span className="text-gray-700 dark:text-white opacity-80 text-sm">
                             Tìm kiếm ...
                           </span>
                         </div>
                       </DialogTrigger>
                       <DialogContent
-                        className="w-full max-w-2xl bg-[#18181b] text-white border-none"
+                        className="w-full max-w-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700"
                         style={{
                           background: "#18181b",
                           color: "#fff",
@@ -1205,7 +1203,7 @@ export default function ChatLayout() {
                         }}
                       >
                         <DialogHeader>
-                          <DialogTitle className="text-white">
+                          <DialogTitle className="text-gray-900 dark:text-white">
                             Tìm kiếm kênh , người dùng
                           </DialogTitle>
                         </DialogHeader>
@@ -1274,7 +1272,7 @@ export default function ChatLayout() {
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
                       <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-white mb-2">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                         {selectedChannel
                           ? "Chưa có tin nhắn nào"
                           : "Chọn một kênh để bắt đầu trò chuyện"}
@@ -1331,12 +1329,12 @@ export default function ChatLayout() {
         {/* GitHub Detail Modal */}
         {showGithubDetail && (
           <Dialog open={showGithubDetail} onOpenChange={setShowGithubDetail}>
-            <DialogContent className="max-w-2xl bg-gray-900 text-white">
+            <DialogContent className="max-w-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700">
               <DialogHeader>
-                <DialogTitle>GitHub Event Detail</DialogTitle>
+                <DialogTitle className="text-gray-900 dark:text-white">GitHub Event Detail</DialogTitle>
               </DialogHeader>
               <div className="p-4">
-                <pre className="text-sm bg-gray-800 p-4 rounded overflow-auto">
+                <pre className="text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-auto text-gray-900 dark:text-white">
                   {JSON.stringify(githubDetailData, null, 2)}
                 </pre>
               </div>

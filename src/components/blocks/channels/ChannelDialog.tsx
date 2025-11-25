@@ -68,11 +68,11 @@ function UserBadge({ user, roles, onRemove, onRoleClick, isPrivate }: {
   return (
     <div className="bg-gray-800 border border-gray-600 rounded-lg p-2 flex items-center justify-between gap-2 hover:border-blue-500 transition-colors">
       <div className="flex items-center gap-2 flex-1">
-        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-black dark:text-white text-xs font-semibold flex-shrink-0">
           {user.username.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white truncate">{user.username}</p>
+          <p className="text-sm font-medium text-black dark:text-white truncate">{user.username}</p>
           {isPrivate && (
             <div className="flex flex-wrap gap-1 mt-1">
               {userRoles.map(roleId => {
@@ -125,11 +125,11 @@ function UserListItem({ user, onAdd }: { user: User; onAdd: () => void }) {
       onClick={onAdd}
     >
       <div className="flex items-center gap-2">
-        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
+        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-black dark:text-white text-xs">
           {user.username.charAt(0).toUpperCase()}
         </div>
         <div>
-          <p className="text-sm font-medium text-white">{user.username}</p>
+          <p className="text-sm font-medium text-black dark:text-white">{user.username}</p>
           <p className="text-xs text-gray-400">{user.email}</p>
         </div>
       </div>
@@ -517,7 +517,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`bg-gray-900 text-white border border-gray-700 w-full h-[600px] max-h-[90vh] flex flex-col ${isMultiChannel && type === "private" ? 'max-w-6xl' : 'max-w-lg'
+      <DialogContent className={`bg-gray-900 text-black dark:text-white border border-gray-700 w-full h-[600px] max-h-[90vh] flex flex-col ${isMultiChannel && type === "private" ? 'max-w-6xl' : 'max-w-lg'
         }`}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
@@ -551,7 +551,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   placeholder="VD: E-Commerce Platform, CRM System..."
-                  className="bg-gray-800 text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
+                  className="bg-gray-800 text-black dark:text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
                 />
               </div>
             )}
@@ -633,7 +633,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                           value={form.name}
                           onChange={(e) => updateChannelFormName(form.id, e.target.value)}
                           placeholder={`Tên kênh ${index + 1}`}
-                          className="flex-1 bg-gray-800 text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500 h-8 text-sm"
+                          className="flex-1 bg-gray-800 text-black dark:text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500 h-8 text-sm"
                         />
                         {channelForms.length > 1 && (
                           <Button
@@ -712,7 +712,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                   value={channelName}
                   onChange={(e) => setChannelName(e.target.value)}
                   placeholder={`Nhập tên kênh ${type === "public" ? "công khai" : "dự án"}`}
-                  className="bg-gray-800 text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
+                  className="bg-gray-800 text-black dark:text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
                 />
               </div>
             )}
@@ -724,7 +724,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Tìm kiếm người dùng..."
-                  className="pl-9 bg-gray-800 text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
+                  className="pl-9 bg-gray-800 text-black dark:text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
                 />
                 {isSearching && (
                   <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
@@ -831,7 +831,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => setEditingUserId(null)}
-                                  className="h-5 w-5 p-0 text-gray-400 hover:text-white"
+                                  className="h-5 w-5 p-0 text-gray-400 hover:text-black dark:text-white"
                                 >
                                   <X className="h-3 w-3" />
                                 </Button>
@@ -944,7 +944,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Tìm kiếm người dùng..."
-                        className="pl-9 bg-gray-800 text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
+                        className="pl-9 bg-gray-800 text-black dark:text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500"
                       />
                       {isSearching && (
                         <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
@@ -1014,7 +1014,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                                         size="sm"
                                         variant="ghost"
                                         onClick={() => setEditingUserId(null)}
-                                        className="h-5 w-5 p-0 text-gray-400 hover:text-white"
+                                        className="h-5 w-5 p-0 text-gray-400 hover:text-black dark:text-white"
                                       >
                                         <X className="h-3 w-3" />
                                       </Button>
@@ -1087,7 +1087,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="text-gray-300 hover:text-white hover:bg-gray-700"
+            className="text-gray-300 hover:text-black dark:text-white hover:bg-gray-700"
           >
             Hủy
           </Button>
@@ -1098,7 +1098,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                 ? (!projectName.trim() || channelForms.some(f => !f.name.trim() || f.users.length < 2))
                 : (!channelName.trim() || (type === "private" && (!projectName.trim() || selectedUsers.length < 2)))
             }
-            className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-blue-600 hover:bg-blue-700 text-black dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSearching && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             {isSearching

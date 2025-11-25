@@ -20,7 +20,7 @@ export const Tool3 = () => {
         <div className="h-full p-4 bg-gray-900/50">
             <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white">
+                    <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                         <BarChart3 className="h-5 w-5 text-green-400" />
                         Tool 3 - Analytics Dashboard
                     </CardTitle>
@@ -38,7 +38,7 @@ export const Tool3 = () => {
                                         {stat.change}
                                     </div>
                                 </div>
-                                <p className="text-lg font-semibold text-white">{stat.value}</p>
+                                <p className="text-lg font-semibold text-black dark:text-white">{stat.value}</p>
                             </div>
                         ))}
                     </div>
@@ -63,8 +63,8 @@ export const Tool3 = () => {
                         {recentActivity.map((activity, index) => (
                             <div key={index} className="flex items-center gap-3 p-2 bg-gray-700/30 rounded">
                                 <div className={`w-2 h-2 rounded-full ${activity.type === 'join' ? 'bg-green-400' :
-                                        activity.type === 'message' ? 'bg-blue-400' :
-                                            activity.type === 'channel' ? 'bg-purple-400' : 'bg-yellow-400'
+                                    activity.type === 'message' ? 'bg-blue-400' :
+                                        activity.type === 'channel' ? 'bg-purple-400' : 'bg-yellow-400'
                                     }`} />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs text-gray-300 truncate">{activity.action}</p>

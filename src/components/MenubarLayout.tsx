@@ -114,34 +114,34 @@ export default function MenubarLayout({
 
   return (
     <TooltipProvider>
-      <nav className="main-menubar flex flex-col items-center gap-2 py-4 bg-zinc-950/95 backdrop-blur-md border-r border-zinc-700/50 min-h-screen w-14 shadow-lg">
+      <nav className="main-menubar flex flex-col items-center gap-2 py-4 bg-zinc-50 dark:bg-zinc-950/95 backdrop-blur-md border-r border-zinc-700/50 min-h-screen w-14 shadow-lg">
         {/* Toggle Sidebar Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 mb-2"
+              className="rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 mb-2"
               onClick={onToggleSidebar}
               title={showSidebar ? "Ẩn sidebar" : "Hiện sidebar"}
             >
               {showSidebar ? (
-                <X className="h-5 w-5 text-zinc-400 hover:text-zinc-200" />
+                <X className="h-5 w-5 text-zinc-800 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200" />
               ) : (
-                <Menu className="h-5 w-5 text-zinc-400 hover:text-zinc-200" />
+                <Menu className="h-5 w-5 text-zinc-800 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200" />
               )}
             </Button>
           </TooltipTrigger>
           <TooltipContent
             side="right"
-            className="bg-zinc-900 text-zinc-100 border border-zinc-700/50"
+            className="bg-zinc-50 dark:bg-zinc-900 text-zinc-100 border border-zinc-700/50"
           >
             {showSidebar ? "Ẩn sidebar" : "Hiện sidebar"}
           </TooltipContent>
         </Tooltip>
 
         {/* Separator */}
-        <div className="w-6 h-px bg-zinc-700/40 mb-1" />
+        <div className="w-6 h-px bg-zinc-200 dark:bg-zinc-700/40 mb-1" />
 
         {items.map((item) => (
           <Tooltip key={item.key}>
@@ -152,8 +152,8 @@ export default function MenubarLayout({
                 }
                 size="icon"
                 className={`rounded-xl transition-all duration-200 ${location.pathname === item.link
-                    ? "bg-blue-500/20 border border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20"
-                    : "hover:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 text-zinc-400 hover:text-zinc-200"
+                  ? "bg-blue-500/20 border border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20"
+                  : "hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 text-zinc-800 dark:text-zinc-400 hover:text-zinc-200"
                   }`}
                 onClick={() => {
                   onSelect?.(item.key);
@@ -165,7 +165,7 @@ export default function MenubarLayout({
             </TooltipTrigger>
             <TooltipContent
               side="right"
-              className="bg-zinc-900 text-zinc-100 border border-zinc-700/50"
+              className="bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 border border-zinc-700/50"
             >
               {item.label}
             </TooltipContent>
@@ -173,7 +173,7 @@ export default function MenubarLayout({
         ))}
         {/* Separator */}
         <div className="flex-1" />
-        <div className="w-6 h-px bg-zinc-700/40 mb-2" />
+        <div className="w-6 h-px bg-zinc-200 dark:bg-zinc-700/40 mb-2" />
 
         <Tooltip>
           <TooltipTrigger asChild>
@@ -189,7 +189,7 @@ export default function MenubarLayout({
           </TooltipTrigger>
           <TooltipContent
             side="right"
-            className="bg-zinc-900 text-zinc-100 border border-zinc-700/50"
+            className="bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 border border-zinc-700/50"
           >
             Đăng xuất
           </TooltipContent>

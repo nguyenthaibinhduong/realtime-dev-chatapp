@@ -59,7 +59,7 @@ function renderNotification(notification: Notification): React.ReactNode {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <h3 className="font-semibold text-white text-lg">
+                  <h3 className="font-semibold text-black dark:text-white text-lg">
                     {notification.data?.sender?.username || "Unknown User"}
                   </h3>
                   <Badge
@@ -117,10 +117,10 @@ function renderNotification(notification: Notification): React.ReactNode {
                           {typeof notification.data.json_data === "string"
                             ? notification.data.json_data
                             : JSON.stringify(
-                                notification.data.json_data,
-                                null,
-                                2
-                              )}
+                              notification.data.json_data,
+                              null,
+                              2
+                            )}
                         </pre>
                       </div>
                     )}
@@ -182,12 +182,12 @@ function renderNotification(notification: Notification): React.ReactNode {
           <CardHeader className="pb-4 space-y-4">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center">
-                <GitBranch className="w-8 h-8 text-white" />
+                <GitBranch className="w-8 h-8 text-black dark:text-white" />
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <h3 className="font-semibold text-white text-lg">
+                  <h3 className="font-semibold text-black dark:text-white text-lg">
                     GitHub Event
                   </h3>
                   <Badge className="bg-green-600/20 text-green-400 border-green-600/30 hover:bg-green-600/30">
@@ -240,7 +240,7 @@ function renderNotification(notification: Notification): React.ReactNode {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-gray-400">Repositories:</span>
-                          <span className="ml-2 text-white">
+                          <span className="ml-2 text-black dark:text-white">
                             {notification.data?.repositories?.length || 0}
                           </span>
                         </div>
@@ -248,7 +248,7 @@ function renderNotification(notification: Notification): React.ReactNode {
                           <span className="text-gray-400">
                             Installation ID:
                           </span>
-                          <span className="ml-2 text-white">
+                          <span className="ml-2 text-black dark:text-white">
                             {notification.data?.installation?.id}
                           </span>
                         </div>
@@ -272,13 +272,13 @@ function renderNotification(notification: Notification): React.ReactNode {
                               >
                                 <div className="flex items-center gap-2">
                                   <Package className="w-4 h-4 text-green-400" />
-                                  <span className="text-white font-medium">
+                                  <span className="text-black dark:text-white font-medium">
                                     {repo.full_name}
                                   </span>
                                   {repo.private && (
                                     <Badge
                                       variant="outline"
-                                      className="text-xs text-white"
+                                      className="text-xs text-black dark:text-white"
                                     >
                                       Private
                                     </Badge>
@@ -315,7 +315,7 @@ function renderNotification(notification: Notification): React.ReactNode {
                         </div>
                         <div>
                           <span className="text-gray-400">Branch:</span>
-                          <span className="ml-2 text-white">
+                          <span className="ml-2 text-black dark:text-white">
                             {notification.data.ref?.replace(
                               "refs/heads/",
                               ""
@@ -324,13 +324,13 @@ function renderNotification(notification: Notification): React.ReactNode {
                         </div>
                         <div>
                           <span className="text-gray-400">Commits:</span>
-                          <span className="ml-2 text-white">
+                          <span className="ml-2 text-black dark:text-white">
                             {notification.data.commits?.length || 0}
                           </span>
                         </div>
                         <div>
                           <span className="text-gray-400">Pusher:</span>
-                          <span className="ml-2 text-white">
+                          <span className="ml-2 text-black dark:text-white">
                             {notification.data.pusher?.name}
                           </span>
                         </div>
@@ -407,7 +407,7 @@ export default function NotificationDetail({
         <div className="w-24 h-24 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center mb-6 ring-4 ring-gray-700/30 shadow-xl">
           <Bell className="w-12 h-12 text-gray-600" />
         </div>
-        <h2 className="text-2xl font-bold mb-3 text-white">
+        <h2 className="text-2xl font-bold mb-3 text-black dark:text-white">
           Chọn một thông báo
         </h2>
         <p className="text-gray-400 max-w-md leading-relaxed">
@@ -509,7 +509,7 @@ export default function NotificationDetail({
             {getNotificationIcon()}
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white">Chi tiết thông báo</h1>
+            <h1 className="text-lg font-bold text-black dark:text-white">Chi tiết thông báo</h1>
             <p className="text-xs text-gray-400">
               {notification.read ? "Đã đọc" : "Chưa đọc"}
             </p>
@@ -523,7 +523,7 @@ export default function NotificationDetail({
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
+              className="hover:bg-gray-800 text-gray-400 hover:text-black dark:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </Button>

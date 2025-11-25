@@ -37,7 +37,7 @@ const AutoCodeBlock = ({ code, language = 'plaintext' }: AutoCodeBlockProps) => 
                 <span className="capitalize">{language}</span>
                 <button
                     onClick={handleCopy}
-                    className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded"
+                    className="text-xs bg-gray-700 hover:bg-gray-600 text-black dark:text-white px-2 py-1 rounded"
                 >
                     {copied ? 'Copied!' : 'Copy'}
                 </button>
@@ -76,7 +76,7 @@ export const Message = ({ text }: MessageRendererProps) => {
                         return <AutoCodeBlock key={index} code={code} language={language} />;
                     }
                     return (
-                        <p key={index} className="whitespace-pre-wrap text-white">
+                        <p key={index} className="whitespace-pre-wrap text-black dark:text-white">
                             {part}
                         </p>
                     );
@@ -85,5 +85,5 @@ export const Message = ({ text }: MessageRendererProps) => {
         );
     }
 
-    return <p className="whitespace-pre-wrap text-white">{text}</p>;
+    return <p className="whitespace-pre-wrap text-black dark:text-white">{text}</p>;
 };

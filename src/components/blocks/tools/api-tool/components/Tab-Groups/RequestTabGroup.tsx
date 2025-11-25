@@ -34,12 +34,13 @@ export default function RequestTabGroup({
   return (
     <Tabs
       defaultValue="body"
-      className="mt-2 w-full text-white"
+      className="mt-2 w-full text-black dark:text-white"
     >
       {/* Tabs header: dark, mobile-friendly, wrap/scroll, reduced padding */}
       <TabsList
         className="
-          w-full bg-zinc-900/80 border border-zinc-800 rounded-md
+          w-full bg-zinc-50
+dark:bg-zinc-900/80 border border-zinc-800 rounded-md
           p-1 flex flex-wrap gap-1 overflow-x-auto
           sticky top-0 z-10
         "
@@ -48,15 +49,15 @@ export default function RequestTabGroup({
           value="query-params"
           className="
             text-xs sm:text-sm px-2 py-1 rounded-md
-            text-white hover:text-white hover:bg-zinc-800
-            data-[state=active]:bg-blue-600 data-[state=active]:text-white
+            text-black dark:text-white hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800
+            data-[state=active]:bg-blue-600 data-[state=active]:text-black dark:text-white
             outline-none focus-visible:ring-2 focus-visible:ring-blue-500
             transition
           "
         >
           Query Params
           {enabledQueryParams > 0 && (
-            <Badge className="ml-1 bg-blue-600 text-white text-[10px] px-1.5 py-0 rounded">
+            <Badge className="ml-1 bg-blue-600 text-black dark:text-white text-[10px] px-1.5 py-0 rounded">
               {enabledQueryParams}
             </Badge>
           )}
@@ -66,15 +67,15 @@ export default function RequestTabGroup({
           value="headers"
           className="
             text-xs sm:text-sm px-2 py-1 rounded-md
-            text-zinc-300 hover:text-white hover:bg-zinc-800
-            data-[state=active]:bg-blue-600 data-[state=active]:text-white
+            text-zinc-300 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800
+            data-[state=active]:bg-blue-600 data-[state=active]:text-black dark:text-white
             outline-none focus-visible:ring-2 focus-visible:ring-blue-500
             transition
           "
         >
           Headers
           {enabledHeaders > 0 && (
-            <Badge className="ml-1 bg-blue-600 text-white text-[10px] px-1.5 py-0 rounded">
+            <Badge className="ml-1 bg-blue-600 text-black dark:text-white text-[10px] px-1.5 py-0 rounded">
               {enabledHeaders}
             </Badge>
           )}
@@ -84,8 +85,8 @@ export default function RequestTabGroup({
           value="body"
           className="
             text-xs sm:text-sm px-2 py-1 rounded-md
-            text-zinc-300 hover:text-white hover:bg-zinc-800
-            data-[state=active]:bg-blue-600 data-[state=active]:text-white
+            text-zinc-300 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800
+            data-[state=active]:bg-blue-600 data-[state=active]:text-black dark:text-white
             outline-none focus-visible:ring-2 focus-visible:ring-blue-500
             transition
           "
@@ -97,21 +98,21 @@ export default function RequestTabGroup({
       {/* Panels: darker bg, white text, thinner padding, rounded */}
       <TabsContent
         value="query-params"
-        className="mt-2 p-2 sm:p-3 bg-zinc-950/80 border border-zinc-800 rounded-lg"
+        className="mt-2 p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-800 rounded-lg"
       >
         <KeyValuePane paneValue={queryParams} setPaneValue={setQueryParams} />
       </TabsContent>
 
       <TabsContent
         value="headers"
-        className="mt-2 p-2 sm:p-3 bg-zinc-950/80 border border-zinc-800 rounded-lg"
+        className="mt-2 p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-800 rounded-lg"
       >
         <KeyValuePane paneValue={headers} setPaneValue={setHeaders} />
       </TabsContent>
 
       <TabsContent
         value="body"
-        className="mt-2 p-2 sm:p-3 bg-zinc-950/80 border border-zinc-800 rounded-lg"
+        className="mt-2 p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-800 rounded-lg"
       >
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-1">

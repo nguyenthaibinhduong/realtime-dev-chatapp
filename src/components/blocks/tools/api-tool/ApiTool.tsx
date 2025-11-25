@@ -91,12 +91,13 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem, onClose }) => {
   return (
     <Layout>
       {/* Header với close button */}
-      <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800 mb-4">
+      <div className="flex items-center justify-between px-4 py-3 bg-zinc-50
+dark:bg-zinc-900 border-b border-zinc-800 mb-4">
         <div className="flex items-center space-x-2">
           <Globe className="h-5 w-5 text-blue-400" />
-          <span className="text-white font-medium">API Testing Tool</span>
+          <span className="text-black dark:text-white font-medium">API Testing Tool</span>
           {initialHistoryItem && (
-            <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">
+            <span className="text-xs bg-green-600 text-black dark:text-white px-2 py-0.5 rounded">
               Loaded from share
             </span>
           )}
@@ -107,7 +108,7 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem, onClose }) => {
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-zinc-800"
+            className="h-8 w-8 p-0 text-gray-400 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800"
             title="Đóng API Tool"
           >
             <X className="h-4 w-4" />
@@ -120,7 +121,7 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem, onClose }) => {
         onValueChange={setSelectedTab}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 bg-zinc-800 px-5">
+        <TabsList className="grid w-full grid-cols-2 bg-zinc-100 dark:bg-zinc-800 px-5">
           <TabsTrigger
             value="request"
             className="data-[state=active]:bg-white data-[state=active]:text-black"
@@ -137,7 +138,8 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem, onClose }) => {
 
         <TabsContent value="request" className="space-y-4">
           {/* Request Section */}
-          <Card className="bg-zinc-900 border-zinc-800">
+          <Card className="bg-zinc-50
+dark:bg-zinc-900 border-zinc-800">
             <CardContent className="pt-6">
               <Request
                 setResponse={setResponse}
@@ -150,7 +152,8 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem, onClose }) => {
           </Card>
 
           {/* Response Section */}
-          <Card className="bg-zinc-900 border-zinc-800">
+          <Card className="bg-zinc-50
+dark:bg-zinc-900 border-zinc-800">
             <CardContent className="pt-6">
               <Response response={response} loading={loading} />
             </CardContent>
@@ -158,7 +161,8 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem, onClose }) => {
         </TabsContent>
 
         <TabsContent value="history">
-          <Card className="bg-zinc-900 border-zinc-800">
+          <Card className="bg-zinc-50
+dark:bg-zinc-900 border-zinc-800">
             <CardContent className="pt-6 h-[calc(100vh-200px)]">
               <HistoryPanel onSelectHistory={handleSelectHistory} />
             </CardContent>

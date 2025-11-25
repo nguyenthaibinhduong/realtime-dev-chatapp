@@ -134,7 +134,7 @@ const TesterReportMessage = ({
             className={cn(
               "max-w-[50vw] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] min-w-[280px] sm:min-w-[320px]",
               "cursor-pointer transition-all duration-200",
-              "bg-black border-2 border-red-500"
+              "bg-white dark:bg-gray-950 border-2 border-red-400 dark:border-red-500"
             )}
           >
             <div className="p-3 space-y-2">
@@ -145,7 +145,7 @@ const TesterReportMessage = ({
                     <Bug className="h-4 w-4 text-red-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-white">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                       Bug Report
                     </h3>
                     {projectName && (
@@ -160,7 +160,7 @@ const TesterReportMessage = ({
 
               {/* Content Preview */}
               <div className="space-y-1.5">
-                <p className="text-xs text-white line-clamp-2">
+                <p className="text-xs text-black dark:text-white line-clamp-2">
                   {contentPreview}
                   {hasMoreContent && "..."}
                 </p>
@@ -217,7 +217,7 @@ const TesterReportMessage = ({
                 <Bug className="h-6 w-6 text-red-400" />
               </div>
               <div className="flex-1">
-                <div className="text-xl font-bold text-white flex items-center gap-2">
+                <div className="text-xl font-bold text-black dark:text-white flex items-center gap-2">
                   Bug Report
                   <Badge
                     variant="outline"
@@ -229,7 +229,7 @@ const TesterReportMessage = ({
                 {projectName && (
                   <div className="text-sm font-medium text-gray-400 mt-1 flex items-center gap-2">
                     <span className="text-gray-500">Project:</span>
-                    <span className="text-white">{projectName}</span>
+                    <span className="text-black dark:text-white">{projectName}</span>
                   </div>
                 )}
               </div>
@@ -256,7 +256,7 @@ const TesterReportMessage = ({
                     <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">
                       Ngày
                     </div>
-                    <div className="text-xs font-semibold text-white truncate">
+                    <div className="text-xs font-semibold text-black dark:text-white truncate">
                       {new Date(message.created_at).toLocaleDateString(
                         "vi-VN",
                         {
@@ -276,7 +276,7 @@ const TesterReportMessage = ({
                     <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">
                       Người báo cáo
                     </div>
-                    <div className="text-xs font-semibold text-white truncate">
+                    <div className="text-xs font-semibold text-black dark:text-white truncate">
                       {message.sender?.username || "Unknown"}
                     </div>
                   </div>
@@ -355,11 +355,11 @@ const TesterReportMessage = ({
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 border border-red-500/30">
                   <FileText className="h-4 w-4 text-red-400" />
                 </div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
                   Mô tả lỗi
                 </h3>
               </div>
-              <Card className="bg-black border border-gray-700/50 shadow-inner">
+              <Card className="bg-white dark:bg-black border border-gray-700/50 shadow-inner">
                 <div
                   className="p-5 prose prose-invert prose-sm max-w-none text-gray-200 leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: content }}
@@ -374,7 +374,7 @@ const TesterReportMessage = ({
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-500/10 border border-yellow-500/30">
                     <FileText className="h-4 w-4 text-yellow-400" />
                   </div>
-                  <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
                     Ghi chú
                   </h3>
                 </div>
@@ -393,7 +393,7 @@ const TesterReportMessage = ({
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/30">
                     <LinkIcon className="h-4 w-4 text-blue-400" />
                   </div>
-                  <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
                     Drive Link
                   </h3>
                 </div>
@@ -442,7 +442,7 @@ const TesterReportMessage = ({
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-500/10 border border-gray-500/30">
                     <FileText className="h-4 w-4 text-gray-400" />
                   </div>
-                  <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
                     Tệp đính kèm
                   </h3>
                   <Badge

@@ -161,7 +161,7 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="w-full max-w-[90vw] h-[90vh] p-0 bg-black text-white border border-zinc-700 flex overflow-hidden"
+                className="w-full max-w-[90vw] h-[90vh] p-0 bg-white dark:bg-black text-black dark:text-white border border-zinc-700 flex overflow-hidden"
             >
                 {/* Mobile */}
                 <div className="flex flex-col h-screen w-full md:hidden">
@@ -267,7 +267,7 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                                                     draggable
                                                     onDragStart={(e) => handleDragStart(e, repo)}
                                                     className="group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200
-                                                    bg-zinc-900 border-zinc-700 hover:border-blue-500 hover:bg-zinc-800 cursor-grab active:cursor-grabbing hover:shadow-lg hover:shadow-blue-500/10"
+                                                    bg-zinc-50 dark:bg-zinc-900 border-zinc-700 hover:border-blue-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-grab active:cursor-grabbing hover:shadow-lg hover:shadow-blue-500/10"
                                                 >
                                                     <div className="flex-shrink-0">
                                                         <Grip className="h-4 w-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
@@ -281,7 +281,7 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                                                                 ) : (
                                                                     <Eye className="h-3 w-3 text-green-400" />
                                                                 )}
-                                                                <span className="text-sm font-semibold text-white truncate">
+                                                                <span className="text-sm font-semibold text-black dark:text-white truncate">
                                                                     {repo.name}
                                                                 </span>
                                                             </div>
@@ -313,7 +313,7 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             flex-1 flex flex-col min-w-0 transition-all duration-300 
                             ${isDragOver
                                 ? 'bg-blue-950/20'
-                                : 'bg-zinc-950'
+                                : 'bg-zinc-50 dark:bg-zinc-950'
                             }
                         `}
                         onDragOver={handleDragOver}
@@ -321,7 +321,7 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                         onDrop={handleDrop}
                     >
                         <div className={`p-6 pb-2 flex items-center justify-between border-b transition-colors ${isDragOver ? 'border-blue-600' : 'border-zinc-800'}`}>
-                            <div className="text-lg font-semibold flex items-center text-white">
+                            <div className="text-lg font-semibold flex items-center text-black dark:text-white">
                                 <Github className="h-6 w-6 mr-2" />
                                 Repository trong kênh
                             </div>
@@ -339,7 +339,7 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                                     <div className="relative mb-6">
                                         <Github className="h-20 w-20 animate-pulse" />
                                         <div className="absolute -top-2 -right-2 h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                            <ArrowRight className="h-4 w-4 text-white" />
+                                            <ArrowRight className="h-4 w-4 text-black dark:text-white" />
                                         </div>
                                     </div>
                                     <div className="text-2xl font-bold mb-3">Thả repository vào đây</div>

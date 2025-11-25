@@ -52,7 +52,7 @@ export const UserProfileDialog = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md bg-zinc-950 text-white border border-zinc-800 shadow-2xl z-[9999]">
+            <DialogContent className="max-w-md bg-zinc-50 dark:bg-zinc-950 text-black dark:text-white border border-zinc-800 shadow-2xl z-[9999]">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
                         <UserIcon className="h-5 w-5 text-blue-400" />
@@ -66,19 +66,19 @@ export const UserProfileDialog = ({
                         <div className="relative">
                             <Avatar className="h-24 w-24 border-4 border-zinc-800 shadow-xl">
                                 <AvatarImage src={displayAvatar} alt={displayName} />
-                                <AvatarFallback className="bg-blue-600 text-white text-2xl">
+                                <AvatarFallback className="bg-blue-600 text-black dark:text-white text-2xl">
                                     {displayName[0]?.toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
                             {isCurrentUser && (
                                 <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1.5">
-                                    <Crown className="h-4 w-4 text-white" />
+                                    <Crown className="h-4 w-4 text-black dark:text-white" />
                                 </div>
                             )}
                         </div>
 
                         <div className="text-center">
-                            <h3 className="text-2xl font-bold text-white">{displayName}</h3>
+                            <h3 className="text-2xl font-bold text-black dark:text-white">{displayName}</h3>
                             <div className="flex items-center justify-center gap-2 mt-2">
                                 {user.role && (
                                     <Badge
@@ -101,17 +101,18 @@ export const UserProfileDialog = ({
                         </div>
                     </div>
 
-                    <Separator className="bg-zinc-800" />
+                    <Separator className="bg-zinc-100 dark:bg-zinc-800" />
 
                     {/* Contact Information */}
                     <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-zinc-900 rounded-lg border border-zinc-800">
+                        <div className="flex items-center gap-3 p-3 bg-zinc-50
+ dark:bg-zinc-900 rounded-lg border border-zinc-800">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
                                 <Mail className="h-5 w-5 text-blue-400" />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs text-zinc-400">Email</p>
-                                <p className="text-sm font-medium text-white truncate">
+                                <p className="text-sm font-medium text-black dark:text-white truncate">
                                     {displayEmail}
                                 </p>
                             </div>
@@ -124,13 +125,14 @@ export const UserProfileDialog = ({
 
                         {/* GitHub Integration */}
                         {user.github_verified && (
-                            <div className="flex items-center gap-3 p-3 bg-zinc-900 rounded-lg border border-zinc-800">
+                            <div className="flex items-center gap-3 p-3 bg-zinc-50
+ dark:bg-zinc-900 rounded-lg border border-zinc-800">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20">
                                     <Github className="h-5 w-5 text-purple-400" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs text-zinc-400">GitHub</p>
-                                    <p className="text-sm font-medium text-white truncate">
+                                    <p className="text-sm font-medium text-black dark:text-white truncate">
                                         {user.github_email || "Đã kết nối"}
                                     </p>
                                 </div>
@@ -140,13 +142,14 @@ export const UserProfileDialog = ({
 
                         {/* Account Created Date */}
                         {user.created_at && (
-                            <div className="flex items-center gap-3 p-3 bg-zinc-900 rounded-lg border border-zinc-800">
+                            <div className="flex items-center gap-3 p-3 bg-zinc-50
+ dark:bg-zinc-900 rounded-lg border border-zinc-800">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/20">
                                     <Calendar className="h-5 w-5 text-orange-400" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs text-zinc-400">Tham gia</p>
-                                    <p className="text-sm font-medium text-white">
+                                    <p className="text-sm font-medium text-black dark:text-white">
                                         {format(new Date(user.created_at), "dd MMMM yyyy", {
                                             locale: vi,
                                         })}
@@ -157,7 +160,8 @@ export const UserProfileDialog = ({
                     </div>
 
                     {/* Verification Status */}
-                    <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800">
+                    <div className="bg-zinc-50
+dark:bg-zinc-900/50 rounded-lg p-4 border border-zinc-800">
                         <h4 className="text-sm font-semibold text-zinc-300 mb-3">
                             Trạng thái xác minh
                         </h4>

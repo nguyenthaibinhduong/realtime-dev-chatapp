@@ -64,7 +64,7 @@ const ROLES = [
   { id: 2, name: "BA", icon: FileText, color: "text-blue-400", bgColor: "bg-blue-500/20", borderColor: "border-blue-500" },
   { id: 3, name: "Tester", icon: Bug, color: "text-orange-400", bgColor: "bg-orange-500/20", borderColor: "border-orange-500" },
   { id: 4, name: "Dev", icon: Code, color: "text-green-400", bgColor: "bg-green-500/20", borderColor: "border-green-500" },
-  { id: 0, name: "Viewer", icon: Eye, color: "text-white", bgColor: "bg-white/20", borderColor: "border-white" },
+  { id: 0, name: "Viewer", icon: Eye, color: "text-black dark:text-white", bgColor: "bg-white/20", borderColor: "border-white" },
 ];
 
 export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
@@ -489,7 +489,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
             variant="outline"
             onClick={openManageMembersDialog}
             disabled={!canManageMembers}
-            className="w-full justify-between bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed mb-2"
+            className="w-full justify-between bg-zinc-50 dark:bg-zinc-900 border-zinc-800 text-black dark:text-white hover:bg-zinc-100  hover:text-black disabled:opacity-50 disabled:cursor-not-allowed mb-2"
           >
             <span className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-purple-400" />
@@ -504,7 +504,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
           variant="outline"
           onClick={() => setAddMemberDialogOpen(true)}
           disabled={isPrivateChannel && !canManageMembers}
-          className="w-full justify-between bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full justify-between bg-zinc-50 dark:bg-zinc-900 border-zinc-800 text-black dark:text-white hover:bg-zinc-100  hover:text-black disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="flex items-center gap-2">
             <Users className="h-4 w-4 text-zinc-400" />
@@ -517,7 +517,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
       {/* Manage Current Members Dialog (Private Channel Only) */}
       {isPrivateChannel && (
         <Dialog open={manageMembersDialogOpen} onOpenChange={setManageMembersDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[80vh] bg-zinc-900 border-zinc-800 text-white flex flex-col">
+          <DialogContent className="max-w-2xl max-h-[80vh] bg-zinc-50 dark:bg-zinc-900 border-zinc-800 text-black dark:text-white flex flex-col">
             <DialogHeader className="flex-shrink-0">
               <DialogTitle className="text-xl font-semibold flex items-center gap-2">
                 <Shield className="h-5 w-5 text-purple-400" />
@@ -538,10 +538,10 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
                   return (
                     <div key={userRole.userId} className="space-y-2">
-                      <div className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
+                      <div className="flex items-center gap-3 p-3 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg border border-zinc-700">
                         <AvatarUser user={member} size={10} />
                         <div className="flex-1">
-                          <p className="font-medium text-white">{member.username}</p>
+                          <p className="font-medium text-black dark:text-white">{member.username}</p>
                           <p className="text-xs text-zinc-400">{member.email}</p>
                         </div>
                         <Button
@@ -555,7 +555,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                         </Button>
                       </div>
 
-                      <div className="ml-3 p-3 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
+                      <div className="ml-3 p-3 bg-zinc-100 dark:bg-zinc-800/30 rounded-lg border border-zinc-700/50">
                         <Label className="text-xs text-zinc-400 mb-2 block">
                           Quyền hiện tại
                         </Label>
@@ -572,7 +572,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                                   "cursor-pointer transition-all",
                                   hasRole
                                     ? `${role.bgColor} ${role.borderColor} ${role.color}`
-                                    : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700"
+                                    : "bg-zinc-100  border-zinc-700 text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700"
                                 )}
                                 onClick={() => handleToggleMemberRole(userRole.userId, role.id)}
                               >
@@ -611,7 +611,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                 variant="outline"
                 onClick={() => setManageMembersDialogOpen(false)}
                 disabled={isSubmitting}
-                className="border-zinc-700 text-black hover:bg-zinc-800 hover:text-white"
+                className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800 hover:text-black dark:text-white"
               >
                 Hủy
               </Button>
@@ -636,7 +636,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
       {/* Confirm Remove Member Dialog */}
       <AlertDialog open={confirmRemoveUserId !== null} onOpenChange={(open) => !open && setConfirmRemoveUserId(null)}>
-        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
+        <AlertDialogContent className="bg-zinc-50 dark:bg-zinc-900 border-zinc-800 text-black dark:text-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-400">
               <X className="h-5 w-5" />
@@ -650,14 +650,14 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
           <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => setConfirmRemoveUserId(null)}
-              className="border-zinc-700 text-black hover:bg-zinc-800 hover:text-white"
+              className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800 hover:text-black dark:text-white"
             >
               Hủy
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => confirmRemoveUserId && handleRemoveMember(confirmRemoveUserId)}
               disabled={isSubmitting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-black dark:text-white"
             >
               {isSubmitting ? (
                 <>
@@ -674,7 +674,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
       {/* Confirm Save Changes Dialog */}
       <AlertDialog open={confirmSaveChanges} onOpenChange={setConfirmSaveChanges}>
-        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
+        <AlertDialogContent className="bg-zinc-50 dark:bg-zinc-900 border-zinc-800 text-black dark:text-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-purple-400">
               <Shield className="h-5 w-5" />
@@ -687,14 +687,14 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
           <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => setConfirmSaveChanges(false)}
-              className="border-zinc-700 text-black hover:bg-zinc-800 hover:text-white"
+              className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800 hover:text-black dark:text-white"
             >
               Hủy
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleSaveMemberRoles}
               disabled={isSubmitting}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-black dark:text-white"
             >
               {isSubmitting ? (
                 <>
@@ -711,7 +711,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
       {/* Add member Dialog */}
       <Dialog open={addMemberDialogOpen} onOpenChange={setAddMemberDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] bg-zinc-900 border-zinc-800 text-white flex flex-col">
+        <DialogContent className="max-w-2xl max-h-[80vh] bg-zinc-50 dark:bg-zinc-900 border-zinc-800 text-black dark:text-white flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-xl font-semibold flex items-center gap-2">
               Chọn người dùng để thêm vào kênh
@@ -738,7 +738,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                 placeholder="Tìm theo tên hoặc email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-blue-500"
+                className="pl-10 bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white placeholder:text-zinc-500 focus:border-blue-500"
               />
               {searchQuery && (
                 <button
@@ -751,7 +751,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
             </div>
 
             {/* Actions Bar */}
-            <div className="flex items-center justify-between px-3 py-2 bg-zinc-800/50 rounded-lg">
+            <div className="flex items-center justify-between px-3 py-2 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg">
               <span className="text-sm text-zinc-400">
                 {filteredUsers.length} người dùng
               </span>
@@ -760,7 +760,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleSelectAll}
-                  className="h-7 text-xs text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  className="h-7 text-xs text-zinc-400 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800"
                 >
                   {selectedUserIds.length === filteredUsers.length
                     ? "Bỏ chọn tất cả"
@@ -778,7 +778,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                 </div>
               ) : !searchQuery.trim() ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                  <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-3">
                     <Search className="h-6 w-6 text-zinc-400" />
                   </div>
                   <p className="text-sm font-medium text-zinc-300 mb-1">
@@ -790,7 +790,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                 </div>
               ) : filteredUsers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                  <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-3">
                     <Users className="h-6 w-6 text-zinc-400" />
                   </div>
                   <p className="text-sm font-medium text-zinc-300 mb-1">
@@ -816,7 +816,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                             "flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all duration-200",
                             isSelected
                               ? "bg-blue-900/30 border border-blue-800/50"
-                              : "hover:bg-zinc-800 border border-transparent"
+                              : "hover:bg-zinc-100 dark:bg-zinc-800 border border-transparent"
                           )}
                         >
                           <Checkbox
@@ -829,7 +829,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                             <p
                               className={cn(
                                 "font-medium truncate text-sm",
-                                isSelected ? "text-blue-300" : "text-white"
+                                isSelected ? "text-blue-300" : "text-black dark:text-white"
                               )}
                             >
                               {user.username}
@@ -845,7 +845,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
                         {/* Role Selection for Private Channels */}
                         {isSelected && isPrivateChannel && (
-                          <div className="ml-11 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
+                          <div className="ml-11 p-3 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg border border-zinc-700">
                             <Label className="text-xs text-zinc-400 mb-2 block">
                               Phân quyền cho {user.username}
                             </Label>
@@ -862,7 +862,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                                       "cursor-pointer transition-all",
                                       hasRole
                                         ? `${role.bgColor} ${role.borderColor} ${role.color}`
-                                        : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700"
+                                        : "bg-zinc-100 border-zinc-700 text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700"
                                     )}
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -889,7 +889,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
               variant="outline"
               onClick={() => setAddMemberDialogOpen(false)}
               disabled={isSubmitting}
-              className="border-zinc-700 text-black hover:bg-zinc-800 hover:text-white"
+              className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800 hover:text-black dark:text-white"
             >
               Hủy
             </Button>

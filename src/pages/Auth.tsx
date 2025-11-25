@@ -160,12 +160,12 @@ export default function Auth() {
       {/* Content Container - Smaller and Compact */}
       <div className="relative z-10 w-full max-w-5xl flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
         {/* Left Side - Introduction with Glass Effect */}
-        <div className="flex-1 text-white space-y-5 max-w-lg">
+        <div className="flex-1 text-black dark:text-white space-y-5 max-w-lg">
           {/* Hero Section with Glass Card */}
           <div className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl hover:bg-white/10 transition-all duration-300">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg shadow-blue-500/50">
-                <MessageSquare className="h-6 w-6 text-white" />
+                <MessageSquare className="h-6 w-6 text-black dark:text-white" />
               </div>
               <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 CodeSync Chat
@@ -218,9 +218,9 @@ export default function Auth() {
         <Card className="w-full max-w-sm bg-gradient-to-br from-gray-950 to-gray-900 backdrop-blur-2xl border border-gray-800 shadow-2xl shadow-black/50 hover:shadow-blue-500/20 transition-all duration-300">
           <CardHeader className="text-center pb-3 space-y-1">
             <div className="inline-block mx-auto mb-2 p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-lg shadow-blue-500/50">
-              <MessageSquare className="h-5 w-5 text-white" />
+              <MessageSquare className="h-5 w-5 text-black dark:text-white" />
             </div>
-            <CardTitle className="text-xl font-bold text-white">Chào mừng trở lại</CardTitle>
+            <CardTitle className="text-xl font-bold text-black dark:text-white">Chào mừng trở lại</CardTitle>
             <CardDescription className="text-xs text-gray-400">
               Đăng nhập để tiếp tục
             </CardDescription>
@@ -230,13 +230,13 @@ export default function Auth() {
               <TabsList className="grid w-full grid-cols-2 bg-gray-800/50 backdrop-blur-md border border-gray-700 p-1">
                 <TabsTrigger
                   value="signin"
-                  className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
+                  className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
                 >
                   Đăng nhập
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
+                  className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
                 >
                   Đăng ký
                 </TabsTrigger>
@@ -245,7 +245,7 @@ export default function Auth() {
               <TabsContent value="signin" className="space-y-3 mt-4">
                 <form onSubmit={handleSignIn} className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-xs text-white font-medium">
+                    <Label htmlFor="email" className="text-xs text-black dark:text-white font-medium">
                       Email
                     </Label>
                     <Input
@@ -254,11 +254,11 @@ export default function Auth() {
                       type="email"
                       placeholder="your@email.com"
                       required
-                      className="bg-gray-900/80 border-gray-700 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                      className="bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="password" className="text-xs text-white font-medium">
+                    <Label htmlFor="password" className="text-xs text-black dark:text-white font-medium">
                       Mật khẩu
                     </Label>
                     <div className="relative">
@@ -268,7 +268,7 @@ export default function Auth() {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         required
-                        className="bg-gray-900/80 border-gray-700 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
+                        className="bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
                       />
                       <Button
                         type="button"
@@ -287,7 +287,7 @@ export default function Auth() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -308,7 +308,7 @@ export default function Auth() {
                 </div>
                 <Button
                   onClick={handleSignInGitHub}
-                  className="w-full bg-gray-800 border border-gray-700 text-white text-sm h-9 hover:bg-gray-700 transition-all shadow-lg"
+                  className="w-full bg-gray-800 border border-gray-700 text-black dark:text-white text-sm h-9 hover:bg-gray-700 transition-all shadow-lg"
                   disabled={isLoading}
                 >
                   <Github className="h-4 w-4 mr-2" />
@@ -321,7 +321,7 @@ export default function Auth() {
               <TabsContent value="signup" className="space-y-3 mt-4">
                 <form onSubmit={handleSignUp} className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="username" className="text-xs text-white font-medium">
+                    <Label htmlFor="username" className="text-xs text-black dark:text-white font-medium">
                       Tên người dùng
                     </Label>
                     <Input
@@ -332,11 +332,11 @@ export default function Auth() {
                       required
                       value={signupUsername}
                       onChange={(e) => setSignupUsername(e.target.value)}
-                      className="bg-gray-900/80 border-gray-700 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                      className="bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-email" className="text-xs text-white font-medium">
+                    <Label htmlFor="signup-email" className="text-xs text-black dark:text-white font-medium">
                       Email
                     </Label>
                     <Input
@@ -347,11 +347,11 @@ export default function Auth() {
                       required
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="bg-gray-900/80 border-gray-700 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                      className="bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-password" className="text-xs text-white font-medium">
+                    <Label htmlFor="signup-password" className="text-xs text-black dark:text-white font-medium">
                       Mật khẩu
                     </Label>
                     <div className="relative">
@@ -375,7 +375,7 @@ export default function Auth() {
                                 : "",
                           }));
                         }}
-                        className={`bg-gray-900/80 border-gray-700 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all ${signupErrors.password ? "border-red-500/50" : ""
+                        className={`bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all ${signupErrors.password ? "border-red-500/50" : ""
                           }`}
                       />
                       <Button
@@ -441,13 +441,13 @@ export default function Auth() {
                           ) : (
                             <AlertCircle className="h-3 w-3 text-gray-500" />
                           )}
-                          <span className={req.check ? "text-green-400" : "text-white"}>{req.text}</span>
+                          <span className={req.check ? "text-green-400" : "text-black dark:text-white"}>{req.text}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-confirm-password" className="text-xs text-white font-medium">
+                    <Label htmlFor="signup-confirm-password" className="text-xs text-black dark:text-white font-medium">
                       Nhập lại mật khẩu
                     </Label>
                     <div className="relative">
@@ -467,7 +467,7 @@ export default function Auth() {
                               v && v !== signupPassword ? "Mật khẩu xác nhận không khớp" : "",
                           }));
                         }}
-                        className={`bg-gray-900/80 border-gray-700 text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all ${signupErrors.confirmPassword ? "border-red-500/50" : ""
+                        className={`bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all ${signupErrors.confirmPassword ? "border-red-500/50" : ""
                           }`}
                       />
                       <Button
@@ -493,7 +493,7 @@ export default function Auth() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                     disabled={isLoading}
                   >
                     {isLoading ? (

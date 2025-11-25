@@ -73,23 +73,23 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = React.memo(({
 
     const MessageItem = ({ message, showUnpin = true }: { message: PinnedMessage; showUnpin?: boolean }) => (
         <div
-            className="group bg-gray-700/30 hover:bg-gray-700/50 rounded px-2 py-1.5 transition-all cursor-pointer border border-gray-600/30 hover:border-gray-500/50"
+            className="group bg-gray-200 dark:bg-gray-700/30 hover:bg-gray-300 dark:hover:bg-gray-700/50 rounded px-2 py-1.5 transition-all cursor-pointer border border-gray-300 dark:border-gray-600/30 hover:border-gray-400 dark:hover:border-gray-500/50"
             onClick={() => onJumpToMessage?.(String(message.id))}
         >
             <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-xs font-medium text-gray-300 truncate">
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
                             {message.sender?.username || message.sender?.name || 'Unknown'}
                         </span>
-                        <span className="text-[10px] text-gray-500 flex-shrink-0">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-500 flex-shrink-0">
                             {new Date(message.created_at).toLocaleTimeString('vi-VN', {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
                         </span>
                     </div>
-                    <p className="text-xs text-gray-400 break-words leading-tight">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 break-words leading-tight">
                         {getMessagePreview(message)}
                     </p>
                 </div>
@@ -100,7 +100,7 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = React.memo(({
                             e.stopPropagation();
                             onUnpin(String(message.id));
                         }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-gray-600 rounded text-gray-400 hover:text-gray-200 flex-shrink-0"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-gray-400 dark:hover:bg-gray-600 rounded text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 flex-shrink-0"
                         title="Bỏ ghim"
                     >
                         <X className="h-3 w-3" />
@@ -113,14 +113,14 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = React.memo(({
     return (
         <>
             <div className={cn(
-                "bg-gray-800 border-l-2 border-gray-600 shadow-lg rounded-md mb-2",
+                "bg-white dark:bg-gray-800 border-l-2 border-blue-500 dark:border-gray-600 shadow-lg rounded-md mb-2",
                 className
             )}>
                 {/* Header với số lượng và nút xem thêm */}
-                <div className="flex items-center justify-between px-2 py-1.5 bg-gray-700/50 rounded-t-md">
+                <div className="flex items-center justify-between px-2 py-1.5 bg-gray-100 dark:bg-gray-700/50 rounded-t-md">
                     <div className="flex items-center gap-1.5">
-                        <Pin className="h-3 w-3 text-gray-400" />
-                        <span className="text-xs font-medium text-gray-300">
+                        <Pin className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
                             {messages.length} tin ghim
                         </span>
                     </div>
@@ -128,7 +128,7 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = React.memo(({
                     {hasMore && (
                         <button
                             onClick={() => setShowAllDialog(true)}
-                            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                            className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
                         >
                             Xem thêm
                             <ChevronDown className="h-3 w-3" />
@@ -148,9 +148,9 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = React.memo(({
 
             {/* Dialog hiển thị tất cả tin nhắn ghim */}
             <Dialog open={showAllDialog} onOpenChange={setShowAllDialog}>
-                <DialogContent className="sm:max-w-[600px] z-[999] bg-gray-800 border-gray-600">
+                <DialogContent className="sm:max-w-[600px] z-[999] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                     <DialogHeader>
-                        <DialogTitle className="text-gray-200 flex items-center gap-2">
+                        <DialogTitle className="text-gray-900 dark:text-gray-200 flex items-center gap-2">
                             <Pin className="h-4 w-4" />
                             Tất cả tin nhắn ghim ({messages.length})
                         </DialogTitle>
@@ -159,14 +159,14 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = React.memo(({
                     <div className="max-h-[60vh] overflow-y-auto">
                         <div className="space-y-2 pr-2">
                             {sortedMessages.map((message) => (
-                                <div key={message.id} className="p-3 bg-gray-700/30 rounded-md">
+                                <div key={message.id} className="p-3 bg-gray-100 dark:bg-gray-700/30 rounded-md">
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <span className="text-sm font-medium text-gray-300">
+                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     {message.sender?.username || message.sender?.name || 'Unknown'}
                                                 </span>
-                                                <span className="text-xs text-gray-500">
+                                                <span className="text-xs text-gray-500 dark:text-gray-500">
                                                     {new Date(message.created_at).toLocaleDateString('vi-VN', {
                                                         day: '2-digit',
                                                         month: '2-digit',
@@ -176,7 +176,7 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = React.memo(({
                                                     })}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-gray-400 break-words cursor-pointer hover:text-gray-300"
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 break-words cursor-pointer hover:text-gray-900 dark:hover:text-gray-300"
                                                 onClick={() => {
                                                     onJumpToMessage?.(String(message.id));
                                                     setShowAllDialog(false);
@@ -194,7 +194,7 @@ export const PinnedMessages: React.FC<PinnedMessagesProps> = React.memo(({
                                                     e.stopPropagation();
                                                     onUnpin(String(message.id));
                                                 }}
-                                                className="p-1.5 hover:bg-gray-600 rounded text-gray-400 hover:text-gray-200 flex-shrink-0"
+                                                className="p-1.5 hover:bg-gray-300 dark:hover:bg-gray-600 rounded text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 flex-shrink-0"
                                                 title="Bỏ ghim"
                                             >
                                                 <X className="h-4 w-4" />

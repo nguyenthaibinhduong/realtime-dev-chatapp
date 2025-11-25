@@ -44,13 +44,13 @@ const Loading = () => {
                 <div className="relative">
                     <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl animate-pulse" />
                     <div className="relative bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-3xl shadow-2xl shadow-blue-500/20">
-                        <MessageCircle className="w-16 h-16 text-white animate-pulse" strokeWidth={1.5} />
+                        <MessageCircle className="w-16 h-16 text-black dark:text-white animate-pulse" strokeWidth={1.5} />
                     </div>
                 </div>
 
                 {/* App name */}
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold text-white tracking-tight">
+                    <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">
                         DevChat
                     </h1>
                     <p className="text-sm text-gray-400 font-medium">

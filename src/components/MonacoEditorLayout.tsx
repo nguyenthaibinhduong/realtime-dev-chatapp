@@ -105,7 +105,7 @@ const CodeEditorJudge0 = () => {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <Code className="h-5 w-5 text-[#007acc]" />
-            <span className="text-white font-medium">Code Editor</span>
+            <span className="text-black dark:text-white font-medium">Code Editor</span>
           </div>
 
           {/* Language selector */}
@@ -116,7 +116,7 @@ const CodeEditorJudge0 = () => {
               <select
                 value={language}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="appearance-none bg-[#3c3c3c] text-white px-3 py-1.5 pr-8 rounded-md border border-[#5a5a5a] text-sm focus:outline-none focus:ring-2 focus:ring-[#007acc] focus:border-transparent"
+                className="appearance-none bg-[#3c3c3c] text-black dark:text-white px-3 py-1.5 pr-8 rounded-md border border-[#5a5a5a] text-sm focus:outline-none focus:ring-2 focus:ring-[#007acc] focus:border-transparent"
               >
                 {Object.entries(languageMap).map(([key, lang]) => (
                   <option key={key} value={key} className="bg-[#3c3c3c]">
@@ -147,7 +147,7 @@ const CodeEditorJudge0 = () => {
         <button
           onClick={runCode}
           disabled={isRunning}
-          className="flex items-center space-x-2 px-4 py-2 bg-[#0e639c] hover:bg-[#1177bb] disabled:bg-[#555] text-white rounded-md transition-colors duration-200 text-sm font-medium"
+          className="flex items-center space-x-2 px-4 py-2 bg-[#0e639c] hover:bg-[#1177bb] disabled:bg-[#555] text-black dark:text-white rounded-md transition-colors duration-200 text-sm font-medium"
         >
           <Play className={`h-4 w-4 ${isRunning ? "animate-spin" : ""}`} />
           <span>{isRunning ? "Running..." : "Run Code"}</span>
@@ -189,7 +189,7 @@ const CodeEditorJudge0 = () => {
         <div className="flex items-center justify-between px-4 py-2 bg-[#2d2d30] border-b border-[#3e3e42]">
           <div className="flex items-center space-x-2">
             <Terminal className="h-4 w-4 text-[#007acc]" />
-            <span className="text-white text-sm font-medium">Output</span>
+            <span className="text-black dark:text-white text-sm font-medium">Output</span>
           </div>
           <div className="text-xs text-gray-400">
             {languageMap[language].icon} {languageMap[language].name}

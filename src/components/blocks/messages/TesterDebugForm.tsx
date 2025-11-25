@@ -243,8 +243,8 @@ export const TesterDebugForm = ({
         <Drawer open={open} onOpenChange={onOpenChange}>
             <DrawerContent className="bg-[#0f1419] border-gray-800 max-h-[95vh]">
                 <DrawerHeader className="border-b border-gray-800">
-                    <DrawerTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                        <span className="bg-red-600 text-white px-2 py-1 rounded text-sm">BUG</span>
+                    <DrawerTitle className="text-2xl font-bold text-black dark:text-white flex items-center gap-2">
+                        <span className="bg-red-600 text-black dark:text-white px-2 py-1 rounded text-sm">BUG</span>
                         Tester Debug Report
                     </DrawerTitle>
                     <DrawerDescription className="text-gray-400">
@@ -254,7 +254,7 @@ export const TesterDebugForm = ({
 
                 <div className="flex-1 p-6 overflow-y-auto space-y-6">
                     <div className="space-y-2">
-                        <Label className="text-white text-sm font-semibold flex items-center gap-1">
+                        <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
                             Tên dự án hoặc Yêu cầu gốc
                             <span className="text-red-500">*</span>
                         </Label>
@@ -265,7 +265,7 @@ export const TesterDebugForm = ({
                                 setErrors({ ...errors, projectOrMessage: "" });
                             }}
                             placeholder="Nhập tên dự án / khách hàng..."
-                            className={`bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-red-500 ${errors.projectOrMessage ? "border-red-500" : ""
+                            className={`bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-red-500 ${errors.projectOrMessage ? "border-red-500" : ""
                                 }`}
                             disabled={!!relatedMessageId}
                         />
@@ -299,7 +299,7 @@ export const TesterDebugForm = ({
                                                 value={searchMessage}
                                                 onChange={(e) => setSearchMessage(e.target.value)}
                                                 placeholder="Tìm kiếm tin nhắn..."
-                                                className="pl-9 bg-gray-800 border-gray-700 text-white"
+                                                className="pl-9 bg-gray-800 border-gray-700 text-black dark:text-white"
                                             />
                                         </div>
                                     </div>
@@ -351,7 +351,7 @@ export const TesterDebugForm = ({
 
                     {/* Content - Rich Text Editor */}
                     <div className="space-y-2">
-                        <Label className="text-white text-sm font-semibold flex items-center gap-1">
+                        <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
                             Nội dung
                             <span className="text-red-500">*</span>
                         </Label>
@@ -366,7 +366,7 @@ export const TesterDebugForm = ({
                                 modules={quillModules}
                                 formats={quillFormats}
                                 placeholder="Mô tả chi tiết về bug, các bước tái hiện, kết quả mong đợi..."
-                                className="text-white [&_.ql-editor]:min-h-[200px] [&_.ql-editor]:text-white [&_.ql-toolbar]:border-gray-700 [&_.ql-container]:border-gray-700"
+                                className="text-black  [&_.ql-editor]:min-h-[200px] [&_.ql-editor]:text-black dark:text-white [&_.ql-toolbar]:border-gray-700 [&_.ql-container]:border-gray-700"
                             />
                         </div>
                         {errors.content && (
@@ -376,7 +376,7 @@ export const TesterDebugForm = ({
 
                     {/* Attachments */}
                     <div className="space-y-2">
-                        <Label className="text-white text-sm font-semibold">Tài liệu đính kèm</Label>
+                        <Label className="text-black dark:text-white text-sm font-semibold">Tài liệu đính kèm</Label>
                         <div
                             className="flex items-center gap-2 p-4 border-2 border-dashed border-gray-700 rounded-lg hover:border-red-500 transition-colors"
                             onDragOver={(e) => {
@@ -411,7 +411,7 @@ export const TesterDebugForm = ({
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 variant="outline"
-                                className="bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                                className="bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-black dark:text-white"
                             >
                                 <Upload className="h-4 w-4 mr-2" />
                                 Chọn tệp
@@ -457,7 +457,7 @@ export const TesterDebugForm = ({
 
                     {/* Assignees */}
                     <div className="space-y-2">
-                        <Label className="text-white text-sm font-semibold flex items-center gap-1">
+                        <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
                             Người phụ trách
                             <span className="text-red-500">*</span>
                         </Label>
@@ -485,7 +485,7 @@ export const TesterDebugForm = ({
                                             value={searchMember}
                                             onChange={(e) => setSearchMember(e.target.value)}
                                             placeholder="Tìm kiếm thành viên..."
-                                            className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500 h-8 text-sm"
+                                            className="bg-gray-800 border-gray-600 text-black dark:text-white placeholder:text-gray-500 h-8 text-sm"
                                             autoFocus
                                         />
                                     </div>
@@ -512,7 +512,7 @@ export const TesterDebugForm = ({
                                                     />
                                                     <AvatarUser user={member} isMe={false} size="sm" />
                                                     <div className="flex-1">
-                                                        <p className="text-sm text-white">{member.name}</p>
+                                                        <p className="text-sm text-black dark:text-white">{member.name}</p>
                                                         {member.username && (
                                                             <p className="text-xs text-gray-500">@{member.username}</p>
                                                         )}
@@ -549,12 +549,12 @@ export const TesterDebugForm = ({
 
                     {/* Notes */}
                     <div className="space-y-2">
-                        <Label className="text-white text-sm font-semibold">Ghi chú</Label>
+                        <Label className="text-black dark:text-white text-sm font-semibold">Ghi chú</Label>
                         <Input
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Thêm ghi chú (không bắt buộc)..."
-                            className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-red-500"
+                            className="bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-red-500"
                         />
                     </div>
 
@@ -568,7 +568,7 @@ export const TesterDebugForm = ({
                                     <ToggleLeft className="h-6 w-6 text-gray-500" />
                                 )}
                                 <div>
-                                    <Label className="text-white text-sm font-semibold cursor-pointer">
+                                    <Label className="text-black dark:text-white text-sm font-semibold cursor-pointer">
                                         Đồng bộ Google Sheet
                                     </Label>
                                     <p className="text-xs text-gray-500">Tự động cập nhật vào bảng tính</p>
@@ -590,7 +590,7 @@ export const TesterDebugForm = ({
 
                     {/* Drive Link */}
                     <div className="space-y-2">
-                        <Label className="text-white text-sm font-semibold flex items-center gap-2">
+                        <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-2">
                             <Link2 className="h-4 w-4" />
                             Thông tin Lưu trữ
                         </Label>
@@ -598,7 +598,7 @@ export const TesterDebugForm = ({
                             value={driveLink}
                             onChange={(e) => setDriveLink(e.target.value)}
                             placeholder="Nhập link Google Drive (nếu có)..."
-                            className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-red-500"
+                            className="bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-red-500"
                         />
                         <p className="text-xs text-gray-500">Link đến folder lưu trữ screenshots, videos, logs...</p>
                     </div>
@@ -615,7 +615,7 @@ export const TesterDebugForm = ({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition-all"
+                                    className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-black dark:text-white transition-all"
                                 >
                                     Hủy
                                 </Button>
@@ -623,7 +623,7 @@ export const TesterDebugForm = ({
                             <Button
                                 type="button"
                                 onClick={handleSubmit}
-                                className="bg-red-600 hover:bg-red-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-red-600 hover:bg-red-700 text-black dark:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting || (!projectName.trim() && !relatedMessageId) || !content.trim() || content === '<p><br></p>' || assignees.length === 0}
                             >
                                 {isSubmitting ? (

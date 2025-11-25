@@ -34,7 +34,7 @@ export default function ResponseHeaderPane({
         {responseHeaders.map(({ key, value }, index) => (
           <div
             key={index}
-            className="flex gap-2 p-3 bg-zinc-800 rounded-lg border border-zinc-700"
+            className="flex gap-2 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-700"
           >
             <div className="flex-shrink-0 min-w-[200px]">
               <Badge

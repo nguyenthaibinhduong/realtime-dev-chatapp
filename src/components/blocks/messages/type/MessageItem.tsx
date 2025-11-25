@@ -116,7 +116,7 @@ const MessageItem = memo(({
         } else if (message.status === "sent" && isLastMyMessage && showSentStatus) {
             statusLabel = (
                 <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-white">✓ Đã gửi</span>
+                    <span className="text-[11px] text-black dark:text-white">✓ Đã gửi</span>
                 </div>
             );
         }
@@ -194,10 +194,10 @@ const MessageItem = memo(({
                 {/* Sender name */}
                 {showSenderInfo && !isMe && !isRemovedMessage && (
                     <div className="flex items-center gap-2 px-2">
-                        <span className="text-xs font-semibold text-gray-300">
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                             {message.sender?.username || 'Unknown'}
                         </span>
-                        <span className="text-[10px] text-gray-500">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-500">
                             {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
                                 hour: '2-digit',
                                 minute: '2-digit'
@@ -211,8 +211,8 @@ const MessageItem = memo(({
                     <div className={cn(
                         "relative flex items-center gap-2 px-2 py-1.5 rounded-lg border border-dashed transition-all duration-200",
                         isMe
-                            ? "bg-gray-800/30 border-gray-700/50 text-gray-500"
-                            : "bg-gray-900/30 border-gray-700/50 text-gray-500"
+                            ? "bg-gray-200 dark:bg-gray-800/30 border-gray-400 dark:border-gray-700/50 text-gray-500 dark:text-gray-500"
+                            : "bg-gray-200 dark:bg-gray-900/30 border-gray-400 dark:border-gray-700/50 text-gray-500 dark:text-gray-500"
                     )}>
                         <div className="flex-1">
                             <p className="text-[11px] italic">
@@ -252,11 +252,11 @@ const MessageItem = memo(({
                             isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
                             !hasOnlyImages && (
                                 isMe
-                                    ? "bg-blue-600 text-white shadow-sm px-2.5 py-1.5"
-                                    : "bg-gray-800 text-gray-100 border border-gray-700 shadow-sm px-2.5 py-1.5"
+                                    ? "bg-blue-600 dark:bg-blue-600 text-white shadow-sm px-2.5 py-1.5"
+                                    : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm px-2.5 py-1.5"
                             ),
-                            isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-600",
-                            isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700",
+                            isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-400 dark:border-gray-600",
+                            isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700 dark:bg-blue-700",
                             hasOnlyImages && "bg-transparent"
                         )}>
 
@@ -267,15 +267,15 @@ const MessageItem = memo(({
                                     onClick={(e) => { e.stopPropagation(); onJumpToMessage?.(String(message.replyTo.id)); }}
                                     className={cn(
                                         "mb-1.5 w-full text-left group/reply rounded-md border px-1.5 py-1",
-                                        isMe ? "border-blue-400/30 bg-blue-900 hover:bg-blue-600/30"
-                                            : "border-gray-700 bg-gray-900/40 hover:bg-gray-900/60"
+                                        isMe ? "border-blue-400/30 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-600/30"
+                                            : "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900/40 hover:bg-gray-200 dark:hover:bg-gray-900/60"
                                     )}
                                     title="Đi tới tin nhắn đã được trả lời"
                                 >
                                     <div className="flex items-start gap-2">
-                                        <div className={cn("w-0.5 rounded", isMe ? "bg-blue-300" : "bg-blue-500")} />
+                                        <div className={cn("w-0.5 rounded", isMe ? "bg-blue-400 dark:bg-blue-300" : "bg-blue-500 dark:bg-blue-500")} />
                                         <div className="flex-1 min-w-0">
-                                            <div className="text-[10px]">
+                                            <div className="text-[10px] text-gray-700 dark:text-gray-200">
                                                 <span className="opacity-80">Trả lời </span>
                                                 <span className="font-semibold">{message.replyTo.sender}</span>
                                             </div>
@@ -292,7 +292,7 @@ const MessageItem = memo(({
                             {message.text && (
                                 <p className={cn(
                                     "text-[12px] leading-relaxed whitespace-pre-wrap break-words",
-                                    isMe ? "text-white" : "text-gray-200"
+                                    isMe ? "text-white" : "text-gray-900 dark:text-gray-200"
                                 )}>
                                     {message.text}
                                 </p>
@@ -327,7 +327,7 @@ const MessageItem = memo(({
                                 )}>
                                     <span className={cn(
                                         "text-[9px] font-medium",
-                                        isMe ? "text-blue-200" : "text-gray-400"
+                                        isMe ? "text-blue-100 dark:text-blue-200" : "text-gray-600 dark:text-gray-400"
                                     )}>
                                         {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
                                             hour: '2-digit',
@@ -505,7 +505,7 @@ const UploadingAttachment = memo(({
                 <div className="flex-1 min-w-0">
                     <div className={cn(
                         "text-sm font-medium truncate mb-1",
-                        isMe ? "text-white" : "text-gray-200"
+                        isMe ? "text-black dark:text-white" : "text-gray-200"
                     )}>
                         {att.filename || "Đang tải lên..."}
                     </div>
@@ -537,7 +537,7 @@ const UploadingAttachment = memo(({
                         </span>
                         <span className={cn(
                             "text-[10px] font-semibold",
-                            isMe ? "text-white" : "text-blue-400"
+                            isMe ? "text-black dark:text-white" : "text-blue-400"
                         )}>
                             {Math.round(att.progress || 0)}%
                         </span>

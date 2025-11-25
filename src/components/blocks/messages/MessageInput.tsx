@@ -306,7 +306,7 @@ export const MessageInput = ({
   // If user is Viewer in private channel, hide the entire input
   if (permissions.isViewer && channel.type === 'group-private') {
     return (
-      <div className="border-t border-border p-4 bg-zinc-900/50">
+      <div className="border-t border-border p-4 bg-zinc-50 dark:bg-zinc-900/50">
         <div className="text-center text-sm text-zinc-500">
           Bạn chỉ có quyền xem tin nhắn trong kênh này.
         </div>
@@ -384,7 +384,7 @@ export const MessageInput = ({
                     type="button"
                     onClick={() => setShowAttachMenu(!showAttachMenu)}
                     className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${showAttachMenu
-                      ? "bg-[#00a884] text-white rotate-45"
+                      ? "bg-[#00a884] text-black dark:text-white rotate-45"
                       : "bg-gray-800 hover:bg-gray-700 text-gray-300"
                       }`}
                   >
@@ -451,10 +451,10 @@ export const MessageInput = ({
                         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
                       >
                         <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isCodeEditorOpen
-                          ? "bg-[#007acc] text-white"
+                          ? "bg-[#007acc] text-black dark:text-white"
                           : "bg-teal-500/20 group-hover:bg-teal-500/30"
                           }`}>
-                          <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-white" : "text-teal-400"}`} />
+                          <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-black dark:text-white" : "text-teal-400"}`} />
                         </div>
                         <span className="text-sm text-gray-200 font-medium">Code Editor</span>
                       </button>
@@ -476,10 +476,10 @@ export const MessageInput = ({
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
                     >
                       <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showBAForm
-                        ? "bg-blue-500 text-white"
+                        ? "bg-blue-500 text-black dark:text-white"
                         : "bg-blue-500/20 group-hover:bg-blue-500/30"
                         }`}>
-                        <FileText className={`h-4 w-4 ${showBAForm ? "text-white" : "text-blue-400"}`} />
+                        <FileText className={`h-4 w-4 ${showBAForm ? "text-black dark:text-white" : "text-blue-400"}`} />
                       </div>
                       <span className="text-sm text-gray-200 font-medium">BA Requirement</span>
                     </button>
@@ -496,10 +496,10 @@ export const MessageInput = ({
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
                     >
                       <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showTesterForm
-                        ? "bg-red-500 text-white"
+                        ? "bg-red-500 text-black dark:text-white"
                         : "bg-red-500/20 group-hover:bg-red-500/30"
                         }`}>
-                        <Bug className={`h-4 w-4 ${showTesterForm ? "text-white" : "text-red-400"}`} />
+                        <Bug className={`h-4 w-4 ${showTesterForm ? "text-black dark:text-white" : "text-red-400"}`} />
                       </div>
                       <span className="text-sm text-gray-200 font-medium">Debug Report</span>
                     </button>
@@ -541,7 +541,7 @@ export const MessageInput = ({
                       ? "Chỉnh sửa tin nhắn..."
                       : "Nhập tin nhắn"
                   }
-                  className="w-full resize-none bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none"
+                  className="w-full resize-none bg-transparent text-sm text-black dark:text-white placeholder:text-gray-500 focus:outline-none"
                   style={{ minHeight: 24, maxHeight: 100 }}
                 />
               </div>
@@ -555,7 +555,7 @@ export const MessageInput = ({
                     type="button"
                     onClick={handleSend}
                     disabled={isSending}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white transition-all disabled:opacity-50 shadow-lg"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-black dark:text-white transition-all disabled:opacity-50 shadow-lg"
                     aria-label="Gửi"
                   >
                     <Send className="h-5 w-5" />
@@ -602,11 +602,11 @@ export const MessageInput = ({
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(idx)}
-                    className="absolute -right-1 -top-1 rounded-full bg-black/60 p-1"
+                    className="absolute -right-1 -top-1 rounded-full bg-white dark:bg-black/60 p-1"
                     aria-label="Xóa tệp"
                     title="Xóa tệp"
                   >
-                    <X className="h-3 w-3 text-white" />
+                    <X className="h-3 w-3 text-black dark:text-white" />
                   </button>
                 </div>
               ))}

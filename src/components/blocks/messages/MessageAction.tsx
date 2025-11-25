@@ -98,7 +98,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                         <button
                             key={a.type}
                             onClick={(e) => { e.stopPropagation(); onAction?.(a.type, messageId); }}
-                            className="w-9 h-9 rounded-full bg-gray-800/90 border border-gray-700/60 flex items-center justify-center text-gray-200 transition-transform hover:scale-110"
+                            className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800/90 border border-gray-300 dark:border-gray-700/60 flex items-center justify-center text-gray-700 dark:text-gray-200 transition-transform hover:scale-110"
                             title={a.label}
                             onMouseDown={(e) => e.stopPropagation()}
                         >
@@ -110,8 +110,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                         <DropdownMenuTrigger asChild>
                             <button
                                 className={cn(
-                                    "w-9 h-9 rounded-full bg-gray-800/90 border border-gray-700/60 flex items-center justify-center text-gray-200 transition-transform hover:scale-110",
-                                    open && "bg-gray-700"
+                                    "w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800/90 border border-gray-300 dark:border-gray-700/60 flex items-center justify-center text-gray-700 dark:text-gray-200 transition-transform hover:scale-110",
+                                    open && "bg-gray-300 dark:bg-gray-700"
                                 )}
                                 title="Thêm"
                                 onClick={(e) => {
@@ -127,11 +127,11 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                 side="top"
                                 sideOffset={12}
                                 align={isMe ? "start" : "end"}
-                                className="w-64 p-2 backdrop-blur-xl rounded-2xl shadow-2xl border z-[1200] bg-gray-900/98 border-gray-700/70"
+                                className="w-64 p-2 backdrop-blur-xl rounded-2xl shadow-2xl border z-[1200] bg-white dark:bg-gray-900/98 border-gray-300 dark:border-gray-700/70"
                             >
                                 {moreActions.map((action, idx) => (
                                     <React.Fragment key={action.type}>
-                                        {action.variant === 'danger' && idx > 0 && <DropdownMenuSeparator className="my-2 bg-gray-700/50" />}
+                                        {action.variant === 'danger' && idx > 0 && <DropdownMenuSeparator className="my-2 bg-gray-300 dark:bg-gray-700/50" />}
                                         <DropdownMenuItem
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -140,15 +140,15 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                             }}
                                             className={cn(
                                                 "flex items-start gap-3 px-3 py-3 rounded-xl cursor-pointer transition-colors",
-                                                action.variant === 'danger' ? "hover:bg-red-500/10" : "hover:bg-gray-700/50"
+                                                action.variant === 'danger' ? "hover:bg-red-500/10" : "hover:bg-gray-200 dark:hover:bg-gray-700/50"
                                             )}
                                         >
-                                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", action.variant === 'danger' ? "bg-red-500/10 text-red-400" : "bg-gray-700/50 text-gray-300")}>
+                                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", action.variant === 'danger' ? "bg-red-500/10 text-red-400" : "bg-gray-200 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300")}>
                                                 {action.icon}
                                             </div>
                                             <div className="flex flex-col flex-1 min-w-0">
-                                                <span className={cn("text-sm font-semibold", action.variant === 'danger' ? "text-red-400" : "text-gray-100")}>{action.label}</span>
-                                                {action.description && <span className="text-xs text-gray-400">{action.description}</span>}
+                                                <span className={cn("text-sm font-semibold", action.variant === 'danger' ? "text-red-400" : "text-gray-900 dark:text-gray-800 dark:text-gray-100")}>{action.label}</span>
+                                                {action.description && <span className="text-xs text-gray-600 dark:text-gray-400">{action.description}</span>}
                                             </div>
                                         </DropdownMenuItem>
                                     </React.Fragment>

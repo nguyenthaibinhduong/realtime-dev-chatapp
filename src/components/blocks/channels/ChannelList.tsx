@@ -171,10 +171,10 @@ export const ChannelList = ({
                 variant="ghost"
                 className={`w-full justify-between px-2 py-2 my-1 h-auto font-normal flex items-center
                     ${selectedChannel?.id === channel.id
-                        ? 'bg-gray-800 text-gray-100 border border-gray-700 shadow-sm'
+                        ? 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm'
                         : unread > 0
-                            ? 'font-bold text-white'
-                            : 'text-sidebar-foreground hover:bg-gray-800 hover:text-gray-100  shadow-sm'
+                            ? 'font-bold text-gray-900 dark:text-white'
+                            : 'text-gray-700 dark:text-sidebar-foreground hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-800 dark:text-gray-100 shadow-sm'
                     }`}
                 onClick={() => onSelectChannel(channel)}
             >
@@ -190,7 +190,7 @@ export const ChannelList = ({
                     </span>
                 </div>
                 {unread > 0 && (
-                    <span className="ml-2 text-xs bg-red-600 text-white rounded-full px-2 py-0.5">
+                    <span className="ml-2 text-xs bg-red-500 dark:bg-red-600 text-white rounded-full px-2 py-0.5">
                         {unread}
                     </span>
                 )}
@@ -203,7 +203,7 @@ export const ChannelList = ({
             {/* Kênh công khai */}
             {grouped.group.length > 0 && (
                 <div className="mb-4">
-                    <div className="text-xs font-semibold text-muted-foreground mb-2 pl-2">
+                    <div className="text-xs font-semibold text-gray-600 dark:text-muted-foreground mb-2 pl-2">
                         {SECTION_LABELS.group}
                     </div>
                     {grouped.group.map(renderChannel)}
@@ -213,7 +213,7 @@ export const ChannelList = ({
             {/* Kênh dự án - nhóm theo project */}
             {projectGroups.length > 0 && (
                 <div className="mb-4">
-                    <div className="text-xs font-semibold text-muted-foreground mb-2 pl-2">
+                    <div className="text-xs font-semibold text-gray-600 dark:text-muted-foreground mb-2 pl-2">
                         {SECTION_LABELS["group-private"]}
                     </div>
                     {projectGroups.map((project) => {
@@ -226,7 +226,7 @@ export const ChannelList = ({
                                 {/* Project Header */}
                                 <Button
                                     variant="ghost"
-                                    className="w-full justify-between px-2 py-1.5 h-auto font-medium flex items-center text-sidebar-foreground hover:bg-gray-800 hover:text-gray-100"
+                                    className="w-full justify-between px-2 py-1.5 h-auto font-medium flex items-center text-gray-700 dark:text-sidebar-foreground hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-800 dark:text-gray-100"
                                     onClick={() => toggleProject(project.key)}
                                 >
                                     <div className="flex items-center gap-2">
@@ -235,14 +235,14 @@ export const ChannelList = ({
                                         ) : (
                                             <ChevronRight className="h-4 w-4" />
                                         )}
-                                        <Folder className="h-4 w-4 text-purple-400" />
+                                        <Folder className="h-4 w-4 text-purple-400 dark:text-purple-400" />
                                         <span className="truncate">{project.projectName}</span>
-                                        <span className="text-xs text-muted-foreground">
+                                        <span className="text-xs text-gray-500 dark:text-muted-foreground">
                                             ({project.channels.length})
                                         </span>
                                     </div>
                                     {totalUnread > 0 && (
-                                        <span className="ml-2 text-xs bg-red-600 text-white rounded-full px-2 py-0.5">
+                                        <span className="ml-2 text-xs bg-red-500 dark:bg-red-600 text-white rounded-full px-2 py-0.5">
                                             {totalUnread}
                                         </span>
                                     )}
@@ -263,7 +263,7 @@ export const ChannelList = ({
             {/* Chat cá nhân */}
             {grouped.personal.length > 0 && (
                 <div className="mb-4">
-                    <div className="text-xs font-semibold text-muted-foreground mb-2 pl-2">
+                    <div className="text-xs font-semibold text-gray-600 dark:text-muted-foreground mb-2 pl-2">
                         {SECTION_LABELS.personal}
                     </div>
                     {grouped.personal.map(renderChannel)}
@@ -273,7 +273,7 @@ export const ChannelList = ({
             {/* Khác */}
             {grouped.other.length > 0 && (
                 <div className="mb-4">
-                    <div className="text-xs font-semibold text-muted-foreground mb-2 pl-2">
+                    <div className="text-xs font-semibold text-gray-600 dark:text-muted-foreground mb-2 pl-2">
                         {SECTION_LABELS.other}
                     </div>
                     {grouped.other.map(renderChannel)}

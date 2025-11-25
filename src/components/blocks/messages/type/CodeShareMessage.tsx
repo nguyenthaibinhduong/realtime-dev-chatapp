@@ -84,10 +84,10 @@ const CodeShareMessage = memo(({
                 {/* Sender Info */}
                 {!isMe && showSenderInfo && (
                     <div className="flex items-center gap-2 px-2">
-                        <span className="text-xs font-semibold text-gray-300">
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                             {message.sender?.username || "Unknown"}
                         </span>
-                        <span className="text-[10px] text-gray-500">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-500">
                             {formatMessageTime(message.send_at || message.created_at)}
                         </span>
                     </div>
@@ -109,7 +109,7 @@ const CodeShareMessage = memo(({
                         TYPOGRAPHY.weight.semibold,
                         "text-[10px] sm:text-[11px]"
                     )}>
-                        <Code className="h-3 w-3 sm:h-4 sm:w-4 text-white flex-shrink-0" />
+                        <Code className="h-3 w-3 sm:h-4 sm:w-4 text-black dark:text-white flex-shrink-0" />
                         <span className="flex-1 truncate">{repo?.full_name}</span>
                         <span className="font-mono text-blue-200 text-[9px] sm:text-xs truncate max-w-[80px] sm:max-w-none">
                             {codePath?.split("/").pop()}
@@ -144,7 +144,7 @@ const CodeShareMessage = memo(({
                         <div className="flex items-center gap-2 mt-1 sm:mt-2">
                             <Button
                                 size="sm"
-                                className="bg-blue-600 text-white hover:bg-blue-700 transition-colors h-7 sm:h-8 text-[10px] sm:text-[11px]"
+                                className="bg-blue-600 text-black dark:text-white hover:bg-blue-700 transition-colors h-7 sm:h-8 text-[10px] sm:text-[11px]"
                                 onClick={handleClick}
                             >
                                 <Code className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Xem code

@@ -53,7 +53,7 @@ export default function Response({ response, loading }: ResponseProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Response</h2>
+        <h2 className="text-xl font-semibold text-black dark:text-white">Response</h2>
         {response && (
           <div className="flex items-center gap-3">
             <Badge className={cn("font-mono", getStatusColor(status))}>
@@ -76,7 +76,8 @@ export default function Response({ response, loading }: ResponseProps) {
       </div>
 
       {!response && !loading && (
-        <div className="flex flex-col items-center justify-center py-12 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">
+        <div className="flex flex-col items-center justify-center py-12 bg-zinc-50
+dark:bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">
           <AlertCircle className="h-12 w-12 mb-2 opacity-50" />
           <p className="text-sm">No response yet</p>
           <p className="text-xs mt-1">Send a request to see the response</p>

@@ -147,9 +147,9 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
             <div className="flex items-center justify-between px-4 py-3 bg-[#2d2d30] border-b border-[#3e3e42]">
                 <div className="flex items-center space-x-2">
                     <Code2 className="h-5 w-5 text-[#007acc]" />
-                    <span className="text-white font-medium">Code Editor Message</span>
+                    <span className="text-black dark:text-white font-medium">Code Editor Message</span>
                     {initialCode && (
-                        <Badge className="bg-green-600 text-white text-xs">
+                        <Badge className="bg-green-600 text-black dark:text-white text-xs">
                             Loaded from card
                         </Badge>
                     )}
@@ -160,7 +160,7 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
                     className="flex h-6 w-6 items-center justify-center rounded hover:bg-[#3e3e42] transition-colors"
                     title="Đóng code editor"
                 >
-                    <X className="h-4 w-4 text-gray-400 hover:text-white" />
+                    <X className="h-4 w-4 text-gray-400 hover:text-black dark:text-white" />
                 </button>
             </div>
 
@@ -175,7 +175,7 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
                             <select
                                 value={lang}
                                 onChange={(e) => handleLanguageChange(e.target.value as Lang)}
-                                className="appearance-none bg-[#3c3c3c] text-white px-3 py-1.5 pr-8 rounded-md border border-[#5a5a5a] text-sm focus:outline-none focus:ring-2 focus:ring-[#007acc] focus:border-transparent"
+                                className="appearance-none bg-[#3c3c3c] text-black dark:text-white px-3 py-1.5 pr-8 rounded-md border border-[#5a5a5a] text-sm focus:outline-none focus:ring-2 focus:ring-[#007acc] focus:border-transparent"
                             >
                                 {Object.entries(languageMap).map(([key, lang]) => (
                                     <option key={key} value={key} className="bg-[#3c3c3c]">
@@ -212,7 +212,7 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
                     <button
                         onClick={runCode}
                         disabled={isRunning || !canSend}
-                        className="flex items-center space-x-2 px-3 py-1.5 bg-[#0e639c] hover:bg-[#1177bb] disabled:bg-[#555] text-white rounded-md transition-colors duration-200 text-sm font-medium"
+                        className="flex items-center space-x-2 px-3 py-1.5 bg-[#0e639c] hover:bg-[#1177bb] disabled:bg-[#555] text-black dark:text-white rounded-md transition-colors duration-200 text-sm font-medium"
                     >
                         <Play className={`h-4 w-4 ${isRunning ? "animate-spin" : ""}`} />
                         <span>{isRunning ? "Running..." : "Test"}</span>
@@ -221,7 +221,7 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
                     <button
                         onClick={handleSend}
                         disabled={isSending || !canSend}
-                        className="flex items-center space-x-2 px-3 py-1.5 bg-[#28a745] hover:bg-[#218838] disabled:bg-[#555] text-white rounded-md transition-colors duration-200 text-sm font-medium"
+                        className="flex items-center space-x-2 px-3 py-1.5 bg-[#28a745] hover:bg-[#218838] disabled:bg-[#555] text-black dark:text-white rounded-md transition-colors duration-200 text-sm font-medium"
                     >
                         <Send className={`h-4 w-4 ${isSending ? "animate-spin" : ""}`} />
                         <span>{isSending ? "Sending..." : "Send Code"}</span>
@@ -270,7 +270,7 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
                 <div className="flex items-center justify-between px-4 py-2 bg-[#2d2d30] border-b border-[#3e3e42]">
                     <div className="flex items-center space-x-2">
                         <Terminal className="h-4 w-4 text-[#007acc]" />
-                        <span className="text-white text-sm font-medium">Output</span>
+                        <span className="text-black dark:text-white text-sm font-medium">Output</span>
                     </div>
                     <div className="text-xs text-gray-400">
                         {languageMap[lang].icon} {languageMap[lang].name}

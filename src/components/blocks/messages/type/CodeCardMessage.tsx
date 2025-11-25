@@ -136,10 +136,10 @@ const CodeCardMessage = memo(({
                 {/* Sender Info */}
                 {!isMe && showSenderInfo && (
                     <div className="flex items-center gap-2 px-2">
-                        <span className="text-xs font-semibold text-gray-300">
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                             {message.sender?.username || "Unknown"}
                         </span>
-                        <span className="text-[10px] text-gray-500">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-500">
                             {new Date(message.created_at).toLocaleTimeString("vi-VN", {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -154,16 +154,16 @@ const CodeCardMessage = memo(({
                     "cursor-pointer transition-all duration-200",
                     "relative rounded-lg border shadow-lg overflow-hidden",
                     isMe
-                        ? "bg-black border-blue-600/30"
-                        : "bg-black border-gray-700/50",
-                    isHovered && "shadow-xl border-gray-600/70"
+                        ? "bg-white dark:bg-gray-950 border-blue-300 dark:border-blue-600/30"
+                        : "bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700/50",
+                    isHovered && "shadow-xl border-gray-400 dark:border-gray-600/70"
                 )}>
                     {/* Header */}
-                    <div className="flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-800/70 border-b border-gray-700/50">
+                    <div className="flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 dark:bg-gray-800/70 border-b border-gray-200 dark:border-gray-700/50">
                         <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
                             <Code2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-400 flex-shrink-0" />
                             <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
-                                <span className="text-[10px] sm:text-[11px] font-medium text-white truncate">
+                                <span className="text-[10px] sm:text-[11px] font-medium text-black dark:text-white truncate">
                                     {message.text || `${author} đã chia sẻ code`}
                                 </span>
                                 <Badge variant="outline" className={cn("text-[8px] sm:text-[9px] border-gray-600 flex-shrink-0 px-0.5 sm:px-1 py-0", langInfo.color)}>
@@ -179,7 +179,7 @@ const CodeCardMessage = memo(({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setIsExpanded(!isExpanded)}
-                                    className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                    className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-black dark:text-white hover:bg-gray-700/50"
                                     title={isExpanded ? "Thu gọn" : "Xem toàn bộ"}
                                 >
                                     {isExpanded ? <EyeOff className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> : <Eye className="h-2.5 w-2.5 sm:h-3 sm:w-3" />}
@@ -191,7 +191,7 @@ const CodeCardMessage = memo(({
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleCopyCode}
-                                className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-black dark:text-white hover:bg-gray-700/50"
                                 title="Copy toàn bộ code"
                             >
                                 <Copy className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
@@ -202,7 +202,7 @@ const CodeCardMessage = memo(({
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleOpenInTool}
-                                className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+                                className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-black dark:text-white hover:bg-gray-700/50"
                                 title="Chỉnh sửa trong Code Editor"
                             >
                                 <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3" />

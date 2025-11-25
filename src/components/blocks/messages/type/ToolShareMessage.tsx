@@ -95,10 +95,10 @@ export default function ToolShareMessage({ item, onOpenTool, isMe = false, showS
                 {/* Sender Info */}
                 {!computedIsMe && showSenderInfo && (
                     <div className="flex items-center gap-2 px-2">
-                        <span className="text-xs font-semibold text-gray-300">
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                             {item?.sender?.username || "Unknown"}
                         </span>
-                        <span className="text-[10px] text-gray-500">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-500">
                             {new Date(item.send_at || item.created_at).toLocaleTimeString("vi-VN", {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -114,9 +114,7 @@ export default function ToolShareMessage({ item, onOpenTool, isMe = false, showS
                         "max-w-[50vw] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px]",
                         "min-w-[280px] sm:min-w-[320px]",
                         COLORS.bg.card,
-                        COLORS.border.card,
-                        "border",
-                        "hover:border-gray-700",
+                        "hover:border-gray-400 dark:hover:border-gray-600",
                         TRANSITIONS.normal
                     )}
                     onClick={handleOpen}

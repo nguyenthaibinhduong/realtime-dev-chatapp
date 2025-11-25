@@ -530,7 +530,7 @@ export const MessageList: React.FC<Props> = ({
 
   return (
     <ScrollArea
-      className="p-4 overflow-auto bg-gradient-to-b from-gray-900 to-black"
+      className="p-4 overflow-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black"
       style={{
         // backgroundImage: 'url(/src/assets/image/background.png)',
         // backgroundRepeat: 'repeat',
@@ -581,11 +581,11 @@ export const MessageList: React.FC<Props> = ({
           }}
         >
           <DialogContent
-            className="bg-black rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center"
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center border border-gray-300 dark:border-gray-700"
             style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)", position: "fixed" }}
           >
             <button
-              className="absolute top-3 right-3 text-zinc-400 hover:text-white text-xl"
+              className="absolute top-3 right-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl"
               onClick={() => {
                 setShowShareModal(false);
                 setShareChannelId(null);
@@ -596,18 +596,18 @@ export const MessageList: React.FC<Props> = ({
             >
               ×
             </button>
-            <div className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+            <div className="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
               <Share2 className="h-5 w-5 text-blue-500" />
               Chia sẻ code cho kênh
             </div>
             <div className="mb-4 w-full">
-              <div className="text-xs text-gray-600 mb-2 text-center">Chọn kênh để chia sẻ</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 text-center">Chọn kênh để chia sẻ</div>
               <ChannelSearch onSelectChannel={handleSelectChannel} isShare={true} />
-              <Button className="w-full mt-4 bg-blue-600 text-white" onClick={() => handleDoShare("current")}>
+              <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleDoShare("current")}>
                 Chia sẻ cho kênh hiện tại
               </Button>
               {shareChannelId && (
-                <Button className="w-full mt-4 bg-white text-black hover:bg-blue-600 hover:text-white" onClick={() => handleDoShare("other")}>
+                <Button className="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white" onClick={() => handleDoShare("other")}>
                   Chia sẻ cho kênh này
                 </Button>
               )}
