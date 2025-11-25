@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { BARequirementForm, BARequirementData } from "./BARequirementForm";
 import { TesterDebugForm, TesterDebugData } from "./TesterDebugForm";
-import { Member } from "@/types/channel";
+import { Member, Channel } from "@/types/channel";
 import { Message } from "@/types/message";
 import { json } from "stream/consumers";
+import { getChannelPermissions } from "@/utils/channelPermissions";
+import { useAuth } from "@/hooks/useAuth";
 
 // Button configuration
 interface ActionButton {
@@ -71,6 +73,7 @@ const FUNCTION_BUTTONS: ActionButton[] = [
 
 interface MessageInputProps {
   channelId: string;
+  channel?: Channel | null;
   onSend?: (
     content: string,
     files?: File[],
@@ -101,6 +104,7 @@ export type EditMessage = {
 
 export const MessageInput = ({
   channelId,
+  channel,
   onSend,
   replyMessage,
   onCancelReply,
@@ -111,6 +115,8 @@ export const MessageInput = ({
   channelMembers = [],
   channelMessages = []
 }: MessageInputProps) => {
+  const { user } = useAuth();
+  const permissions = getChannelPermissions(channel, user?.id);
   const [newMessage, setNewMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -120,6 +126,8 @@ export const MessageInput = ({
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  console.log("Channel in permissions:", permissions);
 
   // Prevent multiple forms from opening at once
   const openBAForm = () => {
@@ -295,6 +303,17 @@ export const MessageInput = ({
     setShowTesterForm(false);
   };
 
+  // If user is Viewer in private channel, hide the entire input
+  if (permissions.isViewer && channel.type === 'group-private') {
+    return (
+      <div className="border-t border-border p-4 bg-zinc-900/50">
+        <div className="text-center text-sm text-zinc-500">
+          Bạn chỉ có quyền xem tin nhắn trong kênh này.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="border-t border-border transition-all duration-200">
@@ -420,60 +439,71 @@ export const MessageInput = ({
                     </>
                   )}
 
-                  {/* Code Editor */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleCodeEditorToggle();
-                      setShowAttachMenu(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
-                  >
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isCodeEditorOpen
-                      ? "bg-[#007acc] text-white"
-                      : "bg-teal-500/20 group-hover:bg-teal-500/30"
-                      }`}>
-                      <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-white" : "text-teal-400"}`} />
-                    </div>
-                    <span className="text-sm text-gray-200 font-medium">Code Editor</span>
-                  </button>
+                  {/* Code Editor - Only for Dev/PM/Owner */}
+                  {permissions.isDev
+                    && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleCodeEditorToggle();
+                          setShowAttachMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                      >
+                        <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isCodeEditorOpen
+                          ? "bg-[#007acc] text-white"
+                          : "bg-teal-500/20 group-hover:bg-teal-500/30"
+                          }`}>
+                          <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-white" : "text-teal-400"}`} />
+                        </div>
+                        <span className="text-sm text-gray-200 font-medium">Code Editor</span>
+                      </button>
+                    )}
 
-                  <div className="h-px bg-gray-700 my-2" />
+                  {(permissions.isBA || permissions.isTester) && (
+                    <div className="h-px bg-gray-700 my-2" />
+                  )}
 
                   {/* Function Buttons */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      openBAForm();
-                      setShowAttachMenu(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
-                  >
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showBAForm
-                      ? "bg-blue-500 text-white"
-                      : "bg-blue-500/20 group-hover:bg-blue-500/30"
-                      }`}>
-                      <FileText className={`h-4 w-4 ${showBAForm ? "text-white" : "text-blue-400"}`} />
-                    </div>
-                    <span className="text-sm text-gray-200 font-medium">BA Requirement</span>
-                  </button>
+                  {/* BA Requirement - Only for BA/PM/Owner */}
+                  {permissions.isBA && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        openBAForm();
+                        setShowAttachMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                    >
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showBAForm
+                        ? "bg-blue-500 text-white"
+                        : "bg-blue-500/20 group-hover:bg-blue-500/30"
+                        }`}>
+                        <FileText className={`h-4 w-4 ${showBAForm ? "text-white" : "text-blue-400"}`} />
+                      </div>
+                      <span className="text-sm text-gray-200 font-medium">BA Requirement</span>
+                    </button>
+                  )}
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      openTesterForm();
-                      setShowAttachMenu(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
-                  >
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showTesterForm
-                      ? "bg-red-500 text-white"
-                      : "bg-red-500/20 group-hover:bg-red-500/30"
-                      }`}>
-                      <Bug className={`h-4 w-4 ${showTesterForm ? "text-white" : "text-red-400"}`} />
-                    </div>
-                    <span className="text-sm text-gray-200 font-medium">Debug Report</span>
-                  </button>
+                  {/* Debug Report - Only for Tester/PM/Owner */}
+                  {permissions.isTester && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        openTesterForm();
+                        setShowAttachMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                    >
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showTesterForm
+                        ? "bg-red-500 text-white"
+                        : "bg-red-500/20 group-hover:bg-red-500/30"
+                        }`}>
+                        <Bug className={`h-4 w-4 ${showTesterForm ? "text-white" : "text-red-400"}`} />
+                      </div>
+                      <span className="text-sm text-gray-200 font-medium">Debug Report</span>
+                    </button>
+                  )}
 
                   <button
                     type="button"

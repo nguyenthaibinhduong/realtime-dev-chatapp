@@ -171,8 +171,8 @@ const MessageItem = memo(({
         <div
             data-message-id={message.id}
             className={cn(
-                "flex gap-1 group py-0.5 transition-all duration-100 rounded-md",
-                isMe ? "flex-row-reverse" : "flex-row"
+                "group relative flex gap-2 px-2 py-1 transition-colors",
+                isMe ? "justify-end" : "justify-start"
             )}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -188,14 +188,22 @@ const MessageItem = memo(({
 
             {/* Message content container */}
             <div className={cn(
-                "relative flex flex-col max-w-[65%] min-w-[100px]",
+                "flex flex-col gap-1",
                 isMe ? "items-end" : "items-start"
             )}>
                 {/* Sender name */}
                 {showSenderInfo && !isMe && !isRemovedMessage && (
-                    <span className="text-[9px] font-medium text-gray-400 px-1 mb-0.5">
-                        {message.sender?.username || 'Unknown'}
-                    </span>
+                    <div className="flex items-center gap-2 px-2">
+                        <span className="text-xs font-semibold text-gray-300">
+                            {message.sender?.username || 'Unknown'}
+                        </span>
+                        <span className="text-[10px] text-gray-500">
+                            {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </span>
+                    </div>
                 )}
 
                 {/* Removed Message Display */}

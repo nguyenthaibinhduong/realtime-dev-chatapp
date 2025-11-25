@@ -101,21 +101,22 @@ const TesterReportMessage = ({
       <div
         data-message-id={message.id}
         className={cn(
-          "group relative flex py-1 transition-colors",
+          "group relative flex gap-2 px-2 py-1 transition-colors",
           isMe ? "justify-end" : "justify-start"
         )}
         onMouseEnter={() => onHover(String(message.id))}
         onMouseLeave={() => onHover(null)}
       >
         {/* Sender Avatar */}
+        {/* Sender Info */}
+
         {showSenderInfo && !isMe ? (
           <div className="mr-2 flex-shrink-0">
             <AvatarUser user={message?.sender} isMe={isMe} size={8} />
           </div>
         ) : !isMe ? (
-          <div className="w-6 flex-shrink-0" />
+          <div className="w-10 flex-shrink-0" />
         ) : null}
-
         {/* Message Content */}
         <div
           className={cn(
@@ -123,20 +124,9 @@ const TesterReportMessage = ({
             isMe ? "items-end" : "items-start"
           )}
         >
-          {/* Sender Info */}
-          {!isMe && showSenderInfo && (
-            <div className="flex items-center gap-2 px-2">
-              <span className="text-xs font-semibold text-gray-300">
-                {message.sender?.username || "Unknown"}
-              </span>
-              <span className="text-[10px] text-gray-500">
-                {new Date(message.created_at).toLocaleTimeString("vi-VN", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-          )}
+
+
+
 
           {/* Bug Report Card - Compact Preview */}
           <Card

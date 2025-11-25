@@ -91,20 +91,20 @@ const BARequireMessage = ({
       <div
         data-message-id={message.id}
         className={cn(
-          "group relative flex gap-2 px-2 py-1 transition-colors hover:bg-gray-800/30",
+          "group relative flex gap-2 px-2 py-1 transition-colors ",
           isMe ? "justify-end" : "justify-start"
         )}
         onMouseEnter={() => onHover(String(message.id))}
         onMouseLeave={() => onHover(null)}
       >
         {/* Sender Avatar */}
-        {!isMe && showSenderInfo && (
-          <Avatar className="h-8 w-8 flex-shrink-0">
-            <AvatarFallback className="bg-blue-600 text-white text-xs">
-              {message.sender?.username?.[0]?.toUpperCase() || "U"}
-            </AvatarFallback>
-          </Avatar>
-        )}
+        {showSenderInfo && !isMe ? (
+          <div className="mr-2 flex-shrink-0">
+            <AvatarUser user={message?.sender} isMe={isMe} size={8} />
+          </div>
+        ) : !isMe ? (
+          <div className="w-10 flex-shrink-0" />
+        ) : null}
 
         {/* Message Content */}
         <div

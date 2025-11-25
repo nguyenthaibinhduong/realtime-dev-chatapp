@@ -42,6 +42,7 @@ import AvatarUser from "@/components/common/AvartarUser";
 import { AvatarGroupGrid, AvatarGroupStack } from "@/components/common/AvatarGroup";
 import { ToolType, TOOL_CONFIGS } from "../tools";
 import ChannelUpdate from "./ChannelSettings";
+import { getChannelPermissions } from "@/utils/channelPermissions";
 
 interface ChannelHeaderProps {
   channel: Channel;
@@ -101,6 +102,9 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
   const [openAttachmentModal, setOpenAttachmentModal] = useState(false);
   const [openSettingsModal, setOpenSettingsModal] = useState(false);
 
+  // Get user permissions for this channel
+  const permissions = getChannelPermissions(channel, user?.id);
+
   useEffect(() => {
     if (channel.type === "personal" && members && user?.id) {
       const otherMember = members.find((m: any) => m.id !== user.id);
@@ -122,6 +126,43 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
               : channel.name
             }
           </h2>
+
+          {/* Display user role badge for private channels */}
+          {channel.type === "group-private" && user?.id && (
+            <div className="flex items-center gap-1.5">
+              {permissions.isOwner && (
+                <Badge variant="outline" className="bg-yellow-500/10 border-yellow-500/50 text-yellow-400 text-xs">
+                  <Crown className="h-3 w-3 mr-1" />
+                  Owner
+                </Badge>
+              )}
+              {permissions.isPM && (
+                <Badge variant="outline" className="bg-purple-500/10 border-purple-500/50 text-purple-400 text-xs">
+                  PM
+                </Badge>
+              )}
+              {permissions.isBA && (
+                <Badge variant="outline" className="bg-blue-500/10 border-blue-500/50 text-blue-400 text-xs">
+                  BA
+                </Badge>
+              )}
+              {permissions.isTester && (
+                <Badge variant="outline" className="bg-orange-500/10 border-orange-500/50 text-orange-400 text-xs">
+                  Tester
+                </Badge>
+              )}
+              {permissions.isDev && (
+                <Badge variant="outline" className="bg-green-500/10 border-green-500/50 text-green-400 text-xs">
+                  Dev
+                </Badge>
+              )}
+              {permissions.isViewer && !permissions.isPM && !permissions.isOwner && (
+                <Badge variant="outline" className="bg-zinc-500/10 border-zinc-500/50 text-zinc-400 text-xs">
+                  Viewer
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
         {channel.member_count > 2 && (
@@ -171,15 +212,15 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
           <DropdownMenuTrigger asChild>
             <button
               className={`p-2.5 rounded-xl border transition-all duration-200 group ${selectedTool
-                  ? 'bg-blue-500/15 border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20'
-                  : 'hover:bg-zinc-800/60 border-transparent hover:border-zinc-600/30'
+                ? 'bg-blue-500/15 border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20'
+                : 'hover:bg-zinc-800/60 border-transparent hover:border-zinc-600/30'
                 }`}
               title="AI Tools"
             >
               <div className="flex items-center gap-1.5">
                 <Wrench className={`h-4.5 w-4.5 transition-colors ${selectedTool
-                    ? 'text-blue-400'
-                    : 'text-zinc-400 group-hover:text-zinc-200'
+                  ? 'text-blue-400'
+                  : 'text-zinc-400 group-hover:text-zinc-200'
                   }`} />
                 {selectedTool && (
                   <ChevronDown className="h-3 w-3 text-blue-400" />
@@ -194,8 +235,8 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                 key={tool.id}
                 onClick={() => onToolChange?.(selectedTool === tool.id ? null : tool.id)}
                 className={`cursor-pointer transition-all duration-200 ${selectedTool === tool.id
-                    ? 'bg-blue-500/20 border-l-2 border-blue-400 text-blue-300'
-                    : 'hover:bg-zinc-800/70 text-zinc-200'
+                  ? 'bg-blue-500/20 border-l-2 border-blue-400 text-blue-300'
+                  : 'hover:bg-zinc-800/70 text-zinc-200'
                   }`}
               >
                 <div className="flex items-center gap-3 w-full py-1">
@@ -230,16 +271,20 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
         {/* Separator */}
         <div className="w-px h-6 bg-zinc-700/40 mx-1" />
 
-        {/* Nút mở modal kết nối repo git */}
-        <button
-          className="p-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
-          title="GitHub Integration"
-          onClick={() => setOpenGitModal(true)}
-        >
-          <Github className="h-4.5 w-4.5 text-zinc-400 group-hover:text-zinc-200 transition-colors" />
-          <span className="sr-only">Kết nối repo Git</span>
-        </button>
-        <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
+        {/* Nút mở modal kết nối repo git - Only for Dev/PM/Owner */}
+        {(permissions.isDev || permissions.isPM || permissions.isOwner) && (
+          <>
+            <button
+              className="p-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
+              title="GitHub Integration"
+              onClick={() => setOpenGitModal(true)}
+            >
+              <Github className="h-4.5 w-4.5 text-zinc-400 group-hover:text-zinc-200 transition-colors" />
+              <span className="sr-only">Kết nối repo Git</span>
+            </button>
+            <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
+          </>
+        )}
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -310,7 +355,7 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
 
             {/* Tabs với thiết kế tối */}
             <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3 bg-zinc-900 rounded-xl p-1 shadow-sm border border-zinc-800">
+              <TabsList className={`grid w-full ${channel.type === "personal" ? "grid-cols-2" : "grid-cols-3"} bg-zinc-900 rounded-xl p-1 shadow-sm border border-zinc-800`}>
                 <TabsTrigger
                   value="members"
                   className="rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-zinc-800 data-[state=active]:text-white data-[state=active]:shadow-md text-zinc-300"
@@ -325,13 +370,16 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                   <Info className="h-4 w-4 mr-2" />
                   Thông tin
                 </TabsTrigger>
-                <TabsTrigger
-                  value="settings"
-                  className="rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-zinc-800 data-[state=active]:text-white data-[state=active]:shadow-md text-zinc-300"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Cài đặt kênh
-                </TabsTrigger>
+                {/* Hide settings tab for personal channels */}
+                {channel.type !== "personal" && (
+                  <TabsTrigger
+                    value="settings"
+                    className="rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-zinc-800 data-[state=active]:text-white data-[state=active]:shadow-md text-zinc-300"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Cài đặt kênh
+                  </TabsTrigger>
+                )}
               </TabsList>
 
               {/* Members Tab */}
@@ -482,21 +530,23 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                 </div>
               </TabsContent>
 
-              {/* Channel Settings */}
-              <TabsContent value="settings">
-                <div className="p-4">
-                  <ChannelUpdate
-                    open={true}
-                    onOpenChange={setOpenSettingsModal}
-                    channelId={channel.id}
-                    channelName={channel.type === "personal" && otherUser
-                      ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
-                      : channel.name
-                    }
-                    channelData={channel}
-                  />
-                </div>
-              </TabsContent>
+              {/* Channel Settings - Hide for personal channels */}
+              {channel.type !== "personal" && (
+                <TabsContent value="settings">
+                  <div className="p-4">
+                    <ChannelUpdate
+                      open={true}
+                      onOpenChange={setOpenSettingsModal}
+                      channelId={channel.id}
+                      channelName={channel.type === "personal" && otherUser
+                        ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
+                        : channel.name
+                      }
+                      channelData={channel}
+                    />
+                  </div>
+                </TabsContent>
+              )}
             </Tabs>
           </DialogContent>
         </Dialog>
