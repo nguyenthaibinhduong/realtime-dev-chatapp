@@ -215,7 +215,7 @@ export default function SettingLayout() {
           ) : (
             // Default content when no component assigned
             <>
-              <h2 className="text-white text-xl font-semibold mb-4">Cài đặt</h2>
+              <h2 className="text-black dark:text-white text-xl font-semibold mb-4">Cài đặt</h2>
               <p className="text-sidebar-foreground/80">
                 Chưa có Layout cho mục này.
               </p>

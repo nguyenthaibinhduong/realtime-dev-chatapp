@@ -19,7 +19,7 @@ export default function ResponseTabGroup({
 }: ResponseTabGroupProps) {
   return (
     <Tabs defaultValue="body" className="mt-4">
-      <TabsList className="bg-zinc-800 border-zinc-700">
+      <TabsList className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700">
         <TabsTrigger value="body" className="data-[state=active]:bg-white data-[state=active]:text-black">
           Response Body
         </TabsTrigger>
@@ -32,7 +32,8 @@ export default function ResponseTabGroup({
       </TabsList>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12 bg-zinc-900 border border-zinc-800 rounded-lg mt-4">
+        <div className="flex items-center justify-center py-12 bg-zinc-50
+dark:bg-zinc-900 border border-zinc-800 rounded-lg mt-4">
           <div className="text-center">
             <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto mb-2" />
             <p className="text-sm text-zinc-400">Sending request...</p>
@@ -42,7 +43,8 @@ export default function ResponseTabGroup({
         <>
           <TabsContent
             value="body"
-            className="mt-4 p-4 bg-zinc-900 border border-zinc-800 rounded-lg"
+            className="mt-4 p-4 bg-zinc-50
+dark:bg-zinc-900 border border-zinc-800 rounded-lg"
           >
             <JsonEditorPane
               paneValue={doc}
@@ -53,7 +55,8 @@ export default function ResponseTabGroup({
 
           <TabsContent
             value="headers"
-            className="mt-4 p-4 bg-zinc-900 border border-zinc-800 rounded-lg"
+            className="mt-4 p-4 bg-zinc-50
+dark:bg-zinc-900 border border-zinc-800 rounded-lg"
           >
             <ResponseHeaderPane response={response} />
           </TabsContent>

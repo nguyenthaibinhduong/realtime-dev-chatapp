@@ -39,7 +39,7 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
     useNotificationHandler();
 
     return (
-        <ResizablePanelGroup direction="horizontal" className="h-screen w-full bg-[hsl(var(--chat-background))] group">
+        <ResizablePanelGroup direction="horizontal" className="h-screen w-full bg-zinc-50 dark:bg-zinc-950 group">
             {/* Menu (MenubarLayout) */}
             {menu}
 
@@ -84,7 +84,7 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
                         <button
                             aria-label="Close tools"
                             onClick={() => setShowRight(false)}
-                            className="w-8 h-8 rounded-md bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center"
+                            className="w-8 h-8 rounded-md bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center"
                         >
                             <SimpleIcon name="close" className="text-zinc-200" />
                         </button>
@@ -100,7 +100,7 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
                     <button
                         aria-label="Open tools"
                         onClick={() => setShowRight(true)}
-                        className="-mr-3 w-10 h-10 rounded-l-md bg-zinc-900 border-l border-border flex items-center justify-center"
+                        className="-mr-3 w-10 h-10 rounded-l-md bg-zinc-50 dark:bg-zinc-900 border-l border-border flex items-center justify-center"
                     >
                         <SimpleIcon name="chevrons-left" className="text-zinc-300 rotate-180" />
                     </button>

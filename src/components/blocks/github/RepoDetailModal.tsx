@@ -347,22 +347,22 @@ export function CodeViewerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden">
-        <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-950">
+      <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-white dark:bg-black text-black dark:text-white border border-zinc-700 overflow-hidden">
+        <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
           <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center h-10 w-10 rounded bg-zinc-900 border border-zinc-800">
+            <div className="flex items-center justify-center h-10 w-10 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-800">
               <svg
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="h-7 w-7 text-white"
+                className="h-7 w-7 text-black dark:text-white"
               >
                 <path d="M12 2C6.477 2 2 6.484 2 12.012c0 4.425 2.867 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.37-1.342-3.37-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.646.35-1.088.636-1.34-2.221-.253-4.555-1.113-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.025 2.747-1.025.546 1.378.202 2.396.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .268.18.579.688.481C19.135 20.19 22 16.437 22 12.012 22 6.484 17.523 2 12 2z" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-base flex items-center gap-2 font-semibold text-white truncate">
+              <DialogTitle className="text-base flex items-center gap-2 font-semibold text-black dark:text-white truncate">
                 <span className="truncate">{repo.full_name}</span>
-                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
                   {repo.private ? (
                     <span className="inline-flex items-center gap-1">
                       <Lock className="h-3 w-3" /> Private
@@ -373,7 +373,7 @@ export function CodeViewerDialog({
                     </span>
                   )}
                 </span>
-                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
                   <span className="inline-flex items-center gap-1">
                     <GitBranch className="h-3 w-3" />{" "}
                     {repo.default_branch || "main"}
@@ -416,7 +416,7 @@ export function CodeViewerDialog({
               }}
             >
               <DialogContent
-                className="bg-black rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center"
+                className="bg-white dark:bg-black rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center"
                 style={{
                   left: "50%",
                   top: "50%",
@@ -425,7 +425,7 @@ export function CodeViewerDialog({
                 }}
               >
                 <button
-                  className="absolute top-3 right-3 text-zinc-400 hover:text-white text-xl"
+                  className="absolute top-3 right-3 text-zinc-400 hover:text-black dark:text-white text-xl"
                   onClick={() => {
                     setShowShareModal(false);
                     setShareChannelId(null);
@@ -435,7 +435,7 @@ export function CodeViewerDialog({
                 >
                   ×
                 </button>
-                <div className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                <div className="text-lg font-semibold text-black dark:text-white mb-2 flex items-center gap-2">
                   <Share2 className="h-5 w-5 text-blue-500" />
                   Chia sẻ code cho kênh
                 </div>
@@ -455,7 +455,7 @@ export function CodeViewerDialog({
                   </Button>
                   {shareChannelId && (
                     <Button
-                      className="w-full mt-4 bg-white text-black hover:bg-blue-600 hover:text-white"
+                      className="w-full mt-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white"
                       onClick={() => handleDoShare("other")}
                     >
                       Chia sẻ cho kênh này
@@ -479,7 +479,7 @@ export function CodeViewerDialog({
                   {dirChildren.dirs.map((d) => (
                     <button
                       key={d}
-                      className="w-full text-left px-3 py-1.5 hover:bg-zinc-900 text-zinc-200"
+                      className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-zinc-900 text-gray-700 dark:text-zinc-200"
                       onClick={() =>
                         setDialogPath(dialogPath ? `${dialogPath}/${d}` : d)
                       }
@@ -494,9 +494,9 @@ export function CodeViewerDialog({
                   {dirChildren.files.map((f) => (
                     <button
                       key={f}
-                      className={`w-full text-left px-3 py-1.5 hover:bg-zinc-900 ${selPath === (dialogPath ? `${dialogPath}/${f}` : f)
-                          ? "bg-zinc-900 text-zinc-100"
-                          : "text-zinc-300"
+                      className={`w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-zinc-900 ${selPath === (dialogPath ? `${dialogPath}/${f}` : f)
+                        ? "bg-gray-100 dark:bg-zinc-900 text-gray-900 dark:text-zinc-100"
+                        : "text-gray-700 dark:text-zinc-300"
                         }`}
                       onClick={() =>
                         handleSelectFile(dialogPath ? `${dialogPath}/${f}` : f)
@@ -520,11 +520,11 @@ export function CodeViewerDialog({
           {/* Right: code */}
           <div className="flex-1 h-full flex flex-col">
             {/* Toolbar (hiển thị ref + branch gốc nếu là commit) */}
-            <div className="px-4 py-2 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
+            <div className="px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
               <div className="text-xs text-zinc-400 truncate">
                 {selPath}
                 {viewBranchOfCommit ? (
-                  <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">
+                  <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-700 text-zinc-300">
                     from branch: <b>{viewBranchOfCommit}</b>
                   </span>
                 ) : null}
@@ -625,7 +625,7 @@ export function CodeViewerDialog({
 // Skeleton
 const SkeletonLine = ({ width = "100%", height = "1rem", className = "" }) => (
   <div
-    className={`bg-zinc-800 animate-pulse rounded ${className}`}
+    className={`bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded ${className}`}
     style={{ width, height }}
   />
 );
@@ -830,22 +830,22 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
 
   return (
     <Dialog open={!!repo} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden flex flex-col">
-        <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-950">
+      <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-white dark:bg-black text-black dark:text-white border border-zinc-700 overflow-hidden flex flex-col">
+        <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
           <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center h-10 w-10 rounded bg-zinc-900 border border-zinc-800">
+            <div className="flex items-center justify-center h-10 w-10 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-800">
               <svg
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="h-7 w-7 text-white"
+                className="h-7 w-7 text-black dark:text-white"
               >
                 <path d="M12 2C6.477 2 2 6.484 2 12.012c0 4.425 2.867 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.37-1.342-3.37-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.646.35-1.088.636-1.34-2.221-.253-4.555-1.113-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.025 2.747-1.025.546 1.378.202 2.396.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .268.18.579.688.481C19.135 20.19 22 16.437 22 12.012 22 6.484 17.523 2 12 2z" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-base flex items-center gap-2 font-semibold text-white truncate">
+              <DialogTitle className="text-base flex items-center gap-2 font-semibold text-black dark:text-white truncate">
                 <span className="truncate">{repo.full_name}</span>
-                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
                   {repo.private ? (
                     <span className="inline-flex items-center gap-1">
                       <Lock className="h-3 w-3" /> Private
@@ -856,7 +856,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                     </span>
                   )}
                 </span>
-                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
                   <span className="inline-flex items-center gap-1">
                     <GitBranch className="h-3 w-3" />{" "}
                     {repo.default_branch || "main"}
@@ -884,12 +884,12 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
 
         <div className="h-full flex flex-col overflow-y-auto">
           {/* Ref bar */}
-          <div className="px-4 py-2 flex items-center gap-2 border-b border-zinc-900 bg-zinc-950">
+          <div className="px-4 py-2 flex items-center gap-2 border-b border-zinc-900 bg-zinc-50 dark:bg-zinc-950">
             <div className="flex items-center gap-2">
               <GitBranch className="h-4 w-4 text-emerald-400" />
               {mode === "branch" ? (
                 <select
-                  className="bg-black border border-zinc-700 rounded px-2 py-1 text-sm"
+                  className="bg-white dark:bg-black border border-zinc-700 rounded px-2 py-1 text-sm"
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   disabled={loading}
@@ -906,12 +906,12 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                 </select>
               ) : (
                 <div className="text-xs text-zinc-300 flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700">
+                  <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-700">
                     Commit:{" "}
                     <span className="font-mono">{commitSha.slice(0, 7)}</span>
                   </span>
                   {viewBranchOfCommit && (
-                    <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700">
+                    <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-700">
                       from branch <b>{viewBranchOfCommit}</b>
                     </span>
                   )}
@@ -950,7 +950,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
             onValueChange={(v) => setTab(v as any)}
             className="flex-1 flex flex-col"
           >
-            <TabsList className="px-4 border-b border-zinc-900 bg-zinc-950 text-zinc-200">
+            <TabsList className="px-4 border-b border-zinc-900 bg-zinc-50 dark:bg-zinc-950 text-zinc-200">
               <TabsTrigger value="code">Source Code</TabsTrigger>
               <TabsTrigger value="commits">Commits</TabsTrigger>
             </TabsList>
@@ -1005,7 +1005,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                     {items.map((c) => (
                       <li
                         key={c.path}
-                        className="flex items-center justify-between px-3 py-2 hover:bg-zinc-900"
+                        className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-900"
                       >
                         <button
                           className="flex items-center gap-2 text-left"
@@ -1054,7 +1054,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                   value={commitSearch}
                   onChange={handleCommitSearch}
                   placeholder="Tìm commit theo message, SHA, tác giả…"
-                  className="w-full px-3 py-2 rounded-md border border-zinc-700 bg-zinc-900 text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full px-3 py-2 rounded-md border border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-gray-900 dark:text-gray-800 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
 
@@ -1073,7 +1073,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                       size="sm"
                       onClick={handlePreviousPage}
                       disabled={!hasPrevPage || commitLoading}
-                      className="border-zinc-700 text-black hover:bg-zinc-800"
+                      className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800"
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" />
                       Trang trước
@@ -1088,7 +1088,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                       size="sm"
                       onClick={handleNextPage}
                       disabled={!hasNextPage || commitLoading}
-                      className="border-zinc-700 text-black hover:bg-zinc-800"
+                      className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800"
                     >
                       Trang sau
                       <ChevronRight className="h-4 w-4 ml-1" />
@@ -1119,7 +1119,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                     </li>
                   ))
                   : commits.map((c) => (
-                    <li key={c.sha} className="px-4 py-3 hover:bg-zinc-900">
+                    <li key={c.sha} className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-zinc-900">
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="min-w-0 flex items-center gap-3">
                           {c.author?.avatar_url && (
@@ -1165,7 +1165,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 border-zinc-700 text-black bg-white hover:bg-zinc-100"
+                            className="h-8 border-zinc-700 text-gray-900 dark:text-white bg-white dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-100 dark:bg-zinc-800"
                             onClick={() => {
                               // 👇 mở commit view: nhớ branch hiện tại + reset path về root
                               setMode("commit");

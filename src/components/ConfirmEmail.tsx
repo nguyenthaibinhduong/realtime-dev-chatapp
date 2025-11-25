@@ -26,8 +26,8 @@ export default function ConfirmEmailPage() {
           typeof result?.ok === "boolean"
             ? result.ok
             : typeof result?.status === "number"
-            ? result.status >= 200 && result.status < 300
-            : true;
+              ? result.status >= 200 && result.status < 300
+              : true;
 
         const msg =
           result?.msg ||
@@ -79,7 +79,7 @@ export default function ConfirmEmailPage() {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => navigate("/auth")}
-                className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition"
+                className="px-4 py-2 rounded-lg bg-sky-600 text-black dark:text-white hover:bg-sky-700 transition"
               >
                 Đăng nhập
               </button>
@@ -105,7 +105,7 @@ export default function ConfirmEmailPage() {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition"
+                className="px-4 py-2 rounded-lg bg-sky-600 text-black dark:text-white hover:bg-sky-700 transition"
               >
                 Thử lại
               </button>

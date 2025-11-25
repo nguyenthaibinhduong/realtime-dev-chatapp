@@ -109,7 +109,7 @@ export default function RepoChatList({
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Tìm repository…"
-                        className="w-full md:w-72 pl-9 pr-8 py-2 rounded-md border border-gray-700 bg-gray-900 text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full md:w-72 pl-9 pr-8 py-2 rounded-md border border-gray-700 bg-gray-900 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
                         aria-label="Lọc repository"
                     />
                     {query && (
@@ -237,7 +237,7 @@ export default function RepoChatList({
                                                     <div className="h-8 w-8 rounded-md bg-gray-700" />
                                                 )}
                                                 <div>
-                                                    <div className="font-medium text-gray-100 truncate max-w-[360px]">
+                                                    <div className="font-medium text-gray-800 dark:text-gray-100 truncate max-w-[360px]">
                                                         {r.full_name || r.name}
                                                     </div>
                                                     <div className="text-xs text-gray-400 line-clamp-1 max-w-[480px]">
@@ -314,7 +314,7 @@ export default function RepoChatList({
 
             {/* Modal xác nhận xóa */}
             {confirmDelete && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-black/40">
                     <div className="bg-white rounded-xl shadow-lg p-6 min-w-[320px] max-w-[90vw]">
                         <div className="text-lg font-semibold text-black mb-2">
                             Xác nhận xóa repository
@@ -332,7 +332,7 @@ export default function RepoChatList({
                             </Button>
                             <Button
                                 variant="destructive"
-                                className="bg-red-600 text-white"
+                                className="bg-red-600 text-black dark:text-white"
                                 onClick={async () => {
                                     await handleRemoveRepo(confirmDelete.id, confirmDelete.name);
                                     setConfirmDelete(null);

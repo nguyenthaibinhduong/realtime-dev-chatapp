@@ -255,14 +255,15 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
   if (loading) {
     return (
       <div
-        className={`w-full max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`}
+        className={`w-full max-w-[160px] bg-zinc-50
+dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`}
       >
-        <div className="aspect-square bg-zinc-800 flex items-center justify-center">
+        <div className="aspect-square bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-zinc-400 animate-spin" />
         </div>
         <div className="p-3 space-y-2">
-          <div className="h-3 bg-zinc-800 rounded w-full"></div>
-          <div className="h-2 bg-zinc-800 rounded w-2/3"></div>
+          <div className="h-3 bg-zinc-100 dark:bg-zinc-800 rounded w-full"></div>
+          <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded w-2/3"></div>
         </div>
       </div>
     );
@@ -295,7 +296,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
   if (isImage) {
     return (
       <div
-        className={`relative group w-full max-w-[160px] rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all duration-200 ${className}`}
+        className={`relative group w-full max-w-[160px] rounded-xl overflow-hidden bg-zinc-50 dark:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all duration-200 ${className}`}
       >
         <div className="relative aspect-square">
           <img
@@ -308,7 +309,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
             }}
           />
           {/* Overlay on hover */}
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-white dark:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
             <a
               href={url}
               target="_blank"
@@ -316,7 +317,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
               className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
               title="Tải xuống"
             >
-              <Download className="w-5 h-5 text-white" />
+              <Download className="w-5 h-5 text-black dark:text-white" />
             </a>
             {showRemove && onRemove && (
               <button
@@ -324,15 +325,16 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
                 className="p-2.5 bg-red-500/20 hover:bg-red-500/30 rounded-lg backdrop-blur-sm transition-colors"
                 title="Xóa"
               >
-                <X className="w-5 h-5 text-white" />
+                <X className="w-5 h-5 text-black dark:text-white" />
               </button>
             )}
           </div>
         </div>
         {/* Filename */}
-        <div className="p-3 bg-zinc-900/90 backdrop-blur-sm">
+        <div className="p-3 bg-zinc-50
+dark:bg-zinc-900/90 backdrop-blur-sm">
           <p
-            className="text-xs text-white truncate font-medium"
+            className="text-xs text-black dark:text-white truncate font-medium"
             title={filename}
           >
             {filename || "Image"}
@@ -350,7 +352,8 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
   // Non-image file - Vertical card layout
   return (
     <div
-      className={`relative group w-full max-w-[160px] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 hover:shadow-lg transition-all duration-200 ${className}`}
+      className={`relative group w-full max-w-[160px] bg-zinc-50
+dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 hover:shadow-lg transition-all duration-200 ${className}`}
     >
       {/* Icon Section */}
       <div
@@ -359,11 +362,11 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
         <div
           className={`w-16 h-16 bg-gradient-to-br ${fileStyle.gradient} rounded-2xl flex items-center justify-center shadow-lg`}
         >
-          {FileIcon && <FileIcon className="w-8 h-8 text-white" />}
+          {FileIcon && <FileIcon className="w-8 h-8 text-black dark:text-white" />}
         </div>
 
         {/* Hover Actions */}
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+        <div className="absolute inset-0 bg-white dark:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
           <a
             href={url}
             target="_blank"
@@ -371,7 +374,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
             className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
             title="Mở"
           >
-            <ExternalLink className="w-5 h-5 text-white" />
+            <ExternalLink className="w-5 h-5 text-black dark:text-white" />
           </a>
           <a
             href={url}
@@ -379,7 +382,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
             className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
             title="Tải xuống"
           >
-            <Download className="w-5 h-5 text-white" />
+            <Download className="w-5 h-5 text-black dark:text-white" />
           </a>
         </div>
 
@@ -390,7 +393,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
             className="absolute top-2 right-2 p-1.5 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
             title="Xóa"
           >
-            <X className="w-4 h-4 text-white" />
+            <X className="w-4 h-4 text-black dark:text-white" />
           </button>
         )}
       </div>
@@ -398,7 +401,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
       {/* File Info Section */}
       <div className="p-3 space-y-1">
         <p
-          className="text-xs font-semibold text-white truncate leading-tight"
+          className="text-xs font-semibold text-black dark:text-white truncate leading-tight"
           title={filename}
         >
           {filename || "Unknown file"}
@@ -411,7 +414,7 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
       </div>
 
       {/* File type badge */}
-      <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 backdrop-blur-sm rounded-md">
+      <div className="absolute top-2 left-2 px-2 py-0.5 bg-white dark:bg-black/50 backdrop-blur-sm rounded-md">
         <p className={`text-[10px] font-semibold uppercase ${fileStyle.color}`}>
           {filename?.split(".").pop() || "File"}
         </p>

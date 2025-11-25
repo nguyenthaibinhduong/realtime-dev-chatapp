@@ -175,20 +175,21 @@ export const AttachmentModal = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl h-4/5 bg-zinc-950 text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl h-4/5 bg-zinc-50 dark:bg-zinc-950 text-black dark:text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6">
+          <div className="bg-zinc-50
+dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6">
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                    <File className="h-6 w-6 text-white" />
+                    <File className="h-6 w-6 text-black dark:text-white" />
                   </div>
                   <div>
-                    <DialogTitle className="text-2xl font-bold text-white tracking-tight">
+                    <DialogTitle className="text-2xl font-bold text-black dark:text-white tracking-tight">
                       Tệp đính kèm
                     </DialogTitle>
-                    <p className="text-zinc-400 text-sm font-medium">
+                    <p className="text-zinc-600 dark:text-zinc-400 text-sm font-medium">
                       {attachments.length} tệp trong cuộc trò chuyện
                     </p>
                   </div>
@@ -198,12 +199,12 @@ export const AttachmentModal = ({
 
             {/* Search */}
             <div className="mt-4 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-600 dark:text-zinc-400" />
               <Input
                 placeholder="Tìm kiếm tệp..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-blue-500"
+                className="pl-10 bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white placeholder:text-zinc-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -214,11 +215,10 @@ export const AttachmentModal = ({
             <div className="flex gap-2 overflow-x-auto scrollbar-thin">
               <Badge
                 variant={selectedType === null ? "default" : "outline"}
-                className={`cursor-pointer whitespace-nowrap ${
-                  selectedType === null
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-zinc-800 hover:bg-zinc-700 border-zinc-700"
-                }`}
+                className={`cursor-pointer whitespace-nowrap ${selectedType === null
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200  border-zinc-700"
+                  }`}
                 onClick={() => setSelectedType(null)}
               >
                 Tất cả
@@ -228,11 +228,10 @@ export const AttachmentModal = ({
                   <Badge
                     key={type}
                     variant={selectedType === type ? "default" : "outline"}
-                    className={`cursor-pointer whitespace-nowrap ${
-                      selectedType === type
-                        ? `${config.bgColor} ${config.color} border-${config.color}`
-                        : "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
-                    }`}
+                    className={`cursor-pointer whitespace-nowrap ${selectedType === type
+                      ? `${config.bgColor} ${config.color} border-${config.color}`
+                      : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200  border-zinc-700 text-black dark:text-white"
+                      }`}
                     onClick={() => setSelectedType(type)}
                   >
                     {config.label}
@@ -251,15 +250,16 @@ export const AttachmentModal = ({
                       value={selectedSender || ""}
                       onValueChange={setSelectedSender}
                     >
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectTrigger className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white">
                         <SelectValue placeholder="Chọn người gửi" />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-800">
+                      <SelectContent className="bg-zinc-50
+dark:bg-zinc-900 border-zinc-800">
                         {members.map((member) => (
                           <SelectItem
                             key={member.id}
                             value={member.id.toString()}
-                            className="text-white"
+                            className="text-black dark:text-white"
                           >
                             {member.username}
                           </SelectItem>
@@ -276,17 +276,17 @@ export const AttachmentModal = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 ${
-                      startDate || endDate ? "border-blue-500" : ""
-                    }`}
+                    className={`bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white hover:bg-zinc-200  ${startDate || endDate ? "border-blue-500" : ""
+                      }`}
                   >
                     <Calendar className="h-3 w-3 mr-1" />
                     {startDate || endDate ? "Đã lọc ngày" : "Ngày tạo"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-72 bg-zinc-900 border-zinc-800">
+                <PopoverContent className="w-72 bg-zinc-50
+dark:bg-zinc-900 border-zinc-800">
                   <div className="space-y-3">
-                    <Label className="text-sm text-zinc-400">
+                    <Label className="text-sm text-zinc-600 dark:text-zinc-400">
                       Lọc theo ngày
                     </Label>
                     <div className="space-y-2">
@@ -306,7 +306,7 @@ export const AttachmentModal = ({
                                 : undefined
                             )
                           }
-                          className="bg-zinc-800 border-zinc-700 text-white"
+                          className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white"
                         />
                       </div>
                       <div>
@@ -325,7 +325,7 @@ export const AttachmentModal = ({
                                 : undefined
                             )
                           }
-                          className="bg-zinc-800 border-zinc-700 text-white"
+                          className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white"
                         />
                       </div>
                     </div>
@@ -339,7 +339,7 @@ export const AttachmentModal = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleResetFilters}
-                  className="bg-red-500 hover:bg-red-600 text-white hover:text-slate-700"
+                  className="bg-red-500 hover:bg-red-600 text-black dark:text-white hover:text-slate-700"
                 >
                   <RotateCcw className="h-3 w-3 mr-1" />
                   Xóa bộ lọc ({activeFilterCount})
@@ -353,28 +353,28 @@ export const AttachmentModal = ({
             {loading && attachments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="h-12 w-12 text-blue-500 animate-spin mb-4" />
-                <p className="text-zinc-400">Đang tải...</p>
+                <p className="text-zinc-600 dark:text-zinc-400">Đang tải...</p>
               </div>
             ) : filteredAttachments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
                   <File className="h-8 w-8 text-zinc-600" />
                 </div>
-                <p className="text-zinc-400 text-lg font-medium">
+                <p className="text-zinc-600 dark:text-zinc-400 text-lg font-medium">
                   {searchQuery ||
-                  selectedType ||
-                  selectedSender ||
-                  startDate ||
-                  endDate
+                    selectedType ||
+                    selectedSender ||
+                    startDate ||
+                    endDate
                     ? "Không tìm thấy tệp nào"
                     : "Chưa có tệp đính kèm"}
                 </p>
                 <p className="text-zinc-500 text-sm mt-1">
                   {searchQuery ||
-                  selectedType ||
-                  selectedSender ||
-                  startDate ||
-                  endDate
+                    selectedType ||
+                    selectedSender ||
+                    startDate ||
+                    endDate
                     ? "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"
                     : "Các tệp được chia sẻ sẽ hiển thị ở đây"}
                 </p>
@@ -402,7 +402,7 @@ export const AttachmentModal = ({
                       onClick={loadMore}
                       disabled={loading}
                       variant="outline"
-                      className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+                      className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white hover:bg-zinc-200 "
                     >
                       {loading ? (
                         <>

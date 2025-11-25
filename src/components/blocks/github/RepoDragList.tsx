@@ -55,8 +55,8 @@ export const RepoDragList: React.FC<RepoDragListProps> = ({
                                 className={`
                                     group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200
                                     ${isAlreadyAdded
-                                        ? 'bg-zinc-800/50 border-zinc-700 opacity-50 cursor-not-allowed'
-                                        : 'bg-zinc-900 border-zinc-700 hover:border-blue-500 hover:bg-zinc-800 cursor-grab active:cursor-grabbing hover:shadow-lg hover:shadow-blue-500/10'
+                                        ? 'bg-zinc-100 dark:bg-zinc-800/50 border-zinc-700 opacity-50 cursor-not-allowed'
+                                        : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-700 hover:border-blue-500 hover:bg-zinc-100 dark:bg-zinc-800 cursor-grab active:cursor-grabbing hover:shadow-lg hover:shadow-blue-500/10'
                                     }
                                 `}
                             >
@@ -76,7 +76,7 @@ export const RepoDragList: React.FC<RepoDragListProps> = ({
                                             ) : (
                                                 <Eye className="h-3 w-3 text-green-400" />
                                             )}
-                                            <span className="text-sm font-semibold text-white truncate">
+                                            <span className="text-sm font-semibold text-black dark:text-white truncate">
                                                 {repo.name}
                                             </span>
                                         </div>
@@ -113,7 +113,7 @@ export const RepoDragList: React.FC<RepoDragListProps> = ({
                     flex-1 min-h-0 overflow-y-auto transition-all duration-300 border-2 border-dashed rounded-lg m-4 p-4
                     ${isDragOver
                         ? 'border-blue-500 bg-blue-950/20 shadow-inner shadow-blue-500/20'
-                        : 'border-zinc-700 bg-zinc-950'
+                        : 'border-zinc-700 bg-zinc-50 dark:bg-zinc-950'
                     }
                 `}
                 onDragOver={onDragOver}
@@ -121,7 +121,7 @@ export const RepoDragList: React.FC<RepoDragListProps> = ({
                 onDrop={onDrop}
             >
                 <div className={`pb-2 flex items-center justify-between border-b mb-4 transition-colors ${isDragOver ? 'border-blue-600' : 'border-zinc-800'}`}>
-                    <div className="text-lg font-semibold flex items-center text-white">
+                    <div className="text-lg font-semibold flex items-center text-black dark:text-white">
                         <Github className="h-6 w-6 mr-2" />
                         Repository trong kênh
                     </div>
@@ -138,7 +138,7 @@ export const RepoDragList: React.FC<RepoDragListProps> = ({
                         <div className="relative mb-4">
                             <Github className="h-16 w-16 animate-pulse" />
                             <div className="absolute -top-1 -right-1 h-6 w-6 bg-blue-500 rounded-full flex items-center justify-center">
-                                <ArrowRight className="h-3 w-3 text-white" />
+                                <ArrowRight className="h-3 w-3 text-black dark:text-white" />
                             </div>
                         </div>
                         <div className="text-xl font-bold mb-2">Thả repository vào đây</div>

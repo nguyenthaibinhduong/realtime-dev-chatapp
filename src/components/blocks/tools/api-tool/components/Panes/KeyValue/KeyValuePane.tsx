@@ -63,7 +63,7 @@ export default function KeyValuePane({
           variant="outline"
           size="sm"
           onClick={onKeyPairAdd}
-          className="border-zinc-700 text-black hover:bg-zinc-800 hover:text-white"
+          className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800 hover:text-black dark:text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
           Thêm tham số

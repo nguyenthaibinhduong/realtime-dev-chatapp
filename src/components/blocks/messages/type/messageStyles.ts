@@ -9,63 +9,63 @@ import { cn } from "@/lib/utils";
 export const COLORS = {
   // Background colors
   bg: {
-    me: "bg-blue-600",
-    meHover: "bg-blue-700",
-    other: "bg-gray-800",
-    otherHover: "bg-gray-700",
-    card: "bg-gray-900",
-    cardHover: "bg-gray-800",
-    overlay: "bg-gray-950/50",
+    me: "bg-blue-600 dark:bg-blue-600",
+    meHover: "bg-blue-700 dark:bg-blue-700",
+    other: "bg-gray-200 dark:bg-gray-800",
+    otherHover: "bg-gray-300 dark:bg-gray-700",
+    card: "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800",
+    cardHover: "bg-gray-50 dark:bg-gray-800",
+    overlay: "bg-gray-100/50 dark:bg-gray-950/50",
   },
   
   // Text colors
   text: {
-    primary: "text-white",
-    secondary: "text-gray-200",
-    muted: "text-gray-400",
-    mutedDark: "text-gray-500",
-    timestamp: "text-gray-400",
-    username: "text-gray-400",
+    primary: "text-gray-900 dark:text-white",
+    secondary: "text-gray-700 dark:text-gray-200",
+    muted: "text-gray-500 dark:text-gray-400",
+    mutedDark: "text-gray-400 dark:text-gray-500",
+    timestamp: "text-gray-500 dark:text-gray-400",
+    username: "text-gray-700 dark:text-gray-300",
   },
   
   // Border colors
   border: {
-    default: "border-gray-700",
-    hover: "border-gray-600",
-    card: "border-gray-800",
-    accent: "border-blue-600/30",
+    default: "border-gray-300 dark:border-gray-700",
+    hover: "border-gray-400 dark:border-gray-600",
+    card: "border-gray-200 dark:border-gray-800",
+    accent: "border-blue-300 dark:border-blue-600/30",
   },
   
   // Status colors
   status: {
-    pending: "text-yellow-400",
-    uploading: "text-blue-400",
-    error: "text-red-400",
-    success: "text-green-400",
+    pending: "text-yellow-500 dark:text-yellow-400",
+    uploading: "text-blue-500 dark:text-blue-400",
+    error: "text-red-500 dark:text-red-400",
+    success: "text-green-500 dark:text-green-400",
   },
   
   // Language colors for code
   language: {
-    javascript: "text-yellow-400",
-    typescript: "text-blue-400",
-    python: "text-green-400",
-    java: "text-orange-400",
-    cpp: "text-blue-400",
-    go: "text-cyan-400",
-    html: "text-orange-400",
-    css: "text-blue-400",
-    json: "text-gray-400",
-    markdown: "text-gray-400",
-    plaintext: "text-gray-400",
+    javascript: "text-yellow-500 dark:text-yellow-400",
+    typescript: "text-blue-500 dark:text-blue-400",
+    python: "text-green-500 dark:text-green-400",
+    java: "text-orange-500 dark:text-orange-400",
+    cpp: "text-blue-500 dark:text-blue-400",
+    go: "text-cyan-500 dark:text-cyan-400",
+    html: "text-orange-500 dark:text-orange-400",
+    css: "text-blue-500 dark:text-blue-400",
+    json: "text-gray-500 dark:text-gray-400",
+    markdown: "text-gray-500 dark:text-gray-400",
+    plaintext: "text-gray-500 dark:text-gray-400",
   },
   
   // Method colors for API requests
   method: {
-    GET: "bg-sky-600 text-white",
-    POST: "bg-green-600 text-white",
-    PUT: "bg-amber-600 text-white",
-    PATCH: "bg-purple-600 text-white",
-    DELETE: "bg-red-600 text-white",
+    GET: "bg-sky-500 dark:bg-sky-600 text-white",
+    POST: "bg-green-500 dark:bg-green-600 text-white",
+    PUT: "bg-amber-500 dark:bg-amber-600 text-white",
+    PATCH: "bg-purple-500 dark:bg-purple-600 text-white",
+    DELETE: "bg-red-500 dark:bg-red-600 text-white",
   },
 } as const;
 
@@ -197,7 +197,7 @@ export const getMessageBubbleClasses = (isMe: boolean, isHovered: boolean, hasOn
     isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
     SPACING.padding.message,
     isMe ? COLORS.bg.me : COLORS.bg.other,
-    isMe ? COLORS.text.primary : COLORS.text.secondary,
+    isMe ? "text-white" : COLORS.text.secondary,
     isMe ? SHADOWS.sm : cn(SHADOWS.sm, COLORS.border.default, "border"),
     isHovered && (isMe ? cn(SHADOWS.lg, COLORS.bg.meHover) : cn(SHADOWS.md, COLORS.border.hover))
   );
@@ -208,10 +208,11 @@ export const getMessageBubbleClasses = (isMe: boolean, isHovered: boolean, hasOn
  */
 export const getCardClasses = (isMe: boolean, isHovered: boolean) => {
   return cn(
-    "relative rounded-lg border overflow-hidden w-full",
+    "relative rounded-lg overflow-hidden w-full",
     TRANSITIONS.normal,
     SHADOWS.card,
-    isMe ? cn(COLORS.bg.card, COLORS.border.accent) : cn(COLORS.bg.card, COLORS.border.card),
+    COLORS.bg.card,
+    isMe ? COLORS.border.accent : COLORS.border.card,
     isHovered && cn(SHADOWS.xl, COLORS.border.hover)
   );
 };
@@ -223,7 +224,7 @@ export const getTimestampClasses = (isMe: boolean) => {
   return cn(
     TYPOGRAPHY.size.xs,
     TYPOGRAPHY.weight.medium,
-    isMe ? "text-blue-200" : COLORS.text.timestamp
+    isMe ? "text-blue-100 dark:text-blue-200" : COLORS.text.timestamp
   );
 };
 
@@ -252,11 +253,11 @@ export const formatMessageTime = (date: string | Date) => {
  * Get status color classes for HTTP status codes
  */
 export const getStatusColorClasses = (status?: number) => {
-  if (!status) return "bg-zinc-700 text-zinc-300";
-  if (status < 300) return "bg-emerald-600 text-white";
-  if (status < 400) return "bg-blue-600 text-white";
-  if (status < 500) return "bg-amber-600 text-white";
-  return "bg-red-600 text-white";
+  if (!status) return "bg-gray-400 dark:bg-zinc-200 dark:bg-zinc-700 text-white";
+  if (status < 300) return "bg-emerald-500 dark:bg-emerald-600 text-white";
+  if (status < 400) return "bg-blue-500 dark:bg-blue-600 text-white";
+  if (status < 500) return "bg-amber-500 dark:bg-amber-600 text-white";
+  return "bg-red-500 dark:bg-red-600 text-white";
 };
 
 /**

@@ -91,20 +91,20 @@ const BARequireMessage = ({
       <div
         data-message-id={message.id}
         className={cn(
-          "group relative flex gap-2 px-2 py-1 transition-colors hover:bg-gray-800/30",
+          "group relative flex gap-2 px-2 py-1 transition-colors ",
           isMe ? "justify-end" : "justify-start"
         )}
         onMouseEnter={() => onHover(String(message.id))}
         onMouseLeave={() => onHover(null)}
       >
         {/* Sender Avatar */}
-        {!isMe && showSenderInfo && (
-          <Avatar className="h-8 w-8 flex-shrink-0">
-            <AvatarFallback className="bg-blue-600 text-white text-xs">
-              {message.sender?.username?.[0]?.toUpperCase() || "U"}
-            </AvatarFallback>
-          </Avatar>
-        )}
+        {showSenderInfo && !isMe ? (
+          <div className="mr-2 flex-shrink-0">
+            <AvatarUser user={message?.sender} isMe={isMe} size={8} />
+          </div>
+        ) : !isMe ? (
+          <div className="w-10 flex-shrink-0" />
+        ) : null}
 
         {/* Message Content */}
         <div
@@ -116,10 +116,10 @@ const BARequireMessage = ({
           {/* Sender Info */}
           {!isMe && showSenderInfo && (
             <div className="flex items-center gap-2 px-2">
-              <span className="text-xs font-semibold text-gray-300">
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                 {message.sender?.username || "Unknown"}
               </span>
-              <span className="text-[10px] text-gray-500">
+              <span className="text-[10px] text-gray-500 dark:text-gray-500">
                 {new Date(message.created_at).toLocaleTimeString("vi-VN", {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -134,7 +134,7 @@ const BARequireMessage = ({
             className={cn(
               "max-w-[50vw] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] min-w-[280px] sm:min-w-[320px]",
               "cursor-pointer transition-all duration-200",
-              "bg-black border-2 border-blue-500"
+              "bg-white dark:bg-gray-950 border-2 border-blue-400 dark:border-blue-500"
             )}
           >
             <div className="p-3 space-y-2">
@@ -145,7 +145,7 @@ const BARequireMessage = ({
                     <FileText className="h-4 w-4 text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-white">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                       BA Requirement
                     </h3>
                     {projectName && (
@@ -163,7 +163,7 @@ const BARequireMessage = ({
                 {requirementsPreview.map((req: string, idx: number) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-2 text-xs text-white"
+                    className="flex items-start gap-2 text-xs text-black dark:text-white"
                   >
                     <span className="text-blue-400 font-semibold mt-0.5">
                       {idx + 1}.
@@ -222,7 +222,7 @@ const BARequireMessage = ({
                 <FileText className="h-6 w-6 text-blue-400" />
               </div>
               <div className="flex-1">
-                <div className="text-xl font-bold text-white flex items-center gap-2">
+                <div className="text-xl font-bold text-black dark:text-white flex items-center gap-2">
                   BA Requirement
                   <Badge
                     variant="outline"
@@ -234,7 +234,7 @@ const BARequireMessage = ({
                 {projectName && (
                   <div className="text-sm font-medium text-gray-400 mt-1 flex items-center gap-2">
                     <span className="text-gray-500">Project:</span>
-                    <span className="text-white">{projectName}</span>
+                    <span className="text-black dark:text-white">{projectName}</span>
                   </div>
                 )}
               </div>
@@ -255,7 +255,7 @@ const BARequireMessage = ({
                     <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">
                       Ngày
                     </div>
-                    <div className="text-xs font-semibold text-white truncate">
+                    <div className="text-xs font-semibold text-black dark:text-white truncate">
                       {new Date(message.created_at).toLocaleDateString(
                         "vi-VN",
                         {
@@ -275,7 +275,7 @@ const BARequireMessage = ({
                     <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">
                       Người tạo
                     </div>
-                    <div className="text-xs font-semibold text-white truncate">
+                    <div className="text-xs font-semibold text-black dark:text-white truncate">
                       {message.sender?.username || "Unknown"}
                     </div>
                   </div>
@@ -312,7 +312,7 @@ const BARequireMessage = ({
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/30">
                   <List className="h-4 w-4 text-blue-400" />
                 </div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
                   Danh sách yêu cầu
                 </h3>
                 <Badge
@@ -322,7 +322,7 @@ const BARequireMessage = ({
                   {requirements.length}
                 </Badge>
               </div>
-              <Card className="bg-black border border-gray-700/50 shadow-inner">
+              <Card className="bg-white dark:bg-black border border-gray-700/50 shadow-inner">
                 <div className="p-5 space-y-3">
                   {requirements.map((req: string, idx: number) => (
                     <div key={idx} className="flex items-start gap-3 group">
@@ -347,7 +347,7 @@ const BARequireMessage = ({
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30">
                     <CheckCircle2 className="h-4 w-4 text-cyan-400" />
                   </div>
-                  <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
                     Tin nhắn liên quan
                   </h3>
                   <Badge
@@ -405,11 +405,11 @@ const BARequireMessage = ({
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-500/10 border border-yellow-500/30">
                     <FileText className="h-4 w-4 text-yellow-400" />
                   </div>
-                  <h3 className="text-base font-bold text-white uppercase tracking-wide ">
+                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide ">
                     Ghi chú
                   </h3>
                 </div>
-                <Card className="bg-black border border-yellow-500/20">
+                <Card className="bg-white dark:bg-black border border-yellow-500/20">
                   <div className="p-4 text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">
                     {notes}
                   </div>
@@ -424,7 +424,7 @@ const BARequireMessage = ({
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-500/10 border border-gray-500/30">
                     <FileText className="h-4 w-4 text-gray-400" />
                   </div>
-                  <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
                     Tệp đính kèm
                   </h3>
                   <Badge

@@ -104,14 +104,14 @@ export default function TestNotiLayout(): JSX.Element {
         <button
           onClick={connect}
           disabled={connected}
-          className="px-4 py-2 rounded-md text-white bg-red-600 disabled:opacity-50"
+          className="px-4 py-2 rounded-md text-black dark:text-white bg-red-600 disabled:opacity-50"
         >
           Connect
         </button>
 
         <button
           onClick={forceConnect}
-          className="px-4 py-2 rounded-md text-white bg-yellow-500"
+          className="px-4 py-2 rounded-md text-black dark:text-white bg-yellow-500"
         >
           Force Connect
         </button>
@@ -128,7 +128,7 @@ export default function TestNotiLayout(): JSX.Element {
           onClick={() => {
             setLogs([]);
           }}
-          className="px-3 py-2 rounded-md bg-blue-600 text-white ml-2"
+          className="px-3 py-2 rounded-md bg-blue-600 text-black dark:text-white ml-2"
         >
           Clear logs
         </button>

@@ -38,7 +38,7 @@ export default function AILayout() {
           <button
             type="submit"
             disabled={loading || !prompt}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-black dark:text-white rounded-lg disabled:opacity-50 hover:bg-blue-700 transition-colors"
           >
             {loading ? "Generating..." : "Generate"}
           </button>
@@ -46,7 +46,7 @@ export default function AILayout() {
           <button
             type="button"
             onClick={reset}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            className="px-4 py-2 bg-gray-600 text-black dark:text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
             Reset
           </button>
@@ -61,7 +61,7 @@ export default function AILayout() {
 
       {response && (
         <div className="mt-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
+          <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-800 dark:text-gray-100">
             Response:
           </h3>
           <div className="prose prose-slate dark:prose-invert max-w-none">
@@ -111,7 +111,7 @@ export default function AILayout() {
                     </code>
                   ) : (
                     <code
-                      className={`${className} block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto`}
+                      className={`${className} block bg-gray-900 text-gray-800 dark:text-gray-100 p-4 rounded-lg overflow-x-auto`}
                       {...props}
                     >
                       {children}

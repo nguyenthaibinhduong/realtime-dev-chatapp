@@ -251,7 +251,7 @@ export const BARequirementForm = ({
         <Drawer open={open} onOpenChange={onOpenChange}>
             <DrawerContent className="bg-[#0f1419] border-gray-800 max-h-[95vh]">
                 <DrawerHeader className="border-b border-gray-800">
-                    <DrawerTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                    <DrawerTitle className="text-2xl font-bold text-black dark:text-white flex items-center gap-2">
                         <FileText className="h-6 w-6 text-blue-500" />
                         BA Requirement
                     </DrawerTitle>
@@ -264,7 +264,7 @@ export const BARequirementForm = ({
                     <div className="space-y-6">
                         {/* Project Name */}
                         <div className="space-y-2 px-2">
-                            <Label className="text-white text-sm font-semibold flex items-center gap-1">
+                            <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
                                 Tên dự án / Khách hàng
                                 <span className="text-red-500">*</span>
                             </Label>
@@ -275,7 +275,7 @@ export const BARequirementForm = ({
                                     setErrors({ ...errors, projectName: "" });
                                 }}
                                 placeholder="Nhập tên dự án hoặc khách hàng..."
-                                className={`bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 ${errors.projectName ? "border-red-500" : ""
+                                className={`bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-blue-500 ${errors.projectName ? "border-red-500" : ""
                                     }`}
                             />
                             {errors.projectName && (
@@ -285,7 +285,7 @@ export const BARequirementForm = ({
 
                         {/* Requirements */}
                         <div className="space-y-2">
-                            <Label className="text-white text-sm font-semibold flex items-center gap-1">
+                            <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
                                 Danh sách yêu cầu
                                 <span className="text-red-500">*</span>
                             </Label>
@@ -308,7 +308,7 @@ export const BARequirementForm = ({
                                         }
                                     }}
                                     placeholder="Nhập yêu cầu và nhấn Enter... (Tab để chuyển tiếp)"
-                                    className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 flex-1"
+                                    className="bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-blue-500 flex-1"
                                 />
                                 <Button
                                     onClick={addRequirement}
@@ -349,7 +349,7 @@ export const BARequirementForm = ({
 
                         {/* Attachments */}
                         <div className="space-y-2">
-                            <Label className="text-white text-sm font-semibold">Tài liệu đính kèm</Label>
+                            <Label className="text-black dark:text-white text-sm font-semibold">Tài liệu đính kèm</Label>
                             <div
                                 className="flex items-center gap-2 p-4 border-2 border-dashed border-gray-700 rounded-lg hover:border-blue-500 transition-colors"
                                 onDragOver={(e) => {
@@ -384,7 +384,7 @@ export const BARequirementForm = ({
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
                                     variant="outline"
-                                    className="bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                                    className="bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-black dark:text-white"
                                 >
                                     <Upload className="h-4 w-4 mr-2" />
                                     Chọn tệp
@@ -423,7 +423,7 @@ export const BARequirementForm = ({
 
                         {/* Assignees */}
                         <div className="space-y-2">
-                            <Label className="text-white text-sm font-semibold flex items-center gap-1">
+                            <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
                                 Người phụ trách
                                 <span className="text-red-500">*</span>
                             </Label>
@@ -451,7 +451,7 @@ export const BARequirementForm = ({
                                                 value={searchMember}
                                                 onChange={(e) => setSearchMember(e.target.value)}
                                                 placeholder="Tìm kiếm thành viên..."
-                                                className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500 h-8 text-sm"
+                                                className="bg-gray-800 border-gray-600 text-black dark:text-white placeholder:text-gray-500 h-8 text-sm"
                                                 autoFocus
                                             />
                                         </div>
@@ -478,7 +478,7 @@ export const BARequirementForm = ({
                                                         />
                                                         <AvatarUser user={member} isMe={false} size="sm" />
                                                         <div className="flex-1">
-                                                            <p className="text-sm text-white">{member.name}</p>
+                                                            <p className="text-sm text-black dark:text-white">{member.name}</p>
                                                             {member.username && (
                                                                 <p className="text-xs text-gray-500">@{member.username}</p>
                                                             )}
@@ -516,7 +516,7 @@ export const BARequirementForm = ({
 
                         {/* Related Messages */}
                         <div className="space-y-2">
-                            <Label className="text-white text-sm font-semibold">Tin nhắn liên quan</Label>
+                            <Label className="text-black dark:text-white text-sm font-semibold">Tin nhắn liên quan</Label>
                             <div className="relative" ref={messageDropdownRef}>
                                 <Button
                                     type="button"
@@ -542,7 +542,7 @@ export const BARequirementForm = ({
                                                     value={searchMessage}
                                                     onChange={(e) => setSearchMessage(e.target.value)}
                                                     placeholder="Tìm kiếm tin nhắn..."
-                                                    className="pl-9 bg-gray-800 border-gray-700 text-white"
+                                                    className="pl-9 bg-gray-800 border-gray-700 text-black dark:text-white"
                                                 />
                                             </div>
                                         </div>
@@ -599,12 +599,12 @@ export const BARequirementForm = ({
 
                         {/* Notes */}
                         <div className="space-y-2">
-                            <Label className="text-white text-sm font-semibold">Ghi chú</Label>
+                            <Label className="text-black dark:text-white text-sm font-semibold">Ghi chú</Label>
                             <Textarea
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
                                 placeholder="Thêm ghi chú (không bắt buộc)..."
-                                className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 min-h-[100px]"
+                                className="bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-blue-500 min-h-[100px]"
                             />
                         </div>
                     </div>
@@ -621,7 +621,7 @@ export const BARequirementForm = ({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition-all"
+                                    className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-black dark:text-white transition-all"
                                 >
                                     Hủy
                                 </Button>
@@ -629,7 +629,7 @@ export const BARequirementForm = ({
                             <Button
                                 type="button"
                                 onClick={handleSubmit}
-                                className="bg-blue-600 hover:bg-blue-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-blue-600 hover:bg-blue-700 text-black dark:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting || (!projectName.trim() && (requirements.filter(r => r).length === 0 && !currentReq.trim()) && assignees.length === 0)}
                             >
                                 {isSubmitting ? (

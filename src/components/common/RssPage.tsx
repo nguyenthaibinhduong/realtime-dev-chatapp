@@ -234,7 +234,7 @@ export default function RssPage({
     }, [categoryMap]);
 
     return (
-        <div className="h-screen bg-[#0A0A0B] text-gray-100 antialiased overflow-y-auto">
+        <div className="h-screen bg-[#0A0A0B] text-gray-800 dark:text-gray-100 antialiased overflow-y-auto">
             <header className="sticky top-0 z-20 bg-[#0A0A0B]/70 backdrop-blur border-b border-white/10">
                 <div className="mx-auto max-w-6xl px-4 py-4 flex items-center gap-3">
                     <div className="flex-1">

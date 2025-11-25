@@ -104,8 +104,8 @@ export default function GithubRegisterLayout() {
     // Chưa cài installation → card hướng dẫn (giữ màu hiện có)
     if (!installed) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--chat-background))] p-4">
-                <Card className="w-full max-w-md bg-sidebar border-sidebar-border">
+            <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
+                <Card className="w-full max-w-md bg-zinc-50 dark:bg-zinc-950 border-sidebar-border">
                     <CardHeader className="text-center">
                         <Github className="h-10 w-10 mx-auto text-primary mb-2" />
                         <CardTitle className="text-xl font-bold text-sidebar-foreground">Liên kết tài khoản Github</CardTitle>
@@ -136,13 +136,13 @@ export default function GithubRegisterLayout() {
 
     // Đã cài installation → Bảng repo với Table component
     return (
-        <div className="min-h-screen p-6 bg-[hsl(var(--chat-background))]">
+        <div className="min-h-screen p-6 bg-zinc-50 dark:bg-zinc-950">
             <div className="flex items-center justify-between mb-4">
                 <div>
                     <h2 className="text-2xl font-bold text-sidebar-foreground mb-1">Kho lưu trữ GitHub</h2>
                 </div>
             </div>
-            <Card className="bg-sidebar border-sidebar-border bg-black">
+            <Card className="bg-zinc-50 dark:bg-zinc-950 border-sidebar-border bg-white dark:bg-black">
                 <RepoTable repos={repos} loading={loading} onRefresh={loadRepo} />
             </Card>
         </div>

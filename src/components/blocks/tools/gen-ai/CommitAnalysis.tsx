@@ -88,27 +88,27 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
 
       {/* Analysis Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="w-full max-w-4xl h-[85vh] p-0 bg-black text-white border border-zinc-700 overflow-hidden">
+        <DialogContent className="w-full max-w-4xl h-[85vh] p-0 bg-white dark:bg-black text-black dark:text-white border border-zinc-700 overflow-hidden">
           <DialogHeader className="px-6 py-4 border-b border-zinc-800 bg-gradient-to-r from-zinc-950 to-zinc-900">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg">
-                    <Brain className="h-7 w-7 text-white" />
+                    <Brain className="h-7 w-7 text-black dark:text-white" />
                   </div>
                   <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                    <Sparkles className="h-2.5 w-2.5 text-white" />
+                    <Sparkles className="h-2.5 w-2.5 text-black dark:text-white" />
                   </div>
                 </div>
                 <div>
-                  <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+                  <DialogTitle className="text-xl font-bold text-black dark:text-white flex items-center gap-2">
                     <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                       Phân tích Commit AI
                     </span>
                     <Zap className="h-5 w-5 text-amber-400 animate-pulse" />
                   </DialogTitle>
                   <div className="text-sm text-zinc-400 mt-1 flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 font-mono text-emerald-400">
+                    <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-700 font-mono text-emerald-400">
                       {props.sha.slice(0, 7)}
                     </span>
                     <span className="text-zinc-500">•</span>
@@ -125,7 +125,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                     size="sm"
                     onClick={fetchCommitAnalysis}
                     disabled={loading}
-                    className="bg-zinc-900 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-700 text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-black dark:text-white"
                   >
                     <RefreshCw
                       className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -137,7 +137,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                   variant="ghost"
                   size="sm"
                   onClick={handleClose}
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  className="text-zinc-400 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -151,14 +151,14 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
               <div className="flex flex-col items-center justify-center h-full space-y-6 p-8">
                 <div className="relative">
                   <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-                    <Brain className="h-10 w-10 text-white animate-pulse" />
+                    <Brain className="h-10 w-10 text-black dark:text-white animate-pulse" />
                   </div>
                   <div className="absolute -top-1 -right-1">
                     <Loader2 className="h-8 w-8 text-amber-400 animate-spin" />
                   </div>
                 </div>
                 <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold text-white">
+                  <h3 className="text-lg font-semibold text-black dark:text-white">
                     Đang phân tích commit...
                   </h3>
                   <p className="text-sm text-zinc-400 max-w-md">
@@ -167,9 +167,9 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                   </p>
                 </div>
                 <div className="space-y-3 animate-pulse w-full max-w-md">
-                  <div className="h-3 bg-zinc-700 rounded-full"></div>
-                  <div className="h-3 bg-zinc-700 rounded-full w-4/5"></div>
-                  <div className="h-3 bg-zinc-700 rounded-full w-3/5"></div>
+                  <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded-full"></div>
+                  <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded-full w-4/5"></div>
+                  <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded-full w-3/5"></div>
                 </div>
               </div>
             )}
@@ -188,7 +188,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                 </div>
                 <Button
                   onClick={fetchCommitAnalysis}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-red-600 hover:bg-red-700 text-black dark:text-white"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Thử lại
@@ -202,7 +202,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-2">
                     <FileCode2 className="h-5 w-5 text-emerald-400" />
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                       Kết quả phân tích
                     </h3>
                   </div>
@@ -217,7 +217,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                     components={{
                       h1: ({ node, ...props }) => (
                         <h1
-                          className="text-3xl font-bold mb-4 mt-6 text-white bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"
+                          className="text-3xl font-bold mb-4 mt-6 text-black dark:text-white bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"
                           {...props}
                         />
                       ),
@@ -253,7 +253,8 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                       ),
                       li: ({ node, children, ...props }) => (
                         <li
-                          className="ml-0 text-zinc-300 flex items-start gap-3 p-2 rounded-lg hover:bg-zinc-900/30 transition-colors"
+                          className="ml-0 text-zinc-300 flex items-start gap-3 p-2 rounded-lg hover:bg-zinc-50
+dark:bg-zinc-900/30 transition-colors"
                           {...props}
                         >
                           <span className="inline-flex items-center justify-center w-1.5 h-1.5 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 mt-3 flex-shrink-0"></span>
@@ -269,14 +270,14 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                       }: any) => {
                         return inline ? (
                           <code
-                            className="bg-zinc-800 text-purple-300 px-2 py-1 rounded-md text-sm font-mono border border-zinc-700"
+                            className="bg-zinc-100 dark:bg-zinc-800 text-purple-300 px-2 py-1 rounded-md text-sm font-mono border border-zinc-700"
                             {...props}
                           >
                             {children}
                           </code>
                         ) : (
                           <code
-                            className={`${className} block bg-zinc-950 text-zinc-100 p-6 rounded-xl overflow-x-auto border border-zinc-700 shadow-lg`}
+                            className={`${className} block bg-zinc-50 dark:bg-zinc-950 text-zinc-100 p-6 rounded-xl overflow-x-auto border border-zinc-700 shadow-lg`}
                             {...props}
                           >
                             {children}
@@ -285,13 +286,14 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                       },
                       pre: ({ node, ...props }) => (
                         <pre
-                          className="bg-zinc-950 rounded-xl overflow-hidden mb-4 border border-zinc-700 shadow-lg"
+                          className="bg-zinc-50 dark:bg-zinc-950 rounded-xl overflow-hidden mb-4 border border-zinc-700 shadow-lg"
                           {...props}
                         />
                       ),
                       blockquote: ({ node, ...props }) => (
                         <blockquote
-                          className="border-l-4 border-gradient-to-b from-purple-500 to-blue-500 bg-zinc-900/30 pl-6 py-4 my-4 text-zinc-400 italic rounded-r-lg"
+                          className="border-l-4 border-gradient-to-b from-purple-500 to-blue-500 bg-zinc-50
+dark:bg-zinc-900/30 pl-6 py-4 my-4 text-zinc-400 italic rounded-r-lg"
                           {...props}
                         />
                       ),
@@ -310,7 +312,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                       ),
                       th: ({ node, ...props }) => (
                         <th
-                          className="border border-zinc-700 px-6 py-3 bg-zinc-800 font-semibold text-zinc-200 text-left"
+                          className="border border-zinc-700 px-6 py-3 bg-zinc-100 dark:bg-zinc-800 font-semibold text-zinc-200 text-left"
                           {...props}
                         />
                       ),

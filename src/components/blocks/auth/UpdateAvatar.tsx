@@ -127,9 +127,9 @@ export const UpdateAvatar: React.FC<UpdateAvatarProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-gray-900 border-gray-700 text-gray-100 sm:max-w-md">
+      <DialogContent className="bg-gray-900 border-gray-700 text-gray-800 dark:text-gray-100 sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl text-white">
+          <DialogTitle className="text-xl text-black dark:text-white">
             Cập nhật Avatar
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -160,7 +160,7 @@ export const UpdateAvatar: React.FC<UpdateAvatarProps> = ({
                 <button
                   onClick={handleRemoveFile}
                   disabled={loading}
-                  className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-black dark:text-white rounded-full p-1.5 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -209,7 +209,7 @@ export const UpdateAvatar: React.FC<UpdateAvatarProps> = ({
             <Button
               onClick={handleBrowseClick}
               variant="outline"
-              className="w-full border-gray-600 text-slate-700 hover:bg-gray-700/50 hover:text-white"
+              className="w-full border-gray-600 text-slate-700 hover:bg-gray-700/50 hover:text-black dark:text-white"
             >
               <Upload className="w-4 h-4 mr-2 " />
               Chọn ảnh từ máy tính
@@ -223,14 +223,14 @@ export const UpdateAvatar: React.FC<UpdateAvatarProps> = ({
             variant="outline"
             onClick={handleClose}
             disabled={loading}
-            className="border-gray-600 text-slate-700 hover:bg-gray-700/50 hover:text-white"
+            className="border-gray-600 text-slate-700 hover:bg-gray-700/50 hover:text-black dark:text-white"
           >
             Hủy
           </Button>
           <Button
             onClick={handleUpload}
             disabled={!selectedFile || loading}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-black dark:text-white"
           >
             {loading ? (
               <>

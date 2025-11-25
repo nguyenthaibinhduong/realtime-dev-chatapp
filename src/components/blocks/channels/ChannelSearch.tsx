@@ -116,7 +116,7 @@ export function ChannelSearch({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Tìm kiếm kênh, người dùng..."
-          className="pl-10 pr-10 bg-[#222] border-none text-white placeholder:text-white/60 rounded-lg shadow"
+          className="pl-10 pr-10 bg-[#222] border-none text-black dark:text-white placeholder:text-black dark:text-white/60 rounded-lg shadow"
         />
         {isLoading && (
           <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-primary" />
@@ -136,8 +136,8 @@ export function ChannelSearch({
               size="sm"
               variant={selectedFilter === option.value ? "default" : "ghost"}
               className={`h-7 px-3 text-xs rounded-full ${selectedFilter === option.value
-                ? "bg-primary text-white"
-                : "text-white/80 hover:text-white hover:bg-white/10"
+                ? "bg-primary text-black dark:text-white"
+                : "text-black dark:text-white/80 hover:text-black dark:text-white hover:bg-white/10"
                 }`}
               onClick={() => setSelectedFilter(option.value)}
               type="button"
@@ -181,7 +181,7 @@ export function ChannelSearch({
                 >
                   <div className="flex items-center gap-2">
                     <User className="h-5 w-5 text-blue-400" />
-                    <span className="font-medium text-white">{user.username}</span>
+                    <span className="font-medium text-black dark:text-white">{user.username}</span>
                     <span className="text-xs text-muted-foreground ml-2">
                       {user.email}
                     </span>
@@ -189,7 +189,7 @@ export function ChannelSearch({
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-7 px-3 text-xs text-white hover:text-white hover:bg-white/10 rounded-full"
+                    className="h-7 px-3 text-xs text-black dark:text-white hover:text-black dark:text-white hover:bg-white/10 rounded-full"
                     onClick={() => handleJoinChannel(user?.id, 'personal')}
                   >
                     Chat
@@ -216,7 +216,7 @@ export function ChannelSearch({
                   onClick={() => handleChannelClick(channel)}
                 >
                   <User className={`h-5 w-5 ${isShare && selectedChannelId === channel.id ? "text-black" : "text-green-400"} mr-2`} />
-                  <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-white"}`}>{channel.name}</span>
+                  <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-black dark:text-white"}`}>{channel.name}</span>
                 </div>
               ))}
             </div>
@@ -240,7 +240,7 @@ export function ChannelSearch({
                 >
                   <div className="flex items-center gap-2">
                     <Globe className={`h-5 w-5 ${isShare && selectedChannelId === channel.id ? "text-black" : "text-blue-400"}`} />
-                    <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-white"}`}>{channel.name}</span>
+                    <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-black dark:text-white"}`}>{channel.name}</span>
                     {channel.member_count && (
                       <span className={`text-xs ml-2 ${isShare && selectedChannelId === channel.id ? "text-black/70" : "text-muted-foreground"}`}>
                         {channel.member_count} thành viên
@@ -251,7 +251,7 @@ export function ChannelSearch({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 px-3 text-xs text-white hover:text-white hover:bg-white/10 rounded-full"
+                      className="h-7 px-3 text-xs text-black dark:text-white hover:text-black dark:text-white hover:bg-white/10 rounded-full"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleJoinChannel(channel?.id, 'group');
@@ -283,7 +283,7 @@ export function ChannelSearch({
                 >
                   <div className="flex items-center gap-2">
                     <Lock className={`h-5 w-5 ${isShare && selectedChannelId === channel.id ? "text-black" : "text-purple-400"}`} />
-                    <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-white"}`}>{channel.name}</span>
+                    <span className={`font-medium ${isShare && selectedChannelId === channel.id ? "text-black" : "text-black dark:text-white"}`}>{channel.name}</span>
                     {channel.member_count && (
                       <span className={`text-xs ml-2 ${isShare && selectedChannelId === channel.id ? "text-black/70" : "text-muted-foreground"}`}>
                         {channel.member_count} thành viên

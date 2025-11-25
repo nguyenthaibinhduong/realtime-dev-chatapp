@@ -35,20 +35,20 @@ const NotificationSkeleton = memo(() => (
   <div className="p-4 border-b border-sidebar-border/20">
     <div className="flex items-start gap-3">
       {/* Avatar skeleton */}
-      <div className="w-8 h-8 bg-sidebar-accent/50 rounded-full animate-pulse flex-shrink-0" />
+      <div className="w-8 h-8 bg-zinc-50 dark:bg-zinc-950-accent/50 rounded-full animate-pulse flex-shrink-0" />
 
       <div className="flex-1 min-w-0 space-y-2">
         {/* Header skeleton */}
         <div className="flex items-center justify-between">
-          <div className="h-3 bg-sidebar-accent/50 rounded animate-pulse w-24" />
-          <div className="h-3 bg-sidebar-accent/30 rounded animate-pulse w-12" />
+          <div className="h-3 bg-zinc-50 dark:bg-zinc-950-accent/50 rounded animate-pulse w-24" />
+          <div className="h-3 bg-zinc-50 dark:bg-zinc-950-accent/30 rounded animate-pulse w-12" />
         </div>
 
         {/* Content skeleton */}
-        <div className="h-3 bg-sidebar-accent/40 rounded animate-pulse w-3/4" />
+        <div className="h-3 bg-zinc-50 dark:bg-zinc-950-accent/40 rounded animate-pulse w-3/4" />
 
         {/* Time skeleton */}
-        <div className="h-2 bg-sidebar-accent/30 rounded animate-pulse w-20" />
+        <div className="h-2 bg-zinc-50 dark:bg-zinc-950-accent/30 rounded animate-pulse w-20" />
       </div>
     </div>
   </div>
@@ -75,7 +75,7 @@ LoadMoreSkeleton.displayName = "LoadMoreSkeleton";
 
 // Memoized NotificationIcon Component
 const NotificationIcon = memo(({ type }: { type: string }) => {
-  const iconClass = "w-4 h-4 text-white";
+  const iconClass = "w-4 h-4 text-black dark:text-white";
 
   const iconConfig = useMemo(
     () => ({
@@ -243,25 +243,25 @@ const NotificationItem = memo(
     return (
       <div
         className={cn(
-          "cursor-pointer transition-all duration-200 p-4 hover:bg-sidebar-accent/30 border-b border-sidebar-border/20",
+          "cursor-pointer transition-all duration-200 p-4 hover:bg-zinc-50 dark:bg-zinc-950-accent/30 border-b border-sidebar-border/20",
           isSelected && !isNewNotification
-            ? "bg-sidebar-accent/50 border-l-2 border-l-blue-500"
+            ? "bg-zinc-50 dark:bg-zinc-950-accent/50 border-l-2 border-l-blue-500"
             : "border-l-2 border-l-transparent hover:border-l-blue-300",
           !notification.read && "bg-blue-50/5",
           // Animation cho notification mới - nền trắng chữ đen
           isNewNotification &&
-            "bg-white text-black border-l-2 border-l-green-500"
+          "bg-white text-black border-l-2 border-l-green-500"
         )}
         onClick={() => onSelect(notification)}
         style={
           isNewNotification
             ? {
-                background: "white",
-                color: "black",
-                animation: "flash-white 0.8s ease-in-out 4",
-                border: "1px solid rgba(0,0,0,0.1)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              }
+              background: "white",
+              color: "black",
+              animation: "flash-white 0.8s ease-in-out 4",
+              border: "1px solid rgba(0,0,0,0.1)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }
             : undefined
         }
       >
@@ -302,9 +302,9 @@ const NotificationItem = memo(
                     style={
                       isNewNotification
                         ? {
-                            animation: "pulse 1s ease-in-out infinite",
-                            boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
-                          }
+                          animation: "pulse 1s ease-in-out infinite",
+                          boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
+                        }
                         : undefined
                     }
                   />
@@ -348,17 +348,17 @@ const NotificationItem = memo(
                   )}
                   {getNotificationDisplay.metadata.action ===
                     "installation_created" && (
-                    <>
-                      <span>
-                        Repositories:{" "}
-                        {getNotificationDisplay.metadata.repoCount}
-                      </span>
-                      <span>•</span>
-                      <span>
-                        Owner: {getNotificationDisplay.metadata.owner}
-                      </span>
-                    </>
-                  )}
+                      <>
+                        <span>
+                          Repositories:{" "}
+                          {getNotificationDisplay.metadata.repoCount}
+                        </span>
+                        <span>•</span>
+                        <span>
+                          Owner: {getNotificationDisplay.metadata.owner}
+                        </span>
+                      </>
+                    )}
                 </div>
               )}
 
@@ -392,7 +392,7 @@ NotificationItem.displayName = "NotificationItem";
 // Memoized EmptyState Component
 const EmptyState = memo(() => (
   <div className="flex flex-col items-center justify-center h-64 text-center p-6">
-    <div className="w-16 h-16 bg-sidebar-accent/30 rounded-full flex items-center justify-center mb-4">
+    <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-950-accent/30 rounded-full flex items-center justify-center mb-4">
       <span className="text-2xl">🔔</span>
     </div>
     <h3 className="font-semibold mb-2 text-sidebar-foreground">
@@ -439,7 +439,7 @@ const LoadMoreButton = memo(
         <Button
           variant="ghost"
           size="sm"
-          className="w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/30"
+          className="w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-zinc-50 dark:bg-zinc-950-accent/30"
           onClick={onLoadMore}
         >
           <ChevronDown className="w-4 h-4 mr-2" />
@@ -731,11 +731,11 @@ export default function NotificationsList({
         <h1 className="text-lg font-bold text-sidebar-foreground">Hoạt động</h1>
         {notifications.length > 0 && !isInitialLoad && (
           <div className="flex items-center gap-2">
-            <span className="text-xs bg-sidebar-accent px-2 py-1 rounded-full text-sidebar-foreground/70">
+            <span className="text-xs bg-zinc-50 dark:bg-zinc-950-accent px-2 py-1 rounded-full text-sidebar-foreground/70">
               {notifications.length}
             </span>
             {unreadCount > 0 && (
-              <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
+              <span className="text-xs bg-blue-500 text-black dark:text-white px-2 py-1 rounded-full">
                 {unreadCount}
               </span>
             )}
@@ -756,16 +756,16 @@ export default function NotificationsList({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh)] bg-sidebar">
+    <div className="flex flex-col h-[calc(100vh)] bg-zinc-50 dark:bg-zinc-950">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-sidebar/80 backdrop-blur-sm">
+      <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-zinc-50 dark:bg-zinc-950/80 backdrop-blur-sm">
         {headerContent}
       </div>
 
       {/* Filter Tabs */}
       <div className="p-3 border-b border-sidebar-border/50">
         <Tabs value={activeFilter} onValueChange={handleFilterChange}>
-          <TabsList className="w-full bg-sidebar-accent/30 h-9">
+          <TabsList className="w-full bg-zinc-50 dark:bg-zinc-950-accent/30 h-9">
             {filterTabs}
           </TabsList>
         </Tabs>

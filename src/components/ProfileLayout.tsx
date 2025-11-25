@@ -167,12 +167,12 @@ const ProfileLayout: React.FC = () => {
               onClick={() => setShowUpdateAvatar(true)}
             >
               <AvatarUser user={user} isMe={user?.id === user?.id} size={24} />
-              <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-                <Upload className="w-8 h-8 text-white transition-opacity" />
+              <div className="absolute inset-0 rounded-full bg-white dark:bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                <Upload className="w-8 h-8 text-black dark:text-white transition-opacity" />
               </div>
             </div>
             <div>
-              <CardTitle className="text-2xl text-gray-100">
+              <CardTitle className="text-2xl text-gray-800 dark:text-gray-100">
                 Hồ sơ cá nhân
               </CardTitle>
               <p className="text-gray-400 mt-1">
@@ -237,7 +237,7 @@ const ProfileLayout: React.FC = () => {
                     type="submit"
                     size="sm"
                     disabled={loading || !username.trim()}
-                    className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-sm sm:order-2"
+                    className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-black dark:text-white shadow-sm sm:order-2"
                   >
                     <Check className="w-4 h-4" />
                     {loading ? "Đang lưu..." : "Lưu thay đổi"}
@@ -311,7 +311,7 @@ const ProfileLayout: React.FC = () => {
                   </AlertDialogTrigger>
                   <AlertDialogContent className="bg-gray-900 border-gray-700">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="text-white flex items-center gap-2">
+                      <AlertDialogTitle className="text-black dark:text-white flex items-center gap-2">
                         <AlertTriangle className="w-5 h-5 text-yellow-500" />
                         Xác nhận hủy liên kết GitHub
                       </AlertDialogTitle>
@@ -328,7 +328,7 @@ const ProfileLayout: React.FC = () => {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="border-gray-600 text-black hover:bg-gray-700/50 hover:text-white">
+                      <AlertDialogCancel className="border-gray-600 text-black hover:bg-gray-700/50 hover:text-black dark:text-white">
                         Hủy bỏ
                       </AlertDialogCancel>
                       <AlertDialogAction
@@ -357,7 +357,7 @@ const ProfileLayout: React.FC = () => {
           {/* Action Buttons - compact + instruction above each button */}
           <div className="w-full mx-auto flex flex-col items-center gap-6">
             <div className="w-full flex justify-between gap-x-4">
-              <p className="text-sm text text-white mb-2">
+              <p className="text-sm text text-black dark:text-white mb-2">
                 Thay đổi mật khẩu định kỳ để bảo vệ tài khoản. Sử dụng mật khẩu
                 mạnh (≥12 ký tự).
               </p>
@@ -383,7 +383,7 @@ const ProfileLayout: React.FC = () => {
               </Button>
             </div>
             <div className="w-full flex justify-between gap-x-4">
-              <p className="text-sm text-white mb-2">
+              <p className="text-sm text-black dark:text-white mb-2">
                 Đăng xuất sẽ kết thúc phiên hiện tại trên thiết bị này. Lưu công
                 việc trước khi thoát.
               </p>

@@ -221,14 +221,14 @@ export const UpdatePassword: React.FC<UpdatePasswordProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md bg-zinc-950 text-white border border-zinc-800 shadow-2xl rounded-2xl">
+      <DialogContent className="max-w-md bg-zinc-50 dark:bg-zinc-950 text-black dark:text-white border border-zinc-800 shadow-2xl rounded-2xl">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-xl flex items-center justify-center">
-              <Lock className="h-6 w-6 text-white" />
+              <Lock className="h-6 w-6 text-black dark:text-white" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-bold text-white">
+              <DialogTitle className="text-xl font-bold text-black dark:text-white">
                 Đổi mật khẩu
               </DialogTitle>
               <DialogDescription className="text-zinc-400 text-sm">
@@ -257,9 +257,9 @@ export const UpdatePassword: React.FC<UpdatePasswordProps> = ({
                 }
                 placeholder="Nhập mật khẩu cũ"
                 disabled={loading}
-                className={`pr-10 bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500 ${
-                  errors.oldPassword ? "border-red-500" : ""
-                }`}
+                className={`pr-10 bg-zinc-50
+dark:bg-zinc-900 border-zinc-800 text-black dark:text-white placeholder:text-zinc-500 focus:border-yellow-500 ${errors.oldPassword ? "border-red-500" : ""
+                  }`}
               />
               <button
                 type="button"
@@ -299,9 +299,9 @@ export const UpdatePassword: React.FC<UpdatePasswordProps> = ({
                 }
                 placeholder="Nhập mật khẩu mới"
                 disabled={loading}
-                className={`pr-10 bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500 ${
-                  errors.newPassword ? "border-red-500" : ""
-                }`}
+                className={`pr-10 bg-zinc-50
+dark:bg-zinc-900 border-zinc-800 text-black dark:text-white placeholder:text-zinc-500 focus:border-yellow-500 ${errors.newPassword ? "border-red-500" : ""
+                  }`}
               />
               <button
                 type="button"
@@ -322,18 +322,17 @@ export const UpdatePassword: React.FC<UpdatePasswordProps> = ({
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-zinc-400">Độ mạnh mật khẩu</span>
                   <span
-                    className={`font-medium ${
-                      strength.label === "Mạnh"
-                        ? "text-green-500"
-                        : strength.label === "Trung bình"
-                          ? "text-yellow-500"
-                          : "text-red-500"
-                    }`}
+                    className={`font-medium ${strength.label === "Mạnh"
+                      ? "text-green-500"
+                      : strength.label === "Trung bình"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                      }`}
                   >
                     {strength.label}
                   </span>
                 </div>
-                <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
                     className={`h-full ${strength.color} transition-all duration-300`}
                     style={{ width: strength.width }}
@@ -350,7 +349,8 @@ export const UpdatePassword: React.FC<UpdatePasswordProps> = ({
             )}
 
             {/* Password Requirements */}
-            <div className="bg-zinc-900/50 rounded-lg p-3 space-y-1.5">
+            <div className="bg-zinc-50
+dark:bg-zinc-900/50 rounded-lg p-3 space-y-1.5">
               <p className="text-xs font-medium text-zinc-400 mb-2">
                 Yêu cầu mật khẩu:
               </p>
@@ -406,9 +406,9 @@ export const UpdatePassword: React.FC<UpdatePasswordProps> = ({
                 }
                 placeholder="Nhập lại mật khẩu mới"
                 disabled={loading}
-                className={`pr-10 bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500 ${
-                  errors.confirmPassword ? "border-red-500" : ""
-                }`}
+                className={`pr-10 bg-zinc-50
+dark:bg-zinc-900 border-zinc-800 text-black dark:text-white placeholder:text-zinc-500 focus:border-yellow-500 ${errors.confirmPassword ? "border-red-500" : ""
+                  }`}
               />
               <button
                 type="button"
@@ -437,14 +437,14 @@ export const UpdatePassword: React.FC<UpdatePasswordProps> = ({
               variant="outline"
               onClick={handleClose}
               disabled={loading}
-              className="flex-1 border-zinc-700 text-slate-900 hover:bg-zinc-800 hover:text-white"
+              className="flex-1 border-zinc-700 text-slate-900 hover:bg-zinc-100 dark:bg-zinc-800 hover:text-black dark:text-white"
             >
               Hủy
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 text-black dark:text-white"
             >
               {loading ? (
                 <>

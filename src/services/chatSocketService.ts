@@ -72,12 +72,21 @@ class ChatSocketService {
   }
 
   onChannelUpdate(callback: (msg: any) => void) {
-    getSocket().on("updateChannel", callback);
+    getSocket().on("receiveUpdateChannel", callback);
   }
 
   offChannelUpdate(callback?: (msg: any) => void) {
-    getSocket().off("updateChannel", callback);
+    getSocket().off("receiveUpdateChannel", callback);
   }
+
+   onRemoveChannel(callback: (msg: any) => void) {
+    getSocket().on("receiveRemoveChannel", callback);
+  }
+
+  offRemoveChannel(callback?: (msg: any) => void) {
+    getSocket().off("receiveRemoveChannel", callback);
+  }
+
 
   /** ================== UNREAD ================== */
 

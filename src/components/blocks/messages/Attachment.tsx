@@ -66,7 +66,7 @@ export const Attachment: React.FC<AttachmentProps> = ({
         className={`flex items-center justify-center ${className}`}
         style={wrapperStyle}
       >
-        <div className="text-sm text-muted-foreground">Loading...</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">Loading...</div>
       </div>
     );
   }
@@ -74,11 +74,11 @@ export const Attachment: React.FC<AttachmentProps> = ({
   if (error) {
     return (
       <div
-        className={`p-2 bg-red-50 text-red-600 rounded ${className}`}
+        className={`p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded ${className}`}
         style={wrapperStyle}
       >
         <div className="text-sm">Error loading attachment</div>
-        <div className="text-xs text-red-500">{error}</div>
+        <div className="text-xs text-red-500 dark:text-red-400">{error}</div>
       </div>
     );
   }
@@ -86,7 +86,7 @@ export const Attachment: React.FC<AttachmentProps> = ({
   if (!url) {
     return (
       <div
-        className={`p-2 bg-gray-50 text-gray-600 rounded ${className}`}
+        className={`p-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded ${className}`}
         style={wrapperStyle}
       >
         <div className="text-sm">No attachment</div>
@@ -112,19 +112,19 @@ export const Attachment: React.FC<AttachmentProps> = ({
 
   return (
     <div
-      className={`inline-flex items-center gap-3 p-2 bg-gray-800/30 rounded ${className}`}
+      className={`inline-flex items-center gap-3 p-2 bg-gray-200 dark:bg-gray-800/30 rounded ${className}`}
       style={wrapperStyle}
     >
       <div className="flex-1 min-w-0">
-        <div className="text-sm truncate">{filename || url}</div>
-        <div className="text-xs">
+        <div className="text-sm truncate text-gray-900 dark:text-gray-200">{filename || url}</div>
+        <div className="text-xs text-gray-600 dark:text-gray-400">
           {attachmentService.formatFileSize(fileSize)}
         </div>
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-primary underline"
+          className="text-xs text-blue-600 dark:text-blue-400 underline"
         >
           Open / Download
         </a>
