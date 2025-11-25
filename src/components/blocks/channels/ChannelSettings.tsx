@@ -138,48 +138,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
   console.log('Can Manage Members:', canManageMembers);
 
   // Listen to channel updates via socket
-  useEffect(() => {
-    const handleChannelUpdate = (data: any) => {
-      console.log('📡 onChannelUpdate received:', {
-        channelId: data.channelId,
-        currentChannelId: channelId,
-        members: data.members,
-        json_data: data.json_data,
-        fullData: data
-      });
 
-      // Check if this is the current channel and it's a group or group-private channel
-      if (data.channelId === channelId && channelData) {
-        const channelType = channelData.type;
-
-        if (channelType === "group" || channelType === "group-private") {
-          // Update members for both group and group-private channels
-          if (data.members) {
-            channelData.members = data.members;
-            console.log('✅ Updated members:', data.members);
-          }
-
-          // Update json_data for group-private channels
-          if (channelType === "group-private" && data.json_data) {
-            channelData.json_data = {
-              ...channelData.json_data,
-              ...data.json_data
-            };
-            console.log('✅ Updated json_data:', channelData.json_data);
-          }
-
-          // Trigger re-render by calling onSuccess
-          onSuccess?.();
-        }
-      }
-    };
-
-    chatSocketService.onChannelUpdate(handleChannelUpdate);
-
-    return () => {
-      chatSocketService.offChannelUpdate(handleChannelUpdate);
-    };
-  }, [channelId, channelData, onSuccess]);
 
   // Filter out users who are already members of the channel
   const filteredUsers = useMemo(
@@ -251,7 +210,8 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     updatedMembers: any[],
     addUserIds: number[] = [],
     removeUserIds: number[] = [],
-    updatedUserRoles?: any[]
+    updatedUserRoles?: any[],
+    notificationText?: string
   ) => {
     const updatedMemberIds = updatedMembers.map((m: any) => m.id);
 
@@ -283,6 +243,17 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
         addUserIds,
         currenetUserIds: updatedMemberIds,
       });
+
+      if (notificationText) {
+        chatSocketService.sendMessage({
+          channelId: channelId,
+          text: notificationText,
+          type: 'notification',
+        });
+      }
+
+
+
       toast({
         title: "Cập nhật kênh thành công",
         description: `Cập nhật kênh thành công`,
@@ -328,7 +299,19 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
         updatedUserRoles = [...existingUserRoles, ...membersWithRoles];
       }
 
-      await updateChannelMembers(updatedMembers, selectedUserIds, [], updatedUserRoles);
+      // Create notification text with member names and roles
+      const memberNames = newMembers.map((m: any) => {
+        if (isPrivateChannel) {
+          const roles = selectedUserRoles[m.id] || [0];
+          const roleNames = roles.map(roleId => ROLES.find(r => r.id === roleId)?.name).filter(Boolean).join(', ');
+          return `${m.username} (${roleNames})`;
+        }
+        return m.username;
+      }).join(', ');
+
+      const notificationText = `Trưởng nhóm đã thêm thành viên mới: ${memberNames}`;
+
+      await updateChannelMembers(updatedMembers, selectedUserIds, [], updatedUserRoles, notificationText);
 
       // Reset state
       setSelectedUserIds([]);
@@ -395,7 +378,13 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
           });
       }
 
-      await updateChannelMembers(remainingMembers, [], [userId], updatedUserRoles);
+      // Create notification text with removed member name
+      const removedMember = channelData.members?.find((m: any) => m.id === userId);
+      const notificationText = removedMember
+        ? `Trưởng nhóm đã xóa thành viên: ${removedMember.username}`
+        : 'Trưởng nhóm đã xóa một thành viên';
+
+      await updateChannelMembers(remainingMembers, [], [userId], updatedUserRoles, notificationText);
 
       // Update local state
       setEditingMemberRoles(prev => {
@@ -429,7 +418,15 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
       const currentMembers = channelData.members || [];
 
-      await updateChannelMembers(currentMembers, [], [], updatedUserRoles);
+      // Create notification text with updated member names and roles
+      const updatedMemberDetails = updatedUserRoles.map(ur => {
+        const roleNames = ur.roleNames.join(', ');
+        return `${ur.username} (${roleNames})`;
+      }).join(', ');
+
+      const notificationText = `Trưởng nhóm đã cập nhật quyền cho: ${updatedMemberDetails}`;
+
+      await updateChannelMembers(currentMembers, [], [], updatedUserRoles, notificationText);
 
       // Reset state
       setManageMembersDialogOpen(false);

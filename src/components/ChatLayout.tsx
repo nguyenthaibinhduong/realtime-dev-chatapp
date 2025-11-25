@@ -152,6 +152,84 @@ export default function ChatLayout() {
     }
   }, []);
 
+  // Listen to channel updates from socket (members, permissions, etc.)
+  useEffect(() => {
+    const handleChannelUpdate = (response: any) => {
+      console.log('🔔 ChatLayout received onChannelUpdate:', response);
+
+      // Parse response structure: can be { data: { channel, members } } or direct object
+      const data = response?.data || response;
+      const updatedChannel = data?.channel;
+      const updatedMembers = data?.members;
+
+      if (!updatedChannel?.id) {
+        console.warn('⚠️ Invalid channel update data received');
+        return;
+      }
+
+      const channelId = String(updatedChannel.id);
+
+      // Update channels list
+      setChannels((prevChannels) => {
+        const idx = prevChannels.findIndex((c) => String(c.id) === channelId);
+        if (idx !== -1) {
+          const updated = [...prevChannels];
+          // Merge channel data
+          updated[idx] = {
+            ...updated[idx],
+            ...updatedChannel,
+            member_count: updatedMembers?.length || updatedChannel.member_count || updated[idx].member_count,
+          };
+          console.log('✅ Updated channel in list:', updated[idx]);
+          return updated;
+        }
+        return prevChannels;
+      });
+
+      // If this is the currently selected channel, update it and members
+      if (selectedChannel && String(selectedChannel.id) === channelId) {
+        console.log('🔄 Updating selected channel and members');
+
+        setSelectedChannel((prev) => {
+          if (!prev) return prev;
+
+          const updated = { ...prev };
+
+          // Update members if provided
+          if (updatedMembers && Array.isArray(updatedMembers)) {
+            updated.members = updatedMembers;
+            updated.member_count = updatedMembers.length;
+            console.log('✅ Updated selectedChannel members:', updatedMembers);
+          }
+
+          // Update json_data if provided (for private channels)
+          if (updatedChannel.json_data) {
+            updated.json_data = {
+              ...prev.json_data,
+              ...updatedChannel.json_data
+            };
+            console.log('✅ Updated selectedChannel json_data:', updated.json_data);
+          }
+
+          console.log('🎯 New selectedChannel state:', updated);
+          return updated;
+        });
+
+        // Update members list if provided
+        if (updatedMembers && Array.isArray(updatedMembers)) {
+          console.log('👥 Updating members list:', updatedMembers);
+          setMembers(updatedMembers);
+        }
+      }
+    };
+
+    chatSocketService.onChannelUpdate(handleChannelUpdate);
+
+    return () => {
+      chatSocketService.offChannelUpdate(handleChannelUpdate);
+    };
+  }, [selectedChannel]);
+
   // ✅ Register notification handlers
   useEffect(() => {
     // Handler for navigating to channel from notification
@@ -607,6 +685,42 @@ export default function ChatLayout() {
     chatSocketService.onUnread(handleUnread);
     return () => chatSocketService.offUnread(handleUnread);
   }, []);
+
+  // Listen to channel removal from socket
+  useEffect(() => {
+    const handleRemoveChannel = (data: { id: string | number }) => {
+      const channelId = String(data.id);
+      console.log('🗑️ Received removeChannel event:', { channelId });
+
+      // Remove channel from channels list
+      setChannels((prevChannels) => {
+        const filtered = prevChannels.filter((c) => String(c.id) !== channelId);
+        console.log('✅ Removed channel from list:', {
+          removedId: channelId,
+          remaining: filtered.length
+        });
+        return filtered;
+      });
+
+      // If removed channel is currently selected, clear selection
+      if (selectedChannel && String(selectedChannel.id) === channelId) {
+        console.log('⚠️ Removed channel was selected, clearing selection');
+        handleSelectChannel(null);
+
+        toast({
+          title: "Kênh đã bị xóa",
+          description: "Kênh bạn đang xem đã bị xóa",
+          variant: "destructive",
+        });
+      }
+    };
+
+    chatSocketService.onRemoveChannel(handleRemoveChannel);
+
+    return () => {
+      chatSocketService.offRemoveChannel(handleRemoveChannel);
+    };
+  }, [selectedChannel, toast]);
 
   const handleSelectChannel = (channel: Channel | null) => {
     setSelectedChannel(channel);
