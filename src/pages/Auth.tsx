@@ -136,9 +136,9 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 bg-gray-50 dark:bg-gray-950">
       {/* Background Image with Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-900 to-violet-950">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-indigo-950 dark:via-slate-900 dark:to-violet-950">
         {/* Pattern Overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNC40MTggMy41ODItOCA4LThzOCAzLjU4MiA4IDgtMy41ODIgOC04IDgtOC0zLjU4Mi04LTh6TTAgMTZjMC00LjQxOCAzLjU4Mi04IDgtOHM4IDMuNTgyIDggOC0zLjU4MiA4LTggOC04LTMuNTgyLTgtOHptMCA0MGMwLTQuNDE4IDMuNTgyLTggOC04czggMy41ODIgOCA4LTMuNTgyIDgtOCA4LTgtMy41ODItOC04em0zNiAwYzAtNC40MTggMy41ODItOCA4LThzOCAzLjU4MiA4IDgtMy41ODIgOC04IDgtOC0zLjU4Mi04LTh6TTEyIDI4YzAtNC40MTggMy41ODItOCA4LThzOCAzLjU4MiA4IDgtMy41ODIgOC04IDgtOC0zLjU4Mi04LTh6bTI0IDBjMC00LjQxOCAzLjU4Mi04IDgtOHM4IDMuNTgyIDggOC0zLjU4MiA4LTggOC04LTMuNTgyLTgtOHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-40" />
 
@@ -160,83 +160,83 @@ export default function Auth() {
       {/* Content Container - Smaller and Compact */}
       <div className="relative z-10 w-full max-w-5xl flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
         {/* Left Side - Introduction with Glass Effect */}
-        <div className="flex-1 text-black dark:text-white space-y-5 max-w-lg">
+        <div className="flex-1 text-gray-900 dark:text-white space-y-5 max-w-lg">
           {/* Hero Section with Glass Card */}
-          <div className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl hover:bg-white/10 transition-all duration-300">
+          <div className="p-6 bg-white/80 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl hover:bg-white/90 dark:hover:bg-white/10 transition-all duration-300">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg shadow-blue-500/50">
-                <MessageSquare className="h-6 w-6 text-black dark:text-white" />
+                <MessageSquare className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 dark:from-blue-400 dark:via-purple-400 dark:to-cyan-400 bg-clip-text text-transparent">
                 CodeSync Chat
               </h1>
             </div>
 
-            <p className="text-sm lg:text-base text-gray-300 leading-relaxed mb-3">
+            <p className="text-sm lg:text-base text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
               Nền tảng giao tiếp thời gian thực cho đội ngũ phát triển
             </p>
 
-            <p className="text-xs text-gray-400 leading-relaxed">
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
               Kết hợp chat realtime, chia sẻ code và tích hợp GitHub. Tăng hiệu suất làm việc nhóm.
             </p>
           </div>
 
           {/* Features Grid - Compact */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="group p-3 bg-gradient-to-br from-blue-500/10 to-blue-600/5 backdrop-blur-md rounded-xl border border-blue-400/20 hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300">
-              <div className="p-2 bg-blue-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
-                <Code2 className="h-4 w-4 text-blue-400" />
+            <div className="group p-3 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-500/10 dark:to-blue-600/5 backdrop-blur-md rounded-xl border border-blue-300 dark:border-blue-400/20 hover:border-blue-400 dark:hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300">
+              <div className="p-2 bg-blue-200 dark:bg-blue-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
+                <Code2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="font-semibold text-xs mb-1 text-blue-300">Code Sharing</h3>
-              <p className="text-[10px] text-gray-400 leading-tight">Syntax highlighting</p>
+              <h3 className="font-semibold text-xs mb-1 text-blue-700 dark:text-blue-300">Code Sharing</h3>
+              <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-tight">Syntax highlighting</p>
             </div>
-            <div className="group p-3 bg-gradient-to-br from-purple-500/10 to-purple-600/5 backdrop-blur-md rounded-xl border border-purple-400/20 hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
-              <div className="p-2 bg-purple-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
-                <Users className="h-4 w-4 text-purple-400" />
+            <div className="group p-3 bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-500/10 dark:to-purple-600/5 backdrop-blur-md rounded-xl border border-purple-300 dark:border-purple-400/20 hover:border-purple-400 dark:hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
+              <div className="p-2 bg-purple-200 dark:bg-purple-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
+                <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
-              <h3 className="font-semibold text-xs mb-1 text-purple-300">Team Work</h3>
-              <p className="text-[10px] text-gray-400 leading-tight">Channels & threads</p>
+              <h3 className="font-semibold text-xs mb-1 text-purple-700 dark:text-purple-300">Team Work</h3>
+              <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-tight">Channels & threads</p>
             </div>
-            <div className="group p-3 bg-gradient-to-br from-yellow-500/10 to-amber-600/5 backdrop-blur-md rounded-xl border border-yellow-400/20 hover:border-yellow-400/40 hover:shadow-lg hover:shadow-yellow-500/20 transition-all duration-300">
-              <div className="p-2 bg-yellow-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
-                <Zap className="h-4 w-4 text-yellow-400" />
+            <div className="group p-3 bg-gradient-to-br from-yellow-100 to-amber-50 dark:from-yellow-500/10 dark:to-amber-600/5 backdrop-blur-md rounded-xl border border-yellow-300 dark:border-yellow-400/20 hover:border-yellow-400 dark:hover:border-yellow-400/40 hover:shadow-lg hover:shadow-yellow-500/20 transition-all duration-300">
+              <div className="p-2 bg-yellow-200 dark:bg-yellow-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
+                <Zap className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               </div>
-              <h3 className="font-semibold text-xs mb-1 text-yellow-300">Real-time</h3>
-              <p className="text-[10px] text-gray-400 leading-tight">WebSocket sync</p>
+              <h3 className="font-semibold text-xs mb-1 text-yellow-700 dark:text-yellow-300">Real-time</h3>
+              <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-tight">WebSocket sync</p>
             </div>
-            <div className="group p-3 bg-gradient-to-br from-green-500/10 to-emerald-600/5 backdrop-blur-md rounded-xl border border-green-400/20 hover:border-green-400/40 hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300">
-              <div className="p-2 bg-green-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
-                <Shield className="h-4 w-4 text-green-400" />
+            <div className="group p-3 bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-500/10 dark:to-emerald-600/5 backdrop-blur-md rounded-xl border border-green-300 dark:border-green-400/20 hover:border-green-400 dark:hover:border-green-400/40 hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300">
+              <div className="p-2 bg-green-200 dark:bg-green-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
+                <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="font-semibold text-xs mb-1 text-green-300">Secure</h3>
-              <p className="text-[10px] text-gray-400 leading-tight">Authentication</p>
+              <h3 className="font-semibold text-xs mb-1 text-green-700 dark:text-green-300">Secure</h3>
+              <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-tight">Authentication</p>
             </div>
           </div>
         </div>
 
         {/* Right Side - Auth Form with Dark Theme */}
-        <Card className="w-full max-w-sm bg-gradient-to-br from-gray-950 to-gray-900 backdrop-blur-2xl border border-gray-800 shadow-2xl shadow-black/50 hover:shadow-blue-500/20 transition-all duration-300">
+        <Card className="w-full max-w-sm bg-white dark:bg-gradient-to-br dark:from-gray-950 dark:to-gray-900 backdrop-blur-2xl border border-gray-200 dark:border-gray-800 shadow-2xl shadow-gray-200/50 dark:shadow-black/50 hover:shadow-blue-500/20 transition-all duration-300">
           <CardHeader className="text-center pb-3 space-y-1">
             <div className="inline-block mx-auto mb-2 p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-lg shadow-blue-500/50">
-              <MessageSquare className="h-5 w-5 text-black dark:text-white" />
+              <MessageSquare className="h-5 w-5 text-white" />
             </div>
-            <CardTitle className="text-xl font-bold text-black dark:text-white">Chào mừng trở lại</CardTitle>
-            <CardDescription className="text-xs text-gray-400">
+            <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Chào mừng trở lại</CardTitle>
+            <CardDescription className="text-xs text-gray-600 dark:text-gray-400">
               Đăng nhập để tiếp tục
             </CardDescription>
           </CardHeader>
           <CardContent className="px-6 pb-6">
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-gray-800/50 backdrop-blur-md border border-gray-700 p-1">
+              <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-800/50 backdrop-blur-md border border-gray-300 dark:border-gray-700 p-1">
                 <TabsTrigger
                   value="signin"
-                  className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
+                  className="text-xs text-gray-600 dark:text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
                 >
                   Đăng nhập
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
+                  className="text-xs text-gray-600 dark:text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
                 >
                   Đăng ký
                 </TabsTrigger>
@@ -245,7 +245,7 @@ export default function Auth() {
               <TabsContent value="signin" className="space-y-3 mt-4">
                 <form onSubmit={handleSignIn} className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-xs text-black dark:text-white font-medium">
+                    <Label htmlFor="email" className="text-xs text-gray-900 dark:text-white font-medium">
                       Email
                     </Label>
                     <Input
@@ -254,11 +254,11 @@ export default function Auth() {
                       type="email"
                       placeholder="your@email.com"
                       required
-                      className="bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                      className="bg-white dark:bg-gray-900/80 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="password" className="text-xs text-black dark:text-white font-medium">
+                    <Label htmlFor="password" className="text-xs text-gray-900 dark:text-white font-medium">
                       Mật khẩu
                     </Label>
                     <div className="relative">
@@ -268,7 +268,7 @@ export default function Auth() {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         required
-                        className="bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
+                        className="bg-white dark:bg-gray-900/80 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
                       />
                       <Button
                         type="button"
@@ -287,7 +287,7 @@ export default function Auth() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -300,15 +300,15 @@ export default function Auth() {
                 </form>
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-700" />
+                    <span className="w-full border-t border-gray-300 dark:border-gray-700" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-gray-900 px-2 text-gray-400">hoặc</span>
+                    <span className="bg-white dark:bg-gray-900 px-2 text-gray-600 dark:text-gray-400">hoặc</span>
                   </div>
                 </div>
                 <Button
                   onClick={handleSignInGitHub}
-                  className="w-full bg-gray-800 border border-gray-700 text-black dark:text-white text-sm h-9 hover:bg-gray-700 transition-all shadow-lg"
+                  className="w-full bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm h-9 hover:bg-gray-300 dark:hover:bg-gray-700 transition-all shadow-lg"
                   disabled={isLoading}
                 >
                   <Github className="h-4 w-4 mr-2" />
@@ -321,7 +321,7 @@ export default function Auth() {
               <TabsContent value="signup" className="space-y-3 mt-4">
                 <form onSubmit={handleSignUp} className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="username" className="text-xs text-black dark:text-white font-medium">
+                    <Label htmlFor="username" className="text-xs text-gray-900 dark:text-white font-medium">
                       Tên người dùng
                     </Label>
                     <Input
@@ -332,11 +332,11 @@ export default function Auth() {
                       required
                       value={signupUsername}
                       onChange={(e) => setSignupUsername(e.target.value)}
-                      className="bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                      className="bg-white dark:bg-gray-900/80 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-email" className="text-xs text-black dark:text-white font-medium">
+                    <Label htmlFor="signup-email" className="text-xs text-gray-900 dark:text-white font-medium">
                       Email
                     </Label>
                     <Input
@@ -347,11 +347,11 @@ export default function Auth() {
                       required
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
+                      className="bg-white dark:bg-gray-900/80 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-password" className="text-xs text-black dark:text-white font-medium">
+                    <Label htmlFor="signup-password" className="text-xs text-gray-900 dark:text-white font-medium">
                       Mật khẩu
                     </Label>
                     <div className="relative">
@@ -375,7 +375,7 @@ export default function Auth() {
                                 : "",
                           }));
                         }}
-                        className={`bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all ${signupErrors.password ? "border-red-500/50" : ""
+                        className={`bg-white dark:bg-gray-900/80 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all ${signupErrors.password ? "border-red-500/50" : ""
                           }`}
                       />
                       <Button
@@ -395,16 +395,16 @@ export default function Auth() {
                     {signupPassword && (
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-[10px]">
-                          <span className="text-gray-400">Độ mạnh mật khẩu</span>
+                          <span className="text-gray-600 dark:text-gray-400">Độ mạnh mật khẩu</span>
                           {(() => {
                             const s = passwordStrength(signupPassword);
                             return (
                               <span
                                 className={`font-medium ${s.label === "Mạnh"
-                                  ? "text-green-400"
+                                  ? "text-green-600 dark:text-green-400"
                                   : s.label === "Trung bình"
-                                    ? "text-yellow-400"
-                                    : "text-red-400"
+                                    ? "text-yellow-600 dark:text-yellow-400"
+                                    : "text-red-600 dark:text-red-400"
                                   }`}
                               >
                                 {s.label}
@@ -412,7 +412,7 @@ export default function Auth() {
                             );
                           })()}
                         </div>
-                        <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
+                        <div className="h-1 bg-gray-300 dark:bg-gray-800 rounded-full overflow-hidden">
                           {(() => {
                             const s = passwordStrength(signupPassword);
                             return (
@@ -428,7 +428,7 @@ export default function Auth() {
                         {signupErrors.password}
                       </div>
                     )}
-                    <div className="bg-gray-800/50 rounded-lg p-2 mt-1">
+                    <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-2 mt-1">
                       {[
                         { check: signupPassword.length >= 8, text: "Ít nhất 8 ký tự" },
                         { check: /[A-Z]/.test(signupPassword), text: "Ít nhất 1 chữ hoa" },
@@ -437,17 +437,17 @@ export default function Auth() {
                       ].map((req, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-[10px]">
                           {req.check ? (
-                            <CheckCircle className="h-3 w-3 text-green-400" />
+                            <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
                           ) : (
-                            <AlertCircle className="h-3 w-3 text-gray-500" />
+                            <AlertCircle className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                           )}
-                          <span className={req.check ? "text-green-400" : "text-black dark:text-white"}>{req.text}</span>
+                          <span className={req.check ? "text-green-600 dark:text-green-400" : "text-gray-700 dark:text-gray-300"}>{req.text}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-confirm-password" className="text-xs text-black dark:text-white font-medium">
+                    <Label htmlFor="signup-confirm-password" className="text-xs text-gray-900 dark:text-white font-medium">
                       Nhập lại mật khẩu
                     </Label>
                     <div className="relative">
@@ -467,7 +467,7 @@ export default function Auth() {
                               v && v !== signupPassword ? "Mật khẩu xác nhận không khớp" : "",
                           }));
                         }}
-                        className={`bg-gray-900/80 border-gray-700 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all ${signupErrors.confirmPassword ? "border-red-500/50" : ""
+                        className={`bg-white dark:bg-gray-900/80 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all ${signupErrors.confirmPassword ? "border-red-500/50" : ""
                           }`}
                       />
                       <Button
@@ -493,7 +493,7 @@ export default function Auth() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                     disabled={isLoading}
                   >
                     {isLoading ? (

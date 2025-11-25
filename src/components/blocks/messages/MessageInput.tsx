@@ -306,8 +306,8 @@ export const MessageInput = ({
   // If user is Viewer in private channel, hide the entire input
   if (permissions.isViewer && channel.type === 'group-private') {
     return (
-      <div className="border-t border-border p-4 bg-zinc-50 dark:bg-zinc-900/50">
-        <div className="text-center text-sm text-zinc-500">
+      <div className="border-t border-gray-300 dark:border-gray-700 p-4 bg-gray-100 dark:bg-zinc-900/50">
+        <div className="text-center text-sm text-gray-600 dark:text-gray-400">
           Bạn chỉ có quyền xem tin nhắn trong kênh này.
         </div>
       </div>
@@ -322,9 +322,9 @@ export const MessageInput = ({
           }`}>
           {/* Reply preview */}
           {replyMessage && !editMessage && (
-            <div className="mb-2 rounded-md bg-[#1f2937] text-gray-200 px-3 py-2 relative">
+            <div className="mb-2 rounded-md bg-blue-100 dark:bg-[#1f2937] text-gray-900 dark:text-gray-200 px-3 py-2 relative">
               <div className="flex items-start gap-2">
-                <div className="w-1 rounded bg-blue-500 mt-0.5" />
+                <div className="w-1 rounded bg-blue-500 dark:bg-blue-500 mt-0.5" />
                 <div className="flex-1">
                   <div className="text-sm">
                     <span className="opacity-80">Trả lời </span>
@@ -348,9 +348,9 @@ export const MessageInput = ({
 
           {/* Edit preview */}
           {editMessage && !replyMessage && (
-            <div className="mb-2 rounded-md bg-[#374151] text-gray-200 px-3 py-2 relative">
+            <div className="mb-2 rounded-md bg-orange-100 dark:bg-[#374151] text-gray-900 dark:text-gray-200 px-3 py-2 relative">
               <div className="flex items-start gap-2">
-                <div className="w-1 rounded bg-orange-500 mt-0.5" />
+                <div className="w-1 rounded bg-orange-500 dark:bg-orange-500 mt-0.5" />
                 <div className="flex-1">
                   <div className="text-sm">
                     <span className="opacity-80">Chỉnh sửa tin nhắn của </span>
@@ -384,8 +384,8 @@ export const MessageInput = ({
                     type="button"
                     onClick={() => setShowAttachMenu(!showAttachMenu)}
                     className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${showAttachMenu
-                      ? "bg-[#00a884] text-black dark:text-white rotate-45"
-                      : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                      ? "bg-[#00a884] text-white rotate-45"
+                      : "bg-gray-300 dark:bg-gray-800 hover:bg-gray-400 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                       }`}
                   >
                     <Plus className="h-5 w-5" />
@@ -398,15 +398,15 @@ export const MessageInput = ({
 
               {/* Popup Menu */}
               {showAttachMenu && (
-                <div className="absolute bottom-full left-0 mb-2 bg-gray-900 rounded-xl shadow-2xl border border-gray-700 p-2 min-w-[200px] animate-in slide-in-from-bottom-2 duration-200">
+                <div className="absolute bottom-full left-0 mb-2 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 p-2 min-w-[200px] animate-in slide-in-from-bottom-2 duration-200">
                   {/* File Upload Options */}
                   {!editMessage && (
                     <>
-                      <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors group">
+                      <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors group">
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors">
-                          <Image className="h-4 w-4 text-purple-400" />
+                          <Image className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                         </div>
-                        <span className="text-sm text-gray-200 font-medium">Hình ảnh</span>
+                        <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">Hình ảnh</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -419,11 +419,11 @@ export const MessageInput = ({
                         />
                       </label>
 
-                      <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors group">
+                      <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors group">
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/20 group-hover:bg-blue-500/30 transition-colors">
-                          <Paperclip className="h-4 w-4 text-blue-400" />
+                          <Paperclip className="h-4 w-4 text-blue-500 dark:text-blue-400" />
                         </div>
-                        <span className="text-sm text-gray-200 font-medium">Tệp đính kèm</span>
+                        <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">Tệp đính kèm</span>
                         <input
                           type="file"
                           multiple
@@ -435,7 +435,7 @@ export const MessageInput = ({
                         />
                       </label>
 
-                      <div className="h-px bg-gray-700 my-2" />
+                      <div className="h-px bg-gray-300 dark:bg-gray-700 my-2" />
                     </>
                   )}
 
@@ -448,15 +448,15 @@ export const MessageInput = ({
                           handleCodeEditorToggle();
                           setShowAttachMenu(false);
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
                       >
                         <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isCodeEditorOpen
-                          ? "bg-[#007acc] text-black dark:text-white"
+                          ? "bg-[#007acc] text-white"
                           : "bg-teal-500/20 group-hover:bg-teal-500/30"
                           }`}>
-                          <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-black dark:text-white" : "text-teal-400"}`} />
+                          <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-white" : "text-teal-500 dark:text-teal-400"}`} />
                         </div>
-                        <span className="text-sm text-gray-200 font-medium">Code Editor</span>
+                        <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">Code Editor</span>
                       </button>
                     )}
 
@@ -473,15 +473,15 @@ export const MessageInput = ({
                         openBAForm();
                         setShowAttachMenu(false);
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
                     >
                       <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showBAForm
-                        ? "bg-blue-500 text-black dark:text-white"
+                        ? "bg-blue-500 text-white"
                         : "bg-blue-500/20 group-hover:bg-blue-500/30"
                         }`}>
-                        <FileText className={`h-4 w-4 ${showBAForm ? "text-black dark:text-white" : "text-blue-400"}`} />
+                        <FileText className={`h-4 w-4 ${showBAForm ? "text-white" : "text-blue-500 dark:text-blue-400"}`} />
                       </div>
-                      <span className="text-sm text-gray-200 font-medium">BA Requirement</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">BA Requirement</span>
                     </button>
                   )}
 
@@ -493,15 +493,15 @@ export const MessageInput = ({
                         openTesterForm();
                         setShowAttachMenu(false);
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors group"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
                     >
                       <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showTesterForm
-                        ? "bg-red-500 text-black dark:text-white"
+                        ? "bg-red-500 text-white"
                         : "bg-red-500/20 group-hover:bg-red-500/30"
                         }`}>
-                        <Bug className={`h-4 w-4 ${showTesterForm ? "text-black dark:text-white" : "text-red-400"}`} />
+                        <Bug className={`h-4 w-4 ${showTesterForm ? "text-white" : "text-red-500 dark:text-red-400"}`} />
                       </div>
-                      <span className="text-sm text-gray-200 font-medium">Debug Report</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">Debug Report</span>
                     </button>
                   )}
 
@@ -511,9 +511,9 @@ export const MessageInput = ({
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-not-allowed opacity-40"
                   >
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-500/20">
-                      <Sparkles className="h-4 w-4 text-purple-400" />
+                      <Sparkles className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                     </div>
-                    <span className="text-sm text-gray-200 font-medium">AI Assistant</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">AI Assistant</span>
                   </button>
                 </div>
               )}
@@ -521,10 +521,10 @@ export const MessageInput = ({
 
             {/* Input Field - WhatsApp Style */}
             <div className="relative flex-1">
-              <div className="rounded-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 px-4 py-2 shadow-lg flex items-center gap-2">
+              <div className="rounded-full bg-gray-200 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700/50 px-4 py-2 shadow-lg flex items-center gap-2">
                 <button
                   type="button"
-                  className="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors"
+                  className="flex-shrink-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 >
                   <Smile className="h-5 w-5" />
                 </button>
@@ -541,7 +541,7 @@ export const MessageInput = ({
                       ? "Chỉnh sửa tin nhắn..."
                       : "Nhập tin nhắn"
                   }
-                  className="w-full resize-none bg-transparent text-sm text-black dark:text-white placeholder:text-gray-500 focus:outline-none"
+                  className="w-full resize-none bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-500 focus:outline-none"
                   style={{ minHeight: 24, maxHeight: 100 }}
                 />
               </div>
@@ -555,7 +555,7 @@ export const MessageInput = ({
                     type="button"
                     onClick={handleSend}
                     disabled={isSending}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-black dark:text-white transition-all disabled:opacity-50 shadow-lg"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white transition-all disabled:opacity-50 shadow-lg"
                     aria-label="Gửi"
                   >
                     <Send className="h-5 w-5" />
@@ -570,7 +570,7 @@ export const MessageInput = ({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 transition-all"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-800 hover:bg-gray-400 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
                     aria-label="Ghi âm"
                   >
                     <Mic className="h-5 w-5" />
@@ -595,18 +595,18 @@ export const MessageInput = ({
                       className="h-16 w-16 rounded border object-cover"
                     />
                   ) : (
-                    <div className="h-16 w-16 rounded border bg-muted text-[10px] text-muted-foreground/90 flex items-center justify-center p-1 text-center">
+                    <div className="h-16 w-16 rounded border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-[10px] text-gray-600 dark:text-gray-400 flex items-center justify-center p-1 text-center">
                       {files[idx].name}
                     </div>
                   )}
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(idx)}
-                    className="absolute -right-1 -top-1 rounded-full bg-white dark:bg-black/60 p-1"
+                    className="absolute -right-1 -top-1 rounded-full bg-red-500 hover:bg-red-600 p-1 shadow-lg"
                     aria-label="Xóa tệp"
                     title="Xóa tệp"
                   >
-                    <X className="h-3 w-3 text-black dark:text-white" />
+                    <X className="h-3 w-3 text-white" />
                   </button>
                 </div>
               ))}
