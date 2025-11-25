@@ -309,7 +309,9 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
         return m.username;
       }).join(', ');
 
-      const notificationText = `Trưởng nhóm đã thêm thành viên mới: ${memberNames}`;
+      const notificationText = isPrivateChannel
+        ? `Trưởng nhóm đã thêm thành viên mới: ${memberNames}`
+        : `Đã thêm thành viên mới: ${memberNames}`;
 
       await updateChannelMembers(updatedMembers, selectedUserIds, [], updatedUserRoles, notificationText);
 
@@ -381,8 +383,8 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
       // Create notification text with removed member name
       const removedMember = channelData.members?.find((m: any) => m.id === userId);
       const notificationText = removedMember
-        ? `Trưởng nhóm đã xóa thành viên: ${removedMember.username}`
-        : 'Trưởng nhóm đã xóa một thành viên';
+        ? (isPrivateChannel ? `Trưởng nhóm đã xóa thành viên: ${removedMember.username}` : `Đã xóa thành viên: ${removedMember.username}`)
+        : (isPrivateChannel ? 'Trưởng nhóm đã xóa một thành viên' : 'Đã xóa một thành viên');
 
       await updateChannelMembers(remainingMembers, [], [userId], updatedUserRoles, notificationText);
 
@@ -418,13 +420,15 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
       const currentMembers = channelData.members || [];
 
-      // Create notification text with updated member names and roles
-      const updatedMemberDetails = updatedUserRoles.map(ur => {
-        const roleNames = ur.roleNames.join(', ');
-        return `${ur.username} (${roleNames})`;
-      }).join(', ');
-
-      const notificationText = `Trưởng nhóm đã cập nhật quyền cho: ${updatedMemberDetails}`;
+      // Create notification text with updated member names and roles (only for private channels)
+      let notificationText: string | undefined;
+      if (isPrivateChannel) {
+        const updatedMemberDetails = updatedUserRoles.map(ur => {
+          const roleNames = ur.roleNames.join(', ');
+          return `${ur.username} (${roleNames})`;
+        }).join(', ');
+        notificationText = `Trưởng nhóm đã cập nhật quyền cho: ${updatedMemberDetails}`;
+      }
 
       await updateChannelMembers(currentMembers, [], [], updatedUserRoles, notificationText);
 
