@@ -3,6 +3,7 @@ import { useEffect, useCallback } from 'react';
 import { useToast } from './useToast';
 import { chatSocketService } from '@/services/chatSocketService';
 import { useNavigate } from 'react-router-dom';
+import { ChatAPI } from '@/api/api';
 
 export interface NotificationAction {
     type: 'message' | 'github' | 'system' | 'default';
@@ -177,7 +178,7 @@ export const useNotificationHandler = () => {
         });
     }, [toast, executeHandler, navigateToChannel, navigate]);
 
-    const handleGithubNotification = useCallback((notify: NotificationData) => {
+    const handleGithubNotification = useCallback(async (notify: NotificationData) => {
         const action = notify.data?.action;
         let title = "🔧 GitHub Event";
         let description = "";
@@ -197,6 +198,8 @@ export const useNotificationHandler = () => {
 
             title = `📦 ${owner}/${repository}`;
             description = `Branch: ${branch} - ${gitMessage}`;
+
+
         } else {
             description = `Action: ${action || 'unknown'}`;
         }
@@ -225,6 +228,26 @@ export const useNotificationHandler = () => {
                 children: "Chi tiết"
             },
         });
+
+        // Gửi tin nhắn thông báo đến các kênh liên quan đến repository
+        const channelIdMatch: any = await ChatAPI.getChannelByRepository({
+            repoIds: [notify.data?.repository?.id]
+        });
+
+        if (channelIdMatch?.data?.length > 0) {
+            const repoName = notify.data?.repository?.full_name || notify.data?.repository?.name || 'repository';
+            const action = notify.data?.action || 'có hoạt động mới';
+            const userName = notify.data?.pusher?.name || notify.data?.sender?.login || 'Ai đó';
+
+            // Duyệt qua danh sách các channel IDs và gửi tin nhắn
+            channelIdMatch.data.forEach((channelId: string | number) => {
+                chatSocketService.sendMessage({
+                    channelId: String(channelId),
+                    text: `${userName} ${action} trên repository ${repoName}`,
+                    type: 'notification',
+                });
+            });
+        }
     }, [toast, executeHandler, openGithubDetail, navigate]);
 
     const handleSystemNotification = useCallback((notify: NotificationData) => {
