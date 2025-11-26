@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3088/v1/api";
 // Tạo instance chung cho axios
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 60000,
+  timeout: 90000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -86,9 +86,12 @@ api.interceptors.response.use(
         localStorage.setItem("token", newToken);
         localStorage.setItem("refresh_token", newRefreshToken);
         chatSocketService.connect();
-        chatSocketService.joinRoom(localStorage.getItem("selectedChannelId") || "" );
+        chatSocketService.joinRoom(
+          localStorage.getItem("selectedChannelId") || ""
+        );
         const res = await AuthAPI.getProfile();
-        if (res.status === 200 && res.data) localStorage.setItem("app_user", JSON.stringify(res.data));
+        if (res.status === 200 && res.data)
+          localStorage.setItem("app_user", JSON.stringify(res.data));
         api.defaults.headers.Authorization = `Bearer ${newToken}`;
         processQueue(null, newToken);
 
