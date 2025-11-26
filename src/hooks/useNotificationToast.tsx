@@ -237,21 +237,25 @@ export const useNotificationHandler = () => {
 
 
         if (channelIdMatch?.data?.length > 0) {
-            const repoName = notify.data?.repository?.full_name || notify.data?.repository?.name || 'repository';
-            const action = notify.data?.action || 'có hoạt động mới';
-            const userName = notify.data?.pusher?.name || notify.data?.sender?.login || 'Ai đó';
+            const repository = notify.data?.repository?.name || notify.data?.repository;
+            const branch = notify.data?.ref ? notify.data.ref.replace("refs/heads/", "") : notify.data?.branch || "main";
+            const gitMessage = notify.data?.head_commit?.message || notify.data?.message || notify.data?.description || "Git activity";
+            const owner = notify.data?.repository?.owner?.login || notify.data?.pusher?.name || "Unknown";
+            const repoFullName = notify.data?.repository?.full_name || `${owner}/${repository}`;
 
             // Duyệt qua danh sách các channel IDs và gửi tin nhắn
             channelIdMatch.data.forEach((channelId: string | number) => {
+                const messageText = `📦 **${repoFullName}** - Branch: \`${branch}\`\n${gitMessage}`;
+
                 console.log({
                     channelId: String(channelId),
-                    text: `${userName} ${action} trên repository ${repoName}`,
+                    text: messageText,
                     type: 'notification',
                 });
 
                 chatSocketService.sendMessage({
                     channelId: String(channelId),
-                    text: `${userName} ${action} trên repository ${repoName}`,
+                    text: messageText,
                     type: 'notification',
                 });
             });

@@ -24,12 +24,12 @@ const NotificationMessage = memo(({ message, onViewRepo }: NotificationMessagePr
                 <span className={cn(TYPOGRAPHY.size.xs, COLORS.text.mutedDark)}>
                     {formatMessageTime(message.send_at || message.created_at)}
                 </span>
-                <span
+                {/* <span
                     onClick={onViewRepo}
                     className="text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition-colors"
                 >
                     xem
-                </span>
+                </span> */}
             </div>
         </div>
     );
