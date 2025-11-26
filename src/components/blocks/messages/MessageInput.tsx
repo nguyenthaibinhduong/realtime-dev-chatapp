@@ -304,7 +304,7 @@ export const MessageInput = ({
   };
 
   // If user is Viewer in private channel, hide the entire input
-  if (permissions.isViewer && channel.type === 'group-private') {
+  if (!permissions.isOwner && !permissions.isPM && permissions.isViewer && channel.type === 'group-private') {
     return (
       <div className="border-t border-gray-300 dark:border-gray-700 p-4 bg-gray-100 dark:bg-zinc-900/50">
         <div className="text-center text-sm text-gray-600 dark:text-gray-400">

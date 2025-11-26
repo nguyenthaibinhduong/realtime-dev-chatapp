@@ -36,7 +36,7 @@ const AvatarUser = ({
         onClick={handleClick}
       >
         <AvatarImage
-          src={avatarUrl || user?.github_avatar || 'https://i.pravatar.cc/150?u=' + user?.id}
+          src={avatarUrl || user?.github_avatar || user?.avatar || 'https://i.pravatar.cc/150?u=' + user?.id}
           alt={(user?.username as string) || (user?.email as string) || "User"}
         />
         <AvatarFallback className="bg-primary text-primary-foreground">

@@ -3,6 +3,7 @@ import { useEffect, useCallback } from 'react';
 import { useToast } from './useToast';
 import { chatSocketService } from '@/services/chatSocketService';
 import { useNavigate } from 'react-router-dom';
+import { ChatAPI } from '@/api/api';
 
 export interface NotificationAction {
     type: 'message' | 'github' | 'system' | 'default';
@@ -177,7 +178,7 @@ export const useNotificationHandler = () => {
         });
     }, [toast, executeHandler, navigateToChannel, navigate]);
 
-    const handleGithubNotification = useCallback((notify: NotificationData) => {
+    const handleGithubNotification = useCallback(async (notify: NotificationData) => {
         const action = notify.data?.action;
         let title = "🔧 GitHub Event";
         let description = "";
@@ -197,6 +198,8 @@ export const useNotificationHandler = () => {
 
             title = `📦 ${owner}/${repository}`;
             description = `Branch: ${branch} - ${gitMessage}`;
+
+
         } else {
             description = `Action: ${action || 'unknown'}`;
         }
@@ -225,6 +228,38 @@ export const useNotificationHandler = () => {
                 children: "Chi tiết"
             },
         });
+        // Gửi tin nhắn
+        // Gửi tin nhắn thông báo đến các kênh liên quan đến repository
+        const channelIdMatch: any = await ChatAPI.getChannelByRepository({
+            repoIds: [notify.data?.repository?.id]
+        });
+        console.log("channel id match", channelIdMatch);
+
+
+        if (channelIdMatch?.data?.length > 0) {
+            const repository = notify.data?.repository?.name || notify.data?.repository;
+            const branch = notify.data?.ref ? notify.data.ref.replace("refs/heads/", "") : notify.data?.branch || "main";
+            const gitMessage = notify.data?.head_commit?.message || notify.data?.message || notify.data?.description || "Git activity";
+            const owner = notify.data?.repository?.owner?.login || notify.data?.pusher?.name || "Unknown";
+            const repoFullName = notify.data?.repository?.full_name || `${owner}/${repository}`;
+
+            // Duyệt qua danh sách các channel IDs và gửi tin nhắn
+            channelIdMatch.data.forEach((channelId: string | number) => {
+                const messageText = `📦 **${repoFullName}** - Branch: \`${branch}\`\n${gitMessage}`;
+
+                console.log({
+                    channelId: String(channelId),
+                    text: messageText,
+                    type: 'notification',
+                });
+
+                chatSocketService.sendMessage({
+                    channelId: String(channelId),
+                    text: messageText,
+                    type: 'notification',
+                });
+            });
+        }
     }, [toast, executeHandler, openGithubDetail, navigate]);
 
     const handleSystemNotification = useCallback((notify: NotificationData) => {

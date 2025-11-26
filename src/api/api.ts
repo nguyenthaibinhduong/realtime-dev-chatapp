@@ -38,6 +38,7 @@ export const ChatAPI = {
   createChannel: async (data: any) => apipost(`channels/create-channel`, data),
   updateChannel: async (data: any) => apipost(`channels/update-channel`, data),
   joinChannel: async (data: any) => apipost(`channels/join-channel`, data),
+  getChannelByRepository : async (data: any) => apipost(`channels/repository-channels`, data),
   //Tìm kiếm
   fetchSearchUser: async (key: string, limit: number) =>
     apiget(`users/search-user`, {
