@@ -147,7 +147,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                                 {action.icon}
                                             </div>
                                             <div className="flex flex-col flex-1 min-w-0">
-                                                <span className={cn("text-sm font-semibold", action.variant === 'danger' ? "text-red-400" : "text-gray-900 dark:text-gray-800 dark:text-gray-100")}>{action.label}</span>
+                                                <span className={cn("text-sm font-semibold", action.variant === 'danger' ? "text-red-400" : "text-gray-900 dark:text-gray-100")}>{action.label}</span>
                                                 {action.description && <span className="text-xs text-gray-600 dark:text-gray-400">{action.description}</span>}
                                             </div>
                                         </DropdownMenuItem>

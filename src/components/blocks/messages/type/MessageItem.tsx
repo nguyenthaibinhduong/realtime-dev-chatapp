@@ -253,7 +253,7 @@ const MessageItem = memo(({
                             !hasOnlyImages && (
                                 isMe
                                     ? "bg-blue-600 dark:bg-blue-600 text-white shadow-sm px-2.5 py-1.5"
-                                    : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm px-2.5 py-1.5"
+                                    : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm px-2.5 py-1.5"
                             ),
                             isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-400 dark:border-gray-600",
                             isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700 dark:bg-blue-700",
