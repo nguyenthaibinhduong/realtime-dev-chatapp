@@ -243,6 +243,12 @@ export const useNotificationHandler = () => {
 
             // Duyệt qua danh sách các channel IDs và gửi tin nhắn
             channelIdMatch.data.forEach((channelId: string | number) => {
+                console.log({
+                    channelId: String(channelId),
+                    text: `${userName} ${action} trên repository ${repoName}`,
+                    type: 'notification',
+                });
+
                 chatSocketService.sendMessage({
                     channelId: String(channelId),
                     text: `${userName} ${action} trên repository ${repoName}`,
