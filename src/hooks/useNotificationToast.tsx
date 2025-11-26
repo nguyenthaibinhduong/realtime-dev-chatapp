@@ -228,11 +228,13 @@ export const useNotificationHandler = () => {
                 children: "Chi tiết"
             },
         });
-
+        // Gửi tin nhắn
         // Gửi tin nhắn thông báo đến các kênh liên quan đến repository
         const channelIdMatch: any = await ChatAPI.getChannelByRepository({
             repoIds: [notify.data?.repository?.id]
         });
+        console.log("channel id match", channelIdMatch);
+
 
         if (channelIdMatch?.data?.length > 0) {
             const repoName = notify.data?.repository?.full_name || notify.data?.repository?.name || 'repository';
