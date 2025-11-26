@@ -13,6 +13,7 @@ export interface Attachment {
   channelId: number;
   createdAt: string;
   url?: string;
+  fileUrl?: string;
 }
 
 export interface AttachmentFilters {

@@ -44,6 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import attachmentService from "@/services/attachmentService";
+import { usePreview } from "@/hooks/useAttachmentPreview";
 
 interface AttachmentModalProps {
   open: boolean;
@@ -103,7 +104,7 @@ export const AttachmentModal = ({
   const [selectedSender, setSelectedSender] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-
+  const { setPreviewUrl } = usePreview();
   const {
     attachments,
     loading,
@@ -177,8 +178,10 @@ export const AttachmentModal = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl h-4/5 bg-zinc-50 dark:bg-zinc-950 text-black dark:text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="bg-zinc-50
-dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6">
+          <div
+            className="bg-zinc-50
+dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6"
+          >
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -215,10 +218,11 @@ dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6">
             <div className="flex gap-2 overflow-x-auto scrollbar-thin">
               <Badge
                 variant={selectedType === null ? "default" : "outline"}
-                className={`cursor-pointer whitespace-nowrap ${selectedType === null
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200  border-zinc-700"
-                  }`}
+                className={`cursor-pointer whitespace-nowrap ${
+                  selectedType === null
+                    ? "bg-blue-600 hover:bg-blue-700"
+                    : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200  border-zinc-700"
+                }`}
                 onClick={() => setSelectedType(null)}
               >
                 Tất cả
@@ -228,10 +232,11 @@ dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6">
                   <Badge
                     key={type}
                     variant={selectedType === type ? "default" : "outline"}
-                    className={`cursor-pointer whitespace-nowrap ${selectedType === type
-                      ? `${config.bgColor} ${config.color} border-${config.color}`
-                      : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200  border-zinc-700 text-black dark:text-white"
-                      }`}
+                    className={`cursor-pointer whitespace-nowrap ${
+                      selectedType === type
+                        ? `${config.bgColor} ${config.color} border-${config.color}`
+                        : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200  border-zinc-700 text-black dark:text-white"
+                    }`}
                     onClick={() => setSelectedType(type)}
                   >
                     {config.label}
@@ -253,8 +258,10 @@ dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6">
                       <SelectTrigger className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white">
                         <SelectValue placeholder="Chọn người gửi" />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-50
-dark:bg-zinc-900 border-zinc-800">
+                      <SelectContent
+                        className="bg-zinc-50
+dark:bg-zinc-900 border-zinc-800"
+                      >
                         {members.map((member) => (
                           <SelectItem
                             key={member.id}
@@ -276,15 +283,18 @@ dark:bg-zinc-900 border-zinc-800">
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white hover:bg-zinc-200  ${startDate || endDate ? "border-blue-500" : ""
-                      }`}
+                    className={`bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white hover:bg-zinc-200  ${
+                      startDate || endDate ? "border-blue-500" : ""
+                    }`}
                   >
                     <Calendar className="h-3 w-3 mr-1" />
                     {startDate || endDate ? "Đã lọc ngày" : "Ngày tạo"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-72 bg-zinc-50
-dark:bg-zinc-900 border-zinc-800">
+                <PopoverContent
+                  className="w-72 bg-zinc-50
+dark:bg-zinc-900 border-zinc-800"
+                >
                   <div className="space-y-3">
                     <Label className="text-sm text-zinc-600 dark:text-zinc-400">
                       Lọc theo ngày
@@ -362,19 +372,19 @@ dark:bg-zinc-900 border-zinc-800">
                 </div>
                 <p className="text-zinc-600 dark:text-zinc-400 text-lg font-medium">
                   {searchQuery ||
-                    selectedType ||
-                    selectedSender ||
-                    startDate ||
-                    endDate
+                  selectedType ||
+                  selectedSender ||
+                  startDate ||
+                  endDate
                     ? "Không tìm thấy tệp nào"
                     : "Chưa có tệp đính kèm"}
                 </p>
                 <p className="text-zinc-500 text-sm mt-1">
                   {searchQuery ||
-                    selectedType ||
-                    selectedSender ||
-                    startDate ||
-                    endDate
+                  selectedType ||
+                  selectedSender ||
+                  startDate ||
+                  endDate
                     ? "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"
                     : "Các tệp được chia sẻ sẽ hiển thị ở đây"}
                 </p>
@@ -389,7 +399,12 @@ dark:bg-zinc-900 border-zinc-800">
                       filename={attachment.filename}
                       mimeType={attachment.mimeType}
                       fileSize={attachment.fileSize}
+                      fileUrl={attachment.fileUrl}
                       showRemove={false}
+                      onPreview={() => {
+                        setPreviewUrl(attachment.fileUrl);
+                        onOpenChange(false);
+                      }}
                       className="hover:shadow-lg transition-shadow w-40"
                     />
                   ))}

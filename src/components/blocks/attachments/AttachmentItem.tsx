@@ -14,6 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePreview } from "@/hooks/useAttachmentPreview";
 
 type AttachmentItemProps = {
   keyName?: string;
@@ -24,6 +25,7 @@ type AttachmentItemProps = {
   onRemove?: () => void;
   showRemove?: boolean;
   className?: string;
+  onPreview?: (url: string) => void;
 };
 
 // Get file icon based on mime type or extension
@@ -211,10 +213,13 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
   onRemove,
   showRemove = false,
   className = "",
+  onPreview,
 }) => {
   const [url, setUrl] = useState<string | null>(fileUrl ?? null);
   const [loading, setLoading] = useState<boolean>(!!keyName && !fileUrl);
   const [error, setError] = useState<string | null>(null);
+
+  const { setPreviewUrl } = usePreview();
 
   useEffect(() => {
     let mounted = true;
@@ -246,6 +251,26 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
       mounted = false;
     };
   }, [keyName, fileUrl]);
+
+  const handlePreview = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!fileUrl) return;
+
+    console.log("🖼️ Preview triggered:", {
+      fileUrl,
+      hasOnPreview: !!onPreview,
+    });
+
+    // Ưu tiên callback từ prop (nếu có)
+    if (onPreview) {
+      onPreview(fileUrl);
+    } else {
+      // Fallback: sử dụng context
+      setPreviewUrl(fileUrl);
+    }
+  };
 
   const isImage = !!mimeType && mimeType.startsWith("image/");
   const FileIcon = getFileIcon(mimeType, filename);
@@ -331,8 +356,10 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`
           </div>
         </div>
         {/* Filename */}
-        <div className="p-3 bg-zinc-50
-dark:bg-zinc-900/90 backdrop-blur-sm">
+        <div
+          className="p-3 bg-zinc-50
+dark:bg-zinc-900/90 backdrop-blur-sm"
+        >
           <p
             className="text-xs text-black dark:text-white truncate font-medium"
             title={filename}
@@ -362,20 +389,27 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-
         <div
           className={`w-16 h-16 bg-gradient-to-br ${fileStyle.gradient} rounded-2xl flex items-center justify-center shadow-lg`}
         >
-          {FileIcon && <FileIcon className="w-8 h-8 text-black dark:text-white" />}
+          {FileIcon && (
+            <FileIcon className="w-8 h-8 text-black dark:text-white" />
+          )}
         </div>
 
         {/* Hover Actions */}
-        <div className="absolute inset-0 bg-white dark:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
-          <a
+        <div className="absolute inset-0 bg-white dark:bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+          {/* <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
             title="Mở"
+          > */}
+          <button
+            type="button"
+            onClick={handlePreview}
+            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
           >
             <ExternalLink className="w-5 h-5 text-black dark:text-white" />
-          </a>
+          </button>
           <a
             href={url}
             download={filename}

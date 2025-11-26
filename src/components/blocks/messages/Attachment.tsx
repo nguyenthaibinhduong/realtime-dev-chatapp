@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import attachmentService from "@/services/attachmentService";
+import AttachmentItem from "../attachments/AttachmentItem";
 
 type AttachmentProps = {
   keyName?: string;
@@ -9,6 +10,7 @@ type AttachmentProps = {
   className?: string;
   fileSize?: number;
   style?: React.CSSProperties;
+  onPreview?: (url: string) => void;
 };
 
 export const Attachment: React.FC<AttachmentProps> = ({
@@ -19,6 +21,7 @@ export const Attachment: React.FC<AttachmentProps> = ({
   fileSize,
   className = "w-56 rounded", // fixed width by default (change w-56 to adjust)
   style,
+  onPreview,
 }) => {
   const [url, setUrl] = useState<string | null>(fileUrl ?? null);
   const [loading, setLoading] = useState<boolean>(!!keyName && !fileUrl);
@@ -66,7 +69,9 @@ export const Attachment: React.FC<AttachmentProps> = ({
         className={`flex items-center justify-center ${className}`}
         style={wrapperStyle}
       >
-        <div className="text-sm text-gray-600 dark:text-gray-400">Loading...</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Loading...
+        </div>
       </div>
     );
   }
@@ -111,25 +116,14 @@ export const Attachment: React.FC<AttachmentProps> = ({
   }
 
   return (
-    <div
-      className={`inline-flex items-center gap-3 p-2 bg-gray-200 dark:bg-gray-800/30 rounded ${className}`}
-      style={wrapperStyle}
-    >
-      <div className="flex-1 min-w-0">
-        <div className="text-sm truncate text-gray-900 dark:text-gray-200">{filename || url}</div>
-        <div className="text-xs text-gray-600 dark:text-gray-400">
-          {attachmentService.formatFileSize(fileSize)}
-        </div>
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-blue-600 dark:text-blue-400 underline"
-        >
-          Open / Download
-        </a>
-      </div>
-    </div>
+    <AttachmentItem
+      key={keyName}
+      fileSize={fileSize}
+      fileUrl={fileUrl}
+      filename={filename}
+      mimeType={mimeType}
+      // onPreview={onPreview}
+    />
   );
 };
 

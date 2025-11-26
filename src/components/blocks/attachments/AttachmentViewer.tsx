@@ -1,4 +1,4 @@
-export const AtthchmentViewer = ({ url }: { url: string }) => {
+export const AttachmentViewer = ({ url }: { url: string }) => {
   if (url.includes(".xlsx") || url.includes(".xls")) {
     return (
       <iframe
