@@ -56,7 +56,7 @@ export const RepoDragList: React.FC<RepoDragListProps> = ({
                                     group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200
                                     ${isAlreadyAdded
                                         ? 'bg-zinc-100 dark:bg-zinc-800/50 border-zinc-700 opacity-50 cursor-not-allowed'
-                                        : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-700 hover:border-blue-500 hover:bg-zinc-100 dark:bg-zinc-800 cursor-grab active:cursor-grabbing hover:shadow-lg hover:shadow-blue-500/10'
+                                        : 'bg-zinc-50  border-zinc-700 hover:border-blue-500 hover:bg-zinc-100 dark:bg-zinc-800 cursor-grab active:cursor-grabbing hover:shadow-lg hover:shadow-blue-500/10'
                                     }
                                 `}
                             >

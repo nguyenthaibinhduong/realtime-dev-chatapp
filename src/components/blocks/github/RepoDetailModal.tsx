@@ -1054,7 +1054,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                   value={commitSearch}
                   onChange={handleCommitSearch}
                   placeholder="Tìm commit theo message, SHA, tác giả…"
-                  className="w-full px-3 py-2 rounded-md border border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-gray-900 dark:text-gray-800 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full px-3 py-2 rounded-md border border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-gray-900  dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
 
@@ -1165,7 +1165,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 border-zinc-700 text-gray-900 dark:text-white bg-white dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-100 dark:bg-zinc-800"
+                            className="h-8 border-zinc-700 text-gray-900 dark:text-white bg-white  hover:bg-gray-100 dark:hover:bg-zinc-100 dark:bg-zinc-800"
                             onClick={() => {
                               // 👇 mở commit view: nhớ branch hiện tại + reset path về root
                               setMode("commit");
