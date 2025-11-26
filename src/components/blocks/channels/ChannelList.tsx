@@ -102,13 +102,18 @@ export const ChannelList = ({
     // Nhóm các kênh group-private theo project key
     const projectGroups: ProjectGroup[] = [];
     const groupPrivateByKey = new Map<string, Channel[]>();
+    const groupPrivateWithoutKey: Channel[] = []; // Kênh group-private không có key
 
     grouped["group-private"].forEach((channel: any) => {
         if (channel.key) {
+            // Có key -> nhóm theo dự án
             if (!groupPrivateByKey.has(channel.key)) {
                 groupPrivateByKey.set(channel.key, []);
             }
             groupPrivateByKey.get(channel.key)!.push(channel);
+        } else {
+            // Không có key -> hiển thị như kênh bình thường
+            groupPrivateWithoutKey.push(channel);
         }
     });
 
@@ -171,7 +176,7 @@ export const ChannelList = ({
                 variant="ghost"
                 className={`w-full justify-between px-2 py-2 my-1 h-auto font-normal flex items-center
                     ${selectedChannel?.id === channel.id
-                        ? 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm'
+                        ? 'bg-gray-200 dark:bg-gray-800 text-gray-900  dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm'
                         : unread > 0
                             ? 'font-bold text-gray-900 dark:text-white'
                             : 'text-gray-700 dark:text-sidebar-foreground hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-800 dark:text-gray-100 shadow-sm'
@@ -210,7 +215,17 @@ export const ChannelList = ({
                 </div>
             )}
 
-            {/* Kênh dự án - nhóm theo project */}
+            {/* Kênh riêng tư không có key - hiển thị như kênh bình thường */}
+            {groupPrivateWithoutKey.length > 0 && (
+                <div className="mb-4">
+                    <div className="text-xs font-semibold text-gray-600 dark:text-muted-foreground mb-2 pl-2">
+                        Kênh riêng tư
+                    </div>
+                    {groupPrivateWithoutKey.map(renderChannel)}
+                </div>
+            )}
+
+            {/* Kênh dự án - nhóm theo project (chỉ những kênh có key) */}
             {projectGroups.length > 0 && (
                 <div className="mb-4">
                     <div className="text-xs font-semibold text-gray-600 dark:text-muted-foreground mb-2 pl-2">

@@ -272,7 +272,9 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
         <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-700/40 mx-1" />
 
         {/* Nút mở modal kết nối repo git - Only for Dev/PM/Owner */}
-        {(permissions.isDev || permissions.isPM || permissions.isOwner) && (
+
+
+        {(permissions.isDev || permissions.isPM || permissions.isOwner || channel.type === "personal") && (
           <>
             <button
               className="p-2.5 rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
