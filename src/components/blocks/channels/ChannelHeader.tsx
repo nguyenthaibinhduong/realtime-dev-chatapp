@@ -101,9 +101,15 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
   const [openGitModal, setOpenGitModal] = useState(false);
   const [openAttachmentModal, setOpenAttachmentModal] = useState(false);
   const [openSettingsModal, setOpenSettingsModal] = useState(false);
+  const [permissions, setPermissions] = useState<ReturnType<typeof getChannelPermissions> | null>(null);
 
   // Get user permissions for this channel
-  const permissions = getChannelPermissions(channel, user?.id);
+  useEffect(() => {
+    if (channel && user.id) {
+      const perms = getChannelPermissions(channel, user.id);
+      setPermissions(perms);
+    }
+  }, [channel, user]);
 
   useEffect(() => {
     if (channel.type === "personal" && members && user?.id) {
@@ -130,33 +136,33 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
           {/* Display user role badge for private channels */}
           {channel.type === "group-private" && user?.id && (
             <div className="flex items-center gap-1.5">
-              {permissions.isOwner && (
+              {permissions?.isOwner && (
                 <Badge variant="outline" className="bg-yellow-500/10 border-yellow-500/50 text-yellow-400 text-xs">
                   <Crown className="h-3 w-3 mr-1" />
                   Owner
                 </Badge>
               )}
-              {permissions.isPM && (
+              {permissions?.isPM && (
                 <Badge variant="outline" className="bg-purple-500/10 border-purple-500/50 text-purple-400 text-xs">
                   PM
                 </Badge>
               )}
-              {permissions.isBA && (
+              {permissions?.isBA && (
                 <Badge variant="outline" className="bg-blue-500/10 border-blue-500/50 text-blue-400 text-xs">
                   BA
                 </Badge>
               )}
-              {permissions.isTester && (
+              {permissions?.isTester && (
                 <Badge variant="outline" className="bg-orange-500/10 border-orange-500/50 text-orange-400 text-xs">
                   Tester
                 </Badge>
               )}
-              {permissions.isDev && (
+              {permissions?.isDev && (
                 <Badge variant="outline" className="bg-green-500/10 border-green-500/50 text-green-400 text-xs">
                   Dev
                 </Badge>
               )}
-              {permissions.isViewer && !permissions.isPM && !permissions.isOwner && (
+              {permissions?.isViewer && !permissions?.isPM && !permissions?.isOwner && (
                 <Badge variant="outline" className="bg-zinc-500/10 border-zinc-500/50 text-zinc-400 text-xs">
                   Viewer
                 </Badge>
@@ -274,7 +280,7 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
         {/* Nút mở modal kết nối repo git - Only for Dev/PM/Owner */}
 
 
-        {(permissions.isDev || permissions.isPM || permissions.isOwner || channel.type === "personal") && (
+        {(permissions?.isDev || permissions?.isPM || permissions?.isOwner || channel.type === "personal") && (
           <>
             <button
               className="p-2.5 rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"

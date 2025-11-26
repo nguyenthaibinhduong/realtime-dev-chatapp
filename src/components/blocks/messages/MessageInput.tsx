@@ -116,7 +116,7 @@ export const MessageInput = ({
   channelMessages = []
 }: MessageInputProps) => {
   const { user } = useAuth();
-  const permissions = getChannelPermissions(channel, user?.id);
+  const [permissions, setPermissions] = useState<ReturnType<typeof getChannelPermissions> | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -126,6 +126,12 @@ export const MessageInput = ({
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (channel && user.id) {
+      const perms = getChannelPermissions(channel, user.id);
+      setPermissions(perms);
+    }
+  }, [channel, user]);
 
   console.log("Channel in permissions:", permissions);
 
@@ -134,6 +140,8 @@ export const MessageInput = ({
     setShowTesterForm(false);
     setShowBAForm(true);
   };
+
+
 
   const openTesterForm = () => {
     setShowBAForm(false);
@@ -304,7 +312,7 @@ export const MessageInput = ({
   };
 
   // If user is Viewer in private channel, hide the entire input
-  if (!permissions.isOwner && !permissions.isPM && permissions.isViewer && channel.type === 'group-private') {
+  if (!permissions?.isOwner && !permissions?.isPM && permissions?.isViewer && channel.type === 'group-private') {
     return (
       <div className="border-t border-gray-300 dark:border-gray-700 p-4 bg-gray-100 dark:bg-zinc-900/50">
         <div className="text-center text-sm text-gray-600 dark:text-gray-400">
@@ -375,7 +383,7 @@ export const MessageInput = ({
 
         {/* Input Section - WhatsApp Style */}
         <div className="p-3">
-          <div className="w-full flex items-end gap-2">
+          <div className="w-full flex items-center justify-between gap-2">
             {/* Plus Button with Popup Menu */}
             <div className="relative" ref={menuRef}>
               <Tooltip>
@@ -440,33 +448,32 @@ export const MessageInput = ({
                   )}
 
                   {/* Code Editor - Only for Dev/PM/Owner */}
-                  {permissions.isDev
-                    && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleCodeEditorToggle();
-                          setShowAttachMenu(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
-                      >
-                        <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isCodeEditorOpen
-                          ? "bg-[#007acc] text-white"
-                          : "bg-teal-500/20 group-hover:bg-teal-500/30"
-                          }`}>
-                          <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-white" : "text-teal-500 dark:text-teal-400"}`} />
-                        </div>
-                        <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">Code Editor</span>
-                      </button>
-                    )}
+                  {(permissions?.isDev || channel.type === "personal" || channel.type === "group") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleCodeEditorToggle();
+                        setShowAttachMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+                    >
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isCodeEditorOpen
+                        ? "bg-[#007acc] text-white"
+                        : "bg-teal-500/20 group-hover:bg-teal-500/30"
+                        }`}>
+                        <Code2 className={`h-4 w-4 ${isCodeEditorOpen ? "text-white" : "text-teal-500 dark:text-teal-400"}`} />
+                      </div>
+                      <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">Code Editor</span>
+                    </button>
+                  )}
 
-                  {(permissions.isBA || permissions.isTester) && (
+                  {(permissions?.isBA || permissions?.isTester) && (
                     <div className="h-px bg-gray-700 my-2" />
                   )}
 
                   {/* Function Buttons */}
                   {/* BA Requirement - Only for BA/PM/Owner */}
-                  {permissions.isBA && (
+                  {permissions?.isBA && (
                     <button
                       type="button"
                       onClick={() => {
@@ -486,7 +493,7 @@ export const MessageInput = ({
                   )}
 
                   {/* Debug Report - Only for Tester/PM/Owner */}
-                  {permissions.isTester && (
+                  {permissions?.isTester && (
                     <button
                       type="button"
                       onClick={() => {
@@ -521,7 +528,7 @@ export const MessageInput = ({
 
             {/* Input Field - WhatsApp Style */}
             <div className="relative flex-1">
-              <div className="rounded-full bg-gray-200 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700/50 px-4 py-2 shadow-lg flex items-center gap-2">
+              <div className="rounded-full bg-gray-200 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700/50 px-4 py-2 shadow-lg flex items-center justify-center gap-2">
                 <button
                   type="button"
                   className="flex-shrink-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
@@ -541,8 +548,8 @@ export const MessageInput = ({
                       ? "Chỉnh sửa tin nhắn..."
                       : "Nhập tin nhắn"
                   }
-                  className="w-full resize-none bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-500 focus:outline-none"
-                  style={{ minHeight: 24, maxHeight: 100 }}
+                  className="w-full resize-none bg-transparent flex items-center text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-500 focus:outline-none"
+                  style={{ minHeight: 24, maxHeight: 100, paddingTop: '2px', paddingBottom: '2px' }}
                 />
               </div>
             </div>

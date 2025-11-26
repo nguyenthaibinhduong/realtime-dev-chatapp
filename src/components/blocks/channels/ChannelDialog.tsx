@@ -55,65 +55,55 @@ const ROLES = [
   { id: 0, name: "Viewer", icon: Eye, color: "text-gray-400", bgColor: "bg-gray-500/20", borderColor: "border-gray-500" },
 ];
 
-function UserBadge({ user, roles, onRemove, onRoleClick, isPrivate }: {
+function UserBadge({ user, roles, onRemove, onRoleToggle, isPrivate }: {
   user: UserWithRoles;
   roles?: number[];
   onRemove: () => void;
-  onRoleClick?: (userId: number) => void;
+  onRoleToggle?: (userId: number, roleId: number) => void;
   isPrivate?: boolean;
 }) {
   const userRoles = roles || user.roles || [0];
-  const getRoleInfo = (roleId: number) => ROLES.find(r => r.id === roleId);
 
   return (
-    <div className="bg-gray-800 border border-gray-600 rounded-lg p-2 flex items-center justify-between gap-2 hover:border-blue-500 transition-colors">
-      <div className="flex items-center gap-2 flex-1">
-        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-black dark:text-white text-xs font-semibold flex-shrink-0">
-          {user.username.charAt(0).toUpperCase()}
-        </div>
-        <div className="flex-1 min-w-0">
+    <div className="bg-gray-800 border border-gray-600 rounded-lg p-2 hover:border-blue-500 transition-colors">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-black dark:text-white text-xs font-semibold flex-shrink-0">
+            {user.username.charAt(0).toUpperCase()}
+          </div>
           <p className="text-sm font-medium text-black dark:text-white truncate">{user.username}</p>
-          {isPrivate && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {userRoles.map(roleId => {
-                const role = getRoleInfo(roleId);
-                if (!role) return null;
-                const RoleIcon = role.icon;
-                return (
-                  <Badge
-                    key={roleId}
-                    variant="outline"
-                    className={`${role.bgColor} ${role.borderColor} ${role.color} text-[10px] px-1.5 py-0 h-5 flex items-center gap-1`}
-                  >
-                    <RoleIcon className="h-2.5 w-2.5" />
-                    {role.name}
-                  </Badge>
-                );
-              })}
-            </div>
-          )}
         </div>
-      </div>
-      <div className="flex items-center gap-1 flex-shrink-0">
-        {isPrivate && onRoleClick && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-gray-700"
-            onClick={() => onRoleClick(user.id)}
-          >
-            Roles
-          </Button>
-        )}
         <Button
           size="sm"
           variant="ghost"
-          className="h-6 w-6 p-0 hover:bg-red-600/20 text-red-400"
+          className="h-6 w-6 p-0 hover:bg-red-600/20 text-red-400 flex-shrink-0"
           onClick={onRemove}
         >
           <X className="h-3.5 w-3.5" />
         </Button>
       </div>
+      {isPrivate && onRoleToggle && (
+        <div className="flex flex-wrap gap-1.5">
+          {ROLES.map((role) => {
+            const RoleIcon = role.icon;
+            const isSelected = userRoles.includes(role.id);
+            return (
+              <Badge
+                key={role.id}
+                variant="outline"
+                className={`cursor-pointer transition-all text-[10px] px-1.5 py-0.5 h-6 flex items-center gap-1 ${isSelected
+                  ? `${role.bgColor} ${role.borderColor} ${role.color}`
+                  : 'bg-gray-800 border-gray-600 text-gray-400 hover:bg-gray-700'
+                  }`}
+                onClick={() => onRoleToggle(user.id, role.id)}
+              >
+                <RoleIcon className="h-2.5 w-2.5" />
+                {role.name}
+              </Badge>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -613,10 +603,11 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                   {channelForms.map((form, index) => (
                     <div
                       key={form.id}
-                      className={`p-3 rounded-lg border-2 transition-all ${activeChannelFormId === form.id
+                      className={`p-3 rounded-lg border-2 transition-all cursor-pointer ${activeChannelFormId === form.id
                         ? 'border-blue-500 bg-blue-500/5'
                         : 'border-gray-600 bg-gray-800/50 hover:border-gray-500'
                         }`}
+                      onClick={() => setActiveChannelFormId(form.id)}
                     >
                       {/* Channel Header */}
                       <div className="flex items-center gap-2 mb-2">
@@ -632,6 +623,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                         <Input
                           value={form.name}
                           onChange={(e) => updateChannelFormName(form.id, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
                           placeholder={`Tên kênh ${index + 1}`}
                           className="flex-1 bg-gray-800 text-black dark:text-white border-gray-600 placeholder:text-gray-400 focus:border-blue-500 h-8 text-sm"
                         />
@@ -639,7 +631,10 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => removeChannelForm(form.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeChannelForm(form.id);
+                            }}
                             className="h-8 w-8 p-0 hover:bg-red-600/20 text-red-400 flex-shrink-0"
                           >
                             <X className="h-3.5 w-3.5" />
@@ -652,17 +647,11 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                         <span className={`${form.users.length < 2 ? 'text-red-400' : 'text-gray-400'}`}>
                           👥 {form.users.length} thành viên {form.users.length < 2 && '(Tối thiểu 2)'}
                         </span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setActiveChannelFormId(form.id)}
-                          className={`h-6 px-2 text-xs ${activeChannelFormId === form.id
-                            ? 'text-blue-400 bg-blue-500/10'
-                            : 'text-gray-400 hover:text-blue-400'
-                            }`}
-                        >
-                          {activeChannelFormId === form.id ? '✓ Đang chỉnh sửa' : 'Chỉnh sửa thành viên'}
-                        </Button>
+                        {activeChannelFormId === form.id && (
+                          <Badge variant="outline" className="bg-blue-500/10 border-blue-500/30 text-blue-400 text-[10px]">
+                            ✓ Đang chỉnh sửa
+                          </Badge>
+                        )}
                       </div>
 
                       {/* Quick Member Preview */}
@@ -774,16 +763,14 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
               <div className="space-y-2 mx-1">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm text-gray-200">
-                    {type === "private" ? "Thành viên (bắt buộc)" : "Thành viên (tùy chọn)"}
+                    Thành viên (bắt buộc)
                   </Label>
-                  {type === "private" && (
-                    <span className={`text-xs ${selectedUsers.length < 2 ? 'text-red-400' : 'text-gray-400'}`}>
-                      {selectedUsers.length}/2 tối thiểu
-                    </span>
-                  )}
+                  <span className={`text-xs ${selectedUsers.length < 2 ? 'text-red-400' : 'text-gray-400'}`}>
+                    {selectedUsers.length}/2 tối thiểu
+                  </span>
                 </div>
 
-                {type === "private" && selectedUsers.length < 2 && (
+                {selectedUsers.length < 2 && (
                   <div className="flex items-center gap-2 p-2 bg-orange-500/10 rounded border border-orange-500/30">
                     <span className="text-orange-400 text-base">⚠️</span>
                     <p className="text-xs text-orange-400">
@@ -791,6 +778,7 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                     </p>
                   </div>
                 )}
+
 
                 {selectedUsers.length > 0 && (
                   <div className="space-y-2 p-3 bg-gray-800 rounded-md border border-gray-600">
@@ -811,68 +799,14 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                     </div>
                     <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                       {selectedUsers.map((user) => (
-                        <div key={user.id}>
-                          <UserBadge
-                            user={user}
-                            roles={user.roles}
-                            onRemove={() => handleRemoveUser(user.id)}
-                            onRoleClick={type === "private" ? setEditingUserId : undefined}
-                            isPrivate={type === "private"}
-                          />
-
-                          {/* Role Selection Panel */}
-                          {type === "private" && editingUserId === user.id && (
-                            <div className="mt-2 p-3 bg-gray-900 rounded-lg border border-blue-500/50 space-y-2">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-semibold text-blue-400 uppercase">
-                                  Chọn vai trò cho {user.username}
-                                </span>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => setEditingUserId(null)}
-                                  className="h-5 w-5 p-0 text-gray-400 hover:text-black dark:text-white"
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              </div>
-                              <div className="grid grid-cols-2 gap-2">
-                                {ROLES.map((role) => {
-                                  const RoleIcon = role.icon;
-                                  const isSelected = (user.roles || [0]).includes(role.id);
-                                  return (
-                                    <button
-                                      key={role.id}
-                                      onClick={() => handleToggleRole(user.id, role.id)}
-                                      className={`p-2 rounded-lg border-2 transition-all ${isSelected
-                                        ? `${role.bgColor} ${role.borderColor} ${role.color}`
-                                        : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-gray-500'
-                                        }`}
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isSelected
-                                          ? `${role.borderColor} ${role.bgColor}`
-                                          : 'border-gray-600'
-                                          }`}>
-                                          {isSelected && (
-                                            <svg className={`w-3 h-3 ${role.color}`} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                              <path d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                          )}
-                                        </div>
-                                        <RoleIcon className="h-4 w-4" />
-                                        <span className="text-sm font-medium">{role.name}</span>
-                                      </div>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                              <p className="text-xs text-gray-400 mt-2">
-                                * Có thể chọn nhiều vai trò. Nếu không chọn, mặc định là Viewer.
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                        <UserBadge
+                          key={user.id}
+                          user={user}
+                          roles={user.roles}
+                          onRemove={() => handleRemoveUser(user.id)}
+                          onRoleToggle={type === "private" ? handleToggleRole : undefined}
+                          isPrivate={type === "private"}
+                        />
                       ))}
                     </div>
                   </div>
@@ -994,68 +928,14 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                           </div>
                           <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                             {getActiveChannelForm()!.users.map((user) => (
-                              <div key={user.id}>
-                                <UserBadge
-                                  user={user}
-                                  roles={user.roles}
-                                  onRemove={() => handleRemoveUserFromChannel(user.id)}
-                                  onRoleClick={setEditingUserId}
-                                  isPrivate={true}
-                                />
-
-                                {/* Role Selection Panel */}
-                                {editingUserId === user.id && (
-                                  <div className="mt-2 p-3 bg-gray-900 rounded-lg border border-blue-500/50 space-y-2">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <span className="text-xs font-semibold text-blue-400 uppercase">
-                                        Chọn vai trò cho {user.username}
-                                      </span>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => setEditingUserId(null)}
-                                        className="h-5 w-5 p-0 text-gray-400 hover:text-black dark:text-white"
-                                      >
-                                        <X className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      {ROLES.map((role) => {
-                                        const RoleIcon = role.icon;
-                                        const isSelected = (user.roles || [0]).includes(role.id);
-                                        return (
-                                          <button
-                                            key={role.id}
-                                            onClick={() => handleToggleRoleForChannel(user.id, role.id)}
-                                            className={`p-2 rounded-lg border-2 transition-all ${isSelected
-                                              ? `${role.bgColor} ${role.borderColor} ${role.color}`
-                                              : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-gray-500'
-                                              }`}
-                                          >
-                                            <div className="flex items-center gap-2">
-                                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isSelected
-                                                ? `${role.borderColor} ${role.bgColor}`
-                                                : 'border-gray-600'
-                                                }`}>
-                                                {isSelected && (
-                                                  <svg className={`w-3 h-3 ${role.color}`} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path d="M5 13l4 4L19 7"></path>
-                                                  </svg>
-                                                )}
-                                              </div>
-                                              <RoleIcon className="h-4 w-4" />
-                                              <span className="text-sm font-medium">{role.name}</span>
-                                            </div>
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                    <p className="text-xs text-gray-400 mt-2">
-                                      * Có thể chọn nhiều vai trò. Nếu không chọn, mặc định là Viewer.
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
+                              <UserBadge
+                                key={user.id}
+                                user={user}
+                                roles={user.roles}
+                                onRemove={() => handleRemoveUserFromChannel(user.id)}
+                                onRoleToggle={handleToggleRoleForChannel}
+                                isPrivate={true}
+                              />
                             ))}
                           </div>
                         </div>

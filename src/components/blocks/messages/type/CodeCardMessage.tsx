@@ -1,10 +1,11 @@
-import { memo, useState } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { MessageActions, MessageActionType } from "@/components/blocks/messages/MessageAction";
 import AvatarUser from "@/components/common/AvartarUser";
 import { Code2, Copy, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Editor from "@monaco-editor/react";
 
 interface CodeCardMessageProps {
     message: any;
@@ -210,17 +211,46 @@ const CodeCardMessage = memo(({
                         </div>
                     </div>
 
-                    {/* Code Preview */}
+                    {/* Code Preview with Monaco Editor */}
                     <div className="relative">
-                        <pre className={cn(
-                            "text-[9px] sm:text-[10px] md:text-[11px] text-gray-300 font-mono p-1.5 sm:p-2 bg-gray-950/50",
-                            "overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800",
-                            isExpanded ? "max-h-64 sm:max-h-80 md:max-h-96 overflow-y-auto" : "max-h-24 sm:max-h-28 md:max-h-32 overflow-y-hidden"
+                        <div className={cn(
+                            "overflow-hidden",
+                            isExpanded ? "h-64 sm:h-80 md:h-96" : "h-24 sm:h-28 md:h-32"
                         )}>
-                            <code className={`language-${language} whitespace-pre`}>
-                                {previewLines.join('\n')}
-                            </code>
-                        </pre>
+                            <Editor
+                                height="100%"
+                                defaultLanguage={language === "cpp17" ? "cpp" : language === "python3" ? "python" : language}
+                                language={language === "cpp17" ? "cpp" : language === "python3" ? "python" : language}
+                                value={isExpanded ? code : previewLines.join('\n')}
+                                theme="vs-dark"
+                                options={{
+                                    readOnly: true,
+                                    minimap: { enabled: false },
+                                    scrollBeyondLastLine: false,
+                                    fontSize: 11,
+                                    lineHeight: 16,
+                                    automaticLayout: true,
+                                    scrollbar: {
+                                        vertical: isExpanded ? 'auto' : 'hidden',
+                                        horizontal: 'auto',
+                                        verticalScrollbarSize: 8,
+                                        horizontalScrollbarSize: 8,
+                                    },
+                                    overviewRulerLanes: 0,
+                                    hideCursorInOverviewRuler: true,
+                                    overviewRulerBorder: false,
+                                    lineNumbers: 'on',
+                                    glyphMargin: false,
+                                    folding: false,
+                                    lineDecorationsWidth: 0,
+                                    lineNumbersMinChars: 3,
+                                    renderLineHighlight: 'none',
+                                    contextmenu: false,
+                                    selectionHighlight: false,
+                                    occurrencesHighlight: "singleFile",
+                                }}
+                            />
+                        </div>
 
                         {/* Gradient overlay when collapsed */}
                         {hasMoreLines && !isExpanded && (

@@ -179,7 +179,7 @@ export const ChannelList = ({
                         ? 'bg-gray-200 dark:bg-gray-800 text-gray-900  dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm'
                         : unread > 0
                             ? 'font-bold text-gray-900 dark:text-white'
-                            : 'text-gray-700 dark:text-sidebar-foreground hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-800 dark:text-gray-100 shadow-sm'
+                            : 'text-gray-700 dark:text-sidebar-foreground hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 dark:text-gray-100 shadow-sm'
                     }`}
                 onClick={() => onSelectChannel(channel)}
             >

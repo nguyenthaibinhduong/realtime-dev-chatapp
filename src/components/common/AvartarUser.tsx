@@ -14,14 +14,14 @@ const AvatarUser = ({
   size?: string | number;
 }) => {
   const { user: currentUser } = useAuth();
-  const [avatarUrl, setAvatarUrl] = useState<string>(null);
+  // const [avatarUrl, setAvatarUrl] = useState<string>(null);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
 
-  useEffect(() => {
-    if (user?.avatar) {
-      attachmentService.getObjectUrl(user.avatar).then(setAvatarUrl);
-    }
-  }, [user?.avatar]);
+  // useEffect(() => {
+  //   if (user?.avatar) {
+  //     attachmentService.getObjectUrl(user.avatar).then(setAvatarUrl);
+  //   }
+  // }, [user?.avatar]);
 
   const handleClick = () => {
     setShowProfileDialog(true);
@@ -36,7 +36,7 @@ const AvatarUser = ({
         onClick={handleClick}
       >
         <AvatarImage
-          src={avatarUrl || user?.github_avatar || user?.avatar || 'https://i.pravatar.cc/150?u=' + user?.id}
+          src={user?.avatar ?? user?.github_avatar ?? 'https://i.pravatar.cc/150?u=' + user?.id}
           alt={(user?.username as string) || (user?.email as string) || "User"}
         />
         <AvatarFallback className="bg-primary text-primary-foreground">
