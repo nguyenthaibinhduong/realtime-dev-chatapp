@@ -57,22 +57,22 @@ function sizeStyle(size: AvatarSize): React.CSSProperties | undefined {
 const displayName = (u?: User) => u?.username || u?.email || "User";
 
 // Hook để lấy avatar URL
-const useAvatarUrl = (user?: User) => {
-    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+// const useAvatarUrl = (user?: User) => {
+//     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (user?.avatar) {
-            attachmentService.getObjectUrl(user.avatar).then(setAvatarUrl);
-        } else {
-            setAvatarUrl(null);
-        }
-    }, [user?.avatar]);
+//     useEffect(() => {
+//         if (user?.avatar) {
+//             attachmentService.getObjectUrl(user.avatar).then(setAvatarUrl);
+//         } else {
+//             setAvatarUrl(null);
+//         }
+//     }, [user?.avatar]);
 
-    return avatarUrl;
-};
+//     return avatarUrl;
+// };
 
 const avatarSrc = (u?: User, avatarUrl?: string | null) => {
-    return avatarUrl || u?.github_avatar || `https://i.pravatar.cc/150?u=${u?.id}` || undefined;
+    return u?.avatar || u?.github_avatar || `https://i.pravatar.cc/150?u=${u?.id}` || undefined;
 };
 
 /** Common props */
@@ -89,28 +89,28 @@ export type BaseGroupProps = {
 };
 
 /** Component Avatar với URL từ attachmentService */
-function AvatarWithUrl({ 
-    user, 
-    className, 
+function AvatarWithUrl({
+    user,
+    className,
     imageClassName,
     fallbackClassName,
-    children 
-}: { 
-    user: User; 
-    className?: string; 
+    children
+}: {
+    user: User;
+    className?: string;
     imageClassName?: string;
     fallbackClassName?: string;
     children?: React.ReactNode;
 }) {
-    const avatarUrl = useAvatarUrl(user);
+    const avatarUrl = '';
     const name = displayName(user);
-    
+
     return (
         <Avatar className={className}>
-            <AvatarImage 
+            <AvatarImage
                 className={imageClassName}
-                src={avatarSrc(user, avatarUrl)} 
-                alt={name} 
+                src={avatarSrc(user, avatarUrl)}
+                alt={name}
             />
             <AvatarFallback className={fallbackClassName || "bg-muted text-muted-foreground font-medium"}>
                 {name?.[0]?.toUpperCase() ?? "U"}
@@ -212,9 +212,9 @@ export function AvatarGroupStack({
                     };
 
                     const core = (
-                        <AvatarWithUrl 
-                            user={u} 
-                            className={cn("ring-2 ring-background", cls ?? "h-10 w-10", "rounded-full")} 
+                        <AvatarWithUrl
+                            user={u}
+                            className={cn("ring-2 ring-background", cls ?? "h-10 w-10", "rounded-full")}
                         />
                     );
 
@@ -331,8 +331,8 @@ export function AvatarGroupSquare({
                     };
 
                     const tile = (
-                        <AvatarWithUrl 
-                            user={u} 
+                        <AvatarWithUrl
+                            user={u}
                             className="h-full w-full rounded-none"
                             imageClassName="object-cover"
                         />
@@ -421,8 +421,8 @@ export function AvatarGroupGrids({
                     };
 
                     const circle = (
-                        <AvatarWithUrl 
-                            user={u} 
+                        <AvatarWithUrl
+                            user={u}
                             className="h-full w-full rounded-full ring-2 ring-background border border-border"
                             imageClassName="object-cover"
                             fallbackClassName="bg-muted text-foreground/90"
@@ -526,8 +526,8 @@ export function AvatarGroupGridStacked({
                     };
 
                     const circle = (
-                        <AvatarWithUrl 
-                            user={u} 
+                        <AvatarWithUrl
+                            user={u}
                             className="h-full w-full rounded-full ring-2 ring-background border border-border shadow-sm"
                             imageClassName="object-cover"
                             fallbackClassName="bg-muted text-foreground/90"
@@ -660,8 +660,8 @@ export function AvatarGroupGrid({
                     onAvatarClick?.(u);
                 };
                 const img = (
-                    <AvatarWithUrl 
-                        user={u} 
+                    <AvatarWithUrl
+                        user={u}
                         className="h-full w-full rounded-full"
                         imageClassName="object-cover"
                     />

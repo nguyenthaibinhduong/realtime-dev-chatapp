@@ -26,8 +26,9 @@ export function getChannelPermissions(
   channel: Channel | null,
   userId: number | undefined
 ): ChannelPermissions {
-  // Default permissions for non-private channels or when no user
-  const defaultPermissions: ChannelPermissions = {
+  
+  // Default permissions when no channel or user
+  const noAccessPermissions: ChannelPermissions = {
     isOwner: false,
     isPM: false,
     isBA: false,
@@ -37,63 +38,59 @@ export function getChannelPermissions(
     userRoles: [],
   };
 
-  // If not a private channel, return default permissions (all access)
-  if (!channel || channel.type !== "group-private" || !userId) {
-
-     return {...defaultPermissions}
+  // If no channel or no userId
+  if (!channel || !userId) {
+    return noAccessPermissions;
   }
 
   // Check if user is owner
-  const isOwner = channel.owner?.id === userId;
+  const isOwner = channel?.owner?.id == userId;
+  console.log("channel?.owner?.id:", channel?.owner?.id, " userId:", userId);
+  
 
-  // Get user roles from json_data
+  // Check if user is member of the channel
+  const isMember = channel.members?.some((member) => member.id === userId);
+
+  // If not a member and not owner, no access
+  if (!isMember) {
+    return noAccessPermissions;
+  }
+
+  // For non-private channels (group, public), all members have full access
+  if (channel.type !== "group-private") {
+    return {
+      isOwner,
+      isPM: true,
+      isBA: true,
+      isTester: true,
+      isDev: true,
+      isViewer: false,
+      userRoles: [1, 2, 3, 4], // All roles for public channels
+    };
+  }
+
+  // For group-private channels, check roles from json_data
   const userRoleData = channel.json_data?.userRoles?.find(
     (ur: any) => ur.userId === userId
   );
 
-  const userRoles = userRoleData?.roles || [];
+  const userRoles = userRoleData?.roles || [0]; // Default to Viewer if no roles
 
   // Check specific roles
   const isPM = userRoles.includes(1);
   const isBA = userRoles.includes(2);
   const isTester = userRoles.includes(3);
   const isDev = userRoles.includes(4);
-  const isViewer = userRoles.includes(0) || userRoles.length === 0;
-
-  // PM and Owner have all permissions
-  if (isOwner || isPM) {
-    return {
-      isOwner,
-      isPM,
-      isBA,
-      isTester,
-      isDev,
-      isViewer: false,
-      userRoles,
-    };
-  }
-
-  // Viewer has no permissions
-  if (isViewer && !isPM && !isOwner) {
-    return {
-      isOwner: false,
-      isPM: false,
-      isBA,
-      isTester,
-      isDev,
-      isViewer: true,
-      userRoles,
-    };
-  }
+  const isViewer = userRoles.includes(0) && !isPM && !isBA && !isTester && !isDev;
 
   // Role-based permissions
   return {
-    isOwner: false,
-    isPM: false,
+    isOwner,
+    isPM,
     isBA,
     isTester,
     isDev,
-    isViewer: false,
+    isViewer,
     userRoles,
   };
 }
