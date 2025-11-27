@@ -9,6 +9,7 @@ import { Message } from "@/types/message";
 import { json } from "stream/consumers";
 import { getChannelPermissions } from "@/utils/channelPermissions";
 import { useAuth } from "@/hooks/useAuth";
+import LinkPreview from "@/components/common/LinkPreview";
 
 // Button configuration
 interface ActionButton {
@@ -88,6 +89,7 @@ interface MessageInputProps {
   isCodeEditorOpen?: boolean; // <-- Thêm state để biết trạng thái
   channelMembers?: Array<Member | any>;
   channelMessages?: any[];
+  onInputExpandedChange?: (expanded: boolean) => void;
 }
 
 export type ReplyMessage = {
@@ -114,6 +116,7 @@ export const MessageInput = ({
   isCodeEditorOpen = false,
   channelMembers = [],
   channelMessages = []
+  , onInputExpandedChange
 }: MessageInputProps) => {
   const { user } = useAuth();
   const [permissions, setPermissions] = useState<ReturnType<typeof getChannelPermissions> | null>(null);
@@ -148,13 +151,16 @@ export const MessageInput = ({
     setShowTesterForm(true);
   };
 
+  // rootRef removed - layout handled by flexbox in parent
   // auto height cho textarea - compact version
   useEffect(() => {
     if (!taRef.current) return;
     const el = taRef.current;
     el.style.height = "28px";
-    el.style.height = Math.min(el.scrollHeight, 100) + "px";
-  }, [newMessage]);
+    el.style.height = Math.min(el.scrollHeight, 50) + "px";
+
+    // no height reports - layout handled by flexbox
+  }, [newMessage, previews, files, replyMessage, editMessage, showAttachMenu]);
 
   useEffect(() => {
     taRef.current?.focus();
@@ -246,6 +252,17 @@ export const MessageInput = ({
 
   const canSend = newMessage.trim().length > 0 || (files.length > 0 && !editMessage);
 
+  // Detect if input contains a URL (http/https)
+  const trimmedMsg = newMessage.trim();
+  const urlRegex = /https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+/i;
+  const detectedUrl = trimmedMsg.match(urlRegex)?.[0];
+
+  // Notify parent when message input expands due to preview link / reply / attachments
+  useEffect(() => {
+    const expanded = !!(replyMessage || editMessage || detectedUrl || previews.length > 0 || files.length > 0);
+    onInputExpandedChange?.(expanded);
+  }, [replyMessage, editMessage, detectedUrl, previews.length, files.length, onInputExpandedChange]);
+
   const handleSend = async () => {
     if (!canSend || isSending) return;
 
@@ -325,9 +342,13 @@ export const MessageInput = ({
   return (
     <TooltipProvider delayDuration={300}>
       <div className="border-t border-border transition-all duration-200">
-        {/* Preview Section với animation */}
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${(replyMessage || editMessage) ? 'max-h-24 opacity-100 p-2 pb-0' : 'max-h-0 opacity-0 p-0'
-          }`}>
+        {/* Preview Section */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${replyMessage || editMessage || detectedUrl
+            ? "max-h-40 opacity-100 p-2 pb-0"
+            : "max-h-0 opacity-0 p-0"
+            }`}
+        >
           {/* Reply preview */}
           {replyMessage && !editMessage && (
             <div className="mb-2 rounded-md bg-blue-100 dark:bg-[#1f2937] text-gray-900 dark:text-gray-200 px-3 py-2 relative">
@@ -377,6 +398,13 @@ export const MessageInput = ({
                   <X className="h-4 w-4" />
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Link Preview */}
+          {detectedUrl && !editMessage && !replyMessage && (
+            <div className="mt-2">
+              <LinkPreview url={detectedUrl} />
             </div>
           )}
         </div>

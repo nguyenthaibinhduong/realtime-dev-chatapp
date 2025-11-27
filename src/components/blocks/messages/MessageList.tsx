@@ -58,6 +58,7 @@ type Props = MessageListProps & {
   hasInputPreview?: boolean; // <-- thêm để biết có reply/edit preview không
   onOpenTool?: (data: any) => void;
   members?: any[]; // <-- thêm members prop
+  isInputExpanded?: boolean; // true if MessageInput shows preview/link/upload/reply
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -71,6 +72,8 @@ export const MessageList: React.FC<Props> = ({
   hasInputPreview = false,
   onOpenTool,
   members,
+  isInputExpanded = false,
+  // removed inputHeightPx - layout now handled by flexbox
 }) => {
   const { user } = useAuth();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -530,14 +533,8 @@ export const MessageList: React.FC<Props> = ({
 
   return (
     <ScrollArea
-      className="p-4 overflow-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black"
-      style={{
-        // backgroundImage: 'url(/src/assets/image/background.png)',
-        // backgroundRepeat: 'repeat',
-        // backgroundSize: '300px',
-        height: hasInputPreview ? "calc(100vh - 24vh)" : "calc(100vh - 20vh)",
-        transition: "height 0.3s ease-in-out"
-      }}
+      className={`flex-1 min-h-0 p-4 overflow-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black ${isInputExpanded ? 'max-h-[65vh]' : 'max-h-[80vh]'}`}
+      style={{ transition: "height 0.3s ease-in-out" }}
       ref={scrollAreaRef}
     >
       <div>

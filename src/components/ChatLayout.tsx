@@ -73,6 +73,8 @@ export default function ChatLayout() {
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
   const [toolInitialItem, setToolInitialItem] = useState<any>(null);
   const [toolInitialData, setToolInitialData] = useState<any>(null);
+  // Message input and list layout handled by flexbox in this component
+  const [isInputExpanded, setIsInputExpanded] = useState<boolean>(false);
 
   // Function to render selected tool component
   const renderToolComponent = () => {
@@ -343,6 +345,11 @@ export default function ChatLayout() {
     searchParams,
     setSearchParams,
   ]);
+
+  // Reset input expansion state when channel changes
+  useEffect(() => {
+    setIsInputExpanded(false);
+  }, [selectedChannel?.id]);
 
   // ✅ Handle URL params on mount
   useEffect(() => {
@@ -1296,6 +1303,7 @@ export default function ChatLayout() {
                     hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
                     onOpenTool={handleOpenTool}
                     members={selectedChannel?.members}
+                    isInputExpanded={isInputExpanded}
                   />
                 )}
 
@@ -1318,6 +1326,7 @@ export default function ChatLayout() {
                         );
                       }}
                       isCodeEditorOpen={selectedTool === "tool2"} // <-- Pass trạng thái
+                      onInputExpandedChange={(v) => setIsInputExpanded(Boolean(v))}
                     />
                   </div>
                 )}

@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, useRef } from "react";
+import { memo, useEffect, useState, useRef, useMemo } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Loader2, Trash2, Heart } from "lucide-react";
@@ -6,6 +6,7 @@ import { MessageActions, MessageActionType } from "@/components/blocks/messages/
 import Attachment from "../Attachment";
 import attachmentService from "@/services/attachmentService";
 import AvatarUser from "@/components/common/AvartarUser";
+import LinkPreview from "@/components/common/LinkPreview";
 
 interface MessageItemProps {
     message: any;
@@ -64,6 +65,19 @@ const MessageItem = memo(({
     // Check if has only image attachments
     const hasOnlyImages = message.attachments?.length > 0 &&
         message.attachments.every((att: any) => att.mimeType?.startsWith("image/"));
+
+    // Extract first http/https URL from message text (if any)
+    const linkUrl = useMemo(() => {
+        try {
+            const text = message?.text || "";
+            const m = text.match(/(https?:\/\/[^\s]+)/i);
+            if (!m) return null;
+            // strip trailing punctuation commonly following URLs
+            return m[0].replace(/[)\].,!?]+$/g, "");
+        } catch (e) {
+            return null;
+        }
+    }, [message?.text]);
 
     // Effect for "Đã gửi" status
     useEffect(() => {
@@ -187,176 +201,185 @@ const MessageItem = memo(({
             ) : null}
 
             {/* Message content container */}
-            <div className={cn(
-                "flex flex-col gap-1",
-                isMe ? "items-end" : "items-start"
-            )}>
-                {/* Sender name */}
-                {showSenderInfo && !isMe && !isRemovedMessage && (
-                    <div className="flex items-center gap-2 px-2">
-                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                            {message.sender?.username || 'Unknown'}
-                        </span>
-                        <span className="text-[10px] text-gray-500 dark:text-gray-500">
-                            {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
-                        </span>
-                    </div>
-                )}
-
-                {/* Removed Message Display */}
-                {isRemovedMessage ? (
+            <div>
+                <div className={cn(
+                    "flex flex-col gap-1",
+                    isMe ? "items-end" : "items-start"
+                )}>
                     <div className={cn(
-                        "relative flex items-center gap-2 px-2 py-1.5 rounded-lg border border-dashed transition-all duration-200",
-                        isMe
-                            ? "bg-gray-200 dark:bg-gray-800/30 border-gray-400 dark:border-gray-700/50 text-gray-500 dark:text-gray-500"
-                            : "bg-gray-200 dark:bg-gray-900/30 border-gray-400 dark:border-gray-700/50 text-gray-500 dark:text-gray-500"
+                        "flex flex-col gap-1",
+                        isMe ? "items-end" : "items-start"
                     )}>
-                        <div className="flex-1">
-                            <p className="text-[11px] italic">
-                                {isMe ? "Bạn đã xóa tin nhắn này" : "Tin nhắn đã bị xóa"}
-                            </p>
-                            <div className={cn(
-                                "flex items-center gap-1 mt-0.5",
-                                isMe ? "justify-end" : "justify-start"
-                            )}>
-                                <span className="text-[9px] font-medium text-gray-600">
+                        {/* Sender name */}
+                        {showSenderInfo && !isMe && !isRemovedMessage && (
+                            <div className="flex items-center gap-2 px-2">
+                                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    {message.sender?.username || 'Unknown'}
+                                </span>
+                                <span className="text-[10px] text-gray-500 dark:text-gray-500">
                                     {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}
                                 </span>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    /* Normal Message Display */
-                    <div className="relative">
-                        {/* Message Actions */}
-                        <MessageActions
-                            isMe={isMe}
-                            isHovered={isHovered}
-                            messageId={String(message.id)}
-                            canEdit={isMe && message.type !== 'remove'}
-                            canDelete={isMe}
-                            isPinned={message.isPin || message.isPinned}
-                            onAction={onMessageAction}
-                            onMenuOpenChange={handleMenuOpenChange}
-                        />
-
-                        {/* Message bubble */}
-                        <div className={cn(
-                            "relative break-words transition-all duration-200",
-                            isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
-                            !hasOnlyImages && (
-                                isMe
-                                    ? "bg-blue-600 dark:bg-blue-600 text-white shadow-sm px-2.5 py-1.5"
-                                    : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm px-2.5 py-1.5"
-                            ),
-                            isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-400 dark:border-gray-600",
-                            isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700 dark:bg-blue-700",
-                            hasOnlyImages && "bg-transparent"
-                        )}>
-
-                            {/* Reply preview cho type: reply-message */}
-                            {message.type === 'reply-message' && message.replyTo && (
-                                <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); onJumpToMessage?.(String(message.replyTo.id)); }}
-                                    className={cn(
-                                        "mb-1.5 w-full text-left group/reply rounded-md border px-1.5 py-1",
-                                        isMe ? "border-blue-400/30 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-600/30"
-                                            : "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900/40 hover:bg-gray-200 dark:hover:bg-gray-900/60"
-                                    )}
-                                    title="Đi tới tin nhắn đã được trả lời"
-                                >
-                                    <div className="flex items-start gap-2">
-                                        <div className={cn("w-0.5 rounded", isMe ? "bg-blue-400 dark:bg-blue-300" : "bg-blue-500 dark:bg-blue-500")} />
-                                        <div className="flex-1 min-w-0">
-                                            <div className="text-[10px] text-gray-700 dark:text-gray-200">
-                                                <span className="opacity-80">Trả lời </span>
-                                                <span className="font-semibold">{message.replyTo.sender}</span>
-                                            </div>
-                                            {message.replyTo.text ? (
-                                                <div className="text-[10px] opacity-80 truncate">
-                                                    {message.replyTo.text}
-                                                </div>
-                                            ) : null}
-                                        </div>
-                                    </div>
-                                </button>
-                            )}
-
-                            {message.text && (
-                                <p className={cn(
-                                    "text-[12px] leading-relaxed whitespace-pre-wrap break-words",
-                                    isMe ? "text-white" : "text-gray-900 dark:text-gray-200"
-                                )}>
-                                    {message.text}
-                                </p>
-                            )}
-
-                            {isFileUploadWithAttachments && message.attachments && (
-                                <AttachmentList
-                                    attachments={message.attachments}
-                                    isFileUploadWithAttachments={isFileUploadWithAttachments}
-                                    isMe={isMe}
-                                    hasText={!!message.text}
-                                />
-                            )}
-
-                            {message.status === "uploading" && message.attachments && (
-                                <div className="space-y-2 mt-2">
-                                    {message.attachments.map((att: any, idx: number) => (
-                                        <UploadingAttachment
-                                            key={idx}
-                                            att={att}
-                                            isFileUpload={message.type === 'file-upload'}
-                                            isMe={isMe}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-
-                            {!hasOnlyImages && (
-                                <div className={cn(
-                                    "flex items-center gap-1 mt-0.5",
-                                    isMe ? "justify-end" : "justify-start"
-                                )}>
-                                    <span className={cn(
-                                        "text-[9px] font-medium",
-                                        isMe ? "text-blue-100 dark:text-blue-200" : "text-gray-600 dark:text-gray-400"
-                                    )}>
-                                        {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-
-                        {hasOnlyImages && (
-                            <div className={cn(
-                                "flex items-center gap-1 mt-0.5 px-1",
-                                isMe ? "justify-end" : "justify-start"
-                            )}>
-                                <span className="text-[9px] font-medium text-gray-400">
-                                    {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </span>
-                                {isMe && message.status === "sent" && (
-                                    <span className="text-gray-400 text-[10px]">✓</span>
-                                )}
                             </div>
                         )}
 
-                        {/* Like Button - Always visible at bottom left for non-removed messages */}
-                        {/* {!isRemovedMessage && (
+                        {/* Removed Message Display */}
+                        {isRemovedMessage ? (
+                            <div className={cn(
+                                "relative flex items-center gap-2 px-2 py-1.5 rounded-lg border border-dashed transition-all duration-200",
+                                isMe
+                                    ? "bg-gray-200 dark:bg-gray-800/30 border-gray-400 dark:border-gray-700/50 text-gray-500 dark:text-gray-500"
+                                    : "bg-gray-200 dark:bg-gray-900/30 border-gray-400 dark:border-gray-700/50 text-gray-500 dark:text-gray-500"
+                            )}>
+                                <div className="flex-1">
+                                    <p className="text-[11px] italic">
+                                        {isMe ? "Bạn đã xóa tin nhắn này" : "Tin nhắn đã bị xóa"}
+                                    </p>
+                                    <div className={cn(
+                                        "flex items-center gap-1 mt-0.5",
+                                        isMe ? "justify-end" : "justify-start"
+                                    )}>
+                                        <span className="text-[9px] font-medium text-gray-600">
+                                            {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            /* Normal Message Display */
+                            <div className="relative">
+                                {/* Message Actions */}
+                                <MessageActions
+                                    isMe={isMe}
+                                    isHovered={isHovered}
+                                    messageId={String(message.id)}
+                                    canEdit={isMe && message.type !== 'remove'}
+                                    canDelete={isMe}
+                                    isPinned={message.isPin || message.isPinned}
+                                    onAction={onMessageAction}
+                                    onMenuOpenChange={handleMenuOpenChange}
+                                />
+
+                                {/* Message bubble */}
+                                <div className={cn(
+                                    "relative break-words transition-all duration-200",
+                                    isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
+                                    !hasOnlyImages && (
+                                        isMe
+                                            ? "bg-blue-600 dark:bg-blue-600 text-white shadow-sm px-2.5 py-1.5"
+                                            : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm px-2.5 py-1.5"
+                                    ),
+                                    isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-400 dark:border-gray-600",
+                                    isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700 dark:bg-blue-700",
+                                    hasOnlyImages && "bg-transparent"
+                                )}>
+
+                                    {/* Reply preview cho type: reply-message */}
+                                    {message.type === 'reply-message' && message.replyTo && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); onJumpToMessage?.(String(message.replyTo.id)); }}
+                                            className={cn(
+                                                "mb-1.5 w-full text-left group/reply rounded-md border px-1.5 py-1",
+                                                isMe ? "border-blue-400/30 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-600/30"
+                                                    : "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900/40 hover:bg-gray-200 dark:hover:bg-gray-900/60"
+                                            )}
+                                            title="Đi tới tin nhắn đã được trả lời"
+                                        >
+                                            <div className="flex items-start gap-2">
+                                                <div className={cn("w-0.5 rounded", isMe ? "bg-blue-400 dark:bg-blue-300" : "bg-blue-500 dark:bg-blue-500")} />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-[10px] text-gray-700 dark:text-gray-200">
+                                                        <span className="opacity-80">Trả lời </span>
+                                                        <span className="font-semibold">{message.replyTo.sender}</span>
+                                                    </div>
+                                                    {message.replyTo.text ? (
+                                                        <div className="text-[10px] opacity-80 truncate">
+                                                            {message.replyTo.text}
+                                                        </div>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    )}
+
+                                    {message.text && (
+                                        <p className={cn(
+                                            "text-[12px] leading-relaxed whitespace-pre-wrap break-words",
+                                            isMe ? "text-white" : "text-gray-900 dark:text-gray-200"
+                                        )}>
+                                            {message.text}
+                                        </p>
+                                    )}
+
+                                    {/* Link preview: show when a http(s) URL exists in the message text */}
+
+
+
+
+                                    {!hasOnlyImages && (
+                                        <div className={cn(
+                                            "flex items-center gap-1 mt-0.5",
+                                            isMe ? "justify-end" : "justify-start"
+                                        )}>
+                                            <span className={cn(
+                                                "text-[9px] font-medium",
+                                                isMe ? "text-blue-100 dark:text-blue-200" : "text-gray-600 dark:text-gray-400"
+                                            )}>
+                                                {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                {isFileUploadWithAttachments && message.attachments && (
+                                    <AttachmentList
+                                        attachments={message.attachments}
+                                        isFileUploadWithAttachments={isFileUploadWithAttachments}
+                                        isMe={isMe}
+                                        hasText={!!message.text}
+                                    />
+                                )}
+
+                                {message.status === "uploading" && message.attachments && (
+                                    <div className="space-y-2 mt-2">
+                                        {message.attachments.map((att: any, idx: number) => (
+                                            <UploadingAttachment
+                                                key={idx}
+                                                att={att}
+                                                isFileUpload={message.type === 'file-upload'}
+                                                isMe={isMe}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {hasOnlyImages && (
+                                    <div className={cn(
+                                        "flex items-center gap-1 mt-0.5 px-1",
+                                        isMe ? "justify-end" : "justify-start"
+                                    )}>
+                                        <span className="text-[9px] font-medium text-gray-400">
+                                            {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
+                                        {isMe && message.status === "sent" && (
+                                            <span className="text-gray-400 text-[10px]">✓</span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Like Button - Always visible at bottom left for non-removed messages */}
+                                {/* {!isRemovedMessage && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -383,18 +406,29 @@ const MessageItem = memo(({
                                 )}
                             </button>
                         )} */}
+                            </div>
+                        )}
+                        {linkUrl && !isRemovedMessage && (
+                            <div className={cn(
+                                "flex flex-col gap-1",
+                                isMe ? "items-end" : "items-start"
+                            )}>
+                                <LinkPreview url={linkUrl} />
+                            </div>
+                        )}
+                        {statusLabel && (
+                            <div className={cn(
+                                "px-1 flex items-center",
+                                isMe ? "justify-end" : "justify-start"
+                            )}>
+                                {statusLabel}
+                            </div>
+                        )}
                     </div>
-                )}
 
-                {statusLabel && (
-                    <div className={cn(
-                        "px-1 flex items-center",
-                        isMe ? "justify-end" : "justify-start"
-                    )}>
-                        {statusLabel}
-                    </div>
-                )}
+                </div>
             </div>
+
         </div>
     );
 });
