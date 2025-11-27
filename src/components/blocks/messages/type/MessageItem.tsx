@@ -322,22 +322,7 @@ const MessageItem = memo(({
 
 
 
-                                    {!hasOnlyImages && (
-                                        <div className={cn(
-                                            "flex items-center gap-1 mt-0.5",
-                                            isMe ? "justify-end" : "justify-start"
-                                        )}>
-                                            <span className={cn(
-                                                "text-[9px] font-medium",
-                                                isMe ? "text-blue-100 dark:text-blue-200" : "text-gray-600 dark:text-gray-400"
-                                            )}>
-                                                {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </span>
-                                        </div>
-                                    )}
+
                                 </div>
                                 {isFileUploadWithAttachments && message.attachments && (
                                     <AttachmentList
@@ -375,6 +360,22 @@ const MessageItem = memo(({
                                         {isMe && message.status === "sent" && (
                                             <span className="text-gray-400 text-[10px]">✓</span>
                                         )}
+                                    </div>
+                                )}
+                                {!hasOnlyImages && (
+                                    <div className={cn(
+                                        "flex items-center gap-1 mt-0.5",
+                                        isMe ? "justify-end" : "justify-start"
+                                    )}>
+                                        <span className={cn(
+                                            "text-[9px] font-medium",
+                                            isMe ? "text-blue-100 dark:text-blue-200" : "text-gray-600 dark:text-gray-400"
+                                        )}>
+                                            {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
                                     </div>
                                 )}
 
