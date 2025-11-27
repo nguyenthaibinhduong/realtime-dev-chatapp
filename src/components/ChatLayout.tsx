@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, Search } from "lucide-react";
+import { MessageSquare, Search, X } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { useNotificationActions } from "@/hooks/useNotificationToast";
 import { useSearchParams } from "react-router-dom";
@@ -36,6 +36,8 @@ import {
 } from "./blocks/tools";
 import { el } from "date-fns/locale";
 import { json } from "stream/consumers";
+import { usePreview } from "@/hooks/useAttachmentPreview";
+import { AttachmentViewer } from "./blocks/attachments/AttachmentViewer";
 
 export default function ChatLayout() {
   const { toast } = useToast();
@@ -75,9 +77,31 @@ export default function ChatLayout() {
   const [toolInitialData, setToolInitialData] = useState<any>(null);
   // Message input and list layout handled by flexbox in this component
   const [isInputExpanded, setIsInputExpanded] = useState<boolean>(false);
+  const { previewUrl, setPreviewUrl } = usePreview();
 
   // Function to render selected tool component
   const renderToolComponent = () => {
+    if (previewUrl) {
+      return (
+        <div className="h-full w-full flex flex-col bg-white dark:bg-zinc-900">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-800">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              File Preview
+            </h3>
+            <button
+              onClick={() => setPreviewUrl(null)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+              title="Đóng preview"
+            >
+              <X className="w-5 h-5 text-gray-700 dark:text-white" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <AttachmentViewer url={previewUrl} />
+          </div>
+        </div>
+      );
+    }
     switch (selectedTool) {
       case "tool1":
         return <Tool1 />;
@@ -157,7 +181,7 @@ export default function ChatLayout() {
   // Listen to channel updates from socket (members, permissions, etc.)
   useEffect(() => {
     const handleChannelUpdate = (response: any) => {
-      console.log('🔔 ChatLayout received onChannelUpdate:', response);
+      console.log("🔔 ChatLayout received onChannelUpdate:", response);
 
       // Parse response structure: can be { data: { channel, members } } or direct object
       const data = response?.data || response;
@@ -165,7 +189,7 @@ export default function ChatLayout() {
       const updatedMembers = data?.members;
 
       if (!updatedChannel?.id) {
-        console.warn('⚠️ Invalid channel update data received');
+        console.warn("⚠️ Invalid channel update data received");
         return;
       }
 
@@ -180,9 +204,12 @@ export default function ChatLayout() {
           updated[idx] = {
             ...updated[idx],
             ...updatedChannel,
-            member_count: updatedMembers?.length || updatedChannel.member_count || updated[idx].member_count,
+            member_count:
+              updatedMembers?.length ||
+              updatedChannel.member_count ||
+              updated[idx].member_count,
           };
-          console.log('✅ Updated channel in list:', updated[idx]);
+          console.log("✅ Updated channel in list:", updated[idx]);
           return updated;
         }
         return prevChannels;
@@ -190,7 +217,7 @@ export default function ChatLayout() {
 
       // If this is the currently selected channel, update it and members
       if (selectedChannel && String(selectedChannel.id) === channelId) {
-        console.log('🔄 Updating selected channel and members');
+        console.log("🔄 Updating selected channel and members");
 
         setSelectedChannel((prev) => {
           if (!prev) return prev;
@@ -201,25 +228,28 @@ export default function ChatLayout() {
           if (updatedMembers && Array.isArray(updatedMembers)) {
             updated.members = updatedMembers;
             updated.member_count = updatedMembers.length;
-            console.log('✅ Updated selectedChannel members:', updatedMembers);
+            console.log("✅ Updated selectedChannel members:", updatedMembers);
           }
 
           // Update json_data if provided (for private channels)
           if (updatedChannel.json_data) {
             updated.json_data = {
               ...prev.json_data,
-              ...updatedChannel.json_data
+              ...updatedChannel.json_data,
             };
-            console.log('✅ Updated selectedChannel json_data:', updated.json_data);
+            console.log(
+              "✅ Updated selectedChannel json_data:",
+              updated.json_data
+            );
           }
 
-          console.log('🎯 New selectedChannel state:', updated);
+          console.log("🎯 New selectedChannel state:", updated);
           return updated;
         });
 
         // Update members list if provided
         if (updatedMembers && Array.isArray(updatedMembers)) {
-          console.log('👥 Updating members list:', updatedMembers);
+          console.log("👥 Updating members list:", updatedMembers);
           setMembers(updatedMembers);
         }
       }
@@ -697,21 +727,21 @@ export default function ChatLayout() {
   useEffect(() => {
     const handleRemoveChannel = (data: { id: string | number }) => {
       const channelId = String(data.id);
-      console.log('🗑️ Received removeChannel event:', { channelId });
+      console.log("🗑️ Received removeChannel event:", { channelId });
 
       // Remove channel from channels list
       setChannels((prevChannels) => {
         const filtered = prevChannels.filter((c) => String(c.id) !== channelId);
-        console.log('✅ Removed channel from list:', {
+        console.log("✅ Removed channel from list:", {
           removedId: channelId,
-          remaining: filtered.length
+          remaining: filtered.length,
         });
         return filtered;
       });
 
       // If removed channel is currently selected, clear selection
       if (selectedChannel && String(selectedChannel.id) === channelId) {
-        console.log('⚠️ Removed channel was selected, clearing selection');
+        console.log("⚠️ Removed channel was selected, clearing selection");
         handleSelectChannel(null);
 
         toast({
@@ -1340,7 +1370,9 @@ export default function ChatLayout() {
           <Dialog open={showGithubDetail} onOpenChange={setShowGithubDetail}>
             <DialogContent className="max-w-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700">
               <DialogHeader>
-                <DialogTitle className="text-gray-900 dark:text-white">GitHub Event Detail</DialogTitle>
+                <DialogTitle className="text-gray-900 dark:text-white">
+                  GitHub Event Detail
+                </DialogTitle>
               </DialogHeader>
               <div className="p-4">
                 <pre className="text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-auto text-gray-900 dark:text-white">
