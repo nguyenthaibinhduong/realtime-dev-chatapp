@@ -265,7 +265,7 @@ export const ChannelHeader = ({
           title="Tìm kiếm tin nhắn"
           onClick={() => setOpenSearchModal(true)}
         >
-          <SearchIcon className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 group-hover:text zinc-900 dark:group-hover:text-zinc-200 transition-colors" />
+          <SearchIcon className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors" />
           <span className="sr-only">Tìm kiếm tin nhắn</span>
         </button>
         {/* Nút mở attachment modal */}
@@ -274,7 +274,7 @@ export const ChannelHeader = ({
           title="Xem tệp đính kèm"
           onClick={() => setOpenAttachmentModal(true)}
         >
-          <Paperclip className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 group-hover:text zinc-900 dark:group-hover:text-zinc-200 transition-colors" />
+          <Paperclip className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors" />
           <span className="sr-only">Xem tệp đính kèm</span>
         </button>
 
@@ -302,14 +302,14 @@ export const ChannelHeader = ({
                   ? "bg-blue-500/15 border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20"
                   : "hover:bg-zinc-100 dark:bg-zinc-800/60 border-transparent hover:border-zinc-600/30"
               }`}
-              title="AI Tools"
+              title="Tools"
             >
               <div className="flex items-center gap-1.5">
                 <Wrench
                   className={`h-4.5 w-4.5 transition-colors ${
                     selectedTool
                       ? "text-blue-400"
-                      : "text-zinc-400 group-hover:text-zinc-200"
+                      : "h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors"
                   }`}
                 />
                 {selectedTool && (
@@ -329,7 +329,7 @@ export const ChannelHeader = ({
                 onClick={() =>
                   onToolChange?.(selectedTool === tool.id ? null : tool.id)
                 }
-                className={`cursor-pointer transition-all duration-200 ${
+                className={`cursor-pointer transition-all duration-200 group ${
                   selectedTool === tool.id
                     ? "bg-blue-500/20 border-l-2 border-blue-400 text-blue-300"
                     : "hover:bg-zinc-100 dark:bg-zinc-800/70 text-zinc-200"
@@ -338,8 +338,8 @@ export const ChannelHeader = ({
                 <div className="flex items-center gap-3 w-full py-1">
                   <span className="text-lg">{tool.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{tool.name}</div>
-                    <div className="text-xs text-zinc-400 truncate">
+                    <div className="font-medium truncate dark:group-hover:text-zinc-900">{tool.name}</div>
+                    <div className="text-xs text-zinc-400 truncate dark:group-hover:text-zinc-900">
                       {tool.description}
                     </div>
                   </div>
@@ -381,7 +381,7 @@ export const ChannelHeader = ({
               title="GitHub Integration"
               onClick={() => setOpenGitModal(true)}
             >
-              <Github className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 group-hover:text zinc-900 dark:group-hover:text-zinc-200 transition-colors" />
+              <Github className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors" />
               <span className="sr-only">Kết nối repo Git</span>
             </button>
             <RepoChatDialog
@@ -401,7 +401,7 @@ export const ChannelHeader = ({
                 setOpen(true);
               }}
             >
-              <Users className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 group-hover:text zinc-900 dark:group-hover:text-zinc-200 transition-colors" />
+              <Users className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors" />
             </button>
           </DialogTrigger>
           <DialogTrigger asChild>
@@ -413,7 +413,7 @@ export const ChannelHeader = ({
                 setOpen(true);
               }}
             >
-              <Info className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 group-hover:text zinc-900 dark:group-hover:text-zinc-200 transition-colors" />
+              <Info className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors" />
             </button>
           </DialogTrigger>
 

@@ -540,7 +540,7 @@ export const MessageInput = ({
                     </button>
                   )}
 
-                  <button
+                  {/* <button
                     type="button"
                     disabled
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-not-allowed opacity-40"
@@ -549,7 +549,7 @@ export const MessageInput = ({
                       <Sparkles className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                     </div>
                     <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">AI Assistant</span>
-                  </button>
+                  </button> */}
                 </div>
               )}
             </div>
@@ -583,13 +583,13 @@ export const MessageInput = ({
             </div>
 
             {/* Send/Mic Button - WhatsApp Style */}
-            {canSend ? (
+        
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
                     onClick={handleSend}
-                    disabled={isSending}
+                    disabled={isSending || !canSend}
                     className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white transition-all disabled:opacity-50 shadow-lg"
                     aria-label="Gửi"
                   >
@@ -600,22 +600,7 @@ export const MessageInput = ({
                   <p>Gửi (Enter)</p>
                 </TooltipContent>
               </Tooltip>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-800 hover:bg-gray-400 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
-                    aria-label="Ghi âm"
-                  >
-                    <Mic className="h-5 w-5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p>Ghi âm tin nhắn</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+              
           </div>
 
           {/* Preview file */}

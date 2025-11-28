@@ -51,26 +51,26 @@ export default function SettingLayout() {
     {
       title: "Sandbox",
       items: [
-        {
-          id: "test-sandbox",
-          label: "Test SandBox",
-          component: <TestLayout />,
-        },
-        {
-          id: "editor-sandbox",
-          label: "Editor SandBox",
-          component: <EditorLayout />,
-        },
+        // {
+        //   id: "test-sandbox",
+        //   label: "Test SandBox",
+        //   component: <TestLayout />,
+        // },
+        // {
+        //   id: "editor-sandbox",
+        //   label: "Editor SandBox",
+        //   component: <EditorLayout />,
+        // },
         {
           id: "monaco-judge0",
-          label: "Monaco + Judge0",
+          label: "Code playground",
           component: <CodeEditorJudge0 />,
         },
-        {
-          id: "TestLayout",
-          label: "TestLayout",
-          component: <ApiTool />,
-        },
+        // {
+        //   id: "TestLayout",
+        //   label: "TestLayout",
+        //   component: <ApiTool />,
+        // },
         {
           id: "ai-tool",
           label: "AI Tool",
@@ -215,7 +215,9 @@ export default function SettingLayout() {
           ) : (
             // Default content when no component assigned
             <>
-              <h2 className="text-black dark:text-white text-xl font-semibold mb-4">Cài đặt</h2>
+              <h2 className="text-black dark:text-white text-xl font-semibold mb-4">
+                Cài đặt
+              </h2>
               <p className="text-sidebar-foreground/80">
                 Chưa có Layout cho mục này.
               </p>
