@@ -366,7 +366,20 @@ export const TesterDebugForm = ({
                                 modules={quillModules}
                                 formats={quillFormats}
                                 placeholder="Mô tả chi tiết về bug, các bước tái hiện, kết quả mong đợi..."
-                                className="text-black  [&_.ql-editor]:min-h-[200px] [&_.ql-editor]:text-black dark:text-white [&_.ql-toolbar]:border-gray-700 [&_.ql-container]:border-gray-700"
+                                className="text-black dark:text-white 
+                                    [&_.ql-editor]:min-h-[200px] 
+                                    [&_.ql-editor]:text-white 
+                                    [&_.ql-editor.ql-blank::before]:text-gray-500
+                                    [&_.ql-editor.ql-blank::before]:opacity-100
+                                    [&_.ql-toolbar]:border-gray-700 
+                                    [&_.ql-container]:border-gray-700
+                                    [&_.ql-toolbar]:bg-gray-800/50
+                                    [&_.ql-stroke]:stroke-gray-400
+                                    [&_.ql-fill]:fill-gray-400
+                                    [&_.ql-picker-label]:text-gray-400
+                                    [&_.ql-picker-options]:bg-gray-800
+                                    [&_.ql-picker-item]:text-gray-300
+                                    [&_.ql-picker-item:hover]:bg-gray-700"
                             />
                         </div>
                         {errors.content && (
@@ -559,7 +572,7 @@ export const TesterDebugForm = ({
                     </div>
 
                     {/* Google Sheet Sync Toggle */}
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                         <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-800">
                             <div className="flex items-center gap-3">
                                 {syncGoogleSheet ? (
@@ -586,10 +599,10 @@ export const TesterDebugForm = ({
                                 {syncGoogleSheet ? "Bật" : "Tắt"}
                             </Button>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Drive Link */}
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                         <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-2">
                             <Link2 className="h-4 w-4" />
                             Thông tin Lưu trữ
@@ -601,7 +614,7 @@ export const TesterDebugForm = ({
                             className="bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-red-500"
                         />
                         <p className="text-xs text-gray-500">Link đến folder lưu trữ screenshots, videos, logs...</p>
-                    </div>
+                    </div> */}
                 </div>
 
                 <DrawerFooter className="border-t border-gray-800">

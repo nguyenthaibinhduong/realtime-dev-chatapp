@@ -374,11 +374,11 @@ const TesterReportMessage = ({
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-500/10 border border-yellow-500/30">
                     <FileText className="h-4 w-4 text-yellow-400" />
                   </div>
-                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
+                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide ">
                     Ghi chú
                   </h3>
                 </div>
-                <Card className="bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 border border-yellow-500/20">
+                <Card className="bg-white dark:bg-black border border-yellow-500/20">
                   <div className="p-4 text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">
                     {notes}
                   </div>

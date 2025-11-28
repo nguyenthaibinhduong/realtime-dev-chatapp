@@ -71,11 +71,11 @@ export default function SettingLayout() {
         //   label: "TestLayout",
         //   component: <ApiTool />,
         // },
-        {
-          id: "ai-tool",
-          label: "AI Tool",
-          component: <AILayout />,
-        },
+        // {
+        //   id: "ai-tool",
+        //   label: "AI Tool",
+        //   component: <AILayout />,
+        // },
       ],
     },
   ];
