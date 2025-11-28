@@ -20,6 +20,7 @@ import { AvatarGroupStack } from "@/components/common/AvatarGroup";
 import AvatarUser from "@/components/common/AvartarUser";
 import { cn } from "@/lib/utils";
 import AttachmentItem from "../../attachments/AttachmentItem";
+import { usePreview } from "@/hooks/useAttachmentPreview";
 
 interface BARequireMessageProps {
   message: any;
@@ -46,6 +47,7 @@ const BARequireMessage = ({
 }: BARequireMessageProps) => {
   const [showDialog, setShowDialog] = useState(false);
   const isHovered = hoveredId === String(message.id);
+  const { setPreviewUrl } = usePreview();
 
   const requirementData = message.json_data || {};
   const {
@@ -234,7 +236,9 @@ const BARequireMessage = ({
                 {projectName && (
                   <div className="text-sm font-medium text-gray-400 mt-1 flex items-center gap-2">
                     <span className="text-gray-500">Project:</span>
-                    <span className="text-black dark:text-white">{projectName}</span>
+                    <span className="text-black dark:text-white">
+                      {projectName}
+                    </span>
                   </div>
                 )}
               </div>
@@ -442,6 +446,8 @@ const BARequireMessage = ({
                       filename={file.filename}
                       mimeType={file.mimeType}
                       fileSize={file.fileSize}
+                      fileUrl={file.fileUrl}
+                      onPreview={() => setPreviewUrl(file.fileUrl)}
                       showRemove={false}
                       className="hover:shadow-lg transition-shadow w-40"
                     />

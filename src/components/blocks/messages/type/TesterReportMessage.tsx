@@ -22,6 +22,7 @@ import { AvatarGroupStack } from "@/components/common/AvatarGroup";
 import AvatarUser from "@/components/common/AvartarUser";
 import { cn } from "@/lib/utils";
 import AttachmentItem from "../../attachments/AttachmentItem";
+import { usePreview } from "@/hooks/useAttachmentPreview";
 
 interface TesterReportMessageProps {
   message: any;
@@ -48,6 +49,7 @@ const TesterReportMessage = ({
 }: TesterReportMessageProps) => {
   const [showDialog, setShowDialog] = useState(false);
   const isHovered = hoveredId === String(message.id);
+  const { setPreviewUrl } = usePreview();
 
   const reportData = message.json_data || {};
   const {
@@ -124,10 +126,6 @@ const TesterReportMessage = ({
             isMe ? "items-end" : "items-start"
           )}
         >
-
-
-
-
           {/* Bug Report Card - Compact Preview */}
           <Card
             onClick={() => setShowDialog(true)}
@@ -229,7 +227,9 @@ const TesterReportMessage = ({
                 {projectName && (
                   <div className="text-sm font-medium text-gray-400 mt-1 flex items-center gap-2">
                     <span className="text-gray-500">Project:</span>
-                    <span className="text-black dark:text-white">{projectName}</span>
+                    <span className="text-black dark:text-white">
+                      {projectName}
+                    </span>
                   </div>
                 )}
               </div>
@@ -460,8 +460,12 @@ const TesterReportMessage = ({
                       filename={file.filename}
                       mimeType={file.mimeType}
                       fileSize={file.fileSize}
+                      fileUrl={file.fileUrl}
                       showRemove={false}
                       className="hover:shadow-lg transition-shadow w-40"
+                      onPreview={() => {
+                        setPreviewUrl(file.fileUrl);
+                      }}
                     />
                   ))}
                 </div>
