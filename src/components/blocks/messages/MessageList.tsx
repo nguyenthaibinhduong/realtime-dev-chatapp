@@ -29,14 +29,16 @@ function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
   if (idx === 0) return true;
   const curr = messages[idx];
   const prev = messages[idx - 1];
-  if (curr?.type === "notification" || prev?.type === "notification") return true;
+  if (curr?.type === "notification" || prev?.type === "notification")
+    return true;
   if (!curr?.sender || !prev?.sender) return true;
   return (
     curr.sender.id !== prev.sender.id ||
     Math.abs(
       new Date(curr.created_at || curr.send_at).getTime() -
-      new Date(prev.created_at || prev.send_at).getTime()
-    ) > 5 * 60 * 1000
+        new Date(prev.created_at || prev.send_at).getTime()
+    ) >
+      5 * 60 * 1000
   );
 }
 
@@ -53,7 +55,11 @@ type Props = MessageListProps & {
     cursors?: any;
   }>;
   type?: string;
-  onReplySelect?: (reply: { id: string; sender: string; text?: string }) => void; // <-- thêm
+  onReplySelect?: (reply: {
+    id: string;
+    sender: string;
+    text?: string;
+  }) => void; // <-- thêm
   onEditSelect?: (edit: { id: string; sender: string; text?: string }) => void; // <-- thêm edit
   hasInputPreview?: boolean; // <-- thêm để biết có reply/edit preview không
   onOpenTool?: (data: any) => void;
@@ -122,20 +128,24 @@ export const MessageList: React.FC<Props> = ({
     if (!latestMessage) return;
 
     // Check if the latest message belongs to current channel
-    const messageChannelId = String(latestMessage.channelId || latestMessage.channel_id);
+    const messageChannelId = String(
+      latestMessage.channelId || latestMessage.channel_id
+    );
     const currentChannelId = String(channelId);
 
     if (messageChannelId !== currentChannelId) {
       console.log("🚫 Not scrolling - message from different channel:", {
         messageChannel: messageChannelId,
-        currentChannel: currentChannelId
+        currentChannel: currentChannelId,
       });
       setPreviousMessageCount(messages.length);
       return;
     }
 
     // Check if this is a really new message (created recently)
-    const messageTime = new Date(latestMessage.created_at || latestMessage.send_at);
+    const messageTime = new Date(
+      latestMessage.created_at || latestMessage.send_at
+    );
     const now = new Date();
     const timeDiff = now.getTime() - messageTime.getTime();
 
@@ -143,7 +153,7 @@ export const MessageList: React.FC<Props> = ({
     if (timeDiff > 30000) {
       console.log("🚫 Not scrolling - message too old:", {
         messageTime: messageTime.toISOString(),
-        timeDiff: timeDiff + "ms"
+        timeDiff: timeDiff + "ms",
       });
       setPreviousMessageCount(messages.length);
       return;
@@ -154,13 +164,13 @@ export const MessageList: React.FC<Props> = ({
       console.log("📜 Auto-scrolling to new message:", {
         messageId: latestMessage.id,
         sender: latestMessage.sender?.name || latestMessage.sender?.username,
-        time: messageTime.toISOString()
+        time: messageTime.toISOString(),
       });
 
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({
           behavior: "smooth",
-          block: "end"
+          block: "end",
         });
       }, 100); // Small delay to ensure DOM is updated
     }
@@ -169,66 +179,85 @@ export const MessageList: React.FC<Props> = ({
   }, [messages, channelId, messagesEndRef, previousMessageCount]);
 
   // Message action handlers
-  const handleLike = useCallback(async (messageId: string) => {
-    const msg: any = messages.find((m) => String(m.id) === String(messageId));
-    if (!msg) return;
+  const handleLike = useCallback(
+    async (messageId: string) => {
+      const msg: any = messages.find((m) => String(m.id) === String(messageId));
+      if (!msg) return;
 
-    // Kiểm tra xem user đã like chưa
-    const currentLikeData = msg.like_data || {};
-    const currentLikes = currentLikeData.users || [];
-    const userAlreadyLiked = currentLikes.some((like: any) => like.userId === user?.id);
+      // Kiểm tra xem user đã like chưa
+      const currentLikeData = msg.like_data || {};
+      const currentLikes = currentLikeData.users || [];
+      const userAlreadyLiked = currentLikes.some(
+        (like: any) => like.userId === user?.id
+      );
 
-    let updatedLikes;
-    let updatedCount;
+      let updatedLikes;
+      let updatedCount;
 
-    if (userAlreadyLiked) {
-      // Bỏ like - xóa user khỏi danh sách
-      updatedLikes = currentLikes.filter((like: any) => like.userId !== user?.id);
-      updatedCount = Math.max(0, (currentLikeData.count || 0) - 1);
-    } else {
-      // Thêm like - thêm user vào danh sách
-      updatedLikes = [...currentLikes, {
-        userId: user?.id,
-        username: user?.username || user?.name || 'Unknown',
-        likedAt: new Date().toISOString(),
-      }];
-      updatedCount = (currentLikeData.count || 0) + 1;
-    }
+      if (userAlreadyLiked) {
+        // Bỏ like - xóa user khỏi danh sách
+        updatedLikes = currentLikes.filter(
+          (like: any) => like.userId !== user?.id
+        );
+        updatedCount = Math.max(0, (currentLikeData.count || 0) - 1);
+      } else {
+        // Thêm like - thêm user vào danh sách
+        updatedLikes = [
+          ...currentLikes,
+          {
+            userId: user?.id,
+            username: user?.username || user?.name || "Unknown",
+            likedAt: new Date().toISOString(),
+          },
+        ];
+        updatedCount = (currentLikeData.count || 0) + 1;
+      }
 
-    chatSocketService.sendMessage({
-      id: messageId,
-      isUpdate: true,
-      likeData: {
-        count: updatedCount,
-        users: updatedLikes,
-      },
-      isLiked: !userAlreadyLiked,
-      likeCount: updatedCount,
-      channelId: channelId,
-      type: 'message',
-    });
-  }, [messages, channelId, user]);
+      chatSocketService.sendMessage({
+        id: messageId,
+        isUpdate: true,
+        likeData: {
+          count: updatedCount,
+          users: updatedLikes,
+        },
+        isLiked: !userAlreadyLiked,
+        likeCount: updatedCount,
+        channelId: channelId,
+        type: "message",
+      });
+    },
+    [messages, channelId, user]
+  );
 
-  const handleReply = useCallback((messageId: string) => {
-    const msg: any = messages.find((m) => String(m.id) === String(messageId));
-    if (!msg) return;
-    onReplySelect?.({
-      id: String(msg.id),
-      sender: msg.sender?.username || msg.sender?.name || "Unknown",
-      text: msg.text || (Array.isArray(msg.attachments) && msg.attachments.length > 0 ? `[${msg.attachments.length} tệp đính kèm]` : ""),
-    });
-  }, [messages, onReplySelect]);
+  const handleReply = useCallback(
+    (messageId: string) => {
+      const msg: any = messages.find((m) => String(m.id) === String(messageId));
+      if (!msg) return;
+      onReplySelect?.({
+        id: String(msg.id),
+        sender: msg.sender?.username || msg.sender?.name || "Unknown",
+        text:
+          msg.text ||
+          (Array.isArray(msg.attachments) && msg.attachments.length > 0
+            ? `[${msg.attachments.length} tệp đính kèm]`
+            : ""),
+      });
+    },
+    [messages, onReplySelect]
+  );
 
   const handleForward = (messageId: string) => {
     setShareMessageId(messageId);
     setShowShareModal(true);
   };
-  const handleSelectChannel = (channel: any) => setShareChannelId(String(channel.id));
-  const handleDoShare = (shareType: 'current' | 'other') => {
+  const handleSelectChannel = (channel: any) =>
+    setShareChannelId(String(channel.id));
+  const handleDoShare = (shareType: "current" | "other") => {
     const messageId = shareMessageId;
     if (!messageId) return;
     let channel_id = "";
-    if (shareType === "current") channel_id = localStorage.getItem("selectedChannelId") || "";
+    if (shareType === "current")
+      channel_id = localStorage.getItem("selectedChannelId") || "";
     else channel_id = shareChannelId || "";
     const msg: any = messages.find((m) => String(m.id) === String(messageId));
     if (!msg) return;
@@ -244,61 +273,69 @@ export const MessageList: React.FC<Props> = ({
     setShareMessageId(null);
   };
 
+  const handlePin = useCallback(
+    async (messageId: string) => {
+      const msg: any = messages.find((m) => String(m.id) === String(messageId));
+      if (!msg) return;
 
-  const handlePin = useCallback(async (messageId: string) => {
-    const msg: any = messages.find((m) => String(m.id) === String(messageId));
-    if (!msg) return;
+      // Hiển thị toast ngay lập tức
+      toast({
+        title: "Đang ghim tin nhắn...",
+        description: "Tin nhắn sẽ được ghim lên đầu",
+        duration: 1000,
+      });
 
-    // Hiển thị toast ngay lập tức
-    toast({
-      title: "Đang ghim tin nhắn...",
-      description: "Tin nhắn sẽ được ghim lên đầu",
-      duration: 1000,
-    });
+      chatSocketService.sendMessage({
+        id: messageId,
+        isUpdate: true,
+        isPin: true,
+        text: msg.text,
+        channelId: channelId,
+        type: "message",
+      });
+    },
+    [channelId, messages, toast]
+  );
 
-    chatSocketService.sendMessage({
-      id: messageId,
-      isUpdate: true,
-      isPin: true,
-      text: msg.text,
-      channelId: channelId,
-      type: 'message',
-    });
-  }, [channelId, messages, toast]);
+  const handleEdit = useCallback(
+    (messageId: string) => {
+      const msg: any = messages.find((m) => String(m.id) === String(messageId));
+      if (!msg) return;
+      onEditSelect?.({
+        id: String(msg.id),
+        sender: msg.sender?.username || msg.sender?.name || "Unknown",
+        text: msg.text || "",
+      });
+    },
+    [messages, onEditSelect]
+  );
 
-  const handleEdit = useCallback((messageId: string) => {
-    const msg: any = messages.find((m) => String(m.id) === String(messageId));
-    if (!msg) return;
-    onEditSelect?.({
-      id: String(msg.id),
-      sender: msg.sender?.username || msg.sender?.name || "Unknown",
-      text: msg.text || "",
-    });
-  }, [messages, onEditSelect]);
+  const handleDelete = useCallback(
+    async (messageId: string) => {
+      const msg: any = messages.find((m) => String(m.id) === String(messageId));
+      if (!msg) return;
+      //console.log('Delete message:', msg);
 
-  const handleDelete = useCallback(async (messageId: string) => {
-    const msg: any = messages.find((m) => String(m.id) === String(messageId));
-    if (!msg) return;
-    //console.log('Delete message:', msg);
-
-    chatSocketService.sendMessage({
-      id: messageId,
-      isUpdate: true,
-      channelId: channelId,
-      text: `tin nhắn đã bị xóa`,
-      type: 'remove',
-    });
-    // toast({
-    //   title: "Đã xóa tin nhắn!",
-    // });
-  }, [channelId, messages]);
+      chatSocketService.sendMessage({
+        id: messageId,
+        isUpdate: true,
+        channelId: channelId,
+        text: `tin nhắn đã bị xóa`,
+        type: "remove",
+      });
+      // toast({
+      //   title: "Đã xóa tin nhắn!",
+      // });
+    },
+    [channelId, messages]
+  );
 
   const handleCopy = useCallback((messageId: string, text: string) => {
-    console.log('Copy message:', messageId, text);
+    console.log("Copy message:", messageId, text);
   }, []);
 
   const handleShare = useCallback((messageId: string) => {
-    console.log('Share message:', messageId);
+    console.log("Share message:", messageId);
     // TODO: Open share dialog
   }, []);
 
@@ -325,38 +362,39 @@ export const MessageList: React.FC<Props> = ({
     if (!v) setCodeShareParams(null);
   }, []);
 
-  const handleMessageAction = useCallback((
-    type: MessageActionType,
-    messageId: string,
-    messageData?: any
-  ) => {
-    if (type === 'reply') {
-      handleReply(messageId); // đẩy dữ liệu reply lên ChatLayout
-      return;
-    }
-    handleAction(type, messageId, messageData);
-  }, [handleAction, handleReply]);
+  const handleMessageAction = useCallback(
+    (type: MessageActionType, messageId: string, messageData?: any) => {
+      if (type === "reply") {
+        handleReply(messageId); // đẩy dữ liệu reply lên ChatLayout
+        return;
+      }
+      handleAction(type, messageId, messageData);
+    },
+    [handleAction, handleReply]
+  );
 
   // Jump đến message có id tương ứng (dùng cho reply preview)
   const scrollToMessage = useCallback((targetId: string) => {
     if (!targetId) return;
-    const el = document.querySelector(`[data-message-id="${targetId}"]`) as HTMLElement | null;
+    const el = document.querySelector(
+      `[data-message-id="${targetId}"]`
+    ) as HTMLElement | null;
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
       setHoveredId(String(targetId));
       window.setTimeout(() => setHoveredId(null), 1600);
     }
   }, []);
-
-
 
   // Separate pinned and regular messages with real-time updates
   const { pinnedMessages } = useMemo(() => {
     const pinned: any[] = [];
 
     // Sắp xếp messages theo thời gian để đảm bảo tin nhắn mới nhất được xử lý đúng
-    const sortedMessages = [...messages].sort((a, b) =>
-      new Date(a.created_at || a.send_at).getTime() - new Date(b.created_at || b.send_at).getTime()
+    const sortedMessages = [...messages].sort(
+      (a, b) =>
+        new Date(a.created_at || a.send_at).getTime() -
+        new Date(b.created_at || b.send_at).getTime()
     );
     sortedMessages.forEach((message: any) => {
       if (message.isPin === true) {
@@ -369,37 +407,73 @@ export const MessageList: React.FC<Props> = ({
   }, [messages]);
 
   // Handle unpin action with immediate UI update
-  const handleUnpin = useCallback(async (messageId: string) => {
+  const handleUnpin = useCallback(
+    async (messageId: string) => {
+      // Gửi socket message để unpin
+      const msg: any = messages.find((m) => String(m.id) === String(messageId));
+      if (!msg) return;
 
-    // Gửi socket message để unpin
-    const msg: any = messages.find((m) => String(m.id) === String(messageId));
-    if (!msg) return;
-
-    chatSocketService.sendMessage({
-      id: messageId,
-      isUpdate: true,
-      isPin: false, // Đặt thành false để bỏ ghim
-      text: msg.text,
-      channelId: channelId,
-      type: 'message',
-    });
-  }, [channelId, messages]);
+      chatSocketService.sendMessage({
+        id: messageId,
+        isUpdate: true,
+        isPin: false, // Đặt thành false để bỏ ghim
+        text: msg.text,
+        channelId: channelId,
+        type: "message",
+      });
+    },
+    [channelId, messages]
+  );
 
   // Add handleOpenInTool function - FIX: Đảm bảo đúng data structure
-  const handleOpenInTool = useCallback((code: string, language: string) => {
-    console.log("📝 MessageList - handleOpenInTool called:", { code, language }); // Debug log
-    onOpenTool?.({
-      type: "code-editor", // <-- Đảm bảo type đúng
-      code,
-      language
-    });
-  }, [onOpenTool]);
+  const handleOpenInTool = useCallback(
+    (code: string, language: string) => {
+      console.log("📝 MessageList - handleOpenInTool called:", {
+        code,
+        language,
+      }); // Debug log
+      onOpenTool?.({
+        type: "code-editor", // <-- Đảm bảo type đúng
+        code,
+        language,
+      });
+    },
+    [onOpenTool]
+  );
+
+  // Thêm useEffect để handle URL params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const messageId = params.get("message");
+
+    if (messageId) {
+      // Delay để đảm bảo DOM đã render
+      setTimeout(() => {
+        const messageElement = document.querySelector(
+          `[data-message-id="${messageId}"]`
+        );
+        if (messageElement) {
+          messageElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          // Add highlight class
+          messageElement.classList.add("highlight-message");
+          setTimeout(() => {
+            messageElement.classList.remove("highlight-message");
+          }, 2000);
+        }
+      }, 500);
+    }
+  }, [messages]);
 
   // Memoized message items
   const messageItems = useMemo(() => {
     return messages.map((message: any, idx: number) => {
       const isMe = message?.sender?.id === user?.id;
-      const showSenderInfo = !isMe && shouldShowSenderInfo(messages, idx, user?.id);
+      const showSenderInfo =
+        !isMe && shouldShowSenderInfo(messages, idx, user?.id);
       const isLastMyMessage = isMe && idx === messages.length - 1;
 
       // Notification message
@@ -507,15 +581,28 @@ export const MessageList: React.FC<Props> = ({
           onCodeShare={handleCodeShare}
           onMessageAction={handleMessageAction}
           onJumpToMessage={scrollToMessage}
+          data-message-id={message.id} // Thêm data-message-id attribute
         />
       );
     });
-  }, [messages, user, type, hoveredId, handleCodeShare, handleMessageAction, scrollToMessage, onOpenTool, handleOpenInTool]);
+  }, [
+    messages,
+    user,
+    type,
+    hoveredId,
+    handleCodeShare,
+    handleMessageAction,
+    scrollToMessage,
+    onOpenTool,
+    handleOpenInTool,
+  ]);
 
   const PinItems = useMemo(() => {
     if (pinnedMessages.length > 0) {
       // Tạo key unique dựa trên pin messages để force re-render khi có thay đổi
-      const pinKey = pinnedMessages.map(m => `${m.id}-${m.isPin}-${m.updated_at || m.created_at}`).join('|');
+      const pinKey = pinnedMessages
+        .map((m) => `${m.id}-${m.isPin}-${m.updated_at || m.created_at}`)
+        .join("|");
 
       return (
         <div className="mb-4 absolute top-0 left-0 right-0 z-[99]">
@@ -533,7 +620,7 @@ export const MessageList: React.FC<Props> = ({
 
   return (
     <ScrollArea
-      className={`flex-1 min-h-0 p-4 overflow-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black ${isInputExpanded ? 'max-h-[65vh]' : 'max-h-[80vh]'}`}
+      className={`flex-1 min-h-0 p-4 overflow-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black ${isInputExpanded ? "max-h-[65vh]" : "max-h-[80vh]"}`}
       style={{ transition: "height 0.3s ease-in-out" }}
       ref={scrollAreaRef}
     >
@@ -549,10 +636,7 @@ export const MessageList: React.FC<Props> = ({
         </div>
 
         {/* Modals */}
-        <RepoChatDialog
-          open={openGitModal}
-          onOpenChange={setOpenGitModal}
-        />
+        <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
 
         {codeShareParams && (
           <CodeViewerDialog
@@ -579,7 +663,12 @@ export const MessageList: React.FC<Props> = ({
         >
           <DialogContent
             className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center border border-gray-300 dark:border-gray-700"
-            style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)", position: "fixed" }}
+            style={{
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              position: "fixed",
+            }}
           >
             <button
               className="absolute top-3 right-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl"
@@ -598,13 +687,24 @@ export const MessageList: React.FC<Props> = ({
               Chia sẻ code cho kênh
             </div>
             <div className="mb-4 w-full">
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 text-center">Chọn kênh để chia sẻ</div>
-              <ChannelSearch onSelectChannel={handleSelectChannel} isShare={true} />
-              <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleDoShare("current")}>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 text-center">
+                Chọn kênh để chia sẻ
+              </div>
+              <ChannelSearch
+                onSelectChannel={handleSelectChannel}
+                isShare={true}
+              />
+              <Button
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => handleDoShare("current")}
+              >
                 Chia sẻ cho kênh hiện tại
               </Button>
               {shareChannelId && (
-                <Button className="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white" onClick={() => handleDoShare("other")}>
+                <Button
+                  className="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white"
+                  onClick={() => handleDoShare("other")}
+                >
                   Chia sẻ cho kênh này
                 </Button>
               )}

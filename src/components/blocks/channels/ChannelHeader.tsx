@@ -13,9 +13,10 @@ import {
   ChevronDown,
   X,
   Settings,
+  SearchIcon,
 } from "lucide-react";
 import { Separator } from "../../ui/separator";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -39,10 +40,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { RepoChatDialog } from "../github/RepoChatDialog";
 import { AttachmentModal } from "../attachments/AttachmentModal";
 import AvatarUser from "@/components/common/AvartarUser";
-import { AvatarGroupGrid, AvatarGroupStack } from "@/components/common/AvatarGroup";
+import {
+  AvatarGroupGrid,
+  AvatarGroupStack,
+} from "@/components/common/AvatarGroup";
 import { ToolType, TOOL_CONFIGS } from "../tools";
 import ChannelUpdate from "./ChannelSettings";
 import { getChannelPermissions } from "@/utils/channelPermissions";
+import { SearchMessageDialog } from "../messages/SearchMessageDialog";
 
 interface ChannelHeaderProps {
   channel: Channel;
@@ -93,7 +98,12 @@ const getChannelTypeLabel = (type: string) => {
   }
 };
 
-export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: ChannelHeaderProps) => {
+export const ChannelHeader = ({
+  channel,
+  members,
+  selectedTool,
+  onToolChange,
+}: ChannelHeaderProps) => {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState("members");
   const [otherUser, setOtherUser] = useState<any>();
@@ -101,7 +111,10 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
   const [openGitModal, setOpenGitModal] = useState(false);
   const [openAttachmentModal, setOpenAttachmentModal] = useState(false);
   const [openSettingsModal, setOpenSettingsModal] = useState(false);
-  const [permissions, setPermissions] = useState<ReturnType<typeof getChannelPermissions> | null>(null);
+  const [permissions, setPermissions] = useState<ReturnType<
+    typeof getChannelPermissions
+  > | null>(null);
+  const [openSearchModal, setOpenSearchModal] = useState(false);
 
   // Get user permissions for this channel
   useEffect(() => {
@@ -119,6 +132,33 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
     console.log("Other User ID:", otherUser);
   }, [channel, members, user]);
 
+  // Handler for navigating to searched message
+  const handleMessageSelect = useCallback((messageId: string) => {
+    // Update URL with message param
+    const newParams = new URLSearchParams(window.location.search);
+    newParams.set("message", messageId);
+    window.history.pushState({}, "", `?${newParams.toString()}`);
+
+    // Scroll to message (implement in MessageList component)
+    setTimeout(() => {
+      const messageElement = document.querySelector(
+        `[data-message-id="${messageId}"]`
+      );
+      if (messageElement) {
+        messageElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        // Highlight effect
+        messageElement.classList.add("highlight-message");
+        setTimeout(() => {
+          messageElement.classList.remove("highlight-message");
+        }, 2000);
+      }
+    }, 500);
+  }, []);
+
   return (
     <div className="h-14 border-b border-zinc-700/50 bg-zinc-50 dark:bg-zinc-950/95 backdrop-blur-md px-6 py-0 flex items-center justify-between shadow-sm">
       <div className="flex items-center min-w-0 flex-1">
@@ -128,52 +168,77 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
             : getChannelIcon(channel)}
           <h2 className="font-semibold text-black dark:text-white text-lg truncate">
             {channel.type === "personal" && otherUser
-              ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
-              : channel.name
-            }
+              ? otherUser.username ||
+                otherUser.name ||
+                otherUser.email ||
+                channel.name
+              : channel.name}
           </h2>
 
           {/* Display user role badge for private channels */}
           {channel.type === "group-private" && user?.id && (
             <div className="flex items-center gap-1.5">
               {permissions?.isOwner && (
-                <Badge variant="outline" className="bg-yellow-500/10 border-yellow-500/50 text-yellow-400 text-xs">
+                <Badge
+                  variant="outline"
+                  className="bg-yellow-500/10 border-yellow-500/50 text-yellow-400 text-xs"
+                >
                   <Crown className="h-3 w-3 mr-1" />
                   Owner
                 </Badge>
               )}
               {permissions?.isPM && (
-                <Badge variant="outline" className="bg-purple-500/10 border-purple-500/50 text-purple-400 text-xs">
+                <Badge
+                  variant="outline"
+                  className="bg-purple-500/10 border-purple-500/50 text-purple-400 text-xs"
+                >
                   PM
                 </Badge>
               )}
               {permissions?.isBA && (
-                <Badge variant="outline" className="bg-blue-500/10 border-blue-500/50 text-blue-400 text-xs">
+                <Badge
+                  variant="outline"
+                  className="bg-blue-500/10 border-blue-500/50 text-blue-400 text-xs"
+                >
                   BA
                 </Badge>
               )}
               {permissions?.isTester && (
-                <Badge variant="outline" className="bg-orange-500/10 border-orange-500/50 text-orange-400 text-xs">
+                <Badge
+                  variant="outline"
+                  className="bg-orange-500/10 border-orange-500/50 text-orange-400 text-xs"
+                >
                   Tester
                 </Badge>
               )}
               {permissions?.isDev && (
-                <Badge variant="outline" className="bg-green-500/10 border-green-500/50 text-green-400 text-xs">
+                <Badge
+                  variant="outline"
+                  className="bg-green-500/10 border-green-500/50 text-green-400 text-xs"
+                >
                   Dev
                 </Badge>
               )}
-              {permissions?.isViewer && !permissions?.isPM && !permissions?.isOwner && (
-                <Badge variant="outline" className="bg-zinc-500/10 border-zinc-500/50 text-zinc-400 text-xs">
-                  Viewer
-                </Badge>
-              )}
+              {permissions?.isViewer &&
+                !permissions?.isPM &&
+                !permissions?.isOwner && (
+                  <Badge
+                    variant="outline"
+                    className="bg-zinc-500/10 border-zinc-500/50 text-zinc-400 text-xs"
+                  >
+                    Viewer
+                  </Badge>
+                )}
             </div>
           )}
         </div>
 
         {channel.member_count > 2 && (
           <>
-            <Separator orientation="vertical" className="mx-4 h-5 bg-zinc-300 dark:bg-zinc-600/40" />
+            <Separator
+              orientation="vertical"
+              className="mx-4 h-5 bg-zinc-300 dark:bg-zinc-600/40"
+            />
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800/50 rounded-full border border-zinc-700/30">
                 <Users className="h-3.5 w-3.5 text-zinc-400" />
@@ -195,6 +260,14 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
         )}
       </div>
       <div className="flex items-center gap-1">
+        <button
+          className="p-2.5 rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
+          title="Tìm kiếm tin nhắn"
+          onClick={() => setOpenSearchModal(true)}
+        >
+          <SearchIcon className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 group-hover:text zinc-900 dark:group-hover:text-zinc-200 transition-colors" />
+          <span className="sr-only">Tìm kiếm tin nhắn</span>
+        </button>
         {/* Nút mở attachment modal */}
         <button
           className="p-2.5 rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
@@ -204,6 +277,13 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
           <Paperclip className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 group-hover:text zinc-900 dark:group-hover:text-zinc-200 transition-colors" />
           <span className="sr-only">Xem tệp đính kèm</span>
         </button>
+
+        <SearchMessageDialog
+          open={openSearchModal}
+          onOpenChange={setOpenSearchModal}
+          channelId={channel.id}
+          onMessageSelect={handleMessageSelect}
+        />
 
         {/* Attachment Modal */}
         <AttachmentModal
@@ -217,17 +297,21 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className={`p-2.5 rounded-xl border transition-all duration-200 group ${selectedTool
-                ? 'bg-blue-500/15 border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20'
-                : 'hover:bg-zinc-100 dark:bg-zinc-800/60 border-transparent hover:border-zinc-600/30'
-                }`}
+              className={`p-2.5 rounded-xl border transition-all duration-200 group ${
+                selectedTool
+                  ? "bg-blue-500/15 border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20"
+                  : "hover:bg-zinc-100 dark:bg-zinc-800/60 border-transparent hover:border-zinc-600/30"
+              }`}
               title="AI Tools"
             >
               <div className="flex items-center gap-1.5">
-                <Wrench className={`h-4.5 w-4.5 transition-colors ${selectedTool
-                  ? 'text-blue-400'
-                  : 'text-zinc-400 group-hover:text-zinc-200'
-                  }`} />
+                <Wrench
+                  className={`h-4.5 w-4.5 transition-colors ${
+                    selectedTool
+                      ? "text-blue-400"
+                      : "text-zinc-400 group-hover:text-zinc-200"
+                  }`}
+                />
                 {selectedTool && (
                   <ChevronDown className="h-3 w-3 text-blue-400" />
                 )}
@@ -235,21 +319,29 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
               <span className="sr-only">AI Tools</span>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 bg-zinc-50 dark:bg-zinc-900/95 backdrop-blur-md border-zinc-700/50 shadow-2xl">
+          <DropdownMenuContent
+            align="end"
+            className="w-64 bg-zinc-50 dark:bg-zinc-900/95 backdrop-blur-md border-zinc-700/50 shadow-2xl"
+          >
             {Object.values(TOOL_CONFIGS).map((tool) => (
               <DropdownMenuItem
                 key={tool.id}
-                onClick={() => onToolChange?.(selectedTool === tool.id ? null : tool.id)}
-                className={`cursor-pointer transition-all duration-200 ${selectedTool === tool.id
-                  ? 'bg-blue-500/20 border-l-2 border-blue-400 text-blue-300'
-                  : 'hover:bg-zinc-100 dark:bg-zinc-800/70 text-zinc-200'
-                  }`}
+                onClick={() =>
+                  onToolChange?.(selectedTool === tool.id ? null : tool.id)
+                }
+                className={`cursor-pointer transition-all duration-200 ${
+                  selectedTool === tool.id
+                    ? "bg-blue-500/20 border-l-2 border-blue-400 text-blue-300"
+                    : "hover:bg-zinc-100 dark:bg-zinc-800/70 text-zinc-200"
+                }`}
               >
                 <div className="flex items-center gap-3 w-full py-1">
                   <span className="text-lg">{tool.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">{tool.name}</div>
-                    <div className="text-xs text-zinc-400 truncate">{tool.description}</div>
+                    <div className="text-xs text-zinc-400 truncate">
+                      {tool.description}
+                    </div>
                   </div>
                   {selectedTool === tool.id && (
                     <div className="flex-shrink-0">
@@ -279,8 +371,10 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
 
         {/* Nút mở modal kết nối repo git - Only for Dev/PM/Owner */}
 
-
-        {(permissions?.isDev || permissions?.isPM || permissions?.isOwner || channel.type === "personal") && (
+        {(permissions?.isDev ||
+          permissions?.isPM ||
+          permissions?.isOwner ||
+          channel.type === "personal") && (
           <>
             <button
               className="p-2.5 rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
@@ -290,7 +384,10 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
               <Github className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 group-hover:text zinc-900 dark:group-hover:text-zinc-200 transition-colors" />
               <span className="sr-only">Kết nối repo Git</span>
             </button>
-            <RepoChatDialog open={openGitModal} onOpenChange={setOpenGitModal} />
+            <RepoChatDialog
+              open={openGitModal}
+              onOpenChange={setOpenGitModal}
+            />
           </>
         )}
 
@@ -349,9 +446,11 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                   <div>
                     <DialogTitle className="text-2xl font-bold text-black dark:text-white tracking-tight">
                       {channel.type === "personal" && otherUser
-                        ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
-                        : channel.name
-                      }
+                        ? otherUser.username ||
+                          otherUser.name ||
+                          otherUser.email ||
+                          channel.name
+                        : channel.name}
                     </DialogTitle>
                     <p className="text-zinc-400 text-sm font-medium">
                       {getChannelTypeLabel(channel.type)}
@@ -363,7 +462,9 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
 
             {/* Tabs với thiết kế tối */}
             <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-              <TabsList className={`grid w-full ${channel.type === "personal" ? "grid-cols-2" : "grid-cols-3"} bg-zinc-50 dark:bg-zinc-900 rounded-xl p-1 shadow-sm border border-zinc-800`}>
+              <TabsList
+                className={`grid w-full ${channel.type === "personal" ? "grid-cols-2" : "grid-cols-3"} bg-zinc-50 dark:bg-zinc-900 rounded-xl p-1 shadow-sm border border-zinc-800`}
+              >
                 <TabsTrigger
                   value="members"
                   className="rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-zinc-100 dark:bg-zinc-800 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-md text-zinc-300"
@@ -445,9 +546,17 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                       {channel.type === "personal" && otherUser ? (
                         <div className="relative">
                           <Avatar className="h-12 w-12 rounded-xl">
-                            <AvatarImage src={otherUser.avatar || otherUser.github_avatar} alt={otherUser.username} />
+                            <AvatarImage
+                              src={otherUser.avatar || otherUser.github_avatar}
+                              alt={otherUser.username}
+                            />
                             <AvatarFallback className="bg-blue-800 text-black dark:text-white text-md">
-                              {(otherUser.username?.[0] || otherUser.name?.[0] || otherUser.email?.[0] || "U").toUpperCase()}
+                              {(
+                                otherUser.username?.[0] ||
+                                otherUser.name?.[0] ||
+                                otherUser.email?.[0] ||
+                                "U"
+                              ).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <OnlineDot userId={otherUser.id} />
@@ -546,9 +655,13 @@ export const ChannelHeader = ({ channel, members, selectedTool, onToolChange }: 
                       open={true}
                       onOpenChange={setOpenSettingsModal}
                       channelId={channel.id}
-                      channelName={channel.type === "personal" && otherUser
-                        ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
-                        : channel.name
+                      channelName={
+                        channel.type === "personal" && otherUser
+                          ? otherUser.username ||
+                            otherUser.name ||
+                            otherUser.email ||
+                            channel.name
+                          : channel.name
                       }
                       channelData={channel}
                     />
