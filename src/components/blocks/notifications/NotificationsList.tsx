@@ -243,39 +243,35 @@ const NotificationItem = memo(
     return (
       <div
         className={cn(
-          "cursor-pointer transition-all duration-200 p-4 hover:bg-zinc-50 dark:bg-zinc-950-accent/30 border-b border-sidebar-border/20",
+          "cursor-pointer transition-all duration-200 p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-800",
           isSelected && !isNewNotification
-            ? "bg-zinc-50 dark:bg-zinc-950-accent/50 border-l-2 border-l-blue-500"
-            : "border-l-2 border-l-transparent hover:border-l-blue-300",
-          !notification.read && "bg-blue-50/5",
-          // Animation cho notification mới - nền trắng chữ đen
+            ? "bg-zinc-100 dark:bg-zinc-800 border-l-4 border-l-blue-500"
+            : "border-l-4 border-l-transparent hover:border-l-blue-300 dark:hover:border-l-blue-500",
+          !notification.read && "bg-blue-50 dark:bg-blue-950/20",
           isNewNotification &&
-          "bg-white text-black border-l-2 border-l-green-500"
+            "bg-white dark:bg-zinc-900 border-l-4 border-l-green-500"
         )}
         onClick={() => onSelect(notification)}
         style={
           isNewNotification
             ? {
-              background: "white",
-              color: "black",
-              animation: "flash-white 0.8s ease-in-out 4",
-              border: "1px solid rgba(0,0,0,0.1)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            }
+                animation: "flash-white 0.8s ease-in-out 4",
+                boxShadow: "0 2px 8px rgba(59, 130, 246, 0.2)",
+              }
             : undefined
         }
       >
         <div className="flex items-start gap-3">
           <NotificationIcon type={notification.type} />
 
-          <div className="flex-1 min-w-0 space-y-1.5">
-            {/* Header với thời gian và dot */}
-            <div className="flex items-center justify-between">
+                 <div className="flex-1 min-w-0 space-y-2">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-2">
               <h4
                 className={cn(
-                  "text-sm truncate",
+                  "text-sm font-semibold truncate",
                   getNotificationDisplay.titleClass,
-                  isNewNotification && "text-gray-900 font-semibold" // Chữ đen đậm trên nền trắng
+                  isNewNotification && "text-zinc-900 dark:text-zinc-100"
                 )}
               >
                 {getNotificationDisplay.title}
@@ -283,10 +279,10 @@ const NotificationItem = memo(
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span
                   className={cn(
-                    "text-xs font-medium",
+                    "text-xs font-medium whitespace-nowrap",
                     isNewNotification
-                      ? "text-gray-600" // Xám đậm trên nền trắng
-                      : "text-sidebar-foreground/50"
+                      ? "text-zinc-600 dark:text-zinc-400"
+                      : "text-zinc-500 dark:text-zinc-400"
                   )}
                 >
                   {formatTime(notification.createdAt)}
@@ -294,17 +290,17 @@ const NotificationItem = memo(
                 {!notification.read && (
                   <div
                     className={cn(
-                      "w-2 h-2 rounded-full",
+                      "w-2 h-2 rounded-full flex-shrink-0",
                       isNewNotification
-                        ? "bg-green-600" // Xanh đậm hơn để thấy rõ trên nền trắng
+                        ? "bg-green-500"
                         : "bg-blue-500"
                     )}
                     style={
                       isNewNotification
                         ? {
-                          animation: "pulse 1s ease-in-out infinite",
-                          boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
-                        }
+                            animation: "pulse 1.5s ease-in-out infinite",
+                            boxShadow: "0 0 6px rgba(34, 197, 94, 0.6)",
+                          }
                         : undefined
                     }
                   />
@@ -315,10 +311,10 @@ const NotificationItem = memo(
             {/* Content - tin nhắn trên 1 hàng với ellipsis */}
             <p
               className={cn(
-                "text-sm truncate leading-relaxed",
+                "text-sm line-clamp-2 leading-relaxed",
                 isNewNotification
-                  ? "text-gray-800" // Xám đậm cho content trên nền trắng
-                  : "text-sidebar-foreground/80"
+                  ? "text-zinc-700 dark:text-zinc-300"
+                  : "text-zinc-600 dark:text-zinc-400"
               )}
             >
               {getNotificationDisplay.content}
@@ -327,54 +323,48 @@ const NotificationItem = memo(
             {/* GitHub specific metadata */}
             {notification.type === "github" &&
               getNotificationDisplay.metadata && (
-                <div className="flex items-center gap-3 text-xs text-sidebar-foreground/50">
+                <div className="flex items-center gap-2 flex-wrap text-xs text-zinc-500 dark:text-zinc-500">
                   {getNotificationDisplay.metadata.action === "push" && (
                     <>
-                      <span>
+                      <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
                         Branch: {getNotificationDisplay.metadata.branch}
                       </span>
-                      <span>•</span>
-                      <span>By: {getNotificationDisplay.metadata.author}</span>
+                      <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                        By: {getNotificationDisplay.metadata.author}
+                      </span>
                       {getNotificationDisplay.metadata.commitsCount > 1 && (
-                        <>
-                          <span>•</span>
-                          <span>
-                            {getNotificationDisplay.metadata.commitsCount}{" "}
-                            commits
-                          </span>
-                        </>
+                        <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                          {getNotificationDisplay.metadata.commitsCount} commits
+                        </span>
                       )}
                     </>
                   )}
                   {getNotificationDisplay.metadata.action ===
                     "installation_created" && (
-                      <>
-                        <span>
-                          Repositories:{" "}
-                          {getNotificationDisplay.metadata.repoCount}
-                        </span>
-                        <span>•</span>
-                        <span>
-                          Owner: {getNotificationDisplay.metadata.owner}
-                        </span>
-                      </>
-                    )}
+                    <>
+                      <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                        Repos: {getNotificationDisplay.metadata.repoCount}
+                      </span>
+                      <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                        Owner: {getNotificationDisplay.metadata.owner}
+                      </span>
+                    </>
+                  )}
                 </div>
               )}
 
             {/* Thời gian chính xác */}
             <div
               className={cn(
-                "flex items-center gap-1 text-xs",
+                "flex items-center gap-1.5 text-xs",
                 isNewNotification
-                  ? "text-gray-500" // Xám nhạt cho thời gian trên nền trắng
-                  : "text-sidebar-foreground/40"
+                  ? "text-zinc-500 dark:text-zinc-500"
+                  : "text-zinc-400 dark:text-zinc-500"
               )}
             >
               <Clock className="w-3 h-3" />
               <span>{formatExactTime(notification.createdAt)}</span>
             </div>
-
             {/* Metadata nhỏ cho các loại khác */}
             {notification.type === "system" && (
               <div className="flex items-center gap-3 text-xs text-sidebar-foreground/40 pt-1">
@@ -539,7 +529,7 @@ export default function NotificationsList({
     () => [
       { value: "all", label: "Tất cả", icon: MessageCircle },
       { value: "message", label: "Tin nhắn", icon: Users },
-      { value: "system", label: "Hệ thống", icon: Settings },
+      // { value: "system", label: "Hệ thống", icon: Settings },
       { value: "github", label: "GitHub", icon: GitBranch },
     ],
     []
@@ -727,20 +717,25 @@ export default function NotificationsList({
     const unreadCount = notifications.filter((n) => !n.read).length;
 
     return (
-      <div className="flex items-center gap-2">
-        <h1 className="text-lg font-bold text-sidebar-foreground">Hoạt động</h1>
-        {notifications.length > 0 && !isInitialLoad && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs bg-zinc-50 dark:bg-zinc-950-accent px-2 py-1 rounded-full text-sidebar-foreground/70">
-              {notifications.length}
-            </span>
-            {unreadCount > 0 && (
-              <span className="text-xs bg-blue-500 text-black dark:text-white px-2 py-1 rounded-full">
-                {unreadCount}
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+            Hoạt động
+          </h1>
+          {notifications.length > 0 && !isInitialLoad && (
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <span className="text-xs bg-blue-500 text-white px-2.5 py-1 rounded-full font-medium">
+                  {unreadCount} mới
+                </span>
+              )}
+              <span className="text-xs bg-zinc-200 dark:bg-zinc-800 px-2.5 py-1 rounded-full text-zinc-700 dark:text-zinc-300 font-medium">
+                {notifications.length}
               </span>
-            )}
-          </div>
-        )}
+
+            </div>
+          )}
+        </div>
       </div>
     );
   }, [notifications, isInitialLoad]);
@@ -765,7 +760,7 @@ export default function NotificationsList({
       {/* Filter Tabs */}
       <div className="p-3 border-b border-sidebar-border/50">
         <Tabs value={activeFilter} onValueChange={handleFilterChange}>
-          <TabsList className="w-full bg-zinc-50 dark:bg-zinc-950-accent/30 h-9">
+          <TabsList className="w-full bg-zinc-100 dark:bg-zinc-800 h-10 p-1">
             {filterTabs}
           </TabsList>
         </Tabs>

@@ -263,7 +263,7 @@ const ProfileLayout: React.FC = () => {
                     : "bg-gray-600/20 text-gray-400 border-gray-500/30"
                 }
               >
-                {user.email_verified ? "Đã xác minh" : "Chưa xác minh"}
+                {user?.email_verified ? "Đã xác minh" : "Chưa xác minh"}
               </Badge>
             </div>
           </div>

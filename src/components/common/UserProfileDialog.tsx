@@ -46,7 +46,7 @@ export const UserProfileDialog = ({
 
     if (!user) return null;
 
-    const displayAvatar = avatarUrl || user.github_avatar || `https://i.pravatar.cc/150?u=${user.id}`;
+    const displayAvatar = user.avatar || user.github_avatar || `https://i.pravatar.cc/150?u=${user.id}`;
     const displayName = user.username || user.name || user.email?.split("@")[0] || "User";
     const displayEmail = user.email || user.github_email || "Không có email";
 
