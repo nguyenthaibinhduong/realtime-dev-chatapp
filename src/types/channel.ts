@@ -1,6 +1,7 @@
 export interface Channel {
   id: string;
   name: string;
+  key?: string;
   description?: string;
   type: string;
   member_count?: number;

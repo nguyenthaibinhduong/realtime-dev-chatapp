@@ -8,6 +8,7 @@ import {
   FileText,
   Users,
   CheckCircle2,
+  Share2,
 } from "lucide-react";
 import {
   Dialog,
@@ -23,6 +24,11 @@ import AvatarUser from "@/components/common/AvartarUser";
 import { cn } from "@/lib/utils";
 import AttachmentItem from "../../attachments/AttachmentItem";
 import { usePreview } from "@/hooks/useAttachmentPreview";
+import ShareButton from "../common/ShareButton";
+import { ChannelSearch } from "../../channels/ChannelSearch";
+import { Button } from "@/components/ui/button";
+import { chatSocketService } from "@/services/chatSocketService";
+import { toast } from "@/hooks/useToast";
 
 interface TesterReportMessageProps {
   message: any;
@@ -50,6 +56,30 @@ const TesterReportMessage = ({
   const [showDialog, setShowDialog] = useState(false);
   const isHovered = hoveredId === String(message.id);
   const { setPreviewUrl } = usePreview();
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareChannelId, setShareChannelId] = useState<string | null>(null);
+  const handleShare = () => setShowShareModal(true);
+  const handleSelectChannel = (channel: any) =>
+    setShareChannelId(String(channel.id));
+  const handleDoShare = (type: "current" | "other") => {
+    let channel_id = "";
+    if (type === "current")
+      channel_id = localStorage.getItem("selectedChannelId") || "";
+    else channel_id = shareChannelId || "";
+
+    const params = {
+      channelId: channel_id,
+      text: message.text || "",
+      type: "tester-report",
+      json_data: message.json_data
+    };
+    chatSocketService.sendMessage(params);
+    toast({
+      title: "Đã chia sẻ file vào kênh chat.",
+      description: `Yêu cầu đã được chia sẻ vào kênh chat.`,
+    });
+    setShowShareModal(false);
+  };
 
   const reportData = message.json_data || {};
   const {
@@ -197,15 +227,73 @@ const TesterReportMessage = ({
 
               {/* Footer */}
               <div className="pt-2 border-t border-red-500/50">
-                <p className="text-[10px] text-gray-400 text-center">
-                  Click để xem chi tiết báo cáo
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-gray-400">
+                    Click để xem chi tiết báo cáo
+                  </p>
+                  <ShareButton onClick={handleShare} />
+                </div>
               </div>
             </div>
           </Card>
         </div>
       </div>
-
+      <Dialog
+        open={showShareModal}
+        onOpenChange={(v) => {
+          setShowShareModal(v);
+          if (!v) setShareChannelId(null);
+        }}
+      >
+        <DialogContent
+          className="bg-white dark:bg-black rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center"
+          style={{
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            position: "fixed",
+          }}
+        >
+          <button
+            className="absolute top-3 right-3 text-zinc-400 hover:text-black dark:text-white text-xl"
+            onClick={() => {
+              setShowShareModal(false);
+              setShareChannelId(null);
+            }}
+            aria-label="Đóng"
+            type="button"
+          >
+            ×
+          </button>
+          <div className="text-lg font-semibold text-black dark:text-white mb-2 flex items-center gap-2">
+            <Share2 className="h-5 w-5 text-blue-500" />
+            Chia sẻ code cho kênh
+          </div>
+          <div className="mb-4 w-full">
+            <div className="text-xs text-gray-600 mb-2 text-center">
+              Chọn kênh để chia sẻ
+            </div>
+            <ChannelSearch
+              onSelectChannel={handleSelectChannel}
+              isShare={true}
+            />
+            <Button
+              className="w-full mt-4 bg-blue-600 text-white"
+              onClick={() => handleDoShare("current")}
+            >
+              Chia sẻ cho kênh hiện tại
+            </Button>
+            {shareChannelId && (
+              <Button
+                className="w-full mt-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white"
+                onClick={() => handleDoShare("other")}
+              >
+                Chia sẻ cho kênh này
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       {/* Detail Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-gradient-to-br from-gray-950 via-black to-gray-950 border-2 border-red-500/60 shadow-2xl">
@@ -387,53 +475,7 @@ const TesterReportMessage = ({
             )}
 
             {/* Drive Link Section */}
-            {driveLink && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 pb-2 border-b border-blue-500/20">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/30">
-                    <LinkIcon className="h-4 w-4 text-blue-400" />
-                  </div>
-                  <h3 className="text-base font-bold text-black dark:text-white uppercase tracking-wide">
-                    Drive Link
-                  </h3>
-                </div>
-                <a
-                  href={driveLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200"
-                >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/20 border border-blue-500/40 group-hover:bg-blue-500/30 transition-colors">
-                    <ExternalLink className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                  </div>
-                  <span className="text-sm text-blue-400 group-hover:text-blue-300 truncate font-medium transition-colors">
-                    {driveLink}
-                  </span>
-                </a>
-              </div>
-            )}
 
-            {/* Sync Status */}
-            {syncGoogleSheet && (
-              <Card className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/40 shadow-lg shadow-green-500/5">
-                <div className="p-4 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/20 border border-green-500/50">
-                    <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-bold text-green-400">
-                      Đã đồng bộ với Google Sheets
-                    </div>
-                    <div className="text-xs text-green-400 mt-0.5">
-                      Báo cáo này đã được lưu vào bảng tính
-                    </div>
-                  </div>
-                  <Badge className="bg-green-500/20 border border-green-500/50 text-green-400">
-                    Active
-                  </Badge>
-                </div>
-              </Card>
-            )}
 
             {/* Attachments Section */}
             {message.attachments && message.attachments.length > 0 && (

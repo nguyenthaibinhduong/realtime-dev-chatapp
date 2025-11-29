@@ -192,7 +192,15 @@ export const ChannelList = ({
                             ? (otherUser.username || otherUser.name || otherUser.email || channel.name)
                             : channel.name
                         }
+
                     </span>
+                    <br />
+                    {channel.type === "group-private" && channel.json_data?.projectName && !channel.key
+                        ? (
+                            <span className="text-xs text-gray-500 dark:text-muted-foreground">{channel.json_data.projectName}</span>
+                        )
+                        : null
+                    }
                 </div>
                 {unread > 0 && (
                     <span className="ml-2 text-xs bg-red-500 dark:bg-red-600 text-white rounded-full px-2 py-0.5">
@@ -222,6 +230,7 @@ export const ChannelList = ({
                         Kênh riêng tư
                     </div>
                     {groupPrivateWithoutKey.map(renderChannel)}
+
                 </div>
             )}
 
@@ -241,7 +250,7 @@ export const ChannelList = ({
                                 {/* Project Header */}
                                 <Button
                                     variant="ghost"
-                                    className="w-full justify-between px-2 py-1.5 h-auto font-medium flex items-center text-gray-700 dark:text-sidebar-foreground hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-800 dark:text-gray-100"
+                                    className="w-full justify-between px-2 py-1.5 h-auto font-medium flex items-center text-gray-700 dark:text-sidebar-foreground hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 dark:text-gray-100"
                                     onClick={() => toggleProject(project.key)}
                                 >
                                     <div className="flex items-center gap-2">

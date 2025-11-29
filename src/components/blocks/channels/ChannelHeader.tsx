@@ -169,9 +169,9 @@ export const ChannelHeader = ({
           <h2 className="font-semibold text-black dark:text-white text-lg truncate">
             {channel.type === "personal" && otherUser
               ? otherUser.username ||
-                otherUser.name ||
-                otherUser.email ||
-                channel.name
+              otherUser.name ||
+              otherUser.email ||
+              channel.name
               : channel.name}
           </h2>
 
@@ -297,20 +297,18 @@ export const ChannelHeader = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className={`p-2.5 rounded-xl border transition-all duration-200 group ${
-                selectedTool
-                  ? "bg-blue-500/15 border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20"
-                  : "hover:bg-zinc-100 dark:bg-zinc-800/60 border-transparent hover:border-zinc-600/30"
-              }`}
+              className={`p-2.5 rounded-xl border transition-all duration-200 group ${selectedTool
+                ? "bg-blue-500/15 border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20"
+                : "hover:bg-zinc-100 dark:bg-zinc-800/60 border-transparent hover:border-zinc-600/30"
+                }`}
               title="Tools"
             >
               <div className="flex items-center gap-1.5">
                 <Wrench
-                  className={`h-4.5 w-4.5 transition-colors ${
-                    selectedTool
-                      ? "text-blue-400"
-                      : "h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors"
-                  }`}
+                  className={`h-4.5 w-4.5 transition-colors ${selectedTool
+                    ? "text-blue-400"
+                    : "h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors"
+                    }`}
                 />
                 {selectedTool && (
                   <ChevronDown className="h-3 w-3 text-blue-400" />
@@ -329,11 +327,10 @@ export const ChannelHeader = ({
                 onClick={() =>
                   onToolChange?.(selectedTool === tool.id ? null : tool.id)
                 }
-                className={`cursor-pointer transition-all duration-200 group ${
-                  selectedTool === tool.id
-                    ? "bg-blue-500/20 border-l-2 border-blue-400 text-blue-300"
-                    : "hover:bg-zinc-100 dark:bg-zinc-800/70 text-zinc-200"
-                }`}
+                className={`cursor-pointer transition-all duration-200 group ${selectedTool === tool.id
+                  ? "bg-blue-500/20 border-l-2 border-blue-400 text-blue-300"
+                  : "hover:bg-zinc-100 dark:bg-zinc-800/70 text-zinc-200"
+                  }`}
               >
                 <div className="flex items-center gap-3 w-full py-1">
                   <span className="text-lg">{tool.icon}</span>
@@ -375,21 +372,23 @@ export const ChannelHeader = ({
           permissions?.isPM ||
           permissions?.isOwner ||
           channel.type === "personal") && (
-          <>
-            <button
-              className="p-2.5 rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
-              title="GitHub Integration"
-              onClick={() => setOpenGitModal(true)}
-            >
-              <Github className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors" />
-              <span className="sr-only">Kết nối repo Git</span>
-            </button>
-            <RepoChatDialog
-              open={openGitModal}
-              onOpenChange={setOpenGitModal}
-            />
-          </>
-        )}
+            <>
+              <button
+                className="p-2.5 rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 group"
+                title="GitHub Integration"
+                onClick={() => setOpenGitModal(true)}
+              >
+                <Github className="h-4.5 w-4.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-900 transition-colors" />
+                <span className="sr-only">Kết nối repo Git</span>
+              </button>
+              <RepoChatDialog
+                open={openGitModal}
+                onOpenChange={setOpenGitModal}
+                role={permissions?.isOwner || permissions?.isPM ? "owner" : null}
+
+              />
+            </>
+          )}
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -447,9 +446,9 @@ export const ChannelHeader = ({
                     <DialogTitle className="text-2xl font-bold text-black dark:text-white tracking-tight">
                       {channel.type === "personal" && otherUser
                         ? otherUser.username ||
-                          otherUser.name ||
-                          otherUser.email ||
-                          channel.name
+                        otherUser.name ||
+                        otherUser.email ||
+                        channel.name
                         : channel.name}
                     </DialogTitle>
                     <p className="text-zinc-400 text-sm font-medium">
@@ -658,9 +657,9 @@ export const ChannelHeader = ({
                       channelName={
                         channel.type === "personal" && otherUser
                           ? otherUser.username ||
-                            otherUser.name ||
-                            otherUser.email ||
-                            channel.name
+                          otherUser.name ||
+                          otherUser.email ||
+                          channel.name
                           : channel.name
                       }
                       channelData={channel}

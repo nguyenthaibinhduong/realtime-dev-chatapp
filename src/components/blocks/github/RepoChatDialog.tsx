@@ -16,7 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { chatSocketService } from "@/services/chatSocketService";
 
-export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; onOpenChange: (v: boolean) => void, role?: string }) {
     const [repos, setRepos] = useState<any[]>([]);
     const [repoChannel, setRepoChannel] = useState<any[]>([]);
     const [loadingRepos, setLoadingRepos] = useState(false);
@@ -88,7 +88,11 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
     // Khi mở dialog hoặc user đổi github_installation_id thì fetch lại
     useEffect(() => {
         if (open && user) {
-            if (!user.github_installation_id) {
+            const userData = { ...user };
+            if (role == "owner") {
+                userData.role = "owner";
+            }
+            if (!user.github_installation_id && role !== "owner") {
                 toast({
                     title: "Chưa kết nối GitHub",
                     description: "Vui lòng kết nối GitHub trước khi sử dụng chức năng này",
@@ -96,12 +100,16 @@ export function RepoChatDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                 navigate("/auth/github/register");
                 return;
             } else {
-                loadRepo();
-                loadRepoChannel();
+                if (role === "owner") {
+                    loadRepoChannel();
+                } else {
+                    loadRepo();
+                    loadRepoChannel();
+                }
             }
         }
         // eslint-disable-next-line
-    }, [open, user?.github_installation_id, loadRepo, loadRepoChannel]);
+    }, [open, user?.github_installation_id, loadRepo, loadRepoChannel, role]);
 
     // Drag & Drop handlers
     const handleDragStart = (e: React.DragEvent, repo: any) => {

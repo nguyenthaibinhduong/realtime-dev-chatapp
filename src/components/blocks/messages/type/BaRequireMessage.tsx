@@ -6,6 +6,7 @@ import {
   Users,
   CheckCircle2,
   List,
+  Share2,
 } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,12 @@ import AvatarUser from "@/components/common/AvartarUser";
 import { cn } from "@/lib/utils";
 import AttachmentItem from "../../attachments/AttachmentItem";
 import { usePreview } from "@/hooks/useAttachmentPreview";
+import ShareButton from "../common/ShareButton";
+import { chatSocketService } from "@/services/chatSocketService";
+import { ChannelSearch } from "../../channels/ChannelSearch";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/useToast";
+
 
 interface BARequireMessageProps {
   message: any;
@@ -48,6 +55,30 @@ const BARequireMessage = ({
   const [showDialog, setShowDialog] = useState(false);
   const isHovered = hoveredId === String(message.id);
   const { setPreviewUrl } = usePreview();
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareChannelId, setShareChannelId] = useState<string | null>(null);
+  const handleShare = () => setShowShareModal(true);
+  const handleSelectChannel = (channel: any) =>
+    setShareChannelId(String(channel.id));
+  const handleDoShare = (type: "current" | "other") => {
+    let channel_id = "";
+    if (type === "current")
+      channel_id = localStorage.getItem("selectedChannelId") || "";
+    else channel_id = shareChannelId || "";
+
+    const params = {
+      channelId: channel_id,
+      text: message.text || "",
+      type: "ba-require",
+      json_data: message.json_data
+    };
+    chatSocketService.sendMessage(params);
+    toast({
+      title: "Đã chia sẻ file vào kênh chat.",
+      description: `Yêu cầu đã được chia sẻ vào kênh chat.`,
+    });
+    setShowShareModal(false);
+  };
 
   const requirementData = message.json_data || {};
   const {
@@ -206,15 +237,73 @@ const BARequireMessage = ({
 
               {/* Footer */}
               <div className="pt-2 border-t border-blue-500/50">
-                <p className="text-[10px] text-gray-400 text-center">
-                  Click để xem chi tiết yêu cầu
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-gray-400">
+                    Click để xem chi tiết yêu cầu
+                  </p>
+                  <ShareButton onClick={handleShare} />
+                </div>
               </div>
             </div>
           </Card>
         </div>
       </div>
-
+      <Dialog
+        open={showShareModal}
+        onOpenChange={(v) => {
+          setShowShareModal(v);
+          if (!v) setShareChannelId(null);
+        }}
+      >
+        <DialogContent
+          className="bg-white dark:bg-black rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center"
+          style={{
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            position: "fixed",
+          }}
+        >
+          <button
+            className="absolute top-3 right-3 text-zinc-400 hover:text-black dark:text-white text-xl"
+            onClick={() => {
+              setShowShareModal(false);
+              setShareChannelId(null);
+            }}
+            aria-label="Đóng"
+            type="button"
+          >
+            ×
+          </button>
+          <div className="text-lg font-semibold text-black dark:text-white mb-2 flex items-center gap-2">
+            <Share2 className="h-5 w-5 text-blue-500" />
+            Chia sẻ code cho kênh
+          </div>
+          <div className="mb-4 w-full">
+            <div className="text-xs text-gray-600 mb-2 text-center">
+              Chọn kênh để chia sẻ
+            </div>
+            <ChannelSearch
+              onSelectChannel={handleSelectChannel}
+              isShare={true}
+            />
+            <Button
+              className="w-full mt-4 bg-blue-600 text-white"
+              onClick={() => handleDoShare("current")}
+            >
+              Chia sẻ cho kênh hiện tại
+            </Button>
+            {shareChannelId && (
+              <Button
+                className="w-full mt-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white"
+                onClick={() => handleDoShare("other")}
+              >
+                Chia sẻ cho kênh này
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       {/* Detail Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-gradient-to-br from-gray-950 via-black to-gray-950 border-2 border-blue-500/60 shadow-2xl">
