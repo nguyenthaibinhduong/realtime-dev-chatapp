@@ -100,7 +100,7 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
                 navigate("/auth/github/register");
                 return;
             } else {
-                if (role === "owner") {
+                if (role === "owner" && !user.github_installation_id) {
                     loadRepoChannel();
                 } else {
                     loadRepo();

@@ -18,6 +18,7 @@ import GithubRegisterLayout from "./components/GithubRegisterLayout";
 import GitHubPage from "./pages/GitHubPage";
 import Blogs from "./pages/Blogs";
 import Error from "./pages/Error";
+import AdminPage from "./pages/AdminPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,9 @@ const App = () => (
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/blogs" element={<Blogs />} />
               <Route path="/settings" element={<SettingsPage />} />
+
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/:section" element={<AdminPage />} />
               <Route path="/error" element={<Error />} />
             </Routes>
           </TooltipProvider>

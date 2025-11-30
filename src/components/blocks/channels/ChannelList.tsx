@@ -84,7 +84,7 @@ export const ChannelList = ({
         }
     }, [collapsedProjects]);
 
-    // Phân loại kênh, chỉ lấy kênh có isActive !== false
+    // Phân loại kênh, chỉ lấy kênh có isChannelActive !== false
     const grouped: Record<string, Channel[]> = {
         group: [],
         "group-private": [],
@@ -93,7 +93,7 @@ export const ChannelList = ({
     };
 
     channels
-        .filter((c: any) => c.isActive !== false) // Lọc kênh không active
+        .filter((c: any) => c.isChannelActive !== false) // Lọc kênh không active
         .forEach((c) => {
             if (grouped[c.type]) grouped[c.type].push(c);
             else grouped.other.push(c);

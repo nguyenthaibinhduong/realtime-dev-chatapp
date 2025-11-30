@@ -155,3 +155,8 @@ export const AttachmentAPI = {
     );
   },
 };
+
+export const SystemAPI = {
+  UsersManagement : async (data:any) => apipost("/admin/users", data),
+  ChannelsManagement : async (data:any) => apipost("/admin/channels", data),
+}

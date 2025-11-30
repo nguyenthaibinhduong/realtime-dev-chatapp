@@ -10,6 +10,7 @@ import {
   Newspaper,
   Menu,
   X,
+  Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,7 +22,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import NotificationBadge from "./blocks/notifications/NotificationBadge";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NotificationAPI } from "@/api/api";
 import { log } from "console";
 import { chatSocketService } from "@/services/chatSocketService";
@@ -39,7 +40,7 @@ export default function MenubarLayout({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -68,12 +69,12 @@ export default function MenubarLayout({
   };
   // Giả sử có 5 thông báo chưa đọc, thay bằng logic thực tế
 
-  const items = [
+  const dataItems = [
 
     {
       key: "chat",
       icon: <MessageSquare className="h-5 w-5" />,
-      label: "Chat",
+      label: "Trò chuyện",
       link: "/",
     },
     {
@@ -93,7 +94,7 @@ export default function MenubarLayout({
           />
         </div>
       ),
-      label: "Notifications",
+      label: "Thông báo",
       link: "/notifications",
     },
 
@@ -101,16 +102,33 @@ export default function MenubarLayout({
 
       key: "blogs",
       icon: <Newspaper className="h-5 w-5" />,
-      label: "Blogs",
+      label: "Tin tức",
       link: "/blogs",
     },
     {
       key: "settings",
       icon: <Settings className="h-5 w-5" />,
-      label: "Settings",
+      label: "Cài đặt",
       link: "/settings",
     },
+
   ];
+
+
+  const items: any = useMemo(() =>
+    user?.role === "admin"
+      ? [
+        ...dataItems,
+        {
+          key: "admin",
+          icon: <Database className="h-5 w-5" />,
+          label: "Quản trị",
+          link: "/admin",
+        },
+      ]
+      : dataItems,
+    [dataItems, user]
+  );
 
   return (
     <TooltipProvider>
@@ -143,7 +161,7 @@ export default function MenubarLayout({
         {/* Separator */}
         <div className="w-6 h-px bg-zinc-200 dark:bg-zinc-700/40 mb-1" />
 
-        {items.map((item) => (
+        {items.map((item: any) => (
           <Tooltip key={item.key}>
             <TooltipTrigger asChild>
               <Button
@@ -153,7 +171,7 @@ export default function MenubarLayout({
                 size="icon"
                 className={`rounded-xl transition-all duration-200 ${location.pathname === item.link
                   ? "bg-blue-500/20 border border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20"
-                  : "hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 text-zinc-800 dark:text-zinc-400 hover:text-zinc-200"
+                  : "hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 text-zinc-800 dark:text-zinc-400 hover:text-zinc-800"
                   }`}
                 onClick={() => {
                   onSelect?.(item.key);
