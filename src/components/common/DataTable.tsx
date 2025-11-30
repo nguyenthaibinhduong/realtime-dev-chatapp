@@ -199,10 +199,24 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
     }, [searchQuery, filterValues]);
 
     // Handlers
-    const handleView = (item: T) => {
-        setSelectedItem(item);
-        setShowDetailModal(true);
-        onSelectOne?.(item);
+    const handleView = async (item: T) => {
+        try {
+            if (apiEndpoint) {
+                setLoading(true);
+                const result = await apiEndpoint({ method: "read-one", id: item.id });
+                setSelectedItem(result.data || item);
+            } else {
+                setSelectedItem(item);
+            }
+            setShowDetailModal(true);
+            onSelectOne?.(item);
+        } catch (error) {
+            console.error("Failed to load detail:", error);
+            setSelectedItem(item); // Fallback to table data
+            setShowDetailModal(true);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEdit = (item: T) => {
