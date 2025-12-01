@@ -41,6 +41,7 @@ import {
   Code,
   Eye,
   Shield,
+  Trash2,
 } from "lucide-react";
 import AvatarUser from "@/components/common/AvartarUser";
 import { useSearchUsers } from "@/hooks/useSearch";
@@ -85,6 +86,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
   const [manageMembersDialogOpen, setManageMembersDialogOpen] = useState(false);
   const [confirmRemoveUserId, setConfirmRemoveUserId] = useState<number | null>(null);
   const [confirmSaveChanges, setConfirmSaveChanges] = useState(false);
+  const [confirmDeleteChannel, setConfirmDeleteChannel] = useState(false);
   const { toast } = useToast();
   const { data: searchResults, isLoading: isSearching } = useSearchUsers(searchQuery, 10);
 
@@ -125,9 +127,14 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     [currentUserRoles]
   );
 
+  const isAdmin = useMemo(() =>
+    currentUser.role.includes("admin"),
+    [currentUser.role]
+  );
+
   const canManageMembers = useMemo(() =>
-    isOwner || isPM,
-    [isOwner, isPM]
+    isOwner || isPM || isAdmin,
+    [isOwner, isPM, isAdmin]
   );
 
   // console.log('Channel Data:', channelData);
@@ -135,6 +142,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
   // console.log('Current User Roles:', currentUserRoles);
   // console.log('Is PM:', isPM);
   // console.log('Is Owner:', isOwner);
+  console.log('Is Admin:', isAdmin);
   console.log('Can Manage Members:', canManageMembers);
 
   // Listen to channel updates via socket
@@ -211,11 +219,12 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     addUserIds: number[] = [],
     removeUserIds: number[] = [],
     updatedUserRoles?: any[],
-    notificationText?: string
+    notificationText?: string,
+    isActive?: boolean
   ) => {
     const updatedMemberIds = updatedMembers.map((m: any) => m.id);
 
-    const updateData: any = {
+    const updateData: any = isActive !== undefined ? { channel_id: channelId, isActive } : {
       channel_id: channelId,
       members: updatedMembers,
       memberIds: updatedMemberIds,
@@ -309,8 +318,9 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
         return m.username;
       }).join(', ');
 
+      const adderRole = isAdmin ? 'Admin' : isOwner ? 'Owner' : 'PM';
       const notificationText = isPrivateChannel
-        ? `Trưởng nhóm đã thêm thành viên mới: ${memberNames}`
+        ? `${adderRole} đã thêm thành viên mới: ${memberNames}`
         : `Đã thêm thành viên mới: ${memberNames}`;
 
       await updateChannelMembers(updatedMembers, selectedUserIds, [], updatedUserRoles, notificationText);
@@ -382,9 +392,10 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
       // Create notification text with removed member name
       const removedMember = channelData.members?.find((m: any) => m.id === userId);
+      const removerRole = isAdmin ? 'Admin' : isOwner ? 'Owner' : 'PM';
       const notificationText = removedMember
-        ? (isPrivateChannel ? `Trưởng nhóm đã xóa thành viên: ${removedMember.username}` : `Đã xóa thành viên: ${removedMember.username}`)
-        : (isPrivateChannel ? 'Trưởng nhóm đã xóa một thành viên' : 'Đã xóa một thành viên');
+        ? (isPrivateChannel ? `${removerRole} đã xóa thành viên: ${removedMember.username}` : `Đã xóa thành viên: ${removedMember.username}`)
+        : (isPrivateChannel ? `${removerRole} đã xóa một thành viên` : 'Đã xóa một thành viên');
 
       await updateChannelMembers(remainingMembers, [], [userId], updatedUserRoles, notificationText);
 
@@ -423,11 +434,12 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
       // Create notification text with updated member names and roles (only for private channels)
       let notificationText: string | undefined;
       if (isPrivateChannel) {
+        const updaterRole = isAdmin ? 'Admin' : isOwner ? 'Owner' : 'PM';
         const updatedMemberDetails = updatedUserRoles.map(ur => {
           const roleNames = ur.roleNames.join(', ');
           return `${ur.username} (${roleNames})`;
         }).join(', ');
-        notificationText = `Trưởng nhóm đã cập nhật quyền cho: ${updatedMemberDetails}`;
+        notificationText = `${updaterRole} đã cập nhật quyền cho: ${updatedMemberDetails}`;
       }
 
       await updateChannelMembers(currentMembers, [], [], updatedUserRoles, notificationText);
@@ -453,6 +465,33 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     setManageMembersDialogOpen(true);
   };
 
+  const handleDeleteChannel = async () => {
+    setIsSubmitting(true);
+    try {
+      // Get all current member IDs
+      const allMemberIds = channelData.members?.map((m: any) => m.id) || [];
+
+      await updateChannelMembers([], [], allMemberIds, undefined, 'Kênh chat đã ngừng hoạt động', false);
+
+      toast({
+        title: "Xóa kênh thành công",
+        description: `Kênh ${channelName} đã ngừng hoạt động`,
+      });
+
+      setConfirmDeleteChannel(false);
+      onOpenChange(false);
+      onSuccess?.();
+    } catch (error: any) {
+      console.error('❌ Error deleting channel:', error);
+      toast({
+        title: "Xóa kênh thất bại",
+        description: error?.message || 'Đã xảy ra lỗi khi xóa kênh',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-4 py-4">
       {/* Permission Info for Private Channels */}
@@ -463,8 +502,8 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
             <div className="flex-1">
               <p className={`text-sm ${canManageMembers ? 'text-green-400' : 'text-yellow-400'}`}>
                 {canManageMembers
-                  ? `Bạn có quyền quản lý (${isOwner ? 'Owner' : 'PM'})`
-                  : 'Chỉ PM hoặc Owner mới có thể thêm thành viên và phân quyền'
+                  ? `Bạn có quyền quản lý (${isAdmin ? 'Admin' : isOwner ? 'Owner' : 'PM'})`
+                  : 'Chỉ Admin, PM hoặc Owner mới có thể thêm thành viên và phân quyền'
                 }
               </p>
               {channelData?.owner && (
@@ -512,6 +551,20 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
+
+        {/* Delete Channel - Only for Admin or Owner */}
+        {(isAdmin || isOwner) && (
+          <Button
+            variant="outline"
+            onClick={() => setConfirmDeleteChannel(true)}
+            className="w-full justify-between bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 mt-4"
+          >
+            <span className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              Xóa kênh
+            </span>
+          </Button>
+        )}
       </div>
 
       {/* Manage Current Members Dialog (Private Channel Only) */}
@@ -587,21 +640,38 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                   );
                 })}
 
-                {/* Show Owner Info */}
+                {/* Show Owner/Admin Info */}
                 {channelData?.members && (
-                  <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Crown className="h-4 w-4 text-blue-400" />
-                      <div>
-                        <p className="text-sm text-blue-400 font-medium">Owner của kênh</p>
-                        <p className="text-xs text-zinc-400 mt-1">
-                          {channelData.members.find((m: any) =>
-                            !channelData.json_data?.userRoles?.some((ur: any) => ur.userId === m.id)
-                          )?.username || 'Không xác định'}
-                        </p>
+                  <>
+                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Crown className="h-4 w-4 text-blue-400" />
+                        <div>
+                          <p className="text-sm text-blue-400 font-medium">Owner của kênh</p>
+                          <p className="text-xs text-zinc-400 mt-1">
+                            {channelData.members.find((m: any) =>
+                              !channelData.json_data?.userRoles?.some((ur: any) => ur.userId === m.id)
+                            )?.username || 'Không xác định'}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+
+                    {/* Show Admin Badge if current user is admin */}
+                    {isAdmin && (
+                      <div className="mt-2 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-purple-400" />
+                          <div>
+                            <p className="text-sm text-purple-400 font-medium">Bạn là Admin hệ thống</p>
+                            <p className="text-xs text-zinc-400 mt-1">
+                              Có toàn quyền quản lý thành viên và phân quyền trong mọi kênh
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -703,6 +773,51 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                 </>
               ) : (
                 'Xác nhận'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirm Delete Channel Dialog */}
+      <AlertDialog open={confirmDeleteChannel} onOpenChange={setConfirmDeleteChannel}>
+        <AlertDialogContent className="bg-zinc-50 dark:bg-zinc-900 border-zinc-800 text-black dark:text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-400">
+              <Trash2 className="h-5 w-5" />
+              Xóa kênh {channelName}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              <p className="mb-2">Bạn có chắc chắn muốn xóa kênh này không?</p>
+              <p className="font-semibold text-red-400">
+                ⚠️ Hành động này sẽ ngừng hoạt động kênh và thông báo cho tất cả thành viên.
+                Kênh sẽ không thể sử dụng được nữa.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => setConfirmDeleteChannel(false)}
+              disabled={isSubmitting}
+              className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800 hover:text-black dark:text-white"
+            >
+              Hủy
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteChannel}
+              disabled={isSubmitting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang xóa...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Xóa kênh
+                </>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

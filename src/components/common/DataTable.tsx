@@ -89,10 +89,11 @@ export interface DataTableProps<T = any> {
     onCreate?: (data: any) => Promise<void>;
     onSelectOne?: (item: T) => void;
     customActions?: Array<{
-        label: string;
+        label: string | ((item: T) => string);
         icon?: ReactNode;
-        onClick: (item: T) => void;
-        className?: string;
+        onClick: (item: T) => void | Promise<void>;
+        className?: string | ((item: T) => string);
+        hidden?: boolean | ((item: T) => boolean);
     }>;
 
     // API Integration (optional - for automatic CRUD)
@@ -481,16 +482,32 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
                                                             Chỉnh sửa
                                                         </DropdownMenuItem>
                                                     )}
-                                                    {customActions.map((action, idx) => (
-                                                        <DropdownMenuItem
-                                                            key={idx}
-                                                            onClick={() => action.onClick(item)}
-                                                            className={`cursor-pointer text-gray-800 dark:text-gray-200 ${action.className || ""}`}
-                                                        >
-                                                            {action.icon}
-                                                            {action.label}
-                                                        </DropdownMenuItem>
-                                                    ))}
+                                                    {customActions.map((action, idx) => {
+                                                        const isHidden = typeof action.hidden === 'function'
+                                                            ? action.hidden(item)
+                                                            : action.hidden || false;
+
+                                                        if (isHidden) return null;
+
+                                                        const label = typeof action.label === 'function'
+                                                            ? action.label(item)
+                                                            : action.label;
+
+                                                        const className = typeof action.className === 'function'
+                                                            ? action.className(item)
+                                                            : action.className;
+
+                                                        return (
+                                                            <DropdownMenuItem
+                                                                key={idx}
+                                                                onClick={() => action.onClick(item)}
+                                                                className={`cursor-pointer text-gray-800 dark:text-gray-200 ${className || ""}`}
+                                                            >
+                                                                {action.icon}
+                                                                {label}
+                                                            </DropdownMenuItem>
+                                                        );
+                                                    })}
                                                     {enableDelete && (
                                                         <DropdownMenuItem
                                                             onClick={() => handleDelete(item)}

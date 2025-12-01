@@ -18,6 +18,8 @@ interface User {
 }
 
 export default function UserManagementNew() {
+    const [reloadTrigger, setReloadTrigger] = useState(0);
+
     // Columns configuration
     const columns: ColumnConfig<User>[] = [
         {
@@ -118,23 +120,38 @@ export default function UserManagementNew() {
     // Custom actions
     const customActions = [
         {
-            label: "Cấp quyền Admin",
+            label: (user: User) => user.role === "admin" ? "Thu hồi quyền Admin" : "Cấp quyền Admin",
             icon: <Shield className="h-4 w-4 mr-2" />,
             onClick: async (user: User) => {
-                if (confirm(`Cấp quyền Admin cho ${user.username}?`)) {
+                // Không cho phép toggle admin cho root admin
+                if (user.email === 'admin@example.com') {
+                    alert('Không thể thay đổi quyền của tài khoản root admin');
+                    return;
+                }
+
+                const action = user.role === "admin" ? "thu hồi" : "cấp";
+                const confirmMsg = user.role === "admin"
+                    ? `Thu hồi quyền Admin của ${user.username}?`
+                    : `Cấp quyền Admin cho ${user.username}?`;
+
+                if (confirm(confirmMsg)) {
                     try {
-                        await SystemAPI.UsersManagement({
-                            method: "update",
+                        const response = await SystemAPI.UsersManagement({
+                            method: "set-toggle-admin",
                             id: user.id,
-                            role: "admin",
                         });
-                        alert("Cấp quyền thành công!");
-                    } catch (error) {
-                        alert("Cấp quyền thất bại!");
+
+                        alert(response?.msg || `${action === "cấp" ? "Cấp" : "Thu hồi"} quyền thành công!`);
+                        // Trigger reload data
+                        setReloadTrigger(prev => prev + 1);
+                    } catch (error: any) {
+                        console.error("Toggle admin failed:", error);
+                        alert(error?.response?.data?.msg || `${action === "cấp" ? "Cấp" : "Thu hồi"} quyền thất bại!`);
                     }
                 }
             },
-            className: "text-purple-400",
+            className: (user: User) => user.role === "admin" ? "text-orange-400" : "text-purple-400",
+            hidden: (user: User) => user.email === 'admin@example.com',
         },
     ];
 
@@ -147,15 +164,27 @@ export default function UserManagementNew() {
                     alt={user.username}
                     className="h-20 w-20 rounded-full"
                 />
-                <div>
-                    <h3 className="text-xl font-bold text-white">{user.username}</h3>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-white">{user.username}</h3>
+                        {user.email === 'admin@example.com' && (
+                            <span className="text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                                🔒 Root Admin
+                            </span>
+                        )}
+                    </div>
                     <p className="text-gray-400">{user.email}</p>
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <p className="text-sm text-gray-400 mb-1">Vai trò</p>
-                    <p className="text-white">{user.role === "admin" ? "Admin" : "User"}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-white">{user.role === "admin" ? "Admin" : "User"}</p>
+                        {user.email === 'admin@example.com' && (
+                            <span className="text-xs text-yellow-400">(Không thể thay đổi)</span>
+                        )}
+                    </div>
                 </div>
                 <div>
                     <p className="text-sm text-gray-400 mb-1">Trạng thái</p>
@@ -190,7 +219,7 @@ export default function UserManagementNew() {
                     <Input
                         value={formData.username}
                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                        className="bg-zinc-950 border-zinc-700 mt-1"
+                        className="bg-zinc-950 border-zinc-700 mt-1 text-gray-900 dark:text-white"
                         required
                     />
                 </div>
@@ -200,7 +229,7 @@ export default function UserManagementNew() {
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="bg-zinc-950 border-zinc-700 mt-1"
+                        className="bg-zinc-950 border-zinc-700 mt-1 text-gray-900 dark:text-white"
                         required
                     />
                 </div>
@@ -211,7 +240,7 @@ export default function UserManagementNew() {
                             type="password"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="bg-zinc-950 border-zinc-700 mt-1"
+                            className="bg-zinc-950 border-zinc-700 mt-1 text-gray-900 dark:text-white"
                             required
                         />
                     </div>
@@ -238,6 +267,7 @@ export default function UserManagementNew() {
 
     return (
         <DataTable<User>
+            key={reloadTrigger}
             title="Quản lý User"
             icon={<Users className="h-8 w-8 text-green-400" />}
             description="Xem, thêm, sửa và quản lý người dùng hệ thống"
