@@ -4,10 +4,12 @@ import MenubarLayout from "./MenubarLayout";
 import { useEffect, useState, useMemo } from "react";
 import SidebarLayout from "./SidebarLayout";
 import { useParams, useNavigate } from "react-router-dom";
-import { Search, X, Users, MessageSquare, Settings } from "lucide-react";
+import { Search, X, Users, MessageSquare, Settings, File, BarChart3 } from "lucide-react";
 import UserManagement from "./blocks/admin/UserManagement";
 import ChannelManagement from "./blocks/admin/ChannelManagement";
 import SystemSettings from "./blocks/admin/SystemSettings";
+import FileManagement from "./blocks/admin/FileManagement";
+import DashboardStats from "./blocks/admin/Dashboard";
 
 interface MenuItem {
     id: string;
@@ -25,23 +27,28 @@ const AdminSidebar = ({ selected, onSelect }: { selected: string; onSelect: (ite
 
     const sections: MenuSection[] = useMemo(() => [
         {
-            title: "Quản lý người dùng",
+            title: "Tổng quan",
             items: [
-                { id: "users", label: "Quản lý User", icon: <Users className="h-4 w-4 mr-2" /> },
+                { id: "dashboard", label: "Thống kê", icon: <BarChart3 className="h-4 w-4 mr-2" /> },
             ]
         },
         {
-            title: "Quản lý nội dung",
+            title: "Quản lý",
             items: [
-                { id: "channels", label: "Quản lý Kênh Chat", icon: <MessageSquare className="h-4 w-4 mr-2" /> },
+                { id: "users", label: "Quản lý người dùng", icon: <Users className="h-4 w-4 mr-2" /> },
+
+                { id: "channels", label: "Quản lý kênh - tin nhắn", icon: <MessageSquare className="h-4 w-4 mr-2" /> },
+
+                { id: "attachments", label: "Quản lý tập tin đính kèm", icon: <File className="h-4 w-4 mr-2" /> },
             ]
         },
-        {
-            title: "Cấu hình",
-            items: [
-                { id: "settings", label: "Cài đặt Hệ thống", icon: <Settings className="h-4 w-4 mr-2" /> },
-            ]
-        }
+
+        // {
+        //     title: "Cấu hình",
+        //     items: [
+        //         { id: "settings", label: "Cài đặt Hệ thống", icon: <Settings className="h-4 w-4 mr-2" /> },
+        //     ]
+        // }
     ], []);
 
     const allItems = useMemo(() =>
@@ -160,7 +167,7 @@ function AdminLayout() {
 
     useEffect(() => {
         if (!section) {
-            navigate("/admin/users", { replace: true });
+            navigate("/admin/dashboard", { replace: true });
         }
     }, [section, navigate]);
 
@@ -170,14 +177,18 @@ function AdminLayout() {
 
     const renderContent = () => {
         switch (selectedMenu) {
+            case "dashboard":
+                return <DashboardStats />;
             case "users":
                 return <UserManagement />;
             case "channels":
                 return <ChannelManagement />;
+            case "attachments":
+                return <FileManagement />;
             case "settings":
                 return <SystemSettings />;
             default:
-                return <UserManagement />;
+                return <DashboardStats />;
         }
     };
 

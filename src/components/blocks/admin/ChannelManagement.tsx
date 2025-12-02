@@ -1,4 +1,4 @@
-import { MessageSquare, Hash, Lock, Trash2 } from "lucide-react";
+import { MessageSquare, Hash, Lock, Trash2, Github } from "lucide-react";
 import DataTable, { ColumnConfig, FilterConfig } from "@/components/common/DataTable";
 import { SystemAPI } from "@/api/api";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ChannelUpdate } from "@/components/blocks/channels/ChannelSettings";
 import { toast } from "@/hooks/useToast";
+import { GithubAPI } from "@/api/api";
+import RepoChatList from "@/components/blocks/github/RepoChatList";
 
 interface User {
     id: number;
@@ -99,6 +101,10 @@ export default function ChannelManagementNew() {
     const [selectedChannelForMessages, setSelectedChannelForMessages] = useState<Channel | null>(null);
     const [messageSearchQuery, setMessageSearchQuery] = useState("");
     const [deletingMessageId, setDeletingMessageId] = useState<number | null>(null);
+    const [repoManagementOpen, setRepoManagementOpen] = useState(false);
+    const [selectedChannelForRepos, setSelectedChannelForRepos] = useState<Channel | null>(null);
+    const [channelRepos, setChannelRepos] = useState<any[]>([]);
+    const [loadingRepos, setLoadingRepos] = useState(false);
 
     // Load stats function
     const loadStats = async () => {
@@ -202,6 +208,26 @@ export default function ChannelManagementNew() {
             });
         } finally {
             setDeletingMessageId(null);
+        }
+    };
+
+    // Load repositories for channel
+    const loadChannelRepos = async (channelId: number) => {
+        try {
+            setLoadingRepos(true);
+            const response = await GithubAPI.getRepoForChannel({ channel_id: channelId.toString() });
+            if (response?.data) {
+                setChannelRepos(Array.isArray(response.data) ? response.data : []);
+            }
+        } catch (error) {
+            console.error("Failed to load repositories:", error);
+            toast({
+                title: "Lỗi",
+                description: "Không thể tải danh sách repository",
+                variant: "destructive",
+            });
+        } finally {
+            setLoadingRepos(false);
         }
     };
 
@@ -406,116 +432,7 @@ export default function ChannelManagementNew() {
 
     return (
         <div className="space-y-6">
-            {/* Statistics Section */}
-            {loadingStats ? (
-                <div className="flex items-center justify-center p-8 bg-zinc-900/50 rounded-lg border border-zinc-800">
-                    <p className="text-gray-400">Đang tải thống kê...</p>
-                </div>
-            ) : stats ? (
-                <div className="space-y-4 pt-4 px-2">
-                    {/* Overview Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 rounded-lg p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-blue-400 font-medium">Tổng kênh</p>
-                                    <p className="text-3xl font-bold text-white mt-1">{stats.totalChannels}</p>
-                                </div>
-                                <MessageSquare className="h-10 w-10 text-blue-400/50" />
-                            </div>
-                        </div>
 
-                        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-lg p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-green-400 font-medium">Group</p>
-                                    <p className="text-3xl font-bold text-white mt-1">{stats.groupChannels}</p>
-                                </div>
-                                <Hash className="h-10 w-10 text-green-400/50" />
-                            </div>
-                        </div>
-
-                        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/30 rounded-lg p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-purple-400 font-medium">Private</p>
-                                    <p className="text-3xl font-bold text-white mt-1">{stats.privateChannels}</p>
-                                </div>
-                                <Lock className="h-10 w-10 text-purple-400/50" />
-                            </div>
-                        </div>
-
-                        <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/30 rounded-lg p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-orange-400 font-medium">Personal</p>
-                                    <p className="text-3xl font-bold text-white mt-1">{stats.personalChannels}</p>
-                                </div>
-                                <Lock className="h-10 w-10 text-orange-400/50" />
-                            </div>
-                        </div>
-
-                        <div className="bg-gradient-to-br from-pink-500/10 to-pink-600/10 border border-pink-500/30 rounded-lg p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-pink-400 font-medium">Tổng tin nhắn</p>
-                                    <p className="text-3xl font-bold text-white mt-1">{stats.totalMessages.toLocaleString()}</p>
-                                </div>
-                                <MessageSquare className="h-10 w-10 text-pink-400/50" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Top Channels */}
-                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
-                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            🏆 Top 5 Kênh Hoạt Động Nhiều Nhất
-                        </h3>
-                        <div className="space-y-3">
-                            {stats.topChannels.map((channel, index) => (
-                                <div
-                                    key={channel.id}
-                                    className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50 hover:bg-zinc-800 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${index === 0 ? "bg-yellow-500/20 text-yellow-400" :
-                                            index === 1 ? "bg-gray-400/20 text-gray-300" :
-                                                index === 2 ? "bg-orange-600/20 text-orange-400" :
-                                                    "bg-zinc-700 text-gray-400"
-                                            }`}>
-                                            #{index + 1}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                {channel.type === "group-private" || channel.type === "personal" ? (
-                                                    <Lock className="h-4 w-4 text-orange-400" />
-                                                ) : (
-                                                    <Hash className="h-4 w-4 text-blue-400" />
-                                                )}
-                                                <p className="text-white font-medium">{channel.name}</p>
-                                                <span className={`text-xs px-2 py-0.5 rounded ${channel.type === "group-private" ? "bg-purple-500/20 text-purple-400" :
-                                                    channel.type === "personal" ? "bg-orange-500/20 text-orange-400" :
-                                                        "bg-blue-500/20 text-blue-400"
-                                                    }`}>
-                                                    {channel.type === "group-private" ? "Project" :
-                                                        channel.type === "personal" ? "Personal" : "Public"}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                Owner: {channel.owner?.username || "Không có"} • {channel.member_count} thành viên
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-2xl font-bold text-white">{channel.messageCount.toLocaleString()}</p>
-                                        <p className="text-xs text-gray-400">tin nhắn</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            ) : null}
 
             {/* DataTable */}
             <DataTable<Channel>
@@ -538,6 +455,16 @@ export default function ChannelManagementNew() {
                         className: "text-blue-400",
                     },
                     {
+                        label: "Quản lý Repository",
+                        icon: <Github className="h-4 w-4 mr-2" />,
+                        onClick: async (channel: Channel) => {
+                            setSelectedChannelForRepos(channel);
+                            await loadChannelRepos(channel.id);
+                            setRepoManagementOpen(true);
+                        },
+                        className: "text-green-400",
+                    },
+                    {
                         label: "Cài đặt kênh",
                         icon: <Hash className="h-4 w-4 mr-2" />,
                         onClick: async (channel: Channel) => {
@@ -558,7 +485,7 @@ export default function ChannelManagementNew() {
                         className: "text-purple-400",
                     },
                 ]}
-                enableCreate={true}
+                enableCreate={false}
                 enableEdit={false}
                 enableDelete={true}
                 enableView={false}
@@ -735,6 +662,45 @@ export default function ChannelManagementNew() {
                                     setSettingsDialogOpen(false);
                                 }}
                             />
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Repository Management Dialog */}
+            <Dialog open={repoManagementOpen} onOpenChange={setRepoManagementOpen}>
+                <DialogContent className="max-w-6xl max-h-[90vh] bg-zinc-900 border-zinc-800 text-white overflow-hidden flex flex-col">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+                            <Github className="h-6 w-6 text-green-400" />
+                            Quản lý Repository: {selectedChannelForRepos?.name}
+                        </DialogTitle>
+                        <div className="text-sm text-gray-400 mt-2">
+                            Admin có thể xóa bất kỳ repository nào trong kênh
+                        </div>
+                    </DialogHeader>
+
+                    {selectedChannelForRepos && (
+                        <div className="flex-1 overflow-y-auto p-6">
+                            {loadingRepos ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <div className="text-gray-400">Đang tải danh sách repository...</div>
+                                </div>
+                            ) : channelRepos.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                                    <Github className="h-16 w-16 mb-4 opacity-50" />
+                                    <p className="text-lg font-medium mb-2">Chưa có repository nào</p>
+                                    <p className="text-sm">Kênh này chưa kết nối với repository nào</p>
+                                </div>
+                            ) : (
+                                <RepoChatList
+                                    repos={channelRepos}
+                                    loading={loadingRepos}
+                                    onRefresh={() => loadChannelRepos(selectedChannelForRepos.id)}
+                                    channel_id={selectedChannelForRepos.id.toString()}
+                                    isAdminView={true}
+                                />
+                            )}
                         </div>
                     )}
                 </DialogContent>

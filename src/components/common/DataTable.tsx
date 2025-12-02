@@ -82,6 +82,7 @@ export interface DataTableProps<T = any> {
 
     // Filters configuration
     filters?: FilterConfig[];
+    onFilterChange?: (filters: Record<string, any>) => void; // Thêm callback
 
     // Actions
     onDelete?: (item: T) => Promise<void>;
@@ -128,6 +129,7 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
     onLoadData,
     columns,
     filters = [],
+    onFilterChange, // Thêm prop
     onDelete,
     onUpdate,
     onCreate,
@@ -363,6 +365,36 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
         }
     };
 
+    // Apply filters và đóng modal
+    const handleApplyFilters = () => {
+        // Xử lý giá trị "all" thành empty string khi gửi lên parent
+        const processedFilters: Record<string, any> = {};
+        Object.entries(filterValues).forEach(([key, value]) => {
+            processedFilters[key] = value === 'all' ? '' : value;
+        });
+
+        setShowFilterModal(false);
+        setPage(1);
+        onFilterChange?.(processedFilters);
+    };
+
+    // Clear filters
+    const handleClearFilters = () => {
+        const emptyFilters: Record<string, any> = {};
+        filters.forEach(f => {
+            emptyFilters[f.key] = 'all'; // Đổi từ '' thành 'all'
+        });
+        setFilterValues(emptyFilters);
+        setPage(1);
+
+        // Gửi empty string lên parent
+        const processedFilters: Record<string, any> = {};
+        filters.forEach(f => {
+            processedFilters[f.key] = '';
+        });
+        onFilterChange?.(processedFilters);
+    };
+
     return (
         <div className="p-6 space-y-6">
             {/* Header */}
@@ -400,10 +432,15 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
                     <Button
                         variant="outline"
                         onClick={() => setShowFilterModal(true)}
-                        className="border-zinc-700"
+                        className="gap-2 border-zinc-700"
                     >
-                        <Filter className="h-4 w-4 mr-2" />
+                        <Filter className="h-4 w-4" />
                         Bộ lọc
+                        {Object.values(filterValues).filter(v => v && v !== '' && v !== 'all').length > 0 && (
+                            <Badge variant="secondary" className="ml-1">
+                                {Object.values(filterValues).filter(v => v && v !== '' && v !== 'all').length}
+                            </Badge>
+                        )}
                     </Button>
                 )}
             </div>
@@ -578,7 +615,7 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
                             setLimit(Number(e.target.value));
                             setPage(1);
                         }}
-                        className="ml-4 px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-sm text-white"
+                        className="ml-4 px-2 py-1 bg-zinc-900 border  border-zinc-700 rounded text-sm text-white"
                     >
                         {limitOptions.map((opt) => (
                             <option key={opt} value={opt}>
@@ -615,62 +652,80 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
                 </Dialog>
             )}
 
-            {/* Filter Modal */}
+            {/* Filter Modal - Styled giống FileManagement */}
             {filters.length > 0 && (
                 <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
-                    <DialogContent className="bg-zinc-900 border-zinc-800">
+                    <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
                         <DialogHeader>
-                            <DialogTitle className="text-white">Bộ lọc</DialogTitle>
+                            <DialogTitle>Bộ lọc nâng cao</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             {filters.map((filter) => (
                                 <div key={filter.key}>
-                                    <label className="text-sm text-gray-400 mb-2 block">{filter.label}</label>
+                                    <label className="text-sm text-gray-400 mb-2 block">
+                                        {filter.label}
+                                    </label>
                                     {filter.type === "select" ? (
                                         <Select
-                                            value={filterValues[filter.key] || ""}
+                                            value={filterValues[filter.key] || "all"}
                                             onValueChange={(value) =>
                                                 setFilterValues({ ...filterValues, [filter.key]: value })
                                             }
                                         >
-                                            <SelectTrigger className="bg-zinc-950 border-zinc-700">
+                                            <SelectTrigger className="dark:bg-zinc-800 dark:text-white dark:border-zinc-700 text-black">
                                                 <SelectValue placeholder="Chọn..." />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-zinc-900 border-zinc-700">
+                                            <SelectContent className="dark:bg-zinc-900 dark:text-white text-black
+                                             border-zinc-700 dark">
                                                 {filter.options?.map((opt) => (
-                                                    <SelectItem key={opt.value} value={opt.value}>
+                                                    <SelectItem
+                                                        key={opt.value || 'all'}
+                                                        value={opt.value || 'all'}
+                                                    >
                                                         {opt.label}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                    ) : (
+                                    ) : filter.type === "date" ? (
                                         <Input
-                                            type={filter.type}
+                                            type="date"
                                             value={filterValues[filter.key] || ""}
                                             onChange={(e) =>
                                                 setFilterValues({ ...filterValues, [filter.key]: e.target.value })
                                             }
-                                            className="bg-zinc-950 border-zinc-700"
+                                            className="bg-zinc-800 border-zinc-700"
+                                        />
+                                    ) : (
+                                        <Input
+                                            type="text"
+                                            value={filterValues[filter.key] || ""}
+                                            onChange={(e) =>
+                                                setFilterValues({ ...filterValues, [filter.key]: e.target.value })
+                                            }
+                                            className="bg-zinc-800 border-zinc-700"
+                                            placeholder={`Nhập ${filter.label.toLowerCase()}...`}
                                         />
                                     )}
                                 </div>
                             ))}
+
+                            <div className="flex gap-2 pt-4">
+                                <Button
+                                    onClick={handleApplyFilters}
+                                    className={`flex-1 bg-${primaryColor}-600 hover:bg-${primaryColor}-700`}
+                                >
+                                    Áp dụng
+                                </Button>
+                                <Button
+                                    onClick={handleClearFilters}
+                                    variant="outline"
+                                    className="flex-1 border-zinc-700"
+                                >
+                                    Xóa bộ lọc
+                                </Button>
+                            </div>
                         </div>
-                        <DialogFooter>
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    setFilterValues({});
-                                    setShowFilterModal(false);
-                                }}
-                            >
-                                Xóa bộ lọc
-                            </Button>
-                            <Button onClick={() => setShowFilterModal(false)} className={`bg-${primaryColor}-600`}>
-                                Áp dụng
-                            </Button>
-                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
             )}

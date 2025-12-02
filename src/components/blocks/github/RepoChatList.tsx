@@ -43,6 +43,7 @@ type RepoTableProps = {
     loading: boolean;
     onRefresh?: () => Promise<void> | void;
     channel_id?: string;
+    isAdminView?: boolean; // Admin có thể xóa mọi repo
 };
 
 export default function RepoChatList({
@@ -50,6 +51,7 @@ export default function RepoChatList({
     loading,
     onRefresh,
     channel_id,
+    isAdminView = false,
 }: RepoTableProps) {
     const [query, setQuery] = useState("");
     const [selectedRepo, setSelectedRepo] = useState<any | null>(null);
@@ -294,8 +296,8 @@ export default function RepoChatList({
                                                     variant="outline"
                                                     size="icon"
                                                     className={`bg-white text-red-600 border-gray-300 rounded-full ml-1 transition-all
-                ${user?.id === repoUserId && hoveredRepoId === r.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-                                                    title="Xóa khỏi kênh"
+                ${(isAdminView || user?.id === repoUserId) && hoveredRepoId === r.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                                                    title={isAdminView ? "Xóa khỏi kênh (Admin)" : "Xóa khỏi kênh"}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         setConfirmDelete({ id: r.id, name: r.full_name || r.name });

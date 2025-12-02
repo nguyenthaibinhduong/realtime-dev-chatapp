@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { DialogFooter } from "@/components/ui/dialog";
+import UserDashboard from "./Dashboard";
 
 interface User {
     id: number;
@@ -19,6 +20,10 @@ interface User {
 
 export default function UserManagementNew() {
     const [reloadTrigger, setReloadTrigger] = useState(0);
+    const [filterValues, setFilterValues] = useState<Record<string, any>>({
+        role: '',
+        isActive: '',
+    });
 
     // Columns configuration
     const columns: ColumnConfig<User>[] = [
@@ -96,12 +101,19 @@ export default function UserManagementNew() {
         filters: Record<string, any>;
     }) => {
         try {
+            // Merge filters từ params và filterValues state
+            const mergedFilters = {
+                ...filterValues,
+                ...params.filters,
+            };
+
             const response = await SystemAPI.UsersManagement({
                 method: "read-all",
                 page: params.page ?? 1,
                 limit: params.limit ?? 10,
                 keySearch: params.search ?? '',
-                ...params.filters,
+                role: mergedFilters?.role ?? '',
+                isActive: mergedFilters?.isActive ?? '',
             });
 
             if (!response || !response.data) {
@@ -115,6 +127,13 @@ export default function UserManagementNew() {
             console.error("Failed to load users:", error);
             return { data: [], total: 0 };
         }
+    };
+
+    // Handle filter change từ DataTable
+    const handleFilterChange = (newFilters: Record<string, any>) => {
+        console.log('Filter changed:', newFilters);
+        setFilterValues(newFilters);
+        setReloadTrigger(prev => prev + 1); // Trigger reload
     };
 
     // Custom actions
@@ -266,25 +285,28 @@ export default function UserManagementNew() {
     };
 
     return (
-        <DataTable<User>
-            key={reloadTrigger}
-            title="Quản lý User"
-            icon={<Users className="h-8 w-8 text-green-400" />}
-            description="Xem, thêm, sửa và quản lý người dùng hệ thống"
-            columns={columns}
-            filters={filters}
-            onLoadData={loadData}
-            apiEndpoint={SystemAPI.UsersManagement}
-            customActions={customActions}
-            detailModalContent={renderDetailModal}
-            detailModalTitle="Thông tin User"
-            formContent={renderForm}
-            enableCreate={true}
-            enableEdit={true}
-            enableDelete={true}
-            enableView={true}
-            enableActiveToggle={true}
-            primaryColor="green"
-        />
+        <div className="space-y-6">
+            <DataTable<User>
+                key={reloadTrigger}
+                title="Quản lý User"
+                icon={<Users className="h-8 w-8 text-green-400" />}
+                description="Xem, thêm, sửa và quản lý người dùng hệ thống"
+                columns={columns}
+                filters={filters}
+                onLoadData={loadData}
+                onFilterChange={handleFilterChange}
+                apiEndpoint={SystemAPI.UsersManagement}
+                customActions={customActions}
+                detailModalContent={renderDetailModal}
+                detailModalTitle="Thông tin User"
+                formContent={renderForm}
+                enableCreate={true}
+                enableEdit={true}
+                enableDelete={true}
+                enableView={true}
+                enableActiveToggle={true}
+                primaryColor="green"
+            />
+        </div>
     );
 }

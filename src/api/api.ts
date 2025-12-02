@@ -159,5 +159,5 @@ export const AttachmentAPI = {
 export const SystemAPI = {
   UsersManagement : async (data:any) => apipost("/admin/users", data),
   ChannelsManagement : async (data:any) => apipost("/admin/channels", data),
-  MessagesManagement : async (data:any) => apipost("/admin/messages", data),
+  FilesManagement : async (data:any) => apipost("/admin/files", data),
 }
