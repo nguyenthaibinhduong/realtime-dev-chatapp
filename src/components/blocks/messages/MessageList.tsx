@@ -36,9 +36,9 @@ function shouldShowSenderInfo(messages: any[], idx: number, userId: any) {
     curr.sender.id !== prev.sender.id ||
     Math.abs(
       new Date(curr.created_at || curr.send_at).getTime() -
-        new Date(prev.created_at || prev.send_at).getTime()
+      new Date(prev.created_at || prev.send_at).getTime()
     ) >
-      5 * 60 * 1000
+    5 * 60 * 1000
   );
 }
 
@@ -65,6 +65,19 @@ type Props = MessageListProps & {
   onOpenTool?: (data: any) => void;
   members?: any[]; // <-- thêm members prop
   isInputExpanded?: boolean; // true if MessageInput shows preview/link/upload/reply
+  onMessageUpdate?: (
+    content: string,
+    files: File[],
+    meta?: {
+      replyTo?: { id: string; sender: string; text?: string };
+      editTo?: { id: string; sender: string; text?: string };
+      messageId?: string;
+      updateAction?: 'pin' | 'unpin' | 'delete' | 'like';
+      likeData?: any;
+    },
+    type?: any,
+    json_data?: any
+  ) => void | Promise<void>; // <-- Thêm prop để xử lý update
 };
 
 export const MessageList: React.FC<Props> = ({
@@ -79,6 +92,7 @@ export const MessageList: React.FC<Props> = ({
   onOpenTool,
   members,
   isInputExpanded = false,
+  onMessageUpdate,
   // removed inputHeightPx - layout now handled by flexbox
 }) => {
   const { user } = useAuth();
@@ -213,20 +227,18 @@ export const MessageList: React.FC<Props> = ({
         updatedCount = (currentLikeData.count || 0) + 1;
       }
 
-      chatSocketService.sendMessage({
-        id: messageId,
-        isUpdate: true,
+      // ✅ Sử dụng onMessageUpdate thay vì gọi trực tiếp chatSocketService
+      onMessageUpdate?.('', [], {
+        messageId,
+        updateAction: 'like',
         likeData: {
           count: updatedCount,
           users: updatedLikes,
+          isLiked: !userAlreadyLiked,
         },
-        isLiked: !userAlreadyLiked,
-        likeCount: updatedCount,
-        channelId: channelId,
-        type: "message",
       });
     },
-    [messages, channelId, user]
+    [messages, user, onMessageUpdate]
   );
 
   const handleReply = useCallback(
@@ -285,16 +297,13 @@ export const MessageList: React.FC<Props> = ({
         duration: 1000,
       });
 
-      chatSocketService.sendMessage({
-        id: messageId,
-        isUpdate: true,
-        isPin: true,
-        text: msg.text,
-        channelId: channelId,
-        type: "message",
+      // ✅ Sử dụng onMessageUpdate thay vì gọi trực tiếp chatSocketService
+      onMessageUpdate?.(msg.text || '', [], {
+        messageId,
+        updateAction: 'pin',
       });
     },
-    [channelId, messages, toast]
+    [messages, toast, onMessageUpdate]
   );
 
   const handleEdit = useCallback(
@@ -314,20 +323,14 @@ export const MessageList: React.FC<Props> = ({
     async (messageId: string) => {
       const msg: any = messages.find((m) => String(m.id) === String(messageId));
       if (!msg) return;
-      //console.log('Delete message:', msg);
 
-      chatSocketService.sendMessage({
-        id: messageId,
-        isUpdate: true,
-        channelId: channelId,
-        text: `tin nhắn đã bị xóa`,
-        type: "remove",
+      // ✅ Sử dụng onMessageUpdate thay vì gọi trực tiếp chatSocketService
+      onMessageUpdate?.('Tin nhắn đã bị xóa', [], {
+        messageId,
+        updateAction: 'delete',
       });
-      // toast({
-      //   title: "Đã xóa tin nhắn!",
-      // });
     },
-    [channelId, messages]
+    [messages, onMessageUpdate]
   );
 
   const handleCopy = useCallback((messageId: string, text: string) => {
@@ -413,16 +416,13 @@ export const MessageList: React.FC<Props> = ({
       const msg: any = messages.find((m) => String(m.id) === String(messageId));
       if (!msg) return;
 
-      chatSocketService.sendMessage({
-        id: messageId,
-        isUpdate: true,
-        isPin: false, // Đặt thành false để bỏ ghim
-        text: msg.text,
-        channelId: channelId,
-        type: "message",
+      // ✅ Sử dụng onMessageUpdate thay vì gọi trực tiếp chatSocketService
+      onMessageUpdate?.(msg.text || '', [], {
+        messageId,
+        updateAction: 'unpin',
       });
     },
-    [channelId, messages]
+    [messages, onMessageUpdate]
   );
 
   // Add handleOpenInTool function - FIX: Đảm bảo đúng data structure

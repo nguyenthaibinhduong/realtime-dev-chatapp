@@ -874,10 +874,67 @@ export default function ChatLayout() {
       meta?: {
         replyTo?: { id: string; sender: string; text?: string };
         editTo?: { id: string; sender: string; text?: string };
+        messageId?: string; // ID của message cần update
+        updateAction?: 'pin' | 'unpin' | 'delete' | 'like'; // Loại action update
+        likeData?: any; // Data cho like action
       },
       type?: any,
       json_data?: any
     ) => {
+      // ✅ Xử lý các action update (pin/unpin/delete/like)
+      if (meta?.updateAction && meta?.messageId) {
+        const action = meta.updateAction;
+        const messageId = meta.messageId;
+
+        if (action === 'pin') {
+          chatSocketService.sendMessage({
+            id: messageId,
+            isUpdate: true,
+            isPin: true,
+            text: content,
+            channelId: selectedChannel.id,
+            type: 'message',
+          });
+          return;
+        }
+
+        if (action === 'unpin') {
+          chatSocketService.sendMessage({
+            id: messageId,
+            isUpdate: true,
+            isPin: false,
+            text: content,
+            channelId: selectedChannel.id,
+            type: 'message',
+          });
+          return;
+        }
+
+        if (action === 'delete') {
+          chatSocketService.sendMessage({
+            id: messageId,
+            isUpdate: true,
+            channelId: selectedChannel.id,
+            text: content || 'Tin nhắn đã bị xóa',
+            type: 'remove',
+          });
+          return;
+        }
+
+        if (action === 'like' && meta.likeData) {
+          chatSocketService.sendMessage({
+            id: messageId,
+            isUpdate: true,
+            likeData: meta.likeData,
+            isLiked: meta.likeData.isLiked,
+            likeCount: meta.likeData.count,
+            channelId: selectedChannel.id,
+            type: 'message',
+          });
+          return;
+        }
+      }
+
       if (
         !selectedChannel?.id ||
         (!content.trim() && (!files || files.length === 0))
@@ -1334,6 +1391,7 @@ export default function ChatLayout() {
                     onOpenTool={handleOpenTool}
                     members={selectedChannel?.members}
                     isInputExpanded={isInputExpanded}
+                    onMessageUpdate={sendMessage} // <-- Truyền sendMessage để xử lý update actions
                   />
                 )}
 
