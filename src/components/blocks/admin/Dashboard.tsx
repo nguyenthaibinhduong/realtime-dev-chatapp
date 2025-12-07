@@ -262,76 +262,130 @@ export default function UserDashboard() {
                 </div>
             </div>
 
-            {/* Quick Action Cards */}
+            {/* Quick Action Cards - Liquid Glass Style */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card
-                    className="bg-gradient-to-br from-green-900/20 to-green-800/10 border-green-800/50 cursor-pointer hover:border-green-600 transition-all"
+                    className="group relative cursor-pointer overflow-hidden rounded-2xl
+                        bg-white/80 dark:bg-black/40
+                        backdrop-blur-xl
+                        border border-green-200/40 dark:border-green-500/20
+                        shadow-[0_8px_32px_0_rgba(34,197,94,0.1)] dark:shadow-[0_8px_32px_0_rgba(34,197,94,0.2)]
+                        transition-all duration-500
+                        hover:shadow-[0_20px_60px_0_rgba(34,197,94,0.25)] dark:hover:shadow-[0_20px_60px_0_rgba(34,197,94,0.4)]
+                        hover:border-green-400/60 dark:hover:border-green-500/50
+                        hover:scale-[1.02]
+                        active:scale-[0.98]"
                     onClick={() => navigate('/admin/users')}
                 >
-                    <CardContent className="p-6">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-transparent dark:from-green-500/20 dark:via-transparent dark:to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    <CardContent className="relative p-6 z-10">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-400 mb-2">Quản lý</p>
-                                <h3 className="text-2xl font-bold text-green-600 mb-1">Người dùng</h3>
-                                <p className="text-sm text-green-500">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Quản lý</p>
+                                <h3 className="text-2xl font-bold text-green-600 dark:text-green-500 mb-1">Người dùng</h3>
+                                <p className="text-sm text-green-600 dark:text-green-400 font-semibold">
                                     {userStats.overview.totalUsers} users
                                 </p>
                             </div>
-                            <div className="bg-green-500/20 p-4 rounded-lg">
-                                <Users className="h-8 w-8 text-green-400" />
+                            <div className="relative p-4 rounded-xl
+                                bg-green-500/20 dark:bg-green-500/30
+                                backdrop-blur-sm
+                                border border-green-500/30 dark:border-green-500/40
+                                group-hover:scale-110 group-hover:rotate-3
+                                transition-all duration-500
+                                shadow-[0_0_20px_rgba(34,197,94,0.3)] dark:shadow-[0_0_30px_rgba(34,197,94,0.5)]">
+                                <Users className="h-8 w-8 text-green-600 dark:text-green-400" />
                             </div>
                         </div>
-                        <div className="mt-4 flex items-center text-sm text-gray-400 hover:text-green-400">
-                            <span>Xem chi tiết</span>
-                            <ArrowRight className="h-4 w-4 ml-2" />
+                        <div className="mt-4 flex items-center text-sm text-gray-600 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">
+                            <span className="font-medium">Xem chi tiết</span>
+                            <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card
-                    className="bg-gradient-to-br from-blue-900/20 to-blue-800/10 border-blue-800/50 cursor-pointer hover:border-blue-600 transition-all"
+                    className="group relative cursor-pointer overflow-hidden rounded-2xl
+                        bg-white/80 dark:bg-black/40
+                        backdrop-blur-xl
+                        border border-blue-200/40 dark:border-blue-500/20
+                        shadow-[0_8px_32px_0_rgba(59,130,246,0.1)] dark:shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]
+                        transition-all duration-500
+                        hover:shadow-[0_20px_60px_0_rgba(59,130,246,0.25)] dark:hover:shadow-[0_20px_60px_0_rgba(59,130,246,0.4)]
+                        hover:border-blue-400/60 dark:hover:border-blue-500/50
+                        hover:scale-[1.02]
+                        active:scale-[0.98]"
                     onClick={() => navigate('/admin/channels')}
                 >
-                    <CardContent className="p-6">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent dark:from-blue-500/20 dark:via-transparent dark:to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    <CardContent className="relative p-6 z-10">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-400 mb-2">Quản lý</p>
-                                <h3 className="text-2xl font-bold text-blue-600 mb-1">Kênh</h3>
-                                <p className="text-sm text-blue-500">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Quản lý</p>
+                                <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-500 mb-1">Kênh</h3>
+                                <p className="text-sm text-blue-600 dark:text-blue-400 font-semibold">
                                     {channelStats?.totalChannels || 0} channels
                                 </p>
                             </div>
-                            <div className="bg-blue-500/20 p-4 rounded-lg">
-                                <MessageSquare className="h-8 w-8 text-blue-400" />
+                            <div className="relative p-4 rounded-xl
+                                bg-blue-500/20 dark:bg-blue-500/30
+                                backdrop-blur-sm
+                                border border-blue-500/30 dark:border-blue-500/40
+                                group-hover:scale-110 group-hover:rotate-3
+                                transition-all duration-500
+                                shadow-[0_0_20px_rgba(59,130,246,0.3)] dark:shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                                <MessageSquare className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                             </div>
                         </div>
-                        <div className="mt-4 flex items-center text-sm text-gray-400 hover:text-blue-400">
-                            <span>Xem chi tiết</span>
-                            <ArrowRight className="h-4 w-4 ml-2" />
+                        <div className="mt-4 flex items-center text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                            <span className="font-medium">Xem chi tiết</span>
+                            <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card
-                    className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-800/50 cursor-pointer hover:border-purple-600 transition-all"
+                    className="group relative cursor-pointer overflow-hidden rounded-2xl
+                        bg-white/80 dark:bg-black/40
+                        backdrop-blur-xl
+                        border border-purple-200/40 dark:border-purple-500/20
+                        shadow-[0_8px_32px_0_rgba(168,85,247,0.1)] dark:shadow-[0_8px_32px_0_rgba(168,85,247,0.2)]
+                        transition-all duration-500
+                        hover:shadow-[0_20px_60px_0_rgba(168,85,247,0.25)] dark:hover:shadow-[0_20px_60px_0_rgba(168,85,247,0.4)]
+                        hover:border-purple-400/60 dark:hover:border-purple-500/50
+                        hover:scale-[1.02]
+                        active:scale-[0.98]"
                     onClick={() => navigate('/admin/attachments')}
                 >
-                    <CardContent className="p-6">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent dark:from-purple-500/20 dark:via-transparent dark:to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    <CardContent className="relative p-6 z-10">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-400 mb-2">Quản lý</p>
-                                <h3 className="text-2xl font-bold text-purple-600 mb-1">File</h3>
-                                <p className="text-sm text-purple-500">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Quản lý</p>
+                                <h3 className="text-2xl font-bold text-purple-600 dark:text-purple-500 mb-1">File</h3>
+                                <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold">
                                     Tập tin đính kèm
                                 </p>
                             </div>
-                            <div className="bg-purple-500/20 p-4 rounded-lg">
-                                <TrendingUp className="h-8 w-8 text-purple-400" />
+                            <div className="relative p-4 rounded-xl
+                                bg-purple-500/20 dark:bg-purple-500/30
+                                backdrop-blur-sm
+                                border border-purple-500/30 dark:border-purple-500/40
+                                group-hover:scale-110 group-hover:rotate-3
+                                transition-all duration-500
+                                shadow-[0_0_20px_rgba(168,85,247,0.3)] dark:shadow-[0_0_30px_rgba(168,85,247,0.5)]">
+                                <TrendingUp className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                             </div>
                         </div>
-                        <div className="mt-4 flex items-center text-sm text-gray-400 hover:text-purple-400">
-                            <span>Xem chi tiết</span>
-                            <ArrowRight className="h-4 w-4 ml-2" />
+                        <div className="mt-4 flex items-center text-sm text-gray-600 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                            <span className="font-medium">Xem chi tiết</span>
+                            <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                         </div>
                     </CardContent>
                 </Card>
@@ -734,51 +788,95 @@ export default function UserDashboard() {
                 <>
                     {/* Chart View */}
                     <div className="space-y-6">
-                        {/* Overview Statistics Cards */}
+                        {/* Overview Statistics Cards - Liquid Glass Style */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/40 transition-all">
-                                <CardContent className="p-6">
+                            <Card className="group relative overflow-hidden rounded-2xl
+                                bg-white/80 dark:bg-black/40
+                                backdrop-blur-xl
+                                border border-blue-200/40 dark:border-blue-500/20
+                                shadow-[0_8px_32px_0_rgba(59,130,246,0.1)] dark:shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]
+                                transition-all duration-500
+                                hover:shadow-[0_20px_60px_0_rgba(59,130,246,0.25)] dark:hover:shadow-[0_20px_60px_0_rgba(59,130,246,0.4)]
+                                hover:border-blue-400/60 dark:hover:border-blue-500/50
+                                hover:scale-[1.02]">
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent dark:from-blue-500/20 dark:via-transparent dark:to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                <CardContent className="relative p-6 z-10">
                                     <div className="flex items-center justify-between mb-2">
-                                        <Users className="h-8 w-8 text-blue-500" />
-                                        <div className="text-3xl font-bold text-blue-600">{userStats.overview.totalUsers}</div>
+                                        <Users className="h-8 w-8 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+                                        <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{userStats.overview.totalUsers}</div>
                                     </div>
-                                    <p className="text-sm text-blue-400 font-medium">Tổng người dùng</p>
-                                    <p className="text-xs text-blue-500 mt-1">Tất cả users trong hệ thống</p>
+                                    <p className="text-sm text-blue-500 dark:text-blue-400 font-medium">Tổng người dùng</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Tất cả users trong hệ thống</p>
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20 hover:border-emerald-500/40 transition-all">
-                                <CardContent className="p-6">
+                            <Card className="group relative overflow-hidden rounded-2xl
+                                bg-white/80 dark:bg-black/40
+                                backdrop-blur-xl
+                                border border-emerald-200/40 dark:border-emerald-500/20
+                                shadow-[0_8px_32px_0_rgba(16,185,129,0.1)] dark:shadow-[0_8px_32px_0_rgba(16,185,129,0.2)]
+                                transition-all duration-500
+                                hover:shadow-[0_20px_60px_0_rgba(16,185,129,0.25)] dark:hover:shadow-[0_20px_60px_0_rgba(16,185,129,0.4)]
+                                hover:border-emerald-400/60 dark:hover:border-emerald-500/50
+                                hover:scale-[1.02]">
+                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent dark:from-emerald-500/20 dark:via-transparent dark:to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                <CardContent className="relative p-6 z-10">
                                     <div className="flex items-center justify-between mb-2">
-                                        <Activity className="h-8 w-8 text-emerald-400" />
-                                        <div className="text-3xl font-bold text-emerald-600">{userStats.overview.onlineUsers}</div>
+                                        <Activity className="h-8 w-8 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
+                                        <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{userStats.overview.onlineUsers}</div>
                                     </div>
-                                    <p className="text-sm text-green-400 font-medium">Đang online</p>
-                                    <p className="text-xs text-green-500 mt-1">
+                                    <p className="text-sm text-emerald-500 dark:text-emerald-400 font-medium">Đang online</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                                         {Math.round((userStats.overview.onlineUsers / userStats.overview.totalUsers) * 100)}% tổng số users
                                     </p>
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20 hover:border-purple-500/40 transition-all">
-                                <CardContent className="p-6">
+                            <Card className="group relative overflow-hidden rounded-2xl
+                                bg-white/80 dark:bg-black/40
+                                backdrop-blur-xl
+                                border border-purple-200/40 dark:border-purple-500/20
+                                shadow-[0_8px_32px_0_rgba(168,85,247,0.1)] dark:shadow-[0_8px_32px_0_rgba(168,85,247,0.2)]
+                                transition-all duration-500
+                                hover:shadow-[0_20px_60px_0_rgba(168,85,247,0.25)] dark:hover:shadow-[0_20px_60px_0_rgba(168,85,247,0.4)]
+                                hover:border-purple-400/60 dark:hover:border-purple-500/50
+                                hover:scale-[1.02]">
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent dark:from-purple-500/20 dark:via-transparent dark:to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                <CardContent className="relative p-6 z-10">
                                     <div className="flex items-center justify-between mb-2">
-                                        <MessageSquare className="h-8 w-8 text-purple-400" />
-                                        <div className="text-3xl font-bold text-purple-600">{channelStats?.totalChannels || 0}</div>
+                                        <MessageSquare className="h-8 w-8 text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-transform duration-300" />
+                                        <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{channelStats?.totalChannels || 0}</div>
                                     </div>
-                                    <p className="text-sm text-purple-400 font-medium">Tổng kênh</p>
-                                    <p className="text-xs text-purple-500 mt-1">Channels trong hệ thống</p>
+                                    <p className="text-sm text-purple-500 dark:text-purple-400 font-medium">Tổng kênh</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Channels trong hệ thống</p>
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20 hover:border-orange-500/40 transition-all">
-                                <CardContent className="p-6">
+                            <Card className="group relative overflow-hidden rounded-2xl
+                                bg-white/80 dark:bg-black/40
+                                backdrop-blur-xl
+                                border border-orange-200/40 dark:border-orange-500/20
+                                shadow-[0_8px_32px_0_rgba(249,115,22,0.1)] dark:shadow-[0_8px_32px_0_rgba(249,115,22,0.2)]
+                                transition-all duration-500
+                                hover:shadow-[0_20px_60px_0_rgba(249,115,22,0.25)] dark:hover:shadow-[0_20px_60px_0_rgba(249,115,22,0.4)]
+                                hover:border-orange-400/60 dark:hover:border-orange-500/50
+                                hover:scale-[1.02]">
+                                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent dark:from-orange-500/20 dark:via-transparent dark:to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                <CardContent className="relative p-6 z-10">
                                     <div className="flex items-center justify-between mb-2">
-                                        <TrendingUp className="h-8 w-8 text-orange-400" />
-                                        <div className="text-3xl font-bold text-orange-600">{channelStats?.totalMessages || 0}</div>
+                                        <TrendingUp className="h-8 w-8 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform duration-300" />
+                                        <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">{channelStats?.totalMessages || 0}</div>
                                     </div>
-                                    <p className="text-sm text-orange-400 font-medium">Tin nhắn</p>
-                                    <p className="text-xs text-orange-500 mt-1">Tổng messages đã gửi</p>
+                                    <p className="text-sm text-orange-500 dark:text-orange-400 font-medium">Tin nhắn</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Tổng messages đã gửi</p>
                                 </CardContent>
                             </Card>
                         </div>

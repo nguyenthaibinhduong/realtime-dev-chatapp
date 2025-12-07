@@ -561,7 +561,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
           >
             <span className="flex items-center gap-2">
               <Trash2 className="h-4 w-4" />
-              Xóa kênh
+              Giải tán kênh
             </span>
           </Button>
         )}
@@ -582,6 +582,40 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto">
+              {channelData?.members && (
+                <>
+                  <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Crown className="h-4 w-4 text-blue-400" />
+                      <div>
+                        <p className="text-sm text-blue-400 font-medium">Nhóm trưởng của kênh</p>
+                        <p className="text-xs text-zinc-400 mt-1">
+                          {channelData.members.find((m: any) =>
+                            !channelData.json_data?.userRoles?.some((ur: any) => ur.userId === m.id)
+                          )?.username || 'Không xác định'} là nhóm trưởng và có toàn quyền quản lý kênh
+
+
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Show Admin Badge if current user is admin */}
+                  {isAdmin && (
+                    <div className="mt-2 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-purple-400" />
+                        <div>
+                          <p className="text-sm text-purple-400 font-medium">Bạn là Admin hệ thống</p>
+                          <p className="text-xs text-zinc-400 mt-1">
+                            Có toàn quyền quản lý thành viên và phân quyền trong mọi kênh
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
               <div className="p-2 space-y-3">
                 {channelData?.json_data?.userRoles?.map((userRole: any) => {
                   const member = channelData.members?.find((m: any) => m.id === userRole.userId);
@@ -641,38 +675,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
                 })}
 
                 {/* Show Owner/Admin Info */}
-                {channelData?.members && (
-                  <>
-                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <Crown className="h-4 w-4 text-blue-400" />
-                        <div>
-                          <p className="text-sm text-blue-400 font-medium">Owner của kênh</p>
-                          <p className="text-xs text-zinc-400 mt-1">
-                            {channelData.members.find((m: any) =>
-                              !channelData.json_data?.userRoles?.some((ur: any) => ur.userId === m.id)
-                            )?.username || 'Không xác định'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Show Admin Badge if current user is admin */}
-                    {isAdmin && (
-                      <div className="mt-2 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-purple-400" />
-                          <div>
-                            <p className="text-sm text-purple-400 font-medium">Bạn là Admin hệ thống</p>
-                            <p className="text-xs text-zinc-400 mt-1">
-                              Có toàn quyền quản lý thành viên và phân quyền trong mọi kênh
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
               </div>
             </div>
 
@@ -785,10 +788,10 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-400">
               <Trash2 className="h-5 w-5" />
-              Xóa kênh {channelName}
+              Giải tán kênh {channelName}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              <p className="mb-2">Bạn có chắc chắn muốn xóa kênh này không?</p>
+              <p className="mb-2">Bạn có chắc chắn muốn giải tán kênh này không?</p>
               <p className="font-semibold text-red-400">
                 ⚠️ Hành động này sẽ ngừng hoạt động kênh và thông báo cho tất cả thành viên.
                 Kênh sẽ không thể sử dụng được nữa.
@@ -816,7 +819,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
               ) : (
                 <>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Xóa kênh
+                  Giải tán kênh
                 </>
               )}
             </AlertDialogAction>

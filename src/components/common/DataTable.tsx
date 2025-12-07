@@ -425,7 +425,7 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
                         placeholder="Tìm kiếm..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 bg-zinc-900 border-zinc-700"
+                        className="pl-10 bg-zinc-900 border-zinc-700 text-black dark:text-white"
                     />
                 </div>
                 {filters.length > 0 && (
@@ -720,7 +720,7 @@ export default function DataTable<T extends { id: number | string; isActive?: bo
                                 <Button
                                     onClick={handleClearFilters}
                                     variant="outline"
-                                    className="flex-1 border-zinc-700"
+                                    className="flex-1 border-zinc-700 text bg-slate-500 hover:bg-slate-600 text-white"
                                 >
                                     Xóa bộ lọc
                                 </Button>

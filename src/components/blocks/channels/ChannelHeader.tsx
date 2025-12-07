@@ -184,7 +184,7 @@ export const ChannelHeader = ({
                   className="bg-yellow-500/10 border-yellow-500/50 text-yellow-400 text-xs"
                 >
                   <Crown className="h-3 w-3 mr-1" />
-                  Owner
+                  Nhóm trưởng
                 </Badge>
               )}
               {permissions?.isPM && (

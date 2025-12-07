@@ -562,9 +562,9 @@ export function ChannelDialog({ open, onOpenChange, type, onSuccess }: ChannelDi
                       Tạo nhiều kênh cùng dự án
                     </Label>
                   </div>
-                  <Badge variant="outline" className="text-xs bg-blue-500/10 border-blue-500/30 text-blue-400">
+                  {/* <Badge variant="outline" className="text-xs bg-blue-500/10 border-blue-500/30 text-blue-400">
                     Dùng chung key
-                  </Badge>
+                  </Badge> */}
                 </div>
                 {isMultiChannel && (
                   <>

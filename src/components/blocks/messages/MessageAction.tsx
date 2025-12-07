@@ -98,11 +98,22 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                         <button
                             key={a.type}
                             onClick={(e) => { e.stopPropagation(); onAction?.(a.type, messageId); }}
-                            className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800/90 border border-gray-300 dark:border-gray-700/60 flex items-center justify-center text-gray-700 dark:text-gray-200 transition-transform hover:scale-110"
+                            className="group relative w-9 h-9 rounded-full 
+                                bg-white/80 dark:bg-black/40
+                                backdrop-blur-xl
+                                border border-white/40 dark:border-white/10
+                                shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]
+                                flex items-center justify-center 
+                                text-gray-700 dark:text-gray-200 
+                                transition-all duration-300
+                                hover:scale-110 hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.2)] dark:hover:shadow-[0_12px_40px_0_rgba(255,255,255,0.1)]
+                                hover:bg-white/90 dark:hover:bg-white/10
+                                active:scale-95"
                             title={a.label}
                             onMouseDown={(e) => e.stopPropagation()}
                         >
-                            {a.icon}
+                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/50 to-transparent dark:from-white/10 dark:to-transparent" />
+                            <div className="relative z-10">{a.icon}</div>
                         </button>
                     ))}
 
@@ -110,15 +121,28 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                         <DropdownMenuTrigger asChild>
                             <button
                                 className={cn(
-                                    "w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800/90 border border-gray-300 dark:border-gray-700/60 flex items-center justify-center text-gray-700 dark:text-gray-200 transition-transform hover:scale-110",
-                                    open && "bg-gray-300 dark:bg-gray-700"
+                                    "group relative w-9 h-9 rounded-full",
+                                    "bg-white/80 dark:bg-black/40",
+                                    "backdrop-blur-xl",
+                                    "border border-white/40 dark:border-white/10",
+                                    "shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]",
+                                    "flex items-center justify-center",
+                                    "text-gray-700 dark:text-gray-200",
+                                    "transition-all duration-300",
+                                    "hover:scale-110 hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.2)] dark:hover:shadow-[0_12px_40px_0_rgba(255,255,255,0.1)]",
+                                    "hover:bg-white/90 dark:hover:bg-white/10",
+                                    "active:scale-95",
+                                    open && "scale-110 bg-white/95 dark:bg-white/15 shadow-[0_12px_40px_0_rgba(0,0,0,0.25)] dark:shadow-[0_12px_40px_0_rgba(255,255,255,0.15)]"
                                 )}
                                 title="Thêm"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                 }}
                             >
-                                <MoreHorizontal className="h-4 w-4" />
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/50 to-transparent dark:from-white/10 dark:to-transparent" />
+                                <div className="relative z-10">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </div>
                             </button>
                         </DropdownMenuTrigger>
 
@@ -127,11 +151,18 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                 side="top"
                                 sideOffset={12}
                                 align={isMe ? "start" : "end"}
-                                className="w-64 p-2 backdrop-blur-xl rounded-2xl shadow-2xl border z-[1200] bg-white dark:bg-gray-900/98 border-gray-300 dark:border-gray-700/70"
+                                className="w-64 p-2 rounded-2xl z-[1200]
+                                    bg-white/90 dark:bg-black/60
+                                    backdrop-blur-2xl
+                                    border border-white/40 dark:border-white/10
+                                    shadow-[0_20px_60px_0_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_0_rgba(0,0,0,0.8)]
+                                    before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/30 before:to-transparent dark:before:from-white/5 dark:before:to-transparent before:pointer-events-none"
                             >
                                 {moreActions.map((action, idx) => (
                                     <React.Fragment key={action.type}>
-                                        {action.variant === 'danger' && idx > 0 && <DropdownMenuSeparator className="my-2 bg-gray-300 dark:bg-gray-700/50" />}
+                                        {action.variant === 'danger' && idx > 0 && (
+                                            <DropdownMenuSeparator className="my-2 h-px bg-gradient-to-r from-transparent via-gray-300/50 dark:via-white/10 to-transparent" />
+                                        )}
                                         <DropdownMenuItem
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -139,16 +170,38 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                                                 handleOpenChange(false);
                                             }}
                                             className={cn(
-                                                "flex items-start gap-3 px-3 py-3 rounded-xl cursor-pointer transition-colors",
-                                                action.variant === 'danger' ? "hover:bg-red-500/10" : "hover:bg-gray-200 dark:hover:bg-gray-700/50"
+                                                "group relative flex items-start gap-3 px-3 py-3 rounded-xl cursor-pointer",
+                                                "transition-all duration-300",
+                                                "hover:bg-white/60 dark:hover:bg-white/5",
+                                                "hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.08)] dark:hover:shadow-[0_4px_12px_0_rgba(255,255,255,0.05)]",
+                                                "active:scale-[0.98]",
+                                                action.variant === 'danger' && "hover:bg-red-500/10 dark:hover:bg-red-500/15"
                                             )}
                                         >
-                                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", action.variant === 'danger' ? "bg-red-500/10 text-red-400" : "bg-gray-200 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300")}>
-                                                {action.icon}
+                                            <div className={cn(
+                                                "relative w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                                                "backdrop-blur-sm transition-all duration-300",
+                                                action.variant === 'danger'
+                                                    ? "bg-red-500/10 dark:bg-red-500/15 text-red-500 dark:text-red-400 group-hover:bg-red-500/20 dark:group-hover:bg-red-500/25 group-hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+                                                    : "bg-gray-100/80 dark:bg-white/5 text-gray-700 dark:text-gray-300 group-hover:bg-gray-200/80 dark:group-hover:bg-white/10 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                                            )}>
+                                                <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/40 to-transparent dark:from-white/10 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                                <div className="relative z-10">{action.icon}</div>
                                             </div>
                                             <div className="flex flex-col flex-1 min-w-0">
-                                                <span className={cn("text-sm font-semibold", action.variant === 'danger' ? "text-red-400" : "text-gray-900 dark:text-gray-100")}>{action.label}</span>
-                                                {action.description && <span className="text-xs text-gray-600 dark:text-gray-400">{action.description}</span>}
+                                                <span className={cn(
+                                                    "text-sm font-semibold transition-colors duration-300",
+                                                    action.variant === 'danger'
+                                                        ? "text-red-500 dark:text-red-400"
+                                                        : "text-gray-900 dark:text-gray-100"
+                                                )}>
+                                                    {action.label}
+                                                </span>
+                                                {action.description && (
+                                                    <span className="text-xs text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                                                        {action.description}
+                                                    </span>
+                                                )}
                                             </div>
                                         </DropdownMenuItem>
                                     </React.Fragment>
