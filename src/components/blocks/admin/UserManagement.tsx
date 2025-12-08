@@ -291,8 +291,8 @@ export default function UserManagementNew() {
                 {/* Information Grid */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-zinc-200 dark:bg-zinc-800/50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">User ID</p>
-                        <p className="text-gray-900 dark:text-white font-mono">#{displayUser.id}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Người dùng</p>
+                        <p className="text-gray-900 dark:text-white font-mono">#{displayUser.username}</p>
                     </div>
                     <div
                         className="bg-zinc-200 dark:bg-zinc-800/50 p-3 rounded-lg cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700/50 transition-colors"
@@ -336,18 +336,18 @@ export default function UserManagementNew() {
                             Thông tin GitHub
                         </h4>
                         <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
+                            {/* <div className="flex justify-between">
                                 <span className="text-gray-600 dark:text-gray-400">GitHub User ID:</span>
                                 <span className="text-gray-900 dark:text-white font-mono">{displayUser.github_user_id}</span>
-                            </div>
+                            </div> */}
                             <div className="flex justify-between">
                                 <span className="text-gray-600 dark:text-gray-400">GitHub Email:</span>
                                 <span className="text-gray-900 dark:text-white">{displayUser.github_email}</span>
                             </div>
-                            <div className="flex justify-between">
+                            {/* <div className="flex justify-between">
                                 <span className="text-gray-600 dark:text-gray-400">Installation ID:</span>
                                 <span className="text-gray-900 dark:text-white font-mono">{displayUser.github_installation_id}</span>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 )}
