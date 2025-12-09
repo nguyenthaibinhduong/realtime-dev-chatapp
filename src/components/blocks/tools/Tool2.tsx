@@ -209,14 +209,14 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
 
                 {/* Action buttons */}
                 <div className="flex items-center space-x-2">
-                    <button
+                    {/* <button
                         onClick={runCode}
                         disabled={isRunning || !canSend}
                         className="flex items-center space-x-2 px-3 py-1.5 bg-[#0e639c] hover:bg-[#1177bb] disabled:bg-[#555] text-black dark:text-white rounded-md transition-colors duration-200 text-sm font-medium"
                     >
                         <Play className={`h-4 w-4 ${isRunning ? "animate-spin" : ""}`} />
                         <span>{isRunning ? "Running..." : "Test"}</span>
-                    </button>
+                    </button> */}
 
                     <button
                         onClick={handleSend}
@@ -266,7 +266,7 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
             </div>
 
             {/* Output panel - styled like MonacoEditorLayout */}
-            <div className="h-48 bg-[#1e1e1e] border-t border-[#3e3e42] flex flex-col">
+            {/* <div className="h-48 bg-[#1e1e1e] border-t border-[#3e3e42] flex flex-col">
                 <div className="flex items-center justify-between px-4 py-2 bg-[#2d2d30] border-b border-[#3e3e42]">
                     <div className="flex items-center space-x-2">
                         <Terminal className="h-4 w-4 text-[#007acc]" />
@@ -281,7 +281,7 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
                         {output || "Click 'Test' to run code or 'Send Code' to share..."}
                     </pre>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 };

@@ -612,6 +612,17 @@ export function CodeViewerDialog({
                     wordWrap: "on",
                     renderLineHighlight: "all",
                   }}
+                  beforeMount={(monaco)=>{
+                    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+                      noSemanticValidation: true,
+                      noSyntaxValidation: true
+                    })
+
+                    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+                    noSemanticValidation: true,
+                    noSyntaxValidation: true,
+                    });
+                  }}
                 />
               )}
             </div>
@@ -1073,7 +1084,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                       size="sm"
                       onClick={handlePreviousPage}
                       disabled={!hasPrevPage || commitLoading}
-                      className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800"
+                      className="border-zinc-700 text-white hover:bg-zinc-100 dark:bg-zinc-800"
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" />
                       Trang trước
@@ -1088,7 +1099,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                       size="sm"
                       onClick={handleNextPage}
                       disabled={!hasNextPage || commitLoading}
-                      className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800"
+                      className="border-zinc-700 text-white hover:bg-zinc-100 dark:bg-zinc-800"
                     >
                       Trang sau
                       <ChevronRight className="h-4 w-4 ml-1" />
