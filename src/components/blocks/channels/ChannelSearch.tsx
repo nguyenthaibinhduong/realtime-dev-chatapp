@@ -116,7 +116,7 @@ export function ChannelSearch({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Tìm kiếm kênh, người dùng..."
-          className="pl-10 pr-10 bg-[#222] border-none text-black dark:text-white placeholder:text-black dark:text-white/60 rounded-lg shadow"
+          className="pl-10 pr-10 bg-[#222] border-none text-white placeholder:text-gray rounded-lg shadow"
         />
         {isLoading && (
           <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-primary" />

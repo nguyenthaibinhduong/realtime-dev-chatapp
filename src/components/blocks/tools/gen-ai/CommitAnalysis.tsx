@@ -125,7 +125,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                     size="sm"
                     onClick={fetchCommitAnalysis}
                     disabled={loading}
-                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-700 text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-black dark:text-white"
+                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-700 text-zinc-300  dark:text-white"
                   >
                     <RefreshCw
                       className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -137,7 +137,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                   variant="ghost"
                   size="sm"
                   onClick={handleClose}
-                  className="text-zinc-400 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800"
+                  className="text-zinc-400  dark:text-white  dark:bg-zinc-800"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -253,8 +253,7 @@ export default function CommitAnalysisComponent(props: CommitAnalysisProps) {
                       ),
                       li: ({ node, children, ...props }) => (
                         <li
-                          className="ml-0 text-zinc-300 flex items-start gap-3 p-2 rounded-lg hover:bg-zinc-50
-dark:bg-zinc-900/30 transition-colors"
+                          className="ml-0 text-zinc-300 flex items-start gap-3 p-2 rounded-lg dark:bg-zinc-900/30 transition-colors"
                           {...props}
                         >
                           <span className="inline-flex items-center justify-center w-1.5 h-1.5 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 mt-3 flex-shrink-0"></span>
