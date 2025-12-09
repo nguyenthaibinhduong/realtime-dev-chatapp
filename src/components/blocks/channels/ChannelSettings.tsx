@@ -78,13 +78,13 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 }) => {
   const { user: currentUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
-  const [selectedUserRoles, setSelectedUserRoles] = useState<Record<number, number[]>>({});
+  const [selectedUserIds, setSelectedUserIds] = useState<(number | string)[]>([]);
+  const [selectedUserRoles, setSelectedUserRoles] = useState<Record<string | number, number[]>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
-  const [editingMemberRoles, setEditingMemberRoles] = useState<Record<number, number[]>>({});
+  const [editingMemberRoles, setEditingMemberRoles] = useState<Record<string | number, number[]>>({});
   const [manageMembersDialogOpen, setManageMembersDialogOpen] = useState(false);
-  const [confirmRemoveUserId, setConfirmRemoveUserId] = useState<number | null>(null);
+  const [confirmRemoveUserId, setConfirmRemoveUserId] = useState<string | number | null>(null);
   const [confirmSaveChanges, setConfirmSaveChanges] = useState(false);
   const [confirmDeleteChannel, setConfirmDeleteChannel] = useState(false);
   const { toast } = useToast();
@@ -157,10 +157,10 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     [searchResults, channelData?.members]
   );
 
-  const handleToggleUser = (userId: number) => {
+  const handleToggleUser = (userId: string | number) => {
     setSelectedUserIds((prev) => {
       const newIds = prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
+        ? prev.filter((id) => String(id) !== String(userId))
         : [...prev, userId];
 
       // If adding user and it's a private channel, initialize with Viewer role
@@ -181,7 +181,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     });
   };
 
-  const handleToggleRole = (userId: number, roleId: number) => {
+  const handleToggleRole = (userId: string | number, roleId: number) => {
     setSelectedUserRoles(prev => {
       const currentRoles = prev[userId] || [0];
       let newRoles: number[];
@@ -216,8 +216,8 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
   // Helper function to update channel with members
   const updateChannelMembers = useCallback(async (
     updatedMembers: any[],
-    addUserIds: number[] = [],
-    removeUserIds: number[] = [],
+    addUserIds: (number | string)[] = [],
+    removeUserIds: (number | string)[] = [],
     updatedUserRoles?: any[],
     notificationText?: string,
     isActive?: boolean
@@ -338,7 +338,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     }
   };
 
-  const handleToggleMemberRole = (userId: number, roleId: number) => {
+  const handleToggleMemberRole = (userId: string | number, roleId: number) => {
     setEditingMemberRoles(prev => {
       const currentRoles = prev[userId] || [];
       let newRoles: number[];
@@ -359,7 +359,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     });
   };
 
-  const handleRemoveMember = async (userId: number) => {
+  const handleRemoveMember = async (userId: string | number) => {
     // Check if channel has minimum 3 members
     const currentMemberCount = channelData.members?.length || 0;
     if (currentMemberCount <= 3) {
@@ -371,27 +371,28 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
     setIsSubmitting(true);
     try {
       // Get remaining members
-      const remainingMembers = channelData.members?.filter((m: any) => m.id !== userId) || [];
+      const remainingMembers = channelData.members?.filter((m: any) => String(m.id) !== String(userId)) || [];
 
       // Prepare updated user roles for private channels
       let updatedUserRoles;
       if (isPrivateChannel) {
         updatedUserRoles = Object.entries(editingMemberRoles)
-          .filter(([userIdStr]) => parseInt(userIdStr) !== userId)
+          .filter(([userIdStr]: any) => String(userIdStr) !== String(userId))
           .map(([userIdStr, roles]) => {
-            const uid = parseInt(userIdStr);
-            const member = channelData.members?.find((m: any) => m.id === uid);
+            const uid = userIdStr; // ✅ Giữ nguyên (có thể là encrypted ID hoặc number)
+            const member = channelData.members?.find((m: any) => String(m.id) === String(uid));
             return {
               userId: uid,
               username: member?.username,
               roles,
               roleNames: roles.map(roleId => ROLES.find(r => r.id === roleId)?.name).filter(Boolean)
             };
-          });
+          })
+          .filter(ur => ur.userId); // ✅ Chỉ loại bỏ null/undefined
       }
 
       // Create notification text with removed member name
-      const removedMember = channelData.members?.find((m: any) => m.id === userId);
+      const removedMember = channelData.members?.find((m: any) => String(m.id) === String(userId));
       const removerRole = isAdmin ? 'Admin' : isOwner ? 'Owner' : 'PM';
       const notificationText = removedMember
         ? (isPrivateChannel ? `${removerRole} đã xóa thành viên: ${removedMember.username}` : `Đã xóa thành viên: ${removedMember.username}`)
@@ -401,8 +402,9 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
       // Update local state
       setEditingMemberRoles(prev => {
-        const { [userId]: removed, ...rest } = prev;
-        return rest;
+        const newState = { ...prev };
+        delete newState[userId];
+        return newState;
       });
 
       setConfirmRemoveUserId(null);
@@ -419,15 +421,18 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
       // Prepare updated user roles
       const updatedUserRoles = Object.entries(editingMemberRoles)
         .map(([userIdStr, roles]) => {
-          const userId = parseInt(userIdStr);
-          const member = channelData.members?.find((m: any) => m.id === userId);
+          const userId = userIdStr; // ✅ Giữ nguyên (encrypted ID hoặc number)
+          const member = channelData.members?.find((m: any) => String(m.id) === String(userId));
           return {
             userId,
             username: member?.username,
             roles,
             roleNames: roles.map(roleId => ROLES.find(r => r.id === roleId)?.name).filter(Boolean)
           };
-        });
+        })
+        .filter(ur => ur.userId); // ✅ Chỉ loại bỏ null/undefined
+
+      console.log('🔍 handleSaveMemberRoles - User Roles:', updatedUserRoles);
 
       const currentMembers = channelData.members || [];
 
@@ -457,7 +462,7 @@ export const ChannelUpdate: React.FC<ChannelUpdateProps> = ({
 
   const openManageMembersDialog = () => {
     // Initialize editing state with current member roles
-    const initialRoles: Record<number, number[]> = {};
+    const initialRoles: Record<string | number, number[]> = {};
     channelData?.json_data?.userRoles?.forEach((ur: any) => {
       initialRoles[ur.userId] = ur.roles || [0];
     });

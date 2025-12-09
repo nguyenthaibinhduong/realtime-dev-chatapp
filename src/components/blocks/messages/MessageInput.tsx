@@ -476,7 +476,7 @@ export const MessageInput = ({
                   )}
 
                   {/* Code Editor - Only for Dev/PM/Owner */}
-                  {(permissions?.isDev || channel.type === "personal" || channel.type === "group") && (
+                  {(permissions?.isPM || permissions?.isOwner || permissions?.isDev || channel.type === "personal" || channel.type === "group") && (
                     <button
                       type="button"
                       onClick={() => {
@@ -501,7 +501,7 @@ export const MessageInput = ({
 
                   {/* Function Buttons */}
                   {/* BA Requirement - Only for BA/PM/Owner */}
-                  {permissions?.isBA && (
+                  {(permissions?.isBA || permissions?.isPM || permissions?.isOwner) && (
                     <button
                       type="button"
                       onClick={() => {
@@ -521,7 +521,7 @@ export const MessageInput = ({
                   )}
 
                   {/* Debug Report - Only for Tester/PM/Owner */}
-                  {permissions?.isTester && (
+                  {(permissions?.isTester || permissions?.isPM || permissions?.isOwner) && (
                     <button
                       type="button"
                       onClick={() => {
@@ -583,24 +583,24 @@ export const MessageInput = ({
             </div>
 
             {/* Send/Mic Button - WhatsApp Style */}
-        
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={handleSend}
-                    disabled={isSending || !canSend}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white transition-all disabled:opacity-50 shadow-lg"
-                    aria-label="Gửi"
-                  >
-                    <Send className="h-5 w-5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p>Gửi (Enter)</p>
-                </TooltipContent>
-              </Tooltip>
-              
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={isSending || !canSend}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white transition-all disabled:opacity-50 shadow-lg"
+                  aria-label="Gửi"
+                >
+                  <Send className="h-5 w-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Gửi (Enter)</p>
+              </TooltipContent>
+            </Tooltip>
+
           </div>
 
           {/* Preview file */}
