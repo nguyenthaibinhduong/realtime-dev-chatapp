@@ -140,7 +140,7 @@ export const AttachmentModal = ({
       };
       newFilters.mimeType = mimeTypeMap[selectedType];
     }
-    if (selectedSender) newFilters.senderId = parseInt(selectedSender);
+    if (selectedSender) newFilters.senderId = selectedSender;
     if (startDate) newFilters.startDate = startDate;
     if (endDate) newFilters.endDate = endDate;
 
