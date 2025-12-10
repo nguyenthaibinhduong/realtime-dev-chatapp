@@ -189,7 +189,7 @@ export function ChannelSearch({
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-7 px-3 text-xs text-black dark:text-white hover:text-black dark:text-white hover:bg-white/10 rounded-full"
+                    className="h-7 px-3 text-xs text-black  hover:text-black dark:text-white hover:bg-white/10 rounded-full"
                     onClick={() => handleJoinChannel(user?.id, 'personal')}
                   >
                     Chat
@@ -251,7 +251,7 @@ export function ChannelSearch({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 px-3 text-xs text-black dark:text-white hover:text-black dark:text-white hover:bg-white/10 rounded-full"
+                      className="h-7 px-3 text-xs text-black  hover:text-black dark:text-white hover:bg-white/10 rounded-full"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleJoinChannel(channel?.id, 'group');
