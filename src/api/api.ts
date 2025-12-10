@@ -24,6 +24,7 @@ export const AuthAPI = {
   goToUpdateLoginGithub: async () =>
     apipost("/auth/github-oauth/redirect-update"),
   updatePassword: async (data: any) => apipost("/auth/update-password", data),
+  resetPassword: async (data: any) => apipost("/auth/reset-password", data),
 };
 
 export const ChatAPI = {
