@@ -1,41 +1,76 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff, MessageSquare, Github, Code2, Users, Zap, Shield } from 'lucide-react';
-import { useToast } from '@/hooks/useToast';
-import { useAuth } from '@/hooks/useAuth';
-import { chatSocketService } from '@/services/chatSocketService';
+import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/useToast";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2, Eye, EyeOff, MessageSquare, Code2, Users, Zap, Shield } from "lucide-react";
 
 export default function AuthForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const recaptchaRef = useRef<ReCAPTCHA>(null);
     const navigate = useNavigate();
     const { toast } = useToast();
     const { signIn, signUp, user } = useAuth();
 
+    const handleCaptchaChange = (token: string | null) => {
+        setCaptchaToken(token);
+    };
+
     const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
+
         const formData = new FormData(e.currentTarget);
         const email = (formData.get("email") as string)?.trim();
         const password = formData.get("password") as string;
+
         if (!email || !password) {
-            toast({ title: "Thiếu thông tin", description: "Nhập email và mật khẩu", variant: "destructive" });
+            toast({
+                title: "Thiếu thông tin",
+                description: "Nhập email và mật khẩu",
+                variant: "destructive"
+            });
             setIsLoading(false);
             return;
         }
-        const res = await signIn(email, password);
+
+        if (!captchaToken) {
+            toast({
+                title: "Xác thực reCAPTCHA",
+                description: "Vui lòng xác nhận bạn không phải là robot",
+                variant: "destructive"
+            });
+            setIsLoading(false);
+            return;
+        }
+
+        const res: any = await signIn(email, password, captchaToken);
+
+        // Reset captcha after attempt
+        recaptchaRef.current?.reset();
+        setCaptchaToken(null);
+
         if (res.error) {
-            // Hiển thị lỗi cụ thể từ response
-            toast({ title: "Lỗi đăng nhập", description: res.error, variant: "destructive" });
+            toast({
+                title: "Lỗi đăng nhập",
+                description: res.error,
+                variant: "destructive"
+            });
             setIsLoading(false);
             return;
         }
-        toast({ title: "Đăng nhập thành công", description: "Chào mừng bạn quay trở lại!" });
+
+        toast({
+            title: "Đăng nhập thành công",
+            description: "Chào mừng bạn quay trở lại!"
+        });
         setIsLoading(false);
     };
 
@@ -48,26 +83,23 @@ export default function AuthForm() {
         const username = formData.get('username') as string;
         const res = await signUp(email, password, username);
         if (res.error) {
-            // Hiển thị lỗi cụ thể từ response
-            toast({ title: "Lỗi đăng ký", description: res.error, variant: "destructive" });
+            toast({
+                title: "Lỗi đăng ký",
+                description: res.error,
+                variant: "destructive"
+            });
             setIsLoading(false);
             return;
         }
-        toast({ title: "Đăng ký thành công", description: "Vui lòng kiểm tra email để xác nhận tài khoản." });
+        toast({
+            title: "Đăng ký thành công",
+            description: "Vui lòng kiểm tra email để xác nhận tài khoản."
+        });
         setIsLoading(false);
     };
 
     const handleForgotPassword = async () => {
-        // const email = prompt("Nhập email để lấy lại mật khẩu:");
-        // if (!email) return;
-        // setIsLoading(true);
-        // const res = await forgotPassword(email);
-        // if (res.error) {
-        //     toast({ title: "Lỗi", description: res.error, variant: "destructive" });
-        // } else {
-        //     toast({ title: "Thành công", description: "Vui lòng kiểm tra email để đặt lại mật khẩu." });
-        // }
-        // setIsLoading(false);
+        // Implementation here
     };
 
     return (
@@ -180,7 +212,9 @@ export default function AuthForm() {
                             <TabsContent value="signin" className="space-y-3 mt-4">
                                 <form onSubmit={handleSignIn} className="space-y-3">
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="text" className="text-xs text-gray-300 font-medium">Email</Label>
+                                        <Label htmlFor="email" className="text-xs text-gray-300">
+                                            Email
+                                        </Label>
                                         <Input
                                             id="email"
                                             name="email"
@@ -190,30 +224,43 @@ export default function AuthForm() {
                                         />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="password" className="text-xs text-gray-300 font-medium">Mật khẩu</Label>
+                                        <Label htmlFor="password" className="text-xs text-gray-300">
+                                            Mật khẩu
+                                        </Label>
                                         <div className="relative">
                                             <Input
                                                 id="password"
                                                 name="password"
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="••••••••"
-                                                className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
+                                                className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 pr-10 transition-all"
                                             />
                                             <Button
                                                 type="button"
                                                 variant="ghost"
                                                 size="sm"
-                                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                className="absolute right-0 top-0 h-9 w-9 px-0 hover:bg-white/10"
                                                 onClick={() => setShowPassword(!showPassword)}
                                             >
                                                 {showPassword ? (
-                                                    <EyeOff className="h-3.5 w-3.5 text-gray-400" />
+                                                    <EyeOff className="h-4 w-4 text-gray-400" />
                                                 ) : (
-                                                    <Eye className="h-3.5 w-3.5 text-gray-400" />
+                                                    <Eye className="h-4 w-4 text-gray-400" />
                                                 )}
                                             </Button>
                                         </div>
                                     </div>
+
+                                    {/* Google reCAPTCHA */}
+                                    <div className="flex justify-center py-2">
+                                        <ReCAPTCHA
+                                            ref={recaptchaRef}
+                                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                            onChange={handleCaptchaChange}
+                                            theme="dark"
+                                        />
+                                    </div>
+
                                     <Button
                                         type="button"
                                         variant="link"
@@ -225,14 +272,16 @@ export default function AuthForm() {
                                     <Button
                                         type="submit"
                                         className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
-                                        disabled={isLoading}
+                                        disabled={isLoading || !captchaToken}
                                     >
                                         {isLoading ? (
-                                            <span className="flex items-center gap-2">
-                                                <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                <span className="text-xs">Đang đăng nhập...</span>
-                                            </span>
-                                        ) : "Đăng nhập"}
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Đang đăng nhập...
+                                            </>
+                                        ) : (
+                                            "Đăng nhập"
+                                        )}
                                     </Button>
                                 </form>
                             </TabsContent>
@@ -240,68 +289,69 @@ export default function AuthForm() {
                             <TabsContent value="signup" className="space-y-3 mt-4">
                                 <form onSubmit={handleSignUp} className="space-y-3">
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="username" className="text-xs text-gray-300 font-medium">Tên người dùng</Label>
+                                        <Label htmlFor="signup-username" className="text-xs text-gray-300">
+                                            Tên người dùng
+                                        </Label>
                                         <Input
-                                            id="username"
+                                            id="signup-username"
                                             name="username"
                                             type="text"
-                                            placeholder="username"
-                                            required
+                                            placeholder="johndoe"
                                             className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="signup-email" className="text-xs text-gray-300 font-medium">Email</Label>
+                                        <Label htmlFor="signup-email" className="text-xs text-gray-300">
+                                            Email
+                                        </Label>
                                         <Input
                                             id="signup-email"
                                             name="email"
                                             type="email"
                                             placeholder="your@email.com"
-                                            required
                                             className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="signup-password" className="text-xs text-gray-300 font-medium">Mật khẩu</Label>
+                                        <Label htmlFor="signup-password" className="text-xs text-gray-300">
+                                            Mật khẩu
+                                        </Label>
                                         <div className="relative">
                                             <Input
                                                 id="signup-password"
                                                 name="password"
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="••••••••"
-                                                required
-                                                minLength={6}
-                                                className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 pr-10 h-9 transition-all"
+                                                className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 pr-10 transition-all"
                                             />
                                             <Button
                                                 type="button"
                                                 variant="ghost"
                                                 size="sm"
-                                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                className="absolute right-0 top-0 h-9 w-9 px-0 hover:bg-white/10"
                                                 onClick={() => setShowPassword(!showPassword)}
                                             >
                                                 {showPassword ? (
-                                                    <EyeOff className="h-3.5 w-3.5 text-gray-400" />
+                                                    <EyeOff className="h-4 w-4 text-gray-400" />
                                                 ) : (
-                                                    <Eye className="h-3.5 w-3.5 text-gray-400" />
+                                                    <Eye className="h-4 w-4 text-gray-400" />
                                                 )}
                                             </Button>
                                         </div>
                                     </div>
-                                    <p className="text-[10px] text-gray-500">
-                                        Mật khẩu phải có ít nhất 6 ký tự
-                                    </p>
                                     <Button
                                         type="submit"
                                         className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
-                                            <span className="flex items-center gap-2">
-                                                <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                <span className="text-xs">Đang đăng ký...</span>
-                                            </span>
-                                        ) : "Đăng ký"}
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Đang đăng ký...
+                                            </>
+                                        ) : (
+                                            "Đăng ký"
+                                        )}
                                     </Button>
                                 </form>
                             </TabsContent>

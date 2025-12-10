@@ -52,6 +52,7 @@ import { SearchMessageDialog } from "../messages/SearchMessageDialog";
 interface ChannelHeaderProps {
   channel: Channel;
   members: Member[];
+  messages?: any[]; // Thêm messages prop
   selectedTool?: ToolType;
   onToolChange?: (tool: ToolType) => void;
 }
@@ -101,6 +102,7 @@ const getChannelTypeLabel = (type: string) => {
 export const ChannelHeader = ({
   channel,
   members,
+  messages,
   selectedTool,
   onToolChange,
 }: ChannelHeaderProps) => {
@@ -282,6 +284,7 @@ export const ChannelHeader = ({
           open={openSearchModal}
           onOpenChange={setOpenSearchModal}
           channelId={channel.id}
+          channelMessages={messages} // Thêm prop này
           onMessageSelect={handleMessageSelect}
         />
 

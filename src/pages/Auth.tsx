@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,8 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn, signUp, signInWithGitHub } = useAuth();
@@ -33,6 +36,10 @@ export default function Auth() {
     password: "",
     confirmPassword: "",
   });
+
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
+  };
 
   const validatePassword = (password: string): string[] => {
     const errors: string[] = [];
@@ -61,7 +68,21 @@ export default function Auth() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const { error } = await signIn(email, password);
+    if (!captchaToken) {
+      toast({
+        title: "Xác thực reCAPTCHA",
+        description: "Vui lòng xác nhận bạn không phải là robot",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const { error } = await signIn(email, password, captchaToken);
+
+    // Reset captcha sau khi đăng nhập
+    recaptchaRef.current?.reset();
+    setCaptchaToken(null);
 
     if (error) {
       toast({
@@ -285,10 +306,21 @@ export default function Auth() {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Google reCAPTCHA */}
+                  <div className="flex justify-center py-2">
+                    <ReCAPTCHA
+                      ref={recaptchaRef}
+                      sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                      onChange={handleCaptchaChange}
+                      theme="dark"
+                    />
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
-                    disabled={isLoading}
+                    disabled={isLoading || !captchaToken}
                   >
                     {isLoading ? (
                       <span className="flex items-center gap-2">

@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSearchParams } from "react-router-dom";
 import { MessageSquare, Search, X } from "lucide-react";
+
+// Hooks
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { useNotificationActions } from "@/hooks/useNotificationToast";
-import { useSearchParams } from "react-router-dom";
-import SidebarLayout from "./SidebarLayout";
-import { ChannelHeader } from "./blocks/channels/ChannelHeader";
-import { MessageList } from "./blocks/messages/MessageList";
-import { MessageInput } from "./blocks/messages/MessageInput";
-import { useAuth } from "@/hooks/useAuth";
-import MenubarLayout from "./MenubarLayout";
+import { useIsMobile } from "@/hooks/useMobile";
+import { usePreview } from "@/hooks/useAttachmentPreview";
+
+// Components - Layouts
 import MasterLayout from "./MasterLayout";
-import { ChannelSearch } from "./blocks/channels/ChannelSearch";
-import { ChannelSection } from "./blocks/channels/ChannelSection";
-import { ChatAPI } from "@/api/api";
+import MenubarLayout from "./MenubarLayout";
+import SidebarLayout from "./SidebarLayout";
+
+// Components - UI
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogTrigger,
@@ -21,11 +23,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Message } from "@/types/message";
-import { Channel, Member } from "@/types/channel";
-import { chatSocketService } from "@/services/chatSocketService";
-import { useIsMobile } from "@/hooks/useMobile";
-import attachmentService, { UploadResult } from "@/services/attachmentService";
+
+// Components - Feature
+import { ChannelHeader } from "./blocks/channels/ChannelHeader";
+import { ChannelSearch } from "./blocks/channels/ChannelSearch";
+import { ChannelSection } from "./blocks/channels/ChannelSection";
+import { MessageList } from "./blocks/messages/MessageList";
+import { MessageInput } from "./blocks/messages/MessageInput";
+import { AttachmentViewer } from "./blocks/attachments/AttachmentViewer";
 import {
   ApiTool,
   FortuneSheet,
@@ -34,437 +39,77 @@ import {
   Tool3,
   ToolType,
 } from "./blocks/tools";
-import { el } from "date-fns/locale";
-import { json } from "stream/consumers";
-import { usePreview } from "@/hooks/useAttachmentPreview";
-import { AttachmentViewer } from "./blocks/attachments/AttachmentViewer";
+
+// Services & API
+import { ChatAPI } from "@/api/api";
+import { chatSocketService } from "@/services/chatSocketService";
+import attachmentService, { UploadResult } from "@/services/attachmentService";
+
+// Types
+import { Message } from "@/types/message";
+import { Channel, Member } from "@/types/channel";
 
 export default function ChatLayout() {
+  // ==================== HOOKS ====================
   const { toast } = useToast();
   const { user } = useAuth();
   const isMobile = useIsMobile();
-  const [showSidebar, setShowSidebar] = useState(!isMobile); // Desktop mặc định hiện, mobile mặc định ẩn
   const { registerHandler, unregisterHandler } = useNotificationActions();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { previewUrl, setPreviewUrl } = usePreview();
 
-  // Navigation states for GitHub detail
+  // ==================== STATE - UI ====================
+  const [showSidebar, setShowSidebar] = useState(!isMobile);
+  const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
+  const [openSearchModal, setOpenSearchModal] = useState(false);
+  const [isInputExpanded, setIsInputExpanded] = useState<boolean>(false);
   const [showGithubDetail, setShowGithubDetail] = useState(false);
   const [githubDetailData, setGithubDetailData] = useState<any>(null);
 
-  // State
+  // ==================== STATE - DATA ====================
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [showChannelTypeMenu, setShowChannelTypeMenu] = useState(false);
-  const [openSearchModal, setOpenSearchModal] = useState(false);
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
-  const [uploadingFiles, setUploadingFiles] = useState<{
-    [key: string]: { progress: number; total: number };
-  }>({});
+
+  // ==================== STATE - MESSAGE ACTIONS ====================
   const [replyTo, setReplyTo] = useState<{
     id: string;
     sender: string;
     text?: string;
   } | null>(null);
+
   const [editTo, setEditTo] = useState<{
     id: string;
     sender: string;
     text?: string;
   } | null>(null);
+
+  // ==================== STATE - TOOLS ====================
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
   const [toolInitialItem, setToolInitialItem] = useState<any>(null);
   const [toolInitialData, setToolInitialData] = useState<any>(null);
-  // Message input and list layout handled by flexbox in this component
-  const [isInputExpanded, setIsInputExpanded] = useState<boolean>(false);
-  const { previewUrl, setPreviewUrl } = usePreview();
 
-  // Function to render selected tool component
-  const renderToolComponent = () => {
-    if (previewUrl) {
-      return (
-        <div className="h-full w-full flex flex-col bg-white dark:bg-zinc-900">
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-800">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              File Preview
-            </h3>
-            <button
-              onClick={() => setPreviewUrl(null)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-              title="Đóng preview"
-            >
-              <X className="w-5 h-5 text-gray-700 dark:text-white" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <AttachmentViewer url={previewUrl} />
-          </div>
-        </div>
-      );
-    }
-    switch (selectedTool) {
-      case "tool1":
-        return <Tool1 />;
-      case "tool2":
-        return (
-          <Tool2
-            onSendCode={(code: string, language: string) => {
-              const username =
-                user?.username ||
-                user?.name ||
-                user?.email?.split("@")[0] ||
-                "Unknown";
-
-              chatSocketService.sendMessage({
-                channelId: selectedChannel?.id,
-                text: `${username} đã gửi một đoạn code`,
-                type: "code-card",
-                channelData: selectedChannel,
-                json_data: {
-                  codeData: {
-                    code: code,
-                    language: language,
-                    author: username,
-                  },
-                },
-              });
-            }}
-            onClose={() => {
-              setSelectedTool(null);
-              setToolInitialData(null);
-            }}
-            initialCode={toolInitialData?.code}
-            initialLanguage={toolInitialData?.language}
-          />
-        );
-      case "tool3":
-        return <Tool3 />;
-      case "apiTool":
-        return (
-          <ApiTool
-            initialHistoryItem={toolInitialItem}
-            onClose={() => {
-              // <-- Thêm onClose handler
-              setSelectedTool(null);
-              setToolInitialItem(null);
-            }}
-          />
-        );
-      case "sheet":
-        return <FortuneSheet />;
-      default:
-        return null;
-    }
-  };
-
-  // Handle opening tool with data - FIX: Sửa logic check
-  const handleOpenTool = useCallback((data: any) => {
-    //console.log("🚀 handleOpenTool received:", data); // Debug log
-
-    if (data.type == "code-editor") {
-      console.log("🔧 Opening Tool2 with code data:", {
-        code: data.code,
-        language: data.language,
-      });
-      setToolInitialData({
-        code: data.code,
-        language: data.language,
-      });
-      setSelectedTool("tool2");
-    } else {
-      console.log("🔧 Opening API Tool with data:", data);
-      setToolInitialItem(data);
-      setSelectedTool("apiTool");
-    }
-  }, []);
-
-  // Listen to channel updates from socket (members, permissions, etc.)
-  useEffect(() => {
-    const handleChannelUpdate = (response: any) => {
-      console.log("🔔 ChatLayout received onChannelUpdate:", response);
-
-      // Parse response structure: can be { data: { channel, members } } or direct object
-      const data = response?.data || response;
-      const updatedChannel = data?.channel;
-      const updatedMembers = data?.members;
-
-      if (!updatedChannel?.id) {
-        console.warn("⚠️ Invalid channel update data received");
-        return;
-      }
-
-      const channelId = String(updatedChannel.id);
-
-      // Update channels list
-      setChannels((prevChannels) => {
-        const idx = prevChannels.findIndex((c) => String(c.id) === channelId);
-        if (idx !== -1) {
-          const updated = [...prevChannels];
-          // Merge channel data
-          updated[idx] = {
-            ...updated[idx],
-            ...updatedChannel,
-            member_count:
-              updatedMembers?.length ||
-              updatedChannel.member_count ||
-              updated[idx].member_count,
-          };
-          console.log("✅ Updated channel in list:", updated[idx]);
-          return updated;
-        }
-        return prevChannels;
-      });
-
-      // If this is the currently selected channel, update it and members
-      if (selectedChannel && String(selectedChannel.id) === channelId) {
-        console.log("🔄 Updating selected channel and members");
-
-        setSelectedChannel((prev) => {
-          if (!prev) return prev;
-
-          const updated = { ...prev };
-
-          // Update members if provided
-          if (updatedMembers && Array.isArray(updatedMembers)) {
-            updated.members = updatedMembers;
-            updated.member_count = updatedMembers.length;
-            console.log("✅ Updated selectedChannel members:", updatedMembers);
-          }
-
-          // Update json_data if provided (for private channels)
-          if (updatedChannel.json_data) {
-            updated.json_data = {
-              ...prev.json_data,
-              ...updatedChannel.json_data,
-            };
-            console.log(
-              "✅ Updated selectedChannel json_data:",
-              updated.json_data
-            );
-          }
-
-          console.log("🎯 New selectedChannel state:", updated);
-          return updated;
-        });
-
-        // Update members list if provided
-        if (updatedMembers && Array.isArray(updatedMembers)) {
-          console.log("👥 Updating members list:", updatedMembers);
-          setMembers(updatedMembers);
-        }
-      }
-    };
-
-    chatSocketService.onChannelUpdate(handleChannelUpdate);
-
-    return () => {
-      chatSocketService.offChannelUpdate(handleChannelUpdate);
-    };
-  }, [selectedChannel]);
-
-  // ✅ Register notification handlers
-  useEffect(() => {
-    // Handler for navigating to channel from notification
-    const handleNavigateToChannel = (data: any) => {
-      const { channelId, channel, messageId } = data;
-
-      // Find channel in current list or use provided channel data
-      let targetChannel = channels.find(
-        (c) => String(c.id) === String(channelId)
-      );
-      if (!targetChannel && channel) {
-        targetChannel = channel;
-        // Optionally add channel to list if not present
-        setChannels((prev) => {
-          const exists = prev.find((c) => String(c.id) === String(channelId));
-          return exists ? prev : [...prev, channel];
-        });
-      }
-
-      if (targetChannel) {
-        handleSelectChannel(targetChannel);
-
-        // Update URL params
-        const newParams = new URLSearchParams(searchParams);
-        newParams.set("channel", String(channelId));
-        if (messageId) {
-          newParams.set("message", String(messageId));
-        }
-        setSearchParams(newParams);
-
-        // Scroll to specific message if provided
-        if (messageId) {
-          setTimeout(() => {
-            const messageElement = document.querySelector(
-              `[data-message-id="${messageId}"]`
-            );
-            if (messageElement) {
-              messageElement.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-            }
-          }, 500);
-        }
-
-        // Show success toast
-        toast({
-          title: "Đã chuyển đến kênh",
-          description: `#${targetChannel.name}`,
-          duration: 2000,
-        });
-
-        // Close sidebar on mobile
-        if (isMobile) {
-          setShowSidebar(false);
-        }
-      } else {
-        toast({
-          title: "Lỗi",
-          description: "Không tìm thấy kênh",
-          variant: "destructive",
-        });
-      }
-    };
-
-    // Handler for opening GitHub detail
-    const handleOpenGithubDetail = (data: any) => {
-      setGithubDetailData(data);
-      setShowGithubDetail(true);
-    };
-
-    // Handler for system notifications
-    const handleOpenSystemDetail = (data: any) => {
-      console.log("System notification detail:", data);
-      toast({
-        title: "System Detail",
-        description: data.message,
-        duration: 3000,
-      });
-    };
-
-    // Handler for general notifications
-    const handleOpenNotificationDetail = (data: any) => {
-      console.log("Notification detail:", data);
-      toast({
-        title: "Notification Detail",
-        description: data.description,
-        duration: 3000,
-      });
-    };
-
-    // Register all handlers
-    registerHandler("navigateToChannel", handleNavigateToChannel);
-    registerHandler("openGithubDetail", handleOpenGithubDetail);
-    registerHandler("openSystemDetail", handleOpenSystemDetail);
-    registerHandler("openNotificationDetail", handleOpenNotificationDetail);
-
-    // Cleanup handlers on unmount
-    return () => {
-      unregisterHandler("navigateToChannel");
-      unregisterHandler("openGithubDetail");
-      unregisterHandler("openSystemDetail");
-      unregisterHandler("openNotificationDetail");
-    };
-  }, [
-    channels,
-    registerHandler,
-    unregisterHandler,
-    toast,
-    isMobile,
-    searchParams,
-    setSearchParams,
-  ]);
-
-  // Reset input expansion state when channel changes
-  useEffect(() => {
-    setIsInputExpanded(false);
-  }, [selectedChannel?.id]);
-
-  // ✅ Handle URL params on mount
-  useEffect(() => {
-    const channelParam = searchParams.get("channel");
-    if (channelParam && channels.length > 0) {
-      const targetChannel = channels.find((c) => String(c.id) === channelParam);
-      if (targetChannel && targetChannel.id !== selectedChannel?.id) {
-        handleSelectChannel(targetChannel);
-      }
-    }
-  }, [searchParams, channels, selectedChannel]);
-
-  // Thêm state cho vị trí nút điều hướng
+  // ==================== STATE - MOBILE NAVIGATION ====================
   const [navBtnPos, setNavBtnPos] = useState({ x: 20, y: 20 });
   const navBtnRef = useRef<HTMLButtonElement>(null);
   const draggingRef = useRef(false);
   const offsetRef = useRef({ x: 0, y: 0 });
 
-  // Xử lý kéo thả nút điều hướng
-  const handleNavBtnMouseDown = (e: React.MouseEvent) => {
-    draggingRef.current = true;
-    offsetRef.current = {
-      x: e.clientX - navBtnPos.x,
-      y: e.clientY - navBtnPos.y,
-    };
-    document.addEventListener("mousemove", handleNavBtnMouseMove);
-    document.addEventListener("mouseup", handleNavBtnMouseUp);
-  };
+  // ==================== STATE - FILE UPLOAD ====================
+  const [uploadingFiles, setUploadingFiles] = useState<{
+    [key: string]: { progress: number; total: number };
+  }>({});
 
-  const handleNavBtnMouseMove = (e: MouseEvent) => {
-    if (!draggingRef.current) return;
-    setNavBtnPos({
-      x: Math.max(
-        0,
-        Math.min(window.innerWidth - 56, e.clientX - offsetRef.current.x)
-      ),
-      y: Math.max(
-        0,
-        Math.min(window.innerHeight - 56, e.clientY - offsetRef.current.y)
-      ),
-    });
-  };
+  // ==================== FUNCTIONS - CHANNEL ====================
 
-  const handleNavBtnMouseUp = () => {
-    draggingRef.current = false;
-    document.removeEventListener("mousemove", handleNavBtnMouseMove);
-    document.removeEventListener("mouseup", handleNavBtnMouseUp);
-  };
-
-  // Touch events cho mobile
-  const handleNavBtnTouchStart = (e: React.TouchEvent) => {
-    draggingRef.current = true;
-    const touch = e.touches[0];
-    offsetRef.current = {
-      x: touch.clientX - navBtnPos.x,
-      y: touch.clientY - navBtnPos.y,
-    };
-    document.addEventListener("touchmove", handleNavBtnTouchMove);
-    document.addEventListener("touchend", handleNavBtnTouchEnd);
-  };
-
-  const handleNavBtnTouchMove = (e: TouchEvent) => {
-    if (!draggingRef.current) return;
-    const touch = e.touches[0];
-    setNavBtnPos({
-      x: Math.max(
-        0,
-        Math.min(window.innerWidth - 56, touch.clientX - offsetRef.current.x)
-      ),
-      y: Math.max(
-        0,
-        Math.min(window.innerHeight - 56, touch.clientY - offsetRef.current.y)
-      ),
-    });
-  };
-
-  const handleNavBtnTouchEnd = () => {
-    draggingRef.current = false;
-    document.removeEventListener("touchmove", handleNavBtnTouchMove);
-    document.removeEventListener("touchend", handleNavBtnTouchEnd);
-  };
-
-  const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
-
-  // Load channels + unread map
+  /**
+   * Load danh sách kênh từ API
+   * - Merge với channels hiện có (socket channels)
+   * - Đăng ký nhận unread count
+   * - Tự động chọn kênh đầu tiên nếu chưa có selectedChannelId
+   */
   const loadChannels = useCallback(async () => {
     try {
       const res = await ChatAPI.fetchChannel();
@@ -472,11 +117,10 @@ export default function ChatLayout() {
       if (Array.isArray(res)) loadedChannels = res;
       else if (res?.data && Array.isArray(res.data)) loadedChannels = res.data;
 
-      // ✅ Merge channels thông minh: update existing + add new + keep socket channels
+      // Merge channels: update existing + add new
       setChannels((prevChannels) => {
         const mergedChannels = [...prevChannels];
 
-        // Process each channel from API
         loadedChannels.forEach((apiChannel: any) => {
           const existingIndex = mergedChannels.findIndex(
             (c: any) =>
@@ -485,45 +129,44 @@ export default function ChatLayout() {
           );
 
           if (existingIndex !== -1) {
-            // Update existing channel
             mergedChannels[existingIndex] = {
               ...mergedChannels[existingIndex],
               ...apiChannel,
             };
           } else {
-            // Add new channel
             mergedChannels.push(apiChannel);
           }
-        });
-
-        console.log("🔄 Smart merged channels:", {
-          existing: prevChannels.length,
-          fromAPI: loadedChannels.length,
-          final: mergedChannels.length,
         });
 
         return mergedChannels;
       });
 
-      // ✅ Đăng ký nhận unread cho tất cả channels (từ API và socket)
-      // Sử dụng callback để lấy channels state mới nhất
+      // Đăng ký unread và chọn kênh
       setChannels((currentChannels) => {
         const channelIds = currentChannels.map((c) => String(c.id));
         if (channelIds.length > 0) {
           chatSocketService.registerUnread(channelIds);
         }
 
-        // Chọn kênh đã lưu hoặc kênh đầu tiên từ currentChannels
+        // Chọn kênh đã lưu hoặc kênh đầu tiên
         const savedChannelId = localStorage.getItem("selectedChannelId");
-        const found = currentChannels.find(
-          (c) => String(c.id) === savedChannelId
-        );
-        setSelectedChannel(found || currentChannels[0] || null);
+        const found = savedChannelId
+          ? currentChannels.find((c) => String(c.id) === savedChannelId)
+          : null;
 
-        return currentChannels; // Không thay đổi state, chỉ sử dụng để access
+        const channelToSelect = found || currentChannels[0] || null;
+
+        // Lưu vào localStorage nếu chọn kênh đầu tiên
+        if (channelToSelect && !savedChannelId) {
+          localStorage.setItem("selectedChannelId", String(channelToSelect.id));
+        }
+
+        setSelectedChannel(channelToSelect);
+
+        return currentChannels;
       });
 
-      // ✅ Lấy danh sách unread ban đầu bằng API (đảm bảo FE có state khi vừa vào)
+      // Lấy unread count từ API
       const unreadRes = await ChatAPI.fetchUnread();
       if (unreadRes?.data && typeof unreadRes.data === "object") {
         setUnreadMap(unreadRes.data);
@@ -538,247 +181,28 @@ export default function ChatLayout() {
     }
   }, [toast]);
 
-  useEffect(() => {
-    loadChannels();
-  }, [loadChannels]);
-
-  // Socket join/leave + onMessage
-  const joinChannelSocketA = useCallback(() => {
-    if (!selectedChannel?.id) return () => { };
-
-    const currentChannelId = selectedChannel.id;
-    console.log("🔌 Joining socket room for channel:", currentChannelId);
-
-    chatSocketService.joinRoom(currentChannelId);
-
-    const messageHandler = (msg: any) => {
-      console.log("📨 New socket message received:", msg);
-
-      // ✅ FILTER: Relaxed channel filtering
-      const msgChannelId = String(msg.channelId || msg.channel_id || "");
-      const capturedChannelId = String(currentChannelId);
-
-      // Chỉ reject nếu message có channelId và khác với current channel
-      if (msgChannelId && msgChannelId !== capturedChannelId) {
-        console.log("🚫 Ignoring message from different channel:", {
-          messageChannel: msgChannelId,
-          currentChannel: capturedChannelId,
-        });
-        return;
-      }
-
-      setMessages((prev: any) => {
-        // ✅ Additional safety check với localStorage (less strict)
-        const currentStoredChannelId =
-          localStorage.getItem("selectedChannelId");
-        if (
-          currentStoredChannelId &&
-          msgChannelId &&
-          String(msgChannelId) !== String(currentStoredChannelId)
-        ) {
-          console.log("🚫 Second check - message channel mismatch:", {
-            messageChannel: msgChannelId,
-            storedChannel: currentStoredChannelId,
-          });
-          return prev;
-        }
-
-        // ✅ Xử lý tin nhắn bị xóa (type === 'remove') - ưu tiên trước
-        if (msg.type === "remove") {
-          const idx = prev.findIndex(
-            (p: any) => String(p.id) === String(msg.id)
-          );
-          if (idx !== -1) {
-            const updated = [...prev];
-            updated[idx] = {
-              ...updated[idx],
-              ...msg,
-              sender: updated[idx].sender || msg.sender,
-              type: "remove",
-              text: msg.text || "Tin nhắn đã bị xóa",
-            };
-            return updated;
-          }
-          return prev;
-        }
-
-        // ✅ Xử lý tin nhắn cập nhật thông thường (isUpdate === true)
-        if (msg.isUpdate) {
-          if (msg.type === "remove") {
-            const idx = prev.findIndex(
-              (p: any) => String(p.id) === String(msg.id)
-            );
-            if (idx !== -1) {
-              const updated = [...prev];
-              updated[idx] = {
-                ...updated[idx],
-                ...msg,
-                sender: updated[idx].sender || msg.sender,
-                type: "remove",
-                text: msg.text || "Tin nhắn đã bị xóa",
-              };
-              return updated;
-            }
-            return prev;
-          } else {
-            const idx = prev.findIndex(
-              (p: any) => String(p.id) === String(msg.id)
-            );
-            if (idx !== -1) {
-              const updated = [...prev];
-              updated[idx] = {
-                ...updated[idx],
-                ...msg,
-                sender: updated[idx].sender || msg.sender,
-                updated_at: msg.updated_at || new Date().toISOString(),
-              };
-              return updated;
-            }
-            return prev;
-          }
-        } else {
-          // Kiểm tra tin nhảin thay thế (fakeID match)
-          const idx = prev.findIndex(
-            (p: any) => String(p.fakeID) === String(msg.fakeID)
-          );
-          if (
-            idx !== -1 &&
-            String(prev[idx].channelId) === String(msg.channelId)
-          ) {
-            console.log("🔄 Replacing fake message with real message:", {
-              fakeID: msg.fakeID,
-              realID: msg.id,
-              channelId: msg.channelId,
-            });
-            const updated = [...prev];
-            updated[idx] = msg;
-            return updated;
-          }
-
-          // Kiểm tra trùng lặp tin nhắn
-          const existingIdx = prev.findIndex(
-            (p: any) => String(p.id) === String(msg.id) && msg.id
-          );
-          if (existingIdx !== -1) {
-            console.log("🚫 Duplicate message ignored:", {
-              messageId: msg.id,
-              channelId: msg.channelId,
-            });
-            return prev;
-          }
-
-          // Thêm tin nhắn mới vào cuối
-          console.log("✅ Adding new message to current channel:", {
-            messageId: msg.id,
-            channelId: msg.channelId,
-            currentChannelId: currentChannelId,
-            text: msg.text?.substring(0, 50) + "...",
-          });
-          return [...prev, msg];
-        }
-      });
-    };
-
-    chatSocketService.onMessage(messageHandler);
-
-    return () => {
-      console.log("🔌 Leaving socket room for channel:", currentChannelId);
-      chatSocketService.leaveRoom(currentChannelId);
-      chatSocketService.offMessage(messageHandler);
-    };
-  }, [selectedChannel]);
-
-  useEffect(() => {
-    const cleanup = joinChannelSocketA();
-    return cleanup;
-  }, [joinChannelSocketA]);
-
-  // Socket channel updates (optional)
-  useEffect(() => {
-    const handler = (channel: any) => {
-      setChannels((prev) => {
-        const idx = prev.findIndex(
-          (c: any) =>
-            String(c.fakeID) === String(channel.fakeID) ||
-            String(c.id) === String(channel.id)
-        );
-        if (idx !== -1) {
-          const updated = [...prev];
-          updated[idx] = channel;
-          return updated;
-        }
-        return [...prev, channel];
-      });
-    };
-    chatSocketService.onChannel(handler);
-    return () => chatSocketService.offChannel(handler);
-  }, []);
-
-  // Lắng nghe unread từ socket
-  useEffect(() => {
-    const handleUnread = (data: { channelId: string; count: number }) => {
-      setUnreadMap((prev) => ({ ...prev, [data.channelId]: data.count }));
-    };
-    chatSocketService.onUnread(handleUnread);
-    return () => chatSocketService.offUnread(handleUnread);
-  }, []);
-
-  // Listen to channel removal from socket
-  useEffect(() => {
-    const handleRemoveChannel = (data: { id: string | number }) => {
-      const channelId = String(data.id);
-      console.log("🗑️ Received removeChannel event:", { channelId });
-
-      // Remove channel from channels list
-      setChannels((prevChannels) => {
-        const filtered = prevChannels.filter((c) => String(c.id) !== channelId);
-        console.log("✅ Removed channel from list:", {
-          removedId: channelId,
-          remaining: filtered.length,
-        });
-        return filtered;
-      });
-
-      // If removed channel is currently selected, clear selection
-      if (selectedChannel && String(selectedChannel.id) === channelId) {
-        console.log("⚠️ Removed channel was selected, clearing selection");
-        handleSelectChannel(null);
-
-        toast({
-          title: "Kênh đã bị xóa",
-          description: "Kênh bạn đang xem đã bị xóa",
-          variant: "destructive",
-        });
-      }
-    };
-
-    chatSocketService.onRemoveChannel(handleRemoveChannel);
-
-    return () => {
-      chatSocketService.offRemoveChannel(handleRemoveChannel);
-    };
-  }, [selectedChannel, toast]);
-
-  const handleSelectChannel = (channel: Channel | null) => {
+  /**
+   * Chọn kênh chat
+   * - Cập nhật selectedChannel state
+   * - Lưu vào localStorage
+   * - Cập nhật URL params
+   * - Clear messages nếu không có kênh
+   */
+  const handleSelectChannel = useCallback((channel: Channel | null) => {
     setSelectedChannel(channel);
 
     if (channel) {
       localStorage.setItem("selectedChannelId", String(channel.id));
-      console.log("🔄 Switching to channel:", {
-        channelId: channel.id,
-        channelName: channel.name,
-      });
 
-      // Update URL
+      // Cập nhật URL
       const newParams = new URLSearchParams(searchParams);
       newParams.set("channel", String(channel.id));
-      newParams.delete("message"); // Clear message param when switching channels
+      newParams.delete("message");
       setSearchParams(newParams);
     } else {
       localStorage.removeItem("selectedChannelId");
-      console.log("🔄 Clearing selected channel");
 
-      // Clear messages chỉ khi không có channel nào được chọn
+      // Clear dữ liệu
       setMessages([]);
       setMembers([]);
 
@@ -788,59 +212,23 @@ export default function ChatLayout() {
       newParams.delete("message");
       setSearchParams(newParams);
     }
-  }; // Initial load messages for selected channel (server trả ASC: cũ→mới)
-  const loadMessages = useCallback(async (channelId: string) => {
-    console.log("📥 Loading messages for channel:", channelId);
-    try {
-      const res = await ChatAPI.fetchMessage(channelId);
-      console.log("📥 Messages response:", res);
+  }, [searchParams, setSearchParams]);
 
-      if (res?.data) {
-        const messagesData = Array.isArray(res.data.items)
-          ? res.data.items
-          : [];
-        const membersData = Array.isArray(res.data.members)
-          ? res.data.members
-          : [];
-
-        console.log("📥 Setting messages:", {
-          messagesCount: messagesData.length,
-          membersCount: membersData.length,
-          channelId,
-        });
-
-        setMessages(messagesData);
-        setMembers(membersData);
-      } else {
-        console.log("📥 No data in response, clearing messages");
-        setMessages([]);
-        setMembers([]);
-      }
-    } catch (error) {
-      console.error("📥 Error loading messages:", error);
-      setMessages([]);
-      setMembers([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedChannel?.id) loadMessages(String(selectedChannel.id));
-    else {
-      setMessages([]);
-      setMembers([]);
-    }
-  }, [selectedChannel, loadMessages]);
-
-  const handleSelectChannelFromSearch = (channel: any) => {
+  /**
+   * Chọn kênh từ search modal
+   */
+  const handleSelectChannelFromSearch = useCallback((channel: any) => {
     handleSelectChannel(channel);
     setOpenSearchModal(false);
-  };
+  }, [handleSelectChannel]);
 
-  const handleJoinChannelFromSearch = async (id: string, type: string) => {
+  /**
+   * Tham gia kênh từ search
+   */
+  const handleJoinChannelFromSearch = useCallback(async (id: string, type: string) => {
     try {
       const res = await ChatAPI.joinChannel({ id, type });
       if (res && res.status && [200, 201].includes(res.status) && res.data) {
-        // console.log('joinfromSearch', res);
         handleSelectChannelFromSearch(res.data.channel);
         localStorage.setItem("selectedChannelId", res.data.channel.id);
 
@@ -864,9 +252,82 @@ export default function ChatLayout() {
         variant: "destructive",
       });
     }
-  };
+  }, [handleSelectChannelFromSearch, loadChannels, toast]);
 
-  // Send message via socket
+  /**
+   * Chọn kênh trên mobile (tự động đóng sidebar)
+   */
+  const handleSelectChannelMobile = useCallback((channel: Channel | null) => {
+    handleSelectChannel(channel);
+    if (isMobile && showSidebar) {
+      setShowSidebar(false);
+    }
+  }, [handleSelectChannel, isMobile, showSidebar]);
+
+  // ==================== FUNCTIONS - MESSAGE ====================
+
+  /**
+   * Load tin nhắn của kênh
+   */
+  const loadMessages = useCallback(async (channelId: string) => {
+    try {
+      const res = await ChatAPI.fetchMessage(channelId);
+
+      if (res?.data) {
+        const messagesData = Array.isArray(res.data.items)
+          ? res.data.items
+          : [];
+        const membersData = Array.isArray(res.data.members)
+          ? res.data.members
+          : [];
+
+        setMessages(messagesData);
+        setMembers(membersData);
+      } else {
+        setMessages([]);
+        setMembers([]);
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+      setMessages([]);
+      setMembers([]);
+    }
+  }, []);
+
+  /**
+   * Load tin nhắn cũ hơn (scroll lên)
+   */
+  const loadOlder = useCallback(
+    async (channelId: string, beforeId: string, pageSize = 50) => {
+      const res = await ChatAPI.fetchMessage(channelId, pageSize, beforeId);
+      return (
+        res?.data ?? {
+          items: [],
+          hasMoreOlder: false,
+          cursors: { before: null },
+        }
+      );
+    },
+    []
+  );
+
+  /**
+   * Thêm tin nhắn cũ vào đầu danh sách (dedupe by id)
+   */
+  const handlePrependMessages = useCallback((newMsgs: Message[]) => {
+    setMessages((prev) => {
+      const exists = new Set(prev.map((m) => String(m.id)));
+      const filtered = newMsgs.filter((m) => !exists.has(String(m.id)));
+      return [...filtered, ...prev];
+    });
+  }, []);
+
+  /**
+   * Gửi tin nhắn qua socket
+   * - Hỗ trợ: reply, edit, pin/unpin, delete, like
+   * - Upload files với progress tracking
+   * - Tạo temporary message khi đang upload
+   */
   const sendMessage = useCallback(
     async (
       content: string,
@@ -874,14 +335,14 @@ export default function ChatLayout() {
       meta?: {
         replyTo?: { id: string; sender: string; text?: string };
         editTo?: { id: string; sender: string; text?: string };
-        messageId?: string; // ID của message cần update
-        updateAction?: 'pin' | 'unpin' | 'delete' | 'like'; // Loại action update
-        likeData?: any; // Data cho like action
+        messageId?: string;
+        updateAction?: 'pin' | 'unpin' | 'delete' | 'like';
+        likeData?: any;
       },
       type?: any,
       json_data?: any
     ) => {
-      // ✅ Xử lý các action update (pin/unpin/delete/like)
+      // Xử lý các action update (pin/unpin/delete/like)
       if (meta?.updateAction && meta?.messageId) {
         const action = meta.updateAction;
         const messageId = meta.messageId;
@@ -943,9 +404,10 @@ export default function ChatLayout() {
 
       let attachments: UploadResult[] = [];
 
+      // Upload files nếu có
       if (files && files.length > 0) {
         try {
-          // ✅ Tạo temporary message với loading attachments
+          // Tạo temporary message với loading state
           const tempMessageId = `temp-${Date.now()}`;
           const tempMessage: any = {
             id: tempMessageId,
@@ -969,16 +431,12 @@ export default function ChatLayout() {
             })),
           };
 
-          // Thêm temporary message vào danh sách
           setMessages((prev) => [...prev, tempMessage]);
 
-          // Upload files với progress tracking
+          // Upload với progress tracking
           const uploadResults = await attachmentService.uploadFile(
             files,
             (fileIndex, progress) => {
-              console.log(`File ${fileIndex + 1} progress: ${progress}%`);
-
-              // ✅ Cập nhật progress cho attachment tương ứng
               setMessages((prev: any) =>
                 prev.map((msg: any) => {
                   if (msg.id === tempMessageId && msg.attachments) {
@@ -997,7 +455,6 @@ export default function ChatLayout() {
             }
           );
 
-          // Convert upload results to attachment format
           attachments = uploadResults.map((result) => ({
             filename: result.filename,
             fileUrl: result.fileUrl,
@@ -1006,12 +463,12 @@ export default function ChatLayout() {
             key: result.key,
           }));
 
-          //remove attachments from json_data if any
+          // Remove attachments từ json_data nếu có
           if (json_data && json_data.attachments) {
             delete json_data.attachments;
           }
 
-          // ✅ Xóa temporary message sau khi upload thành công
+          // Xóa temporary message sau khi upload thành công
           setMessages((prev) => prev.filter((msg) => msg.id !== tempMessageId));
 
           toast({
@@ -1019,9 +476,8 @@ export default function ChatLayout() {
             description: `${files.length} file(s) đã được upload`,
           });
         } catch (error: any) {
-          console.error("📎 Upload process failed:", error);
+          console.error("Upload failed:", error);
 
-          // ✅ Xóa temporary message và hiển thị lỗi
           const tempMessageId = `temp-${Date.now()}`;
           setMessages((prev) => prev.filter((msg) => msg.id !== tempMessageId));
 
@@ -1030,14 +486,13 @@ export default function ChatLayout() {
             description: error?.message || "Không thể upload file",
             variant: "destructive",
           });
-          return; // Don't send message if upload fails
+          return;
         }
       }
 
-      // Xác định type và các thông số gửi
+      // Gửi tin nhắn
       if (meta?.editTo) {
-        // ✅ Chế độ chỉnh sửa tin nhắn
-
+        // Chỉnh sửa tin nhắn
         chatSocketService.sendMessage({
           id: meta.editTo.id,
           channelId: selectedChannel.id,
@@ -1046,10 +501,9 @@ export default function ChatLayout() {
           isUpdate: true,
         });
 
-        // Clear edit mode sau khi gửi
         setEditTo(null);
       } else {
-        // ✅ Tin nhắn mới hoặc reply
+        // Tin nhắn mới hoặc reply
         const computedType = meta?.replyTo
           ? "reply-message"
           : attachments.length > 0
@@ -1096,58 +550,593 @@ export default function ChatLayout() {
           });
         }
 
-        // Clear reply sau khi gửi
         if (meta?.replyTo) setReplyTo(null);
       }
     },
     [selectedChannel, user, toast]
   );
 
-  // ✅ API: load older messages by cursor (before = oldest id currently rendered)
-  const loadOlder = useCallback(
-    async (channelId: string, beforeId: string, pageSize = 50) => {
-      const res = await ChatAPI.fetchMessage(channelId, pageSize, beforeId);
-      // Expect shape: { items, hasMoreOlder, cursors }
-      return (
-        res?.data ?? {
-          items: [],
-          hasMoreOlder: false,
-          cursors: { before: null },
-        }
-      );
-    },
-    []
-  );
+  // ==================== FUNCTIONS - TOOLS ====================
 
-  // ✅ Prepend messages (dedupe by id)
-  const handlePrependMessages = useCallback((newMsgs: Message[]) => {
-    setMessages((prev) => {
-      const exists = new Set(prev.map((m) => String(m.id)));
-      const filtered = newMsgs.filter((m) => !exists.has(String(m.id)));
-      return [...filtered, ...prev];
-    });
+  /**
+   * Mở tool với dữ liệu khởi tạo
+   */
+  const handleOpenTool = useCallback((data: any) => {
+    if (data.type === "code-editor") {
+      setToolInitialData({
+        code: data.code,
+        language: data.language,
+      });
+      setSelectedTool("tool2");
+    } else {
+      setToolInitialItem(data);
+      setSelectedTool("apiTool");
+    }
   }, []);
 
-  // Toggle sidebar function
+  /**
+   * Render tool component theo loại được chọn
+   */
+  const renderToolComponent = () => {
+    if (previewUrl) {
+      return (
+        <div className="h-full w-full flex flex-col bg-white dark:bg-zinc-900">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-800">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              File Preview
+            </h3>
+            <button
+              onClick={() => setPreviewUrl(null)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+              title="Đóng preview"
+            >
+              <X className="w-5 h-5 text-gray-700 dark:text-white" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <AttachmentViewer url={previewUrl} />
+          </div>
+        </div>
+      );
+    }
+
+    switch (selectedTool) {
+      case "tool1":
+        return <Tool1 />;
+
+      case "tool2":
+        return (
+          <Tool2
+            onSendCode={(code: string, language: string) => {
+              const username =
+                user?.username ||
+                user?.name ||
+                user?.email?.split("@")[0] ||
+                "Unknown";
+
+              chatSocketService.sendMessage({
+                channelId: selectedChannel?.id,
+                text: `${username} đã gửi một đoạn code`,
+                type: "code-card",
+                channelData: selectedChannel,
+                json_data: {
+                  codeData: {
+                    code: code,
+                    language: language,
+                    author: username,
+                  },
+                },
+              });
+            }}
+            onClose={() => {
+              setSelectedTool(null);
+              setToolInitialData(null);
+            }}
+            initialCode={toolInitialData?.code}
+            initialLanguage={toolInitialData?.language}
+          />
+        );
+
+      case "tool3":
+        return <Tool3 />;
+
+      case "apiTool":
+        return (
+          <ApiTool
+            initialHistoryItem={toolInitialItem}
+            onClose={() => {
+              setSelectedTool(null);
+              setToolInitialItem(null);
+            }}
+          />
+        );
+
+      case "sheet":
+        return <FortuneSheet />;
+
+      default:
+        return null;
+    }
+  };
+
+  // ==================== FUNCTIONS - MOBILE NAVIGATION ====================
+
+  /**
+   * Xử lý kéo thả nút điều hướng trên mobile
+   */
+  const handleNavBtnMouseDown = (e: React.MouseEvent) => {
+    draggingRef.current = true;
+    offsetRef.current = {
+      x: e.clientX - navBtnPos.x,
+      y: e.clientY - navBtnPos.y,
+    };
+    document.addEventListener("mousemove", handleNavBtnMouseMove);
+    document.addEventListener("mouseup", handleNavBtnMouseUp);
+  };
+
+  const handleNavBtnMouseMove = (e: MouseEvent) => {
+    if (!draggingRef.current) return;
+    setNavBtnPos({
+      x: Math.max(
+        0,
+        Math.min(window.innerWidth - 56, e.clientX - offsetRef.current.x)
+      ),
+      y: Math.max(
+        0,
+        Math.min(window.innerHeight - 56, e.clientY - offsetRef.current.y)
+      ),
+    });
+  };
+
+  const handleNavBtnMouseUp = () => {
+    draggingRef.current = false;
+    document.removeEventListener("mousemove", handleNavBtnMouseMove);
+    document.removeEventListener("mouseup", handleNavBtnMouseUp);
+  };
+
+  const handleNavBtnTouchStart = (e: React.TouchEvent) => {
+    draggingRef.current = true;
+    const touch = e.touches[0];
+    offsetRef.current = {
+      x: touch.clientX - navBtnPos.x,
+      y: touch.clientY - navBtnPos.y,
+    };
+    document.addEventListener("touchmove", handleNavBtnTouchMove);
+    document.addEventListener("touchend", handleNavBtnTouchEnd);
+  };
+
+  const handleNavBtnTouchMove = (e: TouchEvent) => {
+    if (!draggingRef.current) return;
+    const touch = e.touches[0];
+    setNavBtnPos({
+      x: Math.max(
+        0,
+        Math.min(window.innerWidth - 56, touch.clientX - offsetRef.current.x)
+      ),
+      y: Math.max(
+        0,
+        Math.min(window.innerHeight - 56, touch.clientY - offsetRef.current.y)
+      ),
+    });
+  };
+
+  const handleNavBtnTouchEnd = () => {
+    draggingRef.current = false;
+    document.removeEventListener("touchmove", handleNavBtnTouchMove);
+    document.removeEventListener("touchend", handleNavBtnTouchEnd);
+  };
+
+  // ==================== FUNCTIONS - UI ====================
+
+  /**
+   * Toggle sidebar visibility
+   */
   const handleToggleSidebar = useCallback(() => {
     setShowSidebar((prev) => !prev);
   }, []);
 
-  // Khi chọn kênh trên mobile thì ẩn sidebar
-  const handleSelectChannelMobile = (channel: Channel | null) => {
-    handleSelectChannel(channel);
-    if (isMobile && showSidebar) {
-      setShowSidebar(false); // Auto-hide sidebar khi chọn kênh trên mobile
-    }
-  };
+  /**
+   * Toggle channel type menu
+   */
+  const handleShowChannelTypeMenu = () => setShowChannelTypeMenu((v) => !v);
 
-  // Đồng bộ showSidebar với responsive - chỉ khi thay đổi từ mobile sang desktop
+  // ==================== EFFECTS ====================
+
+  /**
+   * Load channels khi component mount
+   */
   useEffect(() => {
-    // Khi chuyển từ mobile sang desktop, mặc định hiện sidebar
+    loadChannels();
+  }, [loadChannels]);
+
+  /**
+   * Load messages khi chọn kênh mới
+   */
+  useEffect(() => {
+    if (selectedChannel?.id) {
+      loadMessages(String(selectedChannel.id));
+    } else {
+      setMessages([]);
+      setMembers([]);
+    }
+  }, [selectedChannel, loadMessages]);
+
+  /**
+   * Reset input expansion khi đổi kênh
+   */
+  useEffect(() => {
+    setIsInputExpanded(false);
+  }, [selectedChannel?.id]);
+
+  /**
+   * Xử lý URL params khi mount
+   */
+  useEffect(() => {
+    const channelParam = searchParams.get("channel");
+    if (channelParam && channels.length > 0) {
+      const targetChannel = channels.find((c) => String(c.id) === channelParam);
+      if (targetChannel && targetChannel.id !== selectedChannel?.id) {
+        handleSelectChannel(targetChannel);
+      }
+    }
+  }, [searchParams, channels, selectedChannel]);
+
+  /**
+   * Socket: Join/leave channel room và lắng nghe tin nhắn
+   */
+  const joinChannelSocketA = useCallback(() => {
+    if (!selectedChannel?.id) return () => { };
+
+
+    const currentChannelId = selectedChannel.id;
+    chatSocketService.connect();
+    chatSocketService.joinRoom(currentChannelId);
+
+    const messageHandler = (msg: any) => {
+      // Filter tin nhắn theo channelId
+      const msgChannelId = String(msg.channelId || msg.channel_id || "");
+      const capturedChannelId = String(currentChannelId);
+
+      if (msgChannelId && msgChannelId !== capturedChannelId) {
+        return;
+      }
+
+      setMessages((prev: any) => {
+        // Double check với localStorage
+        const currentStoredChannelId = localStorage.getItem("selectedChannelId");
+        if (
+          currentStoredChannelId &&
+          msgChannelId &&
+          String(msgChannelId) !== String(currentStoredChannelId)
+        ) {
+          return prev;
+        }
+
+        // Xử lý tin nhắn bị xóa (type === 'remove')
+        if (msg.type === "remove") {
+          const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+          if (idx !== -1) {
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              ...msg,
+              sender: updated[idx].sender || msg.sender,
+              type: "remove",
+              text: msg.text || "Tin nhắn đã bị xóa",
+            };
+            return updated;
+          }
+          return prev;
+        }
+
+        // Xử lý tin nhắn cập nhật (isUpdate === true)
+        if (msg.isUpdate) {
+          const idx = prev.findIndex((p: any) => String(p.id) === String(msg.id));
+          if (idx !== -1) {
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              ...msg,
+              sender: updated[idx].sender || msg.sender,
+              updated_at: msg.updated_at || new Date().toISOString(),
+            };
+            return updated;
+          }
+          return prev;
+        }
+
+        // Thay thế fake message bằng real message
+        const idx = prev.findIndex(
+          (p: any) => String(p.fakeID) === String(msg.fakeID)
+        );
+        if (idx !== -1 && String(prev[idx].channelId) === String(msg.channelId)) {
+          const updated = [...prev];
+          updated[idx] = msg;
+          return updated;
+        }
+
+        // Kiểm tra trùng lặp
+        const existingIdx = prev.findIndex(
+          (p: any) => String(p.id) === String(msg.id) && msg.id
+        );
+        if (existingIdx !== -1) {
+          return prev;
+        }
+
+        // Thêm tin nhắn mới
+        return [...prev, msg];
+      });
+    };
+
+    chatSocketService.onMessage(messageHandler);
+
+    return () => {
+      chatSocketService.leaveRoom(currentChannelId);
+      chatSocketService.offMessage(messageHandler);
+    };
+  }, [selectedChannel]);
+
+  useEffect(() => {
+    const cleanup = joinChannelSocketA();
+    return cleanup;
+  }, [joinChannelSocketA]);
+
+  /**
+   * Socket: Lắng nghe channel updates (members, permissions, etc.)
+   */
+  useEffect(() => {
+    const handleChannelUpdate = (response: any) => {
+      const data = response?.data || response;
+      const updatedChannel = data?.channel;
+      const updatedMembers = data?.members;
+
+      if (!updatedChannel?.id) return;
+
+      const channelId = String(updatedChannel.id);
+
+      // Cập nhật channels list
+      setChannels((prevChannels) => {
+        const idx = prevChannels.findIndex((c) => String(c.id) === channelId);
+        if (idx !== -1) {
+          const updated = [...prevChannels];
+          updated[idx] = {
+            ...updated[idx],
+            ...updatedChannel,
+            member_count:
+              updatedMembers?.length ||
+              updatedChannel.member_count ||
+              updated[idx].member_count,
+          };
+          return updated;
+        }
+        return prevChannels;
+      });
+
+      // Cập nhật selected channel nếu đang xem kênh này
+      if (selectedChannel && String(selectedChannel.id) === channelId) {
+        setSelectedChannel((prev) => {
+          if (!prev) return prev;
+
+          const updated = { ...prev };
+
+          if (updatedMembers && Array.isArray(updatedMembers)) {
+            updated.members = updatedMembers;
+            updated.member_count = updatedMembers.length;
+          }
+
+          if (updatedChannel.json_data) {
+            updated.json_data = {
+              ...prev.json_data,
+              ...updatedChannel.json_data,
+            };
+          }
+
+          return updated;
+        });
+
+        if (updatedMembers && Array.isArray(updatedMembers)) {
+          setMembers(updatedMembers);
+        }
+      }
+    };
+
+    chatSocketService.onChannelUpdate(handleChannelUpdate);
+
+    return () => {
+      chatSocketService.offChannelUpdate(handleChannelUpdate);
+    };
+  }, [selectedChannel]);
+
+  /**
+   * Socket: Lắng nghe channel mới được tạo
+   */
+  useEffect(() => {
+    const handler = (channel: any) => {
+      setChannels((prev) => {
+        const idx = prev.findIndex(
+          (c: any) =>
+            String(c.fakeID) === String(channel.fakeID) ||
+            String(c.id) === String(channel.id)
+        );
+        if (idx !== -1) {
+          const updated = [...prev];
+          updated[idx] = channel;
+          return updated;
+        }
+        return [...prev, channel];
+      });
+    };
+    chatSocketService.onChannel(handler);
+    return () => chatSocketService.offChannel(handler);
+  }, []);
+
+  /**
+   * Socket: Lắng nghe unread count
+   */
+  useEffect(() => {
+    const handleUnread = (data: { channelId: string; count: number }) => {
+      setUnreadMap((prev) => ({ ...prev, [data.channelId]: data.count }));
+    };
+    chatSocketService.onUnread(handleUnread);
+    return () => chatSocketService.offUnread(handleUnread);
+  }, []);
+
+  /**
+   * Socket: Lắng nghe channel bị xóa
+   */
+  useEffect(() => {
+    const handleRemoveChannel = (data: { id: string | number }) => {
+      const channelId = String(data.id);
+
+      // Xóa khỏi danh sách
+      setChannels((prevChannels) => {
+        return prevChannels.filter((c) => String(c.id) !== channelId);
+      });
+
+      // Clear selection nếu đang xem kênh bị xóa
+      if (selectedChannel && String(selectedChannel.id) === channelId) {
+        handleSelectChannel(null);
+
+        toast({
+          title: "Kênh đã bị xóa",
+          description: "Kênh bạn đang xem đã bị xóa",
+          variant: "destructive",
+        });
+      }
+    };
+
+    chatSocketService.onRemoveChannel(handleRemoveChannel);
+
+    return () => {
+      chatSocketService.offRemoveChannel(handleRemoveChannel);
+    };
+  }, [selectedChannel, toast]);
+
+  /**
+   * Đăng ký notification handlers
+   */
+  useEffect(() => {
+    // Handler: Chuyển đến kênh từ notification
+    const handleNavigateToChannel = (data: any) => {
+      const { channelId, channel, messageId } = data;
+
+      let targetChannel = channels.find((c) => String(c.id) === String(channelId));
+      if (!targetChannel && channel) {
+        targetChannel = channel;
+        setChannels((prev) => {
+          const exists = prev.find((c) => String(c.id) === String(channelId));
+          return exists ? prev : [...prev, channel];
+        });
+      }
+
+      if (targetChannel) {
+        handleSelectChannel(targetChannel);
+
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set("channel", String(channelId));
+        if (messageId) {
+          newParams.set("message", String(messageId));
+        }
+        setSearchParams(newParams);
+
+        if (messageId) {
+          setTimeout(() => {
+            const messageElement = document.querySelector(
+              `[data-message-id="${messageId}"]`
+            );
+            if (messageElement) {
+              messageElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }, 500);
+        }
+
+        toast({
+          title: "Đã chuyển đến kênh",
+          description: `#${targetChannel.name}`,
+          duration: 2000,
+        });
+
+        if (isMobile) {
+          setShowSidebar(false);
+        }
+      } else {
+        toast({
+          title: "Lỗi",
+          description: "Không tìm thấy kênh",
+          variant: "destructive",
+        });
+      }
+    };
+
+    // Handler: Mở GitHub detail
+    const handleOpenGithubDetail = (data: any) => {
+      setGithubDetailData(data);
+      setShowGithubDetail(true);
+    };
+
+    // Handler: System notifications
+    const handleOpenSystemDetail = (data: any) => {
+      toast({
+        title: "System Detail",
+        description: data.message,
+        duration: 3000,
+      });
+    };
+
+    // Handler: General notifications
+    const handleOpenNotificationDetail = (data: any) => {
+      toast({
+        title: "Notification Detail",
+        description: data.description,
+        duration: 3000,
+      });
+    };
+
+    registerHandler("navigateToChannel", handleNavigateToChannel);
+    registerHandler("openGithubDetail", handleOpenGithubDetail);
+    registerHandler("openSystemDetail", handleOpenSystemDetail);
+    registerHandler("openNotificationDetail", handleOpenNotificationDetail);
+
+    return () => {
+      unregisterHandler("navigateToChannel");
+      unregisterHandler("openGithubDetail");
+      unregisterHandler("openSystemDetail");
+      unregisterHandler("openNotificationDetail");
+    };
+  }, [
+    channels,
+    registerHandler,
+    unregisterHandler,
+    toast,
+    isMobile,
+    searchParams,
+    setSearchParams,
+  ]);
+
+  /**
+   * Đồng bộ sidebar với responsive mode
+   */
+  useEffect(() => {
     if (!isMobile) {
       setShowSidebar(true);
     }
-  }, [isMobile]); // Chỉ phụ thuộc vào isMobile, không phụ thuộc showSidebar
+  }, [isMobile]);
+
+  // ==================== RENDER ====================
+
+  // Filter messages theo channel hiện tại
+  const filteredMessages = messages.filter((msg: any) => {
+    const msgChannelId = String(msg.channelId || msg.channel_id || "");
+    const currentChannelId = String(selectedChannel?.id || "");
+    return (
+      !msgChannelId ||
+      !currentChannelId ||
+      msgChannelId === currentChannelId
+    );
+  });
 
   return (
     <MasterLayout
@@ -1157,9 +1146,9 @@ export default function ChatLayout() {
           showSidebar={showSidebar}
         />
       }
-      showSidebar={!isMobile && showSidebar} // Desktop only
+      showSidebar={!isMobile && showSidebar}
       sidebar={
-        !isMobile ? ( // Desktop only
+        !isMobile ? (
           <SidebarLayout>
             <div className="flex items-center justify-between px-3 pt-2">
               <Dialog open={openSearchModal} onOpenChange={setOpenSearchModal}>
@@ -1178,13 +1167,11 @@ export default function ChatLayout() {
                 </DialogTrigger>
                 <DialogContent
                   className="w-full max-w-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700"
-                  style={{
-                    height: "85vh",
-                  }}
+                  style={{ height: "85vh" }}
                 >
                   <DialogHeader>
                     <DialogTitle className="text-gray-900 dark:text-white">
-                      Tìm kiếm kênh , người dùng
+                      Tìm kiếm kênh, người dùng
                     </DialogTitle>
                   </DialogHeader>
                   <div className="px-3 pt-2 h-[70vh]">
@@ -1204,15 +1191,15 @@ export default function ChatLayout() {
                 onShowChannelTypeMenu={handleShowChannelTypeMenu}
                 showChannelTypeMenu={showChannelTypeMenu}
                 onChannelCreated={loadChannels}
-                unreadMap={unreadMap} // truyền vào
+                unreadMap={unreadMap}
               />
             </ScrollArea>
           </SidebarLayout>
-        ) : null // Mobile không có sidebar trong MasterLayout
+        ) : null
       }
       children_right={renderToolComponent()}
     >
-      {/* Mobile Sidebar Overlay - Độc lập với MasterLayout */}
+      {/* Mobile Sidebar Overlay */}
       {isMobile && (
         <div>
           <button
@@ -1298,7 +1285,7 @@ export default function ChatLayout() {
                       >
                         <DialogHeader>
                           <DialogTitle className="text-gray-900 dark:text-white">
-                            Tìm kiếm kênh , người dùng
+                            Tìm kiếm kênh, người dùng
                           </DialogTitle>
                         </DialogHeader>
                         <div className="px-3 pt-2 h-[70vh]">
@@ -1318,7 +1305,7 @@ export default function ChatLayout() {
                       onShowChannelTypeMenu={handleShowChannelTypeMenu}
                       showChannelTypeMenu={showChannelTypeMenu}
                       onChannelCreated={loadChannels}
-                      unreadMap={unreadMap} // truyền vào
+                      unreadMap={unreadMap}
                     />
                   </ScrollArea>
                 </SidebarLayout>
@@ -1334,93 +1321,66 @@ export default function ChatLayout() {
           <ChannelHeader
             channel={selectedChannel}
             members={members}
+            messages={filteredMessages} // Thêm prop này
             selectedTool={selectedTool}
             onToolChange={setSelectedTool}
           />
         )}
 
         <div className="flex flex-col h-full">
-          {(() => {
-            const filteredMessages: any[] = messages.filter((msg: any) => {
-              const msgChannelId = String(
-                msg.channelId || msg.channel_id || ""
-              );
-              const currentChannelId = String(selectedChannel?.id || "");
-              return (
-                !msgChannelId ||
-                !currentChannelId ||
-                msgChannelId === currentChannelId
-              );
-            });
+          {filteredMessages.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  {selectedChannel
+                    ? "Chưa có tin nhắn nào"
+                    : "Chọn một kênh để bắt đầu trò chuyện"}
+                </h3>
+                <p className="text-muted-foreground">
+                  {selectedChannel
+                    ? "Hãy là người đầu tiên gửi tin nhắn trong kênh này"
+                    : "Chọn một kênh từ sidebar để xem tin nhắn"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <MessageList
+              messages={filteredMessages}
+              channelId={String(selectedChannel?.id)}
+              onPrependMessages={handlePrependMessages}
+              loadOlder={loadOlder}
+              type={selectedChannel?.type}
+              onReplySelect={(r) => setReplyTo(r)}
+              onEditSelect={(e) => setEditTo(e)}
+              hasInputPreview={!!(replyTo || editTo)}
+              onOpenTool={handleOpenTool}
+              members={selectedChannel?.members}
+              isInputExpanded={isInputExpanded}
+              onMessageUpdate={sendMessage}
+            />
+          )}
 
-            console.log("💬 Render check:", {
-              totalMessages: messages.length,
-              filteredMessages: filteredMessages.length,
-              selectedChannelId: selectedChannel?.id,
-              hasSelectedChannel: !!selectedChannel,
-            });
-
-            return (
-              <>
-                {filteredMessages.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                        {selectedChannel
-                          ? "Chưa có tin nhắn nào"
-                          : "Chọn một kênh để bắt đầu trò chuyện"}
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {selectedChannel
-                          ? "Be the first to send a message in this channel"
-                          : "Choose a channel from the sidebar to view messages"}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <MessageList
-                    messages={filteredMessages}
-                    channelId={String(selectedChannel?.id)}
-                    onPrependMessages={handlePrependMessages}
-                    loadOlder={loadOlder}
-                    type={selectedChannel?.type}
-                    onReplySelect={(r) => setReplyTo(r)} // <-- nhận reply từ danh sách
-                    onEditSelect={(e) => setEditTo(e)} // <-- nhận edit từ danh sách
-                    hasInputPreview={!!(replyTo || editTo)} // <-- truyền trạng thái preview
-                    onOpenTool={handleOpenTool}
-                    members={selectedChannel?.members}
-                    isInputExpanded={isInputExpanded}
-                    onMessageUpdate={sendMessage} // <-- Truyền sendMessage để xử lý update actions
-                  />
-                )}
-
-                {selectedChannel && (
-                  <div className="flex-shrink-0">
-                    <MessageInput
-                      channel={selectedChannel}
-                      channelMembers={members}
-                      channelMessages={filteredMessages}
-                      channelId={selectedChannel.id}
-                      onSend={sendMessage}
-                      replyMessage={replyTo || undefined}
-                      onCancelReply={() => setReplyTo(null)}
-                      editMessage={editTo || undefined}
-                      onCancelEdit={() => setEditTo(null)}
-                      onToggleCodeEditor={() => {
-                        // Toggle logic: nếu đang mở tool2 thì đóng, không thì mở
-                        setSelectedTool(
-                          selectedTool === "tool2" ? null : "tool2"
-                        );
-                      }}
-                      isCodeEditorOpen={selectedTool === "tool2"} // <-- Pass trạng thái
-                      onInputExpandedChange={(v) => setIsInputExpanded(Boolean(v))}
-                    />
-                  </div>
-                )}
-              </>
-            );
-          })()}
+          {selectedChannel && (
+            <div className="flex-shrink-0">
+              <MessageInput
+                channel={selectedChannel}
+                channelMembers={members}
+                channelMessages={filteredMessages}
+                channelId={selectedChannel.id}
+                onSend={sendMessage}
+                replyMessage={replyTo || undefined}
+                onCancelReply={() => setReplyTo(null)}
+                editMessage={editTo || undefined}
+                onCancelEdit={() => setEditTo(null)}
+                onToggleCodeEditor={() => {
+                  setSelectedTool(selectedTool === "tool2" ? null : "tool2");
+                }}
+                isCodeEditorOpen={selectedTool === "tool2"}
+                onInputExpandedChange={(v) => setIsInputExpanded(Boolean(v))}
+              />
+            </div>
+          )}
         </div>
 
         {/* GitHub Detail Modal */}

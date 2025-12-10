@@ -16,7 +16,8 @@ interface AuthContextType {
   loading: boolean;
   signIn: (
     email: string,
-    password: string
+    password: string,
+    captchaToken: string
   ) => Promise<{ error: string | null }>;
   signInWithGitHub: () => Promise<void>;
   signUp: (
@@ -61,10 +62,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initializeAuth();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (
+    email: string,
+    password: string,
+    captchaToken: string
+  ) => {
     setLoading(true);
     try {
-      const response = await authService.login({ email, password });
+      const response = await authService.login({ email, password, captchaToken });
 
       if (response.status && response.data) {
         setUser(response.data.user);
