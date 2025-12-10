@@ -315,12 +315,12 @@ const BARequireMessage = ({
               <div className="flex-1">
                 <div className="text-xl font-bold text-black dark:text-white flex items-center gap-2">
                   BA Requirement
-                  <Badge
+                  {/* <Badge
                     variant="outline"
                     className="ml-2 bg-blue-500/10 border-blue-500/50 text-blue-400 text-xs"
                   >
                     {message.id}
-                  </Badge>
+                  </Badge> */}
                 </div>
                 {projectName && (
                   <div className="text-sm font-medium text-gray-400 mt-1 flex items-center gap-2">

@@ -15,7 +15,7 @@ export const AttachmentViewer = ({
   const [viewerError, setViewerError] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  console.log("fack url", url);
+
 
   // Reset error khi URL thay đổi
   useEffect(() => {

@@ -305,12 +305,12 @@ const TesterReportMessage = ({
               <div className="flex-1">
                 <div className="text-xl font-bold text-black dark:text-white flex items-center gap-2">
                   Bug Report
-                  <Badge
+                  {/* <Badge
                     variant="outline"
                     className="ml-2 bg-red-500/10 border-red-500/50 text-red-400 text-xs"
                   >
                     {message.id}
-                  </Badge>
+                  </Badge> */}
                 </div>
                 {projectName && (
                   <div className="text-sm font-medium text-gray-400 mt-1 flex items-center gap-2">

@@ -60,7 +60,7 @@ interface ChannelUpdateProps {
   onSuccess?: () => void;
 }
 
-const ROLES = [
+export const ROLES = [
   { id: 1, name: "PM", icon: Crown, color: "text-purple-400", bgColor: "bg-purple-500/20", borderColor: "border-purple-500" },
   { id: 2, name: "BA", icon: FileText, color: "text-blue-400", bgColor: "bg-blue-500/20", borderColor: "border-blue-500" },
   { id: 3, name: "Tester", icon: Bug, color: "text-orange-400", bgColor: "bg-orange-500/20", borderColor: "border-orange-500" },

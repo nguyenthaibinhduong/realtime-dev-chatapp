@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Plus, Trash2, Upload, User, MessageSquare, FileText, Search } from "lucide-react";
+import { X, Plus, Trash2, Upload, User, MessageSquare, FileText, Search, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/drawer";
 import { Member } from "@/types/channel";
 import AvatarUser from "@/components/common/AvartarUser";
+import { ROLES } from "@/components/blocks/channels/ChannelSettings";
+import { cn } from "@/lib/utils";
 
 interface BARequirementFormProps {
     open: boolean;
@@ -24,6 +26,7 @@ interface BARequirementFormProps {
     channelMembers?: Array<Member | any>;
     channelMessages?: Array<{ id: string; text: string; sender: { name: string }; created_at: string } | any>;
     onSubmit: (data: BARequirementData) => void;
+    memberRoles?: Array<any>
 }
 
 export interface BARequirementData {
@@ -56,7 +59,8 @@ export const BARequirementForm = ({
     onOpenChange,
     channelMembers = [],
     channelMessages = [],
-    onSubmit
+    onSubmit,
+    memberRoles = []
 }: BARequirementFormProps) => {
     const [projectName, setProjectName] = useState("");
     const [requirements, setRequirements] = useState<string[]>([""]);
@@ -75,6 +79,8 @@ export const BARequirementForm = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const memberDropdownRef = useRef<HTMLDivElement>(null);
     const messageDropdownRef = useRef<HTMLDivElement>(null);
+
+
 
     useEffect(() => {
         // Auto focus on first input
@@ -481,6 +487,18 @@ export const BARequirementForm = ({
                                                             <p className="text-sm text-black dark:text-white">{member.name}</p>
                                                             {member.username && (
                                                                 <p className="text-xs text-gray-500">@{member.username}</p>
+                                                            )}
+                                                            {memberRoles && memberRoles.map(mr => mr.userId).includes(member.id) && (
+                                                                <div className="flex items-center gap-1 mt-1">
+                                                                    {memberRoles.find(mr => mr.userId === member.id).roles.map((roleId: number) => {
+                                                                        const role = ROLES.find(r => r.id === roleId);
+                                                                        if (!role) return null;
+                                                                        return (<Badge
+                                                                            key={role.id}
+                                                                            className={cn("text-xs font-medium px-2 py-0.5", role.color, role.bgColor, role.borderColor, "border")}
+                                                                        >{role.name}</Badge>);
+                                                                    })}
+                                                                </div>
                                                             )}
                                                         </div>
                                                     </div>

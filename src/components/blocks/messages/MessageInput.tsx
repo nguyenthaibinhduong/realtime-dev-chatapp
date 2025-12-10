@@ -137,6 +137,8 @@ export const MessageInput = ({
   }, [channel, user]);
 
   console.log("Channel in permissions:", permissions);
+  console.log("fack", channel)
+  console.log('fack', channelMembers)
 
   // Prevent multiple forms from opening at once
   const openBAForm = () => {
@@ -640,6 +642,7 @@ export const MessageInput = ({
           onOpenChange={setShowBAForm}
           channelMembers={channelMembers}
           channelMessages={channelMessages}
+          memberRoles={channel?.json_data?.userRoles}
           onSubmit={handleBASubmit}
         />
 
@@ -649,6 +652,7 @@ export const MessageInput = ({
           onOpenChange={setShowTesterForm}
           channelMembers={channelMembers}
           channelMessages={channelMessages}
+          memberRoles={channel?.json_data?.userRoles}
           onSubmit={handleTesterSubmit}
         />
       </div>

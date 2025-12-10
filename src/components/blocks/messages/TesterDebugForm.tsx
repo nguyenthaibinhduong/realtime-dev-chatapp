@@ -17,6 +17,8 @@ import {
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import AvatarUser from "@/components/common/AvartarUser";
+import { ROLES } from "@/components/blocks/channels/ChannelSettings";
+import { cn } from "@/lib/utils";
 
 interface TesterDebugFormProps {
     open: boolean;
@@ -24,6 +26,7 @@ interface TesterDebugFormProps {
     channelMembers?: Array<{ id: string; name: string; username?: string; avatar?: string }>;
     channelMessages?: Array<{ id: string; text: string; sender: { name: string }; created_at: string }>;
     onSubmit: (data: TesterDebugData) => void;
+    memberRoles?: Array<any>;
 }
 
 export interface TesterDebugData {
@@ -70,7 +73,8 @@ export const TesterDebugForm = ({
     onOpenChange,
     channelMembers = [],
     channelMessages = [],
-    onSubmit
+    onSubmit,
+    memberRoles = []
 }: TesterDebugFormProps) => {
     const [projectName, setProjectName] = useState("");
     const [relatedMessageId, setRelatedMessageId] = useState<string | undefined>();
@@ -528,6 +532,18 @@ export const TesterDebugForm = ({
                                                         <p className="text-sm text-black dark:text-white">{member.name}</p>
                                                         {member.username && (
                                                             <p className="text-xs text-gray-500">@{member.username}</p>
+                                                        )}
+                                                        {memberRoles && memberRoles.map(mr => mr.userId).includes(member.id) && (
+                                                            <div className="flex items-center gap-1 mt-1">
+                                                                {memberRoles.find(mr => mr.userId === member.id).roles.map((roleId: number) => {
+                                                                    const role = ROLES.find(r => r.id === roleId);
+                                                                    if (!role) return null;
+                                                                    return (<Badge
+                                                                        key={role.id}
+                                                                        className={cn("text-xs font-medium px-2 py-0.5", role.color, role.bgColor, role.borderColor, "border")}
+                                                                    >{role.name}</Badge>);
+                                                                })}
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>

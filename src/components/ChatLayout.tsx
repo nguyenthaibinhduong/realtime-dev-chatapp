@@ -48,6 +48,7 @@ import attachmentService, { UploadResult } from "@/services/attachmentService";
 // Types
 import { Message } from "@/types/message";
 import { Channel, Member } from "@/types/channel";
+import { useChannelUpdate } from "@/hooks/useChannelUpdateListener";
 
 export default function ChatLayout() {
   // ==================== HOOKS ====================
@@ -270,9 +271,10 @@ export default function ChatLayout() {
    * Load tin nhắn của kênh
    */
   const loadMessages = useCallback(async (channelId: string) => {
+
     try {
       const res = await ChatAPI.fetchMessage(channelId);
-
+      
       if (res?.data) {
         const messagesData = Array.isArray(res.data.items)
           ? res.data.items
@@ -293,6 +295,10 @@ export default function ChatLayout() {
       setMembers([]);
     }
   }, []);
+
+  useChannelUpdate({
+  onUpdate: () => loadMessages(selectedChannel?.id),
+  });
 
   /**
    * Load tin nhắn cũ hơn (scroll lên)
@@ -886,6 +892,7 @@ export default function ChatLayout() {
    */
   useEffect(() => {
     const handleChannelUpdate = (response: any) => {
+
       const data = response?.data || response;
       const updatedChannel = data?.channel;
       const updatedMembers = data?.members;

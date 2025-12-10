@@ -76,6 +76,7 @@ class ChatSocketService {
   }
 
   offChannelUpdate(callback?: (msg: any) => void) {
+    
     getSocket().off("receiveUpdateChannel", callback);
   }
 
