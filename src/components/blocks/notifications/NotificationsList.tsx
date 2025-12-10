@@ -153,42 +153,58 @@ const NotificationItem = memo(
           };
 
         case "github":
-          // GitHub có nhiều loại action khác nhau
-          const action = notification.data?.action;
+          // ✅ GitHub data nằm trong notification.data.data (nested structure)
+          const githubData = notification.data?.data;
+          const event = notification.data?.event; // "push", "pull_request", "installation", etc.
+          const action = notification.data?.action; // "opened", "closed", "merged", etc.
 
-          if (action === "created") {
-            // Installation created
-            const repoCount = notification.data?.repositories?.length || 0;
-            const owner =
-              notification.data?.installation?.account?.login || "Unknown";
-
+          if (!githubData) {
             return {
-              title: `🔧 GitHub App - ${owner}`,
-              content: `Đã cài đặt ứng dụng cho ${repoCount} repository${repoCount > 1 ? "s" : ""}`,
+              title: `🐙 GitHub Event`,
+              content: `Event: ${event || "unknown"}`,
               titleClass: "text-green-400 font-medium",
               metadata: {
-                action: "installation_created",
-                repoCount,
-                owner,
-                createdAt: notification.data?.installation?.created_at,
+                action: event || "unknown",
               },
             };
-          } else if (
-            notification.data?.repository &&
-            notification.data?.commits
-          ) {
-            // Push event
-            const repository = notification.data.repository.name;
-            const owner =
-              notification.data.repository.owner?.login ||
-              notification.data.pusher?.name ||
+          }
+
+          // Pull Request event
+          if (event === "pull_request") {
+            const pr = githubData.pull_request;
+            const repository = githubData.repository?.name || notification.data?.repoFullName?.split("/")[1];
+            const owner = pr?.user?.login || githubData.repository?.owner?.login || notification.data?.repoFullName?.split("/")[0] || "Unknown";
+            const isMerged = pr?.merged === true;
+            const prNumber = pr?.number || githubData.number;
+            const prTitle = pr?.title || "No title";
+            const prState = pr?.state || "unknown";
+
+            return {
+              title: `${isMerged ? '🔀' : '🔃'} ${owner}/${repository}`,
+              content: `PR #${prNumber}: ${prTitle}`,
+              titleClass: isMerged ? "text-purple-400 font-medium" : "text-blue-400 font-medium",
+              metadata: {
+                action: isMerged ? "merged" : action || prState,
+                pr: prNumber,
+                state: prState,
+                merged: isMerged,
+                author: owner,
+                baseBranch: pr?.base?.ref || "main",
+                headBranch: pr?.head?.ref || "unknown",
+              },
+            };
+          }
+
+          // Push event
+          if (event === "push" && githubData.commits) {
+            const repository = githubData.repository?.name || notification.data?.repoFullName?.split("/")[1];
+            const owner = githubData.pusher?.name ||
+              githubData.repository?.owner?.name ||
+              notification.data?.repoFullName?.split("/")[0] ||
               "Unknown";
-            const commitMessage =
-              notification.data.head_commit?.message || "No commit message";
-            const branch = notification.data.ref
-              ? notification.data.ref.replace("refs/heads/", "")
-              : "main";
-            const commitsCount = notification.data.commits?.length || 1;
+            const commitMessage = githubData.head_commit?.message || "No commit message";
+            const branch = githubData.ref ? githubData.ref.replace("refs/heads/", "") : "main";
+            const commitsCount = githubData.commits?.length || 1;
 
             return {
               title: `📦 ${owner}/${repository}`,
@@ -198,21 +214,40 @@ const NotificationItem = memo(
                 action: "push",
                 branch,
                 commitsCount,
-                author: notification.data.head_commit?.author?.name || owner,
-                compareUrl: notification.data.compare,
-              },
-            };
-          } else {
-            // Other GitHub events
-            return {
-              title: `🐙 GitHub Event`,
-              content: `Action: ${action || "unknown"}`,
-              titleClass: "text-green-400 font-medium",
-              metadata: {
-                action: action || "unknown",
+                author: githubData.head_commit?.author?.name || owner,
+                compareUrl: githubData.compare,
               },
             };
           }
+
+          // Installation event
+          if (event === "installation" || action === "created") {
+            const repoCount = githubData.repositories?.length || 0;
+            const owner = githubData.installation?.account?.login || "Unknown";
+
+            return {
+              title: `🔧 GitHub App - ${owner}`,
+              content: `Đã cài đặt ứng dụng cho ${repoCount} repository${repoCount > 1 ? "s" : ""}`,
+              titleClass: "text-green-400 font-medium",
+              metadata: {
+                action: "installation_created",
+                repoCount,
+                owner,
+                createdAt: githubData.installation?.created_at,
+              },
+            };
+          }
+
+          // Other GitHub events
+          return {
+            title: `🐙 GitHub Event`,
+            content: `${event || "Unknown event"} - ${notification.data?.repoFullName || "Repository"}`,
+            titleClass: "text-green-400 font-medium",
+            metadata: {
+              action: action || event || "unknown",
+              repository: notification.data?.repoFullName,
+            },
+          };
 
         case "system":
           return {
@@ -249,22 +284,22 @@ const NotificationItem = memo(
             : "border-l-4 border-l-transparent hover:border-l-blue-300 dark:hover:border-l-blue-500",
           !notification.read && "bg-blue-50 dark:bg-blue-950/20",
           isNewNotification &&
-            "bg-white dark:bg-zinc-900 border-l-4 border-l-green-500"
+          "bg-white dark:bg-zinc-900 border-l-4 border-l-green-500"
         )}
         onClick={() => onSelect(notification)}
         style={
           isNewNotification
             ? {
-                animation: "flash-white 0.8s ease-in-out 4",
-                boxShadow: "0 2px 8px rgba(59, 130, 246, 0.2)",
-              }
+              animation: "flash-white 0.8s ease-in-out 4",
+              boxShadow: "0 2px 8px rgba(59, 130, 246, 0.2)",
+            }
             : undefined
         }
       >
         <div className="flex items-start gap-3">
           <NotificationIcon type={notification.type} />
 
-                 <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex-1 min-w-0 space-y-2">
             {/* Header */}
             <div className="flex items-start justify-between gap-2">
               <h4
@@ -298,9 +333,9 @@ const NotificationItem = memo(
                     style={
                       isNewNotification
                         ? {
-                            animation: "pulse 1.5s ease-in-out infinite",
-                            boxShadow: "0 0 6px rgba(34, 197, 94, 0.6)",
-                          }
+                          animation: "pulse 1.5s ease-in-out infinite",
+                          boxShadow: "0 0 6px rgba(34, 197, 94, 0.6)",
+                        }
                         : undefined
                     }
                   />
@@ -341,15 +376,15 @@ const NotificationItem = memo(
                   )}
                   {getNotificationDisplay.metadata.action ===
                     "installation_created" && (
-                    <>
-                      <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
-                        Repos: {getNotificationDisplay.metadata.repoCount}
-                      </span>
-                      <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
-                        Owner: {getNotificationDisplay.metadata.owner}
-                      </span>
-                    </>
-                  )}
+                      <>
+                        <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                          Repos: {getNotificationDisplay.metadata.repoCount}
+                        </span>
+                        <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                          Owner: {getNotificationDisplay.metadata.owner}
+                        </span>
+                      </>
+                    )}
                 </div>
               )}
 
