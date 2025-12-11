@@ -150,10 +150,4 @@ src/components/blocks/messages/
 5. Implement message type rendering for BA/Debug messages
 6. Add AI Assistant feature
 
-## 💡 Tips
 
-- Press Enter to quickly add requirements in BA form
-- Use rich text editor formatting for detailed bug descriptions
-- Search messages by content or sender name
-- Toggle Google Sheet sync for automatic tracking
-- All forms support drag-and-drop file attachments
