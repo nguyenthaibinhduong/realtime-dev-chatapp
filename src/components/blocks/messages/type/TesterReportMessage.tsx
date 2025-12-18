@@ -29,6 +29,7 @@ import { ChannelSearch } from "../../channels/ChannelSearch";
 import { Button } from "@/components/ui/button";
 import { chatSocketService } from "@/services/chatSocketService";
 import { toast } from "@/hooks/useToast";
+import { StatusDropDown } from "../StatusDropDown";
 
 interface TesterReportMessageProps {
   message: any;
@@ -126,6 +127,7 @@ const TesterReportMessage = ({
 
   const contentPreview = stripHtml(content).slice(0, 100);
   const hasMoreContent = stripHtml(content).length > 100;
+
 
   return (
     <>
@@ -318,6 +320,9 @@ const TesterReportMessage = ({
                     <span className="text-black dark:text-white">
                       {projectName}
                     </span>
+                    <StatusDropDown 
+                      msg={message}
+                      />
                   </div>
                 )}
               </div>

@@ -15,6 +15,8 @@ import AvatarUser from "@/components/common/AvartarUser";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import { StatusDropDown } from "./StatusDropDown";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SearchMessageDialogProps {
   open: boolean;
@@ -149,6 +151,7 @@ export const SearchMessageDialog = ({
     return config?.color || "zinc";
   };
 
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[85vh] bg-zinc-50 dark:bg-zinc-950 text-black dark:text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
@@ -277,6 +280,11 @@ export const SearchMessageDialog = ({
                             {MESSAGE_TYPES.find((t) => t.value === msg.type)?.label ||
                               msg.type}
                           </Badge>
+                        )}
+                        {msg.json_data?.status && (
+                          <StatusDropDown
+                            msg={msg}
+                          />
                         )}
                       </div>
                       <p className="text-xs text-zinc-400">
