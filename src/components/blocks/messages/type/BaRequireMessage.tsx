@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, act } from "react";
 import {
   FileText,
   ExternalLink,
@@ -27,6 +27,7 @@ import { chatSocketService } from "@/services/chatSocketService";
 import { ChannelSearch } from "../../channels/ChannelSearch";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/useToast";
+import { StatusDropDown } from "../StatusDropDown";
 
 
 interface BARequireMessageProps {
@@ -88,6 +89,7 @@ const BARequireMessage = ({
     assignees = [],
     relatedMessages = [],
   } = requirementData;
+
 
   // Get assignee users from channel members
   const assigneeUsers = useMemo(() => {
@@ -330,7 +332,12 @@ const BARequireMessage = ({
                     </span>
                   </div>
                 )}
-              </div>
+                    <StatusDropDown
+                      msg={message}
+                    />
+              
+                </div>
+  
             </DialogTitle>
           </DialogHeader>
 

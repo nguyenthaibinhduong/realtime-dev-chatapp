@@ -118,6 +118,7 @@ export const ChannelHeader = ({
   > | null>(null);
   const [openSearchModal, setOpenSearchModal] = useState(false);
 
+
   // Get user permissions for this channel
   useEffect(() => {
     if (channel && user.id) {
@@ -504,32 +505,31 @@ export const ChannelHeader = ({
                     {members.map((member: any) => (
                       <div
                         key={member.id}
-                        className="flex items-center gap-3 p-3 bg-zinc-100 dark:bg-zinc-800  rounded-lg hover:bg-zinc-200  transition-colors duration-200"
+                        className="flex items-center gap-3 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-neutral-200 transition-colors duration-200 group cursor-pointer"
                       >
                         <div className="relative mr-2">
                           <AvatarUser user={member} size={8} />
-                          {/* Chấm online */}
                           <OnlineDot userId={member.id} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="font-semibold text-black dark:text-white truncate">
+                            <p className="font-semibold text-black dark:text-white dark:group-hover:text-black truncate transition-colors">
                               {member.username}
                             </p>
                             {member.isOwner && (
-                              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black dark:text-white border-0 px-2 py-0.5 text-xs">
+                              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 px-2 py-0.5 text-xs">
                                 <Crown className="h-3 w-3 mr-1" />
                                 Trưởng nhóm
                               </Badge>
                             )}
                             {member.isMine && (
-                              <Badge className="bg-gradient-to-r from-green-500 to-blue-700 text-black dark:text-white border-0 px-2 py-0.5 text-xs">
+                              <Badge className="bg-gradient-to-r from-green-500 to-blue-700 text-white border-0 px-2 py-0.5 text-xs">
                                 <User className="h-3 w-3 mr-1" />
                                 Bạn
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-zinc-400 truncate">
+                          <p className="text-sm text-zinc-400 dark:group-hover:text-zinc-900 truncate transition-colors">
                             {member.email}
                           </p>
                         </div>

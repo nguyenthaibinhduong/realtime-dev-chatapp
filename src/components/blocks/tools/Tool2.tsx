@@ -261,6 +261,7 @@ export const Tool2 = ({ onSendCode, onClose, initialCode, initialLanguage }: Too
                         contextmenu: true,
                         mouseWheelZoom: true,
                         padding: { top: 16, bottom: 16 },
+                        renderValidationDecorations: "off",
                     }}
                 />
             </div>

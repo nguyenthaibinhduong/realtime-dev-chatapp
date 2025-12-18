@@ -309,7 +309,7 @@ export const MessageInput = ({
       data.attachments,
       { replyTo: replyMessage },
       'ba-require',
-      data
+      {...data, status: 'open'}
     );
     // Đóng form sau khi gửi
     setShowBAForm(false);
@@ -324,7 +324,7 @@ export const MessageInput = ({
       data.attachments,
       { replyTo: replyMessage },
       'tester-report',
-      data
+      {...data, status: 'open'}
     );
     // Đóng form sau khi gửi
     setShowTesterForm(false);
