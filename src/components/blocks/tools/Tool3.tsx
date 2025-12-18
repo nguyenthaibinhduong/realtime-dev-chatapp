@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ChatAPI } from "@/api/api";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatTimeHelper } from "@/lib/utils";
 
 interface BARequirement {
   id: string;
@@ -99,18 +100,6 @@ export const Tool3 = () => {
     open: testerReports.filter((r) => r.status === "open").length,
     in_progress: testerReports.filter((r) => r.status === "in_progress").length,
     completed: testerReports.filter((r) => r.status === "completed").length,
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    return "Just now";
   };
 
   const getStatusIcon = (status: string) => {
@@ -265,7 +254,7 @@ export const Tool3 = () => {
                         <p className="text-xs text-gray-400">
                           {req.requirements.length} requirements
                         </p>
-                        <p className="text-xs text-gray-500">{formatDate(req.created_at)}</p>
+                        <p className="text-xs text-gray-500">{formatTimeHelper()(req.created_at)}</p>
                       </div>
                     </div>
                   ))}
@@ -369,7 +358,7 @@ export const Tool3 = () => {
                         <p className="text-xs text-gray-400">
                           {report.projectName || "No project"}
                         </p>
-                        <p className="text-xs text-gray-500">{formatDate(report.created_at)}</p>
+                        <p className="text-xs text-gray-500">{formatTimeHelper()(report.created_at)}</p>
                       </div>
                     </div>
                   ))}
