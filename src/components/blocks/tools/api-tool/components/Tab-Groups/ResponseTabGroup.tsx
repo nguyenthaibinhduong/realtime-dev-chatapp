@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import JsonEditorPane from "../Panes/Json/JsonEditorPane";
 import ResponseHeaderPane from "../Panes/ResponseHeader/ResponseHeaderPane";
+import { blockUi } from "@/components/blocks/block-ui";
 
 interface ResponseTabGroupProps {
   doc: string;
@@ -19,32 +20,30 @@ export default function ResponseTabGroup({
 }: ResponseTabGroupProps) {
   return (
     <Tabs defaultValue="body" className="mt-4">
-      <TabsList className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700">
-        <TabsTrigger value="body" className="data-[state=active]:bg-white data-[state=active]:text-black">
+      <TabsList className="bg-muted border border-border">
+        <TabsTrigger value="body" className="text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground">
           Response Body
         </TabsTrigger>
         <TabsTrigger
           value="headers"
-          className="data-[state=active]:bg-white data-[state=active]:text-black"
+          className="text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground"
         >
           Response Headers
         </TabsTrigger>
       </TabsList>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12 bg-zinc-50
-dark:bg-zinc-900 border border-zinc-800 rounded-lg mt-4">
+        <div className={`flex items-center justify-center py-12 mt-4 ${blockUi.sectionMuted}`}>
           <div className="text-center">
             <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto mb-2" />
-            <p className="text-sm text-zinc-400">Sending request...</p>
+            <p className="text-sm text-muted-foreground">Sending request...</p>
           </div>
         </div>
       ) : (
         <>
           <TabsContent
             value="body"
-            className="mt-4 p-4 bg-zinc-50
-dark:bg-zinc-900 border border-zinc-800 rounded-lg"
+            className={`mt-4 p-4 ${blockUi.section}`}
           >
             <JsonEditorPane
               paneValue={doc}
@@ -55,8 +54,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-lg"
 
           <TabsContent
             value="headers"
-            className="mt-4 p-4 bg-zinc-50
-dark:bg-zinc-900 border border-zinc-800 rounded-lg"
+            className={`mt-4 p-4 ${blockUi.section}`}
           >
             <ResponseHeaderPane response={response} />
           </TabsContent>

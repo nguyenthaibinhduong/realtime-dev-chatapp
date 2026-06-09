@@ -4,6 +4,7 @@ import KeyValueEditor from "./KeyValueEditor";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { blockUi } from "@/components/blocks/block-ui";
 
 interface KeyPair {
   id: string;
@@ -56,14 +57,14 @@ export default function KeyValuePane({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm text-zinc-400">
+        <span className="text-sm text-muted-foreground">
           {paneValue.filter((kv) => kv.enabled !== false).length} enabled
         </span>
         <Button
           variant="outline"
           size="sm"
           onClick={onKeyPairAdd}
-          className="border-zinc-700 text-black hover:bg-zinc-100 dark:bg-zinc-800 hover:text-black dark:text-white"
+          className={blockUi.subtleButton}
         >
           <Plus className="h-4 w-4 mr-2" />
           Thêm tham số
@@ -73,7 +74,7 @@ export default function KeyValuePane({
       <ScrollArea className="max-h-[400px]">
         <div className="space-y-1 pr-4">
           {paneValue.length === 0 ? (
-            <div className="text-center py-8 text-zinc-500">
+            <div className="text-center py-8 text-muted-foreground">
               <p className="text-sm">Chưa có tham số nào</p>
               <p className="text-xs mt-1">
                 Click "Thêm tham số" để bắt đầu thêm tham số mới

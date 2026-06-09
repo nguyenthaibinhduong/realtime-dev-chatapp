@@ -5,6 +5,7 @@ import { ChatAPI } from "@/api/api";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatTimeHelper } from "@/lib/utils";
+import { blockUi } from "@/components/blocks/block-ui";
 
 interface BARequirement {
   id: string;
@@ -143,38 +144,38 @@ export const Tool3 = () => {
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center bg-gray-900/50">
+      <div className="h-full flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
-          <p className="text-sm text-gray-400">Đang tải dữ liệu...</p>
+          <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full overflow-auto bg-gray-900/50">
+    <div className="h-full overflow-auto bg-background text-foreground">
       <div className="p-4 space-y-4">
         {/* Header */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className={blockUi.dialogPanel}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-black dark:text-white">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               <BarChart3 className="h-5 w-5 text-blue-400" />
               Project Management Dashboard
             </CardTitle>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Thống kê BA Requirements và Tester Reports
             </p>
           </CardHeader>
         </Card>
 
         {/* BA Requirements Section */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className={blockUi.dialogPanel}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-black dark:text-white text-base">
+            <CardTitle className="flex items-center gap-2 text-foreground text-base">
               <FileText className="h-4 w-4 text-blue-400" />
               BA Requirements
-              <Badge variant="outline" className="ml-auto text-slate-100">
+              <Badge variant="outline" className={`ml-auto ${blockUi.chip}`}>
                 {baStats.total} total
               </Badge>
             </CardTitle>
@@ -185,21 +186,21 @@ export const Tool3 = () => {
               <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Circle className="h-3.5 w-3.5 text-blue-400" />
-                  <p className="text-xs text-gray-400">Chờ thực hiện</p>
+                  <p className="text-xs text-muted-foreground">Chờ thực hiện</p>
                 </div>
                 <p className="text-2xl font-semibold text-blue-400">{baStats.open}</p>
               </div>
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Clock className="h-3.5 w-3.5 text-yellow-400" />
-                  <p className="text-xs text-gray-400">Đang thực hiện</p>
+                  <p className="text-xs text-muted-foreground">Đang thực hiện</p>
                 </div>
                 <p className="text-2xl font-semibold text-yellow-400">{baStats.in_progress}</p>
               </div>
               <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle className="h-3.5 w-3.5 text-green-400" />
-                  <p className="text-xs text-gray-400">Hoàn thành</p>
+                  <p className="text-xs text-muted-foreground">Hoàn thành</p>
                 </div>
                 <p className="text-2xl font-semibold text-green-400">{baStats.completed}</p>
               </div>
@@ -207,7 +208,7 @@ export const Tool3 = () => {
 
             {/* BA Progress Bar */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-gray-400">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>Tiến độ hoàn thành</span>
                 <span>
                   {baStats.total > 0
@@ -216,7 +217,7 @@ export const Tool3 = () => {
                   %
                 </span>
               </div>
-              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500"
                   style={{
@@ -228,7 +229,7 @@ export const Tool3 = () => {
 
             {/* Recent BA Requirements */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+              <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Yêu cầu gần đây
               </h3>
@@ -237,10 +238,10 @@ export const Tool3 = () => {
                   {baRequirements.slice(0, 10).map((req) => (
                     <div
                       key={req.id}
-                      className="p-3 bg-gray-700/30 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors"
+                      className="p-3 bg-muted/40 rounded-lg border border-border hover:border-blue-500/50 transition-colors"
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="text-sm font-medium text-black dark:text-white truncate flex-1">
+                        <p className="text-sm font-medium text-foreground truncate flex-1">
                           {req.projectName}
                         </p>
                         <Badge variant="outline" className={`text-xs ${getStatusColor(req.status)}`}>
@@ -251,15 +252,15 @@ export const Tool3 = () => {
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-muted-foreground">
                           {req.requirements.length} requirements
                         </p>
-                        <p className="text-xs text-gray-500">{formatTimeHelper()(req.created_at)}</p>
+                        <p className="text-xs text-muted-foreground">{formatTimeHelper()(req.created_at)}</p>
                       </div>
                     </div>
                   ))}
                   {baRequirements.length === 0 && (
-                    <div className="text-center py-8 text-gray-500 text-sm">
+                    <div className="text-center py-8 text-muted-foreground text-sm">
                       Chưa có BA Requirements
                     </div>
                   )}
@@ -270,12 +271,12 @@ export const Tool3 = () => {
         </Card>
 
         {/* Tester Reports Section */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className={blockUi.dialogPanel}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-black dark:text-white text-base">
+            <CardTitle className="flex items-center gap-2 text-foreground text-base">
               <Bug className="h-4 w-4 text-red-400" />
               Tester Reports
-              <Badge variant="outline" className="ml-auto text-slate-100">
+              <Badge variant="outline" className={`ml-auto ${blockUi.chip}`}>
                 {testerStats.total} total
               </Badge>
             </CardTitle>
@@ -286,21 +287,21 @@ export const Tool3 = () => {
               <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Circle className="h-3.5 w-3.5 text-red-400" />
-                  <p className="text-xs text-gray-400">Bug mới</p>
+                  <p className="text-xs text-muted-foreground">Bug mới</p>
                 </div>
                 <p className="text-2xl font-semibold text-red-400">{testerStats.open}</p>
               </div>
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Clock className="h-3.5 w-3.5 text-yellow-400" />
-                  <p className="text-xs text-gray-400">Đang fix</p>
+                  <p className="text-xs text-muted-foreground">Đang fix</p>
                 </div>
                 <p className="text-2xl font-semibold text-yellow-400">{testerStats.in_progress}</p>
               </div>
               <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle className="h-3.5 w-3.5 text-green-400" />
-                  <p className="text-xs text-gray-400">Đã fix</p>
+                  <p className="text-xs text-muted-foreground">Đã fix</p>
                 </div>
                 <p className="text-2xl font-semibold text-green-400">{testerStats.completed}</p>
               </div>
@@ -308,7 +309,7 @@ export const Tool3 = () => {
 
             {/* Tester Progress Bar */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-gray-400">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>Tiến độ fix bug</span>
                 <span>
                   {testerStats.total > 0
@@ -317,7 +318,7 @@ export const Tool3 = () => {
                   %
                 </span>
               </div>
-              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-red-500 to-green-500 transition-all duration-500"
                   style={{
@@ -329,7 +330,7 @@ export const Tool3 = () => {
 
             {/* Recent Tester Reports */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+              <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Bug reports gần đây
               </h3>
@@ -338,10 +339,10 @@ export const Tool3 = () => {
                   {testerReports.slice(0, 10).map((report) => (
                     <div
                       key={report.id}
-                      className="p-3 bg-gray-700/30 rounded-lg border border-gray-600 hover:border-red-500/50 transition-colors"
+                      className="p-3 bg-muted/40 rounded-lg border border-border hover:border-red-500/50 transition-colors"
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="text-sm font-medium text-black dark:text-white line-clamp-2 flex-1">
+                        <p className="text-sm font-medium text-foreground line-clamp-2 flex-1">
                           {report.content
                             .replace(/<[^>]*>/g, "")
                             .slice(0, 60)}
@@ -355,15 +356,15 @@ export const Tool3 = () => {
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-muted-foreground">
                           {report.projectName || "No project"}
                         </p>
-                        <p className="text-xs text-gray-500">{formatTimeHelper()(report.created_at)}</p>
+                        <p className="text-xs text-muted-foreground">{formatTimeHelper()(report.created_at)}</p>
                       </div>
                     </div>
                   ))}
                   {testerReports.length === 0 && (
-                    <div className="text-center py-8 text-gray-500 text-sm">
+                    <div className="text-center py-8 text-muted-foreground text-sm">
                       Chưa có Tester Reports
                     </div>
                   )}
@@ -374,16 +375,16 @@ export const Tool3 = () => {
         </Card>
 
         {/* Summary Card */}
-        <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700">
+        <Card className={blockUi.dialogPanel}>
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 bg-blue-500/10 rounded-lg">
                 <p className="text-3xl font-bold text-blue-400">{baStats.total}</p>
-                <p className="text-sm text-gray-400 mt-1">Total BA Requirements</p>
+                <p className="text-sm text-muted-foreground mt-1">Total BA Requirements</p>
               </div>
               <div className="text-center p-4 bg-red-500/10 rounded-lg">
                 <p className="text-3xl font-bold text-red-400">{testerStats.total}</p>
-                <p className="text-sm text-gray-400 mt-1">Total Bug Reports</p>
+                <p className="text-sm text-muted-foreground mt-1">Total Bug Reports</p>
               </div>
             </div>
           </CardContent>

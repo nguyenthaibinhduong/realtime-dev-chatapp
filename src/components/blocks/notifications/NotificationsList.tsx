@@ -13,9 +13,7 @@ import { useEffect, useRef, useCallback, useState, useMemo, memo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format } from "path";
-import { NotificationAPI } from "@/api/api";
-import { on } from "events";
+import { blockUi } from "@/components/blocks/block-ui";
 
 interface NotificationsListProps {
   notifications: Notification[] | any[];
@@ -32,23 +30,23 @@ interface NotificationsListProps {
 
 // Skeleton Components
 const NotificationSkeleton = memo(() => (
-  <div className="p-4 border-b border-sidebar-border/20">
+  <div className="p-4 border-b border-border">
     <div className="flex items-start gap-3">
       {/* Avatar skeleton */}
-      <div className="w-8 h-8 bg-zinc-50 dark:bg-zinc-950-accent/50 rounded-full animate-pulse flex-shrink-0" />
+      <div className={`w-8 h-8 rounded-full flex-shrink-0 ${blockUi.skeleton}`} />
 
       <div className="flex-1 min-w-0 space-y-2">
         {/* Header skeleton */}
         <div className="flex items-center justify-between">
-          <div className="h-3 bg-zinc-50 dark:bg-zinc-950-accent/50 rounded animate-pulse w-24" />
-          <div className="h-3 bg-zinc-50 dark:bg-zinc-950-accent/30 rounded animate-pulse w-12" />
+          <div className={`h-3 w-24 ${blockUi.skeleton}`} />
+          <div className={`h-3 w-12 ${blockUi.skeleton}`} />
         </div>
 
         {/* Content skeleton */}
-        <div className="h-3 bg-zinc-50 dark:bg-zinc-950-accent/40 rounded animate-pulse w-3/4" />
+        <div className={`h-3 w-3/4 ${blockUi.skeleton}`} />
 
         {/* Time skeleton */}
-        <div className="h-2 bg-zinc-50 dark:bg-zinc-950-accent/30 rounded animate-pulse w-20" />
+        <div className={`h-2 w-20 ${blockUi.skeleton}`} />
       </div>
     </div>
   </div>
@@ -65,7 +63,7 @@ const InitialLoadingSkeleton = memo(() => (
 InitialLoadingSkeleton.displayName = "InitialLoadingSkeleton";
 
 const LoadMoreSkeleton = memo(() => (
-  <div className="border-t border-sidebar-border/20 space-y-0">
+  <div className="border-t border-border space-y-0">
     {Array.from({ length: 3 }, (_, i) => (
       <NotificationSkeleton key={i} />
     ))}
@@ -75,7 +73,7 @@ LoadMoreSkeleton.displayName = "LoadMoreSkeleton";
 
 // Memoized NotificationIcon Component
 const NotificationIcon = memo(({ type }: { type: string }) => {
-  const iconClass = "w-4 h-4 text-black dark:text-white";
+  const iconClass = "w-4 h-4 text-white";
 
   const iconConfig = useMemo(
     () => ({
@@ -278,13 +276,13 @@ const NotificationItem = memo(
     return (
       <div
         className={cn(
-          "cursor-pointer transition-all duration-200 p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-800",
+          "cursor-pointer transition-all duration-200 p-4 hover:bg-accent/50 border-b border-border",
           isSelected && !isNewNotification
-            ? "bg-zinc-100 dark:bg-zinc-800 border-l-4 border-l-blue-500"
-            : "border-l-4 border-l-transparent hover:border-l-blue-300 dark:hover:border-l-blue-500",
-          !notification.read && "bg-blue-50 dark:bg-blue-950/20",
+            ? "bg-accent/70 border-l-4 border-l-primary"
+            : "border-l-4 border-l-transparent hover:border-l-primary/50",
+          !notification.read && "bg-primary/5",
           isNewNotification &&
-          "bg-white dark:bg-zinc-900 border-l-4 border-l-green-500"
+          "bg-card border-l-4 border-l-emerald-500"
         )}
         onClick={() => onSelect(notification)}
         style={
@@ -327,8 +325,8 @@ const NotificationItem = memo(
                     className={cn(
                       "w-2 h-2 rounded-full flex-shrink-0",
                       isNewNotification
-                        ? "bg-green-500"
-                        : "bg-blue-500"
+                        ? "bg-emerald-500"
+                        : "bg-primary"
                     )}
                     style={
                       isNewNotification
@@ -361,14 +359,14 @@ const NotificationItem = memo(
                 <div className="flex items-center gap-2 flex-wrap text-xs text-zinc-500 dark:text-zinc-500">
                   {getNotificationDisplay.metadata.action === "push" && (
                     <>
-                      <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${blockUi.chip}`}>
                         Branch: {getNotificationDisplay.metadata.branch}
                       </span>
-                      <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${blockUi.chip}`}>
                         By: {getNotificationDisplay.metadata.author}
                       </span>
                       {getNotificationDisplay.metadata.commitsCount > 1 && (
-                        <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${blockUi.chip}`}>
                           {getNotificationDisplay.metadata.commitsCount} commits
                         </span>
                       )}
@@ -377,10 +375,10 @@ const NotificationItem = memo(
                   {getNotificationDisplay.metadata.action ===
                     "installation_created" && (
                       <>
-                        <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${blockUi.chip}`}>
                           Repos: {getNotificationDisplay.metadata.repoCount}
                         </span>
-                        <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${blockUi.chip}`}>
                           Owner: {getNotificationDisplay.metadata.owner}
                         </span>
                       </>
@@ -417,7 +415,7 @@ NotificationItem.displayName = "NotificationItem";
 // Memoized EmptyState Component
 const EmptyState = memo(() => (
   <div className="flex flex-col items-center justify-center h-64 text-center p-6">
-    <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-950-accent/30 rounded-full flex items-center justify-center mb-4">
+    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
       <span className="text-2xl">🔔</span>
     </div>
     <h3 className="font-semibold mb-2 text-sidebar-foreground">
@@ -454,7 +452,7 @@ const LoadMoreButton = memo(
     notificationCount: number;
     onLoadMore: () => void;
   }) => (
-    <div className="p-4 border-t border-sidebar-border/30">
+    <div className="p-4 border-t border-border">
       {loading ? (
         <div>
           <LoadingSpinner page={page + 1} />
@@ -464,7 +462,7 @@ const LoadMoreButton = memo(
         <Button
           variant="ghost"
           size="sm"
-          className="w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-zinc-50 dark:bg-zinc-950-accent/30"
+          className="w-full text-muted-foreground hover:text-foreground hover:bg-accent"
           onClick={onLoadMore}
         >
           <ChevronDown className="w-4 h-4 mr-2" />
@@ -494,7 +492,7 @@ const LoadMoreTrigger = memo(
   }) => (
     <div
       ref={onRef}
-      className="min-h-[60px] flex items-center justify-center border-t border-sidebar-border/20"
+      className="min-h-[60px] flex items-center justify-center border-t border-border"
     >
       {loading ? (
         <div className="w-full">
@@ -522,7 +520,7 @@ const EndState = memo(
     notificationCount: number;
     pageCount: number;
   }) => (
-    <div className="text-center py-6 border-t border-sidebar-border/30">
+    <div className="text-center py-6 border-t border-border">
       <div className="flex flex-col items-center gap-2">
         <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
           <span className="text-green-500 text-sm">✓</span>
@@ -734,8 +732,8 @@ export default function NotificationsList({
             value={option.value}
             className={cn(
               "text-xs px-3 py-1.5 transition-all",
-              "text-sidebar-foreground/70 hover:text-sidebar-foreground/90",
-              "data-[state=active]:bg-white data-[state=active]:text-black",
+              "text-muted-foreground hover:text-foreground",
+              "data-[state=active]:bg-background data-[state=active]:text-foreground",
               "data-[state=active]:shadow-sm"
             )}
           >
@@ -764,7 +762,7 @@ export default function NotificationsList({
                   {unreadCount} mới
                 </span>
               )}
-              <span className="text-xs bg-zinc-200 dark:bg-zinc-800 px-2.5 py-1 rounded-full text-zinc-700 dark:text-zinc-300 font-medium">
+              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${blockUi.chip}`}>
                 {notifications.length}
               </span>
 
@@ -786,16 +784,16 @@ export default function NotificationsList({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh)] bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex flex-col h-[calc(100vh)] bg-background text-foreground">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-zinc-50 dark:bg-zinc-950/80 backdrop-blur-sm">
+      <div className="flex items-center justify-between p-4 border-b border-border bg-card backdrop-blur-sm">
         {headerContent}
       </div>
 
       {/* Filter Tabs */}
-      <div className="p-3 border-b border-sidebar-border/50">
+      <div className="p-3 border-b border-border">
         <Tabs value={activeFilter} onValueChange={handleFilterChange}>
-          <TabsList className="w-full bg-zinc-100 dark:bg-zinc-800 h-10 p-1">
+          <TabsList className="w-full bg-muted h-10 p-1">
             {filterTabs}
           </TabsList>
         </Tabs>

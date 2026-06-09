@@ -53,13 +53,13 @@ export const AttachmentViewer = ({
 
   // Fallback: Download button
   const DownloadFallback = () => (
-    <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-gray-900 via-gray-950 to-black p-8 text-center">
-      <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 max-w-md">
+    <div className="flex flex-col items-center justify-center h-full bg-background p-8 text-center">
+      <div className="bg-card border border-border rounded-xl p-8 max-w-md shadow-sm">
         <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-white mb-2">
+        <h3 className="text-xl font-bold text-foreground mb-2">
           Không thể xem trước
         </h3>
-        <p className="text-gray-400 mb-6 text-sm">
+        <p className="text-muted-foreground mb-6 text-sm">
           File này không thể hiển thị trực tiếp trong trình duyệt. Vui lòng tải
           xuống để xem.
         </p>
@@ -78,14 +78,14 @@ export const AttachmentViewer = ({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-medium transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 border border-border bg-background hover:bg-accent text-foreground rounded-xl font-medium transition-colors"
           >
             <ExternalLink className="h-4 w-4" />
             Mở tab mới
           </a>
         </div>
 
-        <div className="mt-6 text-xs text-gray-500">
+        <div className="mt-6 text-xs text-muted-foreground">
           <FileText className="h-4 w-4 inline mr-1" />
           {filename}
         </div>
@@ -192,7 +192,7 @@ export const AttachmentViewer = ({
           className="absolute bottom-4 right-4"
           onClick={() => setViewerError(true)}
         >
-          <button className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm rounded-lg">
+          <button className="px-4 py-2 bg-background hover:bg-accent text-foreground border border-border text-sm rounded-lg shadow-sm">
             Tải xuống thay thế
           </button>
         </div>

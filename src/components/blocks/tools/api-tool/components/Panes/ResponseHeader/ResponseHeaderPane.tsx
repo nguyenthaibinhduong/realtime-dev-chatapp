@@ -22,7 +22,7 @@ export default function ResponseHeaderPane({
 
   if (responseHeaders.length === 0) {
     return (
-      <div className="text-center py-8 text-zinc-500">
+      <div className="text-center py-8 text-muted-foreground">
         <p className="text-sm">No headers available</p>
       </div>
     );
@@ -34,7 +34,7 @@ export default function ResponseHeaderPane({
         {responseHeaders.map(({ key, value }, index) => (
           <div
             key={index}
-            className="flex gap-2 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-700"
+            className="flex gap-2 p-3 bg-muted/60 rounded-lg border border-border"
           >
             <div className="flex-shrink-0 min-w-[200px]">
               <Badge
@@ -44,7 +44,7 @@ export default function ResponseHeaderPane({
                 {key}
               </Badge>
             </div>
-            <div className="flex-1 font-mono text-sm text-zinc-300 break-all">
+            <div className="flex-1 font-mono text-sm text-foreground break-all">
               {value}
             </div>
           </div>

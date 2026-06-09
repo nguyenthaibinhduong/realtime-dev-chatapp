@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import KeyValuePane from "../Panes/KeyValue/KeyValuePane";
 import JsonEditorPane from "../Panes/Json/JsonEditorPane";
 import { Badge } from "@/components/ui/badge";
+import { blockUi } from "@/components/blocks/block-ui";
 
 interface KeyPair {
   id: string;
@@ -34,13 +35,12 @@ export default function RequestTabGroup({
   return (
     <Tabs
       defaultValue="body"
-      className="mt-2 w-full text-black dark:text-white"
+      className="mt-2 w-full text-foreground"
     >
       {/* Tabs header: dark, mobile-friendly, wrap/scroll, reduced padding */}
       <TabsList
         className="
-          w-full bg-zinc-50
-dark:bg-zinc-900/80 border border-zinc-800 rounded-md
+          w-full bg-muted border border-border rounded-md
           p-1 flex flex-wrap gap-1 overflow-x-auto
           sticky top-0 z-10
         "
@@ -49,15 +49,15 @@ dark:bg-zinc-900/80 border border-zinc-800 rounded-md
           value="query-params"
           className="
             text-xs sm:text-sm px-2 py-1 rounded-md
-            text-black dark:text-white hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800
-            data-[state=active]:bg-blue-600 data-[state=active]:text-black dark:text-white
-            outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+            text-muted-foreground hover:text-foreground hover:bg-accent
+            data-[state=active]:bg-background data-[state=active]:text-foreground
+            outline-none focus-visible:ring-2 focus-visible:ring-ring
             transition
           "
         >
           Query Params
           {enabledQueryParams > 0 && (
-            <Badge className="ml-1 bg-blue-600 text-black dark:text-white text-[10px] px-1.5 py-0 rounded">
+            <Badge className="ml-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0 rounded">
               {enabledQueryParams}
             </Badge>
           )}
@@ -67,15 +67,15 @@ dark:bg-zinc-900/80 border border-zinc-800 rounded-md
           value="headers"
           className="
             text-xs sm:text-sm px-2 py-1 rounded-md
-            text-zinc-300 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800
-            data-[state=active]:bg-blue-600 data-[state=active]:text-black dark:text-white
-            outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+            text-muted-foreground hover:text-foreground hover:bg-accent
+            data-[state=active]:bg-background data-[state=active]:text-foreground
+            outline-none focus-visible:ring-2 focus-visible:ring-ring
             transition
           "
         >
           Headers
           {enabledHeaders > 0 && (
-            <Badge className="ml-1 bg-blue-600 text-black dark:text-white text-[10px] px-1.5 py-0 rounded">
+            <Badge className="ml-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0 rounded">
               {enabledHeaders}
             </Badge>
           )}
@@ -85,9 +85,9 @@ dark:bg-zinc-900/80 border border-zinc-800 rounded-md
           value="body"
           className="
             text-xs sm:text-sm px-2 py-1 rounded-md
-            text-zinc-300 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800
-            data-[state=active]:bg-blue-600 data-[state=active]:text-black dark:text-white
-            outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+            text-muted-foreground hover:text-foreground hover:bg-accent
+            data-[state=active]:bg-background data-[state=active]:text-foreground
+            outline-none focus-visible:ring-2 focus-visible:ring-ring
             transition
           "
         >
@@ -98,25 +98,25 @@ dark:bg-zinc-900/80 border border-zinc-800 rounded-md
       {/* Panels: darker bg, white text, thinner padding, rounded */}
       <TabsContent
         value="query-params"
-        className="mt-2 p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-800 rounded-lg"
+        className={`mt-2 p-2 sm:p-3 ${blockUi.section}`}
       >
         <KeyValuePane paneValue={queryParams} setPaneValue={setQueryParams} />
       </TabsContent>
 
       <TabsContent
         value="headers"
-        className="mt-2 p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-800 rounded-lg"
+        className={`mt-2 p-2 sm:p-3 ${blockUi.section}`}
       >
         <KeyValuePane paneValue={headers} setPaneValue={setHeaders} />
       </TabsContent>
 
       <TabsContent
         value="body"
-        className="mt-2 p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-800 rounded-lg"
+        className={`mt-2 p-2 sm:p-3 ${blockUi.section}`}
       >
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs sm:text-sm text-zinc-400">
+            <span className="text-xs sm:text-sm text-muted-foreground">
               Request Body (JSON)
             </span>
           </div>

@@ -15,6 +15,7 @@ import { log } from "console";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { chatSocketService } from "@/services/chatSocketService";
+import { blockUi } from "@/components/blocks/block-ui";
 
 export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; onOpenChange: (v: boolean) => void, role?: string }) {
     const [repos, setRepos] = useState<any[]>([]);
@@ -169,24 +170,24 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="w-full max-w-[90vw] h-[90vh] p-0 bg-white dark:bg-black text-black dark:text-white border border-zinc-700 flex overflow-hidden"
+                className={`w-[calc(100vw-1rem)] max-w-6xl h-[min(90vh,820px)] p-0 flex overflow-hidden rounded-xl ${blockUi.dialog}`}
             >
                 {/* Mobile */}
                 <div className="flex flex-col h-screen w-full md:hidden">
                     {/* Chọn repo để thêm */}
-                    <div className="w-full border-b border-zinc-800 flex-shrink-0">
+                    <div className="w-full border-b border-border flex-shrink-0 bg-card">
                         <DialogHeader className="p-6 pb-2">
-                            <DialogTitle className="text-lg flex items-center gap-2">
+                            <DialogTitle className="text-lg flex items-center gap-2 text-foreground">
                                 <Github className="h-6 w-6" /> Kết nối Repository với Kênh
                             </DialogTitle>
 
                             {/* Cảnh báo bảo mật */}
-                            <div className="mt-3 p-3 bg-red-950/30 border border-red-800/50 rounded-lg">
+                            <div className={`mt-3 p-3 rounded-lg border ${blockUi.dangerPanel}`}>
                                 <div className="flex items-start gap-2">
-                                    <Shield className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                                    <Shield className="h-5 w-5 mt-0.5 flex-shrink-0" />
                                     <div className="text-sm">
-                                        <div className="font-semibold text-red-300 mb-1">Cảnh báo bảo mật</div>
-                                        <div className="text-red-200/90 leading-relaxed">
+                                        <div className="font-semibold mb-1">Cảnh báo bảo mật</div>
+                                        <div className="leading-relaxed">
                                             Không chia sẻ repository chứa thông tin nhạy cảm như API keys, mật khẩu,
                                             token, hoặc dữ liệu cá nhân. Mọi thành viên trong kênh sẽ có thể xem nội dung repository.
                                         </div>
@@ -194,12 +195,12 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
                                 </div>
                             </div>
 
-                            <div className="mt-2 text-xs text-zinc-400 italic">
+                            <div className="mt-2 text-xs text-muted-foreground italic">
                                 💡 Kéo thả repository từ danh sách vào khu vực bên dưới để thêm nhanh
                             </div>
                         </DialogHeader>
                         {loadingRepos ? (
-                            <div className="text-center text-sm text-zinc-400 py-6">Đang tải danh sách repo…</div>
+                            <div className="text-center text-sm text-muted-foreground py-6">Đang tải danh sách repo...</div>
                         ) : (
                             <RepoDragList
                                 repos={repos}
@@ -224,19 +225,19 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
 
                 {/* Desktop */}
                 <div className="hidden md:flex w-full h-full">
-                    <div className="w-full max-w-sm border-r border-zinc-800 flex flex-col min-h-0">
+                    <div className="w-full max-w-sm border-r border-border bg-card flex flex-col min-h-0">
                         <DialogHeader className="p-6 pb-2">
-                            <DialogTitle className="text-lg flex items-center gap-2">
+                            <DialogTitle className="text-lg flex items-center gap-2 text-foreground">
                                 <Github className="h-6 w-6" /> Kết nối Repository với Kênh
                             </DialogTitle>
 
                             {/* Cảnh báo bảo mật */}
-                            <div className="mt-3 p-3 bg-red-950/30 border border-red-800/50 rounded-lg">
+                            <div className={`mt-3 p-3 rounded-lg border ${blockUi.dangerPanel}`}>
                                 <div className="flex items-start gap-2">
-                                    <Shield className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                                    <Shield className="h-5 w-5 mt-0.5 flex-shrink-0" />
                                     <div className="text-sm">
-                                        <div className="font-semibold text-red-300 mb-1">Cảnh báo bảo mật</div>
-                                        <div className="text-red-200/90 leading-relaxed text-xs">
+                                        <div className="font-semibold mb-1">Cảnh báo bảo mật</div>
+                                        <div className="leading-relaxed text-xs">
                                             Không chia sẻ repository chứa thông tin nhạy cảm như API keys, mật khẩu,
                                             token, hoặc dữ liệu cá nhân. Mọi thành viên trong kênh sẽ có thể xem nội dung repository.
                                         </div>
@@ -244,7 +245,7 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
                                 </div>
                             </div>
 
-                            <div className="mt-2 text-xs text-zinc-400 italic">
+                            <div className="mt-2 text-xs text-muted-foreground italic">
                                 💡 Kéo thả repository từ danh sách vào khu vực bên phải để thêm nhanh
                             </div>
                         </DialogHeader>
@@ -255,12 +256,12 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
                             <div className="p-6 pt-2 flex-1 flex flex-col min-h-0">
                                 <div className="mb-4">
                                     <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-sm font-semibold text-zinc-300">Repository có sẵn</h3>
-                                        <span className="text-xs text-zinc-500">
+                                        <h3 className="text-sm font-semibold text-foreground">Repository có sẵn</h3>
+                                        <span className="text-xs text-muted-foreground">
                                             {repos.filter(repo => !repoChannel.some(r => r.id === repo.id)).length} / {repos.length} repo
                                         </span>
                                     </div>
-                                    <p className="text-xs text-zinc-400">
+                                    <p className="text-xs text-muted-foreground">
                                         Kéo repository vào khu vực bên phải để thêm vào kênh
                                     </p>
                                 </div>
@@ -275,7 +276,7 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
                                                     draggable
                                                     onDragStart={(e) => handleDragStart(e, repo)}
                                                     className="group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200
-                                                    bg-zinc-50 dark:bg-zinc-900 border-zinc-700 hover:border-blue-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-grab active:cursor-grabbing hover:shadow-lg hover:shadow-blue-500/10"
+                                                    bg-card border-border hover:border-primary/40 hover:bg-accent/50 cursor-grab active:cursor-grabbing hover:shadow-sm"
                                                 >
                                                     <div className="flex-shrink-0">
                                                         <Grip className="h-4 w-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
@@ -289,22 +290,22 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
                                                                 ) : (
                                                                     <Eye className="h-3 w-3 text-green-400" />
                                                                 )}
-                                                                <span className="text-sm font-semibold text-black dark:text-white truncate">
+                                                                    <span className="text-sm font-semibold text-foreground truncate">
                                                                     {repo.name}
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        <div className="text-xs text-zinc-400 truncate">
+                                                        <div className="text-xs text-muted-foreground truncate">
                                                             {repo.full_name}
                                                         </div>
                                                         {repo.description && (
-                                                            <div className="text-xs text-zinc-500 truncate mt-1">
+                                                            <div className="text-xs text-muted-foreground truncate mt-1">
                                                                 {repo.description}
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    <div className="text-xs text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                                                         Kéo để thêm
                                                     </div>
                                                 </div>
@@ -320,16 +321,16 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
                         className={`
                             flex-1 flex flex-col min-w-0 transition-all duration-300 
                             ${isDragOver
-                                ? 'bg-blue-950/20'
-                                : 'bg-zinc-50 dark:bg-zinc-950'
+                                ? 'bg-primary/10'
+                                : 'bg-background'
                             }
                         `}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                     >
-                        <div className={`p-6 pb-2 flex items-center justify-between border-b transition-colors ${isDragOver ? 'border-blue-600' : 'border-zinc-800'}`}>
-                            <div className="text-lg font-semibold flex items-center text-black dark:text-white">
+                        <div className={`p-6 pb-2 flex items-center justify-between border-b transition-colors ${isDragOver ? 'border-primary/60' : 'border-border'}`}>
+                            <div className="text-lg font-semibold flex items-center text-foreground">
                                 <Github className="h-6 w-6 mr-2" />
                                 Repository trong kênh
                             </div>
@@ -341,13 +342,13 @@ export function RepoChatDialog({ open, onOpenChange, role }: { open: boolean; on
                             )}
                         </div>
 
-                        <div className={`flex-1 min-h-0 overflow-y-auto p-6 transition-all ${isDragOver ? 'border-2 border-dashed border-blue-500 rounded-lg m-2' : ''}`}>
+                        <div className={`flex-1 min-h-0 overflow-y-auto p-6 transition-all ${isDragOver ? 'border-2 border-dashed border-primary rounded-lg m-2' : ''}`}>
                             {isDragOver ? (
                                 <div className="flex flex-col items-center justify-center h-full text-blue-400">
                                     <div className="relative mb-6">
                                         <Github className="h-20 w-20 animate-pulse" />
                                         <div className="absolute -top-2 -right-2 h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                            <ArrowRight className="h-4 w-4 text-black dark:text-white" />
+                                            <ArrowRight className="h-4 w-4 text-white" />
                                         </div>
                                     </div>
                                     <div className="text-2xl font-bold mb-3">Thả repository vào đây</div>

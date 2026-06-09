@@ -24,6 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { GithubAPI } from "@/api/api";
 import { useToast } from "@/hooks/useToast";
 import { chatSocketService } from "@/services/chatSocketService";
+import { blockUi } from "@/components/blocks/block-ui";
 
 type GHOwner = { login: string; avatar_url: string; html_url: string };
 export type GHRepo = {
@@ -102,21 +103,21 @@ export default function RepoChatList({
 
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 text-foreground">
             {/* Header controls */}
             <div className="flex items-center gap-2 w-full md:w-auto">
                 <div className="relative flex-1 md:flex-none">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Tìm repository…"
-                        className="w-full md:w-72 pl-9 pr-8 py-2 rounded-md border border-gray-700 bg-gray-900 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className={`w-full md:w-72 pl-9 pr-8 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 ${blockUi.input}`}
                         aria-label="Lọc repository"
                     />
                     {query && (
                         <button
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                             onClick={() => setQuery("")}
                             aria-label="Clear"
                         >
@@ -130,7 +131,7 @@ export default function RepoChatList({
                         onClick={onRefresh}
                         disabled={loading}
                         aria-busy={loading}
-                        className="shrink-0 text-black"
+                        className={`shrink-0 ${blockUi.subtleButton}`}
                         title="Làm mới"
                     >
                         {loading ? (
@@ -149,15 +150,15 @@ export default function RepoChatList({
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto rounded-lg border border-gray-700">
+            <div className={blockUi.tableWrap}>
                 <Table className="min-w-[800px]">
-                    <TableCaption className="text-gray-500">
+                    <TableCaption className="text-muted-foreground">
                         {filtered.length > 0
                             ? "Danh sách repository từ GitHub App installation."
                             : "—"}
                     </TableCaption>
                     <TableHeader>
-                        <TableRow className="text-xs uppercase tracking-wide text-gray-400 bg-gray-800/50">
+                        <TableRow className={blockUi.tableHead}>
                             <TableHead className="w-[45%]">Repository</TableHead>
                             <TableHead className="w-[15%]">Visibility</TableHead>
                             <TableHead className="w-[15%]">Language</TableHead>
@@ -168,22 +169,22 @@ export default function RepoChatList({
                     <TableBody>
                         {loading &&
                             Array.from({ length: 6 }).map((_, i) => (
-                                <TableRow key={`sk-${i}`} className="border-gray-800">
+                                <TableRow key={`sk-${i}`} className="border-border">
                                     <TableCell>
-                                        <div className="h-4 w-40 rounded bg-gray-800 animate-pulse" />
-                                        <div className="mt-1 h-3 w-64 rounded bg-gray-800/60 animate-pulse" />
+                                        <div className={`h-4 w-40 ${blockUi.skeleton}`} />
+                                        <div className={`mt-1 h-3 w-64 ${blockUi.skeleton}`} />
                                     </TableCell>
                                     <TableCell>
-                                        <div className="h-4 w-16 rounded bg-gray-800 animate-pulse" />
+                                        <div className={`h-4 w-16 ${blockUi.skeleton}`} />
                                     </TableCell>
                                     <TableCell>
-                                        <div className="h-4 w-20 rounded bg-gray-800 animate-pulse" />
+                                        <div className={`h-4 w-20 ${blockUi.skeleton}`} />
                                     </TableCell>
                                     <TableCell>
-                                        <div className="h-4 w-24 rounded bg-gray-800 animate-pulse" />
+                                        <div className={`h-4 w-24 ${blockUi.skeleton}`} />
                                     </TableCell>
                                     <TableCell>
-                                        <div className="ml-auto h-8 w-20 rounded bg-gray-800 animate-pulse" />
+                                        <div className={`ml-auto h-8 w-20 ${blockUi.skeleton}`} />
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -192,7 +193,7 @@ export default function RepoChatList({
                             <TableRow>
                                 <TableCell
                                     colSpan={5}
-                                    className="text-center text-gray-500 py-8"
+                                    className="text-center text-muted-foreground py-8"
                                 >
                                     Chưa có repository
                                 </TableCell>
@@ -221,7 +222,7 @@ export default function RepoChatList({
                                 return (
                                     <TableRow
                                         key={r.id}
-                                        className="border-gray-800 cursor-pointer hover:bg-gray-800/40 group"
+                                        className={`cursor-pointer group ${blockUi.tableRow}`}
                                         onClick={() => setSelectedRepo(r)}
                                         onMouseEnter={() => setHoveredRepoId(r.id)}
                                         onMouseLeave={() => setHoveredRepoId(null)}
@@ -236,20 +237,20 @@ export default function RepoChatList({
                                                         loading="lazy"
                                                     />
                                                 ) : (
-                                                    <div className="h-8 w-8 rounded-md bg-gray-700" />
+                                                    <div className="h-8 w-8 rounded-md bg-muted" />
                                                 )}
                                                 <div>
-                                                    <div className="font-medium text-gray-800 dark:text-gray-100 truncate max-w-[360px]">
+                                                    <div className="font-medium text-foreground truncate max-w-[360px]">
                                                         {r.full_name || r.name}
                                                     </div>
-                                                    <div className="text-xs text-gray-400 line-clamp-1 max-w-[480px]">
+                                                    <div className="text-xs text-muted-foreground line-clamp-1 max-w-[480px]">
                                                         {r.description || "—"}
                                                     </div>
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className="inline-flex items-center gap-1 text-xs text-gray-200">
+                                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                                                 {r.private ? (
                                                     <>
                                                         <Lock className="h-3.5 w-3.5" /> Private
@@ -262,12 +263,12 @@ export default function RepoChatList({
                                             </span>
                                         </TableCell>
                                         <TableCell>
-                                            <span className="text-xs text-gray-200">
+                                            <span className="text-xs text-muted-foreground">
                                                 {r.language || "—"}
                                             </span>
                                         </TableCell>
                                         <TableCell>
-                                            <span className="text-xs text-gray-200">
+                                            <span className="text-xs text-muted-foreground">
                                                 {updated || "—"}
                                             </span>
                                         </TableCell>
@@ -280,7 +281,7 @@ export default function RepoChatList({
                                                     asChild
                                                     variant="outline"
                                                     size="sm"
-                                                    className="gap-1 bg-white text-black border-gray-300 hover:bg-gray-100"
+                                                    className={`gap-1 ${blockUi.subtleButton}`}
                                                 >
                                                     <a
                                                         href={r.html_url}
@@ -295,7 +296,7 @@ export default function RepoChatList({
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                    className={`bg-white text-red-600 border-gray-300 rounded-full ml-1 transition-all
+                                                    className={`bg-background text-red-600 border-border hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full ml-1 transition-all
                 ${(isAdminView || user?.id === repoUserId) && hoveredRepoId === r.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
                                                     title={isAdminView ? "Xóa khỏi kênh (Admin)" : "Xóa khỏi kênh"}
                                                     onClick={(e) => {
@@ -316,25 +317,25 @@ export default function RepoChatList({
 
             {/* Modal xác nhận xóa */}
             {confirmDelete && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-black/40">
-                    <div className="bg-white rounded-xl shadow-lg p-6 min-w-[320px] max-w-[90vw]">
-                        <div className="text-lg font-semibold text-black mb-2">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm">
+                    <div className={`rounded-xl p-6 min-w-[320px] max-w-[90vw] ${blockUi.dialog}`}>
+                        <div className="text-lg font-semibold text-foreground mb-2">
                             Xác nhận xóa repository
                         </div>
-                        <div className="text-black mb-4">
+                        <div className="text-muted-foreground mb-4">
                             Bạn có muốn xóa repository <span className="font-bold">{confirmDelete.name}</span> ra khỏi kênh chat không?
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button
                                 variant="outline"
-                                className="bg-gray-100 text-black border-gray-300"
+                                className={blockUi.subtleButton}
                                 onClick={() => setConfirmDelete(null)}
                             >
                                 Không
                             </Button>
                             <Button
                                 variant="destructive"
-                                className="bg-red-600 text-black dark:text-white"
+                                className="bg-red-600 text-white hover:bg-red-700"
                                 onClick={async () => {
                                     await handleRemoveRepo(confirmDelete.id, confirmDelete.name);
                                     setConfirmDelete(null);

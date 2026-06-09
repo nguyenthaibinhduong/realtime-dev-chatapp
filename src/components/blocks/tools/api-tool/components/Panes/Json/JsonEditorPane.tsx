@@ -111,7 +111,7 @@ export default function JsonEditorPanel({
   return (
     <div
       ref={editorRef}
-      className="border border-zinc-700 rounded-lg overflow-hidden"
+      className="border border-border rounded-lg overflow-hidden"
       style={{ minHeight: "200px" }}
     />
   );

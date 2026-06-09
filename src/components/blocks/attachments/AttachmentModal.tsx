@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/select";
 import attachmentService from "@/services/attachmentService";
 import { usePreview } from "@/hooks/useAttachmentPreview";
+import { blockUi } from "@/components/blocks/block-ui";
 
 interface AttachmentModalProps {
   open: boolean;
@@ -176,23 +177,22 @@ export const AttachmentModal = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl h-4/5 bg-zinc-50 dark:bg-zinc-950 text-black dark:text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
+        <DialogContent className={`max-w-4xl h-[min(82vh,760px)] w-[calc(100vw-1.5rem)] overflow-hidden flex flex-col rounded-xl p-0 ${blockUi.dialog}`}>
           {/* Header */}
           <div
-            className="bg-zinc-50
-dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6"
+            className={`px-6 py-6 ${blockUi.dialogHeader}`}
           >
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                    <File className="h-6 w-6 text-black dark:text-white" />
+                  <div className="w-11 h-11 rounded-lg border border-primary/15 bg-primary/10 text-primary flex items-center justify-center">
+                    <File className="h-5 w-5" />
                   </div>
                   <div>
-                    <DialogTitle className="text-2xl font-bold text-black dark:text-white tracking-tight">
+                    <DialogTitle className="text-xl font-semibold text-foreground tracking-tight">
                       Tệp đính kèm
                     </DialogTitle>
-                    <p className="text-zinc-600 dark:text-zinc-400 text-sm font-medium">
+                    <p className="text-muted-foreground text-sm font-medium">
                       {attachments.length} tệp trong cuộc trò chuyện
                     </p>
                   </div>
@@ -202,26 +202,26 @@ dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6"
 
             {/* Search */}
             <div className="mt-4 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Tìm kiếm tệp..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white placeholder:text-zinc-500 focus:border-blue-500"
+                className={`pl-10 ${blockUi.input}`}
               />
             </div>
           </div>
 
           {/* Filter Tabs & Advanced Filters */}
-          <div className="px-6 py-4 border-b border-zinc-800 space-y-3">
+          <div className="px-6 py-4 border-b border-border space-y-3">
             {/* Type Filter Tabs */}
             <div className="flex gap-2 overflow-x-auto scrollbar-thin">
               <Badge
                 variant={selectedType === null ? "default" : "outline"}
                 className={`cursor-pointer whitespace-nowrap ${
                   selectedType === null
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200  border-zinc-700"
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                    : `${blockUi.chip} hover:bg-accent hover:text-foreground`
                 }`}
                 onClick={() => setSelectedType(null)}
               >
@@ -234,8 +234,8 @@ dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6"
                     variant={selectedType === type ? "default" : "outline"}
                     className={`cursor-pointer whitespace-nowrap ${
                       selectedType === type
-                        ? `${config.bgColor} ${config.color} border-${config.color}`
-                        : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200  border-zinc-700 text-black dark:text-white"
+                        ? `${config.bgColor} ${config.color} border-transparent`
+                        : `${blockUi.chip} hover:bg-accent hover:text-foreground`
                     }`}
                     onClick={() => setSelectedType(type)}
                   >
@@ -255,18 +255,17 @@ dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6"
                       value={selectedSender || ""}
                       onValueChange={setSelectedSender}
                     >
-                      <SelectTrigger className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white">
+                      <SelectTrigger className={blockUi.select}>
                         <SelectValue placeholder="Chọn người gửi" />
                       </SelectTrigger>
                       <SelectContent
-                        className="bg-zinc-50
-dark:bg-zinc-900 border-zinc-800"
+                        className="border-border bg-popover text-popover-foreground"
                       >
                         {members.map((member) => (
                           <SelectItem
                             key={member.id}
                             value={member.id.toString()}
-                            className="text-black dark:text-white"
+                            className="text-foreground"
                           >
                             {member.username}
                           </SelectItem>
@@ -283,8 +282,8 @@ dark:bg-zinc-900 border-zinc-800"
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white hover:bg-zinc-200  ${
-                      startDate || endDate ? "border-blue-500" : ""
+                    className={`${blockUi.subtleButton} ${
+                      startDate || endDate ? "border-primary" : ""
                     }`}
                   >
                     <Calendar className="h-3 w-3 mr-1" />
@@ -292,16 +291,15 @@ dark:bg-zinc-900 border-zinc-800"
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-72 bg-zinc-50
-dark:bg-zinc-900 border-zinc-800"
+                  className="w-72 border-border bg-popover text-popover-foreground"
                 >
                   <div className="space-y-3">
-                    <Label className="text-sm text-zinc-600 dark:text-zinc-400">
+                    <Label className="text-sm text-muted-foreground">
                       Lọc theo ngày
                     </Label>
                     <div className="space-y-2">
                       <div>
-                        <Label className="text-xs text-zinc-500">Từ ngày</Label>
+                        <Label className="text-xs text-muted-foreground">Từ ngày</Label>
                         <Input
                           type="date"
                           value={
@@ -316,11 +314,11 @@ dark:bg-zinc-900 border-zinc-800"
                                 : undefined
                             )
                           }
-                          className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white"
+                          className={blockUi.input}
                         />
                       </div>
                       <div>
-                        <Label className="text-xs text-zinc-500">
+                        <Label className="text-xs text-muted-foreground">
                           Đến ngày
                         </Label>
                         <Input
@@ -335,7 +333,7 @@ dark:bg-zinc-900 border-zinc-800"
                                 : undefined
                             )
                           }
-                          className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white"
+                          className={blockUi.input}
                         />
                       </div>
                     </div>
@@ -349,7 +347,7 @@ dark:bg-zinc-900 border-zinc-800"
                   variant="ghost"
                   size="sm"
                   onClick={handleResetFilters}
-                  className="bg-red-500 hover:bg-red-600 text-black dark:text-white hover:text-slate-700"
+                  className="bg-red-500 text-white hover:bg-red-600"
                 >
                   <RotateCcw className="h-3 w-3 mr-1" />
                   Xóa bộ lọc ({activeFilterCount})
@@ -363,14 +361,14 @@ dark:bg-zinc-900 border-zinc-800"
             {loading && attachments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="h-12 w-12 text-blue-500 animate-spin mb-4" />
-                <p className="text-zinc-600 dark:text-zinc-400">Đang tải...</p>
+                <p className="text-muted-foreground">Đang tải...</p>
               </div>
             ) : filteredAttachments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-                  <File className="h-8 w-8 text-zinc-600" />
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <File className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <p className="text-zinc-600 dark:text-zinc-400 text-lg font-medium">
+                <p className="text-foreground text-lg font-medium">
                   {searchQuery ||
                   selectedType ||
                   selectedSender ||
@@ -379,7 +377,7 @@ dark:bg-zinc-900 border-zinc-800"
                     ? "Không tìm thấy tệp nào"
                     : "Chưa có tệp đính kèm"}
                 </p>
-                <p className="text-zinc-500 text-sm mt-1">
+                <p className="text-muted-foreground text-sm mt-1">
                   {searchQuery ||
                   selectedType ||
                   selectedSender ||
@@ -417,7 +415,7 @@ dark:bg-zinc-900 border-zinc-800"
                       onClick={loadMore}
                       disabled={loading}
                       variant="outline"
-                      className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white hover:bg-zinc-200 "
+                      className={blockUi.subtleButton}
                     >
                       {loading ? (
                         <>

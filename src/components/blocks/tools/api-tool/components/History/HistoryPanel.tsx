@@ -33,6 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 import { chatSocketService } from "@/services/chatSocketService";
 import { toast } from "@/hooks/useToast";
+import { blockUi } from "@/components/blocks/block-ui";
 
 interface HistoryPanelProps {
   onSelectHistory?: (item: RequestHistoryItem) => void;
@@ -129,13 +130,13 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
   return (
     <div className="space-y-4 h-full flex flex-col">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-black dark:text-white">Request History</h2>
+        <h2 className="text-xl font-semibold text-foreground">Request History</h2>
         <div className="flex gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={loadHistory}
-            className="text-zinc-400 hover:text-black dark:text-white"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent"
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -150,19 +151,18 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                   Clear All
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-zinc-50
-dark:bg-zinc-900 border-zinc-800">
+              <AlertDialogContent className={blockUi.dialog}>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black dark:text-white">
+                  <AlertDialogTitle className="text-foreground">
                     Clear History
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="text-zinc-400">
+                  <AlertDialogDescription className="text-muted-foreground">
                     Are you sure you want to clear all request history? This
                     action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white hover:bg-zinc-200 dark:bg-zinc-700">
+                  <AlertDialogCancel className={blockUi.subtleButton}>
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
@@ -179,19 +179,19 @@ dark:bg-zinc-900 border-zinc-800">
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search history..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-10 bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white"
+          className={`pl-10 pr-10 ${blockUi.input}`}
         />
         {searchQuery && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setSearchQuery("")}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-zinc-200 dark:bg-zinc-700"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-accent"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -199,8 +199,7 @@ dark:bg-zinc-900 border-zinc-800">
       </div>
 
       {filteredHistory.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 bg-zinc-50
-dark:bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">
+        <div className={`flex flex-col items-center justify-center py-12 text-muted-foreground ${blockUi.sectionMuted}`}>
           <Clock className="h-12 w-12 mb-2 opacity-50" />
           <p className="text-sm">
             {searchQuery ? "No matching requests found" : "No history yet"}
@@ -217,8 +216,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">
             {filteredHistory.map((item) => (
               <div
                 key={item.id}
-                className="bg-zinc-50
-dark:bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors group"
+                className="bg-card border border-border rounded-lg p-4 hover:border-primary/30 hover:bg-accent/40 transition-colors group"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -239,14 +237,14 @@ dark:bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 tra
                       >
                         {item.response.status}
                       </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-muted-foreground">
                         {formatDate(item.timestamp)}
                       </span>
                     </div>
-                    <p className="text-sm text-black dark:text-white truncate mb-1">
+                    <p className="text-sm text-foreground truncate mb-1">
                       {item.url}
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-zinc-400">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span>⏱ {item.response.time}</span>
                       <span>📦 {item.response.size}</span>
                     </div>
@@ -258,7 +256,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 tra
                           variant="ghost"
                           size="sm"
                           onClick={() => onSelectHistory(item)}
-                          className="h-8 w-8 p-0 text-zinc-400 hover:text-black dark:text-white"
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent"
                         >
                           <ArrowRight className="h-4 w-4" />
                         </Button>
@@ -266,7 +264,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 tra
                           variant="default"
                           size="sm"
                           onClick={() => handleShare(item)}
-                          className="h-8 w-8 p-0 text-black dark:text-white hover:bg-blue-800"
+                          className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary/90"
                         >
                           <Share2 className="h-4 w-4" />
                         </Button>

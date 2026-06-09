@@ -33,6 +33,7 @@ import { ChannelSearch } from "@/components/blocks/channels/ChannelSearch";
 import { chatSocketService } from "@/services/chatSocketService";
 import { toast } from "@/hooks/useToast";
 import CommitAnalysisComponent from "../tools/gen-ai/CommitAnalysis";
+import { blockUi } from "@/components/blocks/block-ui";
 
 /** ---------------- Types ---------------- */
 type RepoViewerProps = {
@@ -289,7 +290,7 @@ export function CodeViewerDialog({
   }, [tree, dialogPath]);
 
   const breadcrumb = (
-    <div className="px-3 py-2 text-xs text-zinc-400 border-b border-zinc-800">
+    <div className="px-3 py-2 text-xs text-muted-foreground border-b border-border">
       <button className="hover:underline" onClick={() => setDialogPath("")}>
         root
       </button>
@@ -347,22 +348,22 @@ export function CodeViewerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-white dark:bg-black text-black dark:text-white border border-zinc-700 overflow-hidden">
-        <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
+      <DialogContent className={`w-[calc(100vw-1rem)] max-w-[92vw] h-[92vh] p-0 overflow-hidden rounded-xl ${blockUi.dialog}`}>
+        <DialogHeader className={`px-4 py-3 ${blockUi.dialogHeader}`}>
           <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center h-10 w-10 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-800">
+            <div className={`h-10 w-10 ${blockUi.iconTile}`}>
               <svg
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="h-7 w-7 text-black dark:text-white"
+                className="h-7 w-7 text-foreground"
               >
                 <path d="M12 2C6.477 2 2 6.484 2 12.012c0 4.425 2.867 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.37-1.342-3.37-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.646.35-1.088.636-1.34-2.221-.253-4.555-1.113-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.025 2.747-1.025.546 1.378.202 2.396.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .268.18.579.688.481C19.135 20.19 22 16.437 22 12.012 22 6.484 17.523 2 12 2z" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-base flex items-center gap-2 font-semibold text-black dark:text-white truncate">
+              <DialogTitle className="text-base flex items-center gap-2 font-semibold text-foreground truncate">
                 <span className="truncate">{repo.full_name}</span>
-                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                <span className={`ml-2 px-2 py-0.5 rounded text-xs ${blockUi.chip}`}>
                   {repo.private ? (
                     <span className="inline-flex items-center gap-1">
                       <Lock className="h-3 w-3" /> Private
@@ -373,20 +374,20 @@ export function CodeViewerDialog({
                     </span>
                   )}
                 </span>
-                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                <span className={`ml-2 px-2 py-0.5 rounded text-xs ${blockUi.chip}`}>
                   <span className="inline-flex items-center gap-1">
                     <GitBranch className="h-3 w-3" />{" "}
                     {repo.default_branch || "main"}
                   </span>
                 </span>
               </DialogTitle>
-              <div className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
+              <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
                 <ExternalLink className="h-3.5 w-3.5" />
                 <a
                   href={repo.html_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline text-zinc-300"
+                  className="hover:underline text-foreground/80"
                 >
                   {repo.html_url}
                 </a>
@@ -401,7 +402,7 @@ export function CodeViewerDialog({
             <Button
               variant="outline"
               size="icon"
-              className="mr-10 bg-white text-black border-gray-300 hover:bg-gray-100"
+              className={`mr-10 ${blockUi.subtleButton}`}
               title="Chia sẻ code này cho kênh"
               onClick={handleShare}
             >
@@ -416,7 +417,7 @@ export function CodeViewerDialog({
               }}
             >
               <DialogContent
-                className="bg-white dark:bg-black rounded-xl shadow-lg p-6 w-[40vw] min-h-[60vh] relative flex flex-col items-center justify-center"
+                className={`rounded-xl p-6 w-[min(520px,calc(100vw-2rem))] min-h-[420px] relative flex flex-col items-center justify-center ${blockUi.dialog}`}
                 style={{
                   left: "50%",
                   top: "50%",
@@ -425,7 +426,7 @@ export function CodeViewerDialog({
                 }}
               >
                 <button
-                  className="absolute top-3 right-3 text-zinc-400 hover:text-black dark:text-white text-xl"
+                  className="absolute top-3 right-3 text-muted-foreground hover:text-foreground text-xl"
                   onClick={() => {
                     setShowShareModal(false);
                     setShareChannelId(null);
@@ -435,12 +436,12 @@ export function CodeViewerDialog({
                 >
                   ×
                 </button>
-                <div className="text-lg font-semibold text-black dark:text-white mb-2 flex items-center gap-2">
+                <div className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
                   <Share2 className="h-5 w-5 text-blue-500" />
                   Chia sẻ code cho kênh
                 </div>
                 <div className="mb-4 w-full">
-                  <div className="text-xs text-gray-600 mb-2 text-center">
+                  <div className="text-xs text-muted-foreground mb-2 text-center">
                     Chọn kênh để chia sẻ
                   </div>
                   <ChannelSearch
@@ -455,7 +456,7 @@ export function CodeViewerDialog({
                   </Button>
                   {shareChannelId && (
                     <Button
-                      className="w-full mt-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white"
+                      className={`w-full mt-4 ${blockUi.subtleButton}`}
                       onClick={() => handleDoShare("other")}
                     >
                       Chia sẻ cho kênh này
@@ -470,16 +471,16 @@ export function CodeViewerDialog({
         <div className="h-full flex overflow-y-auto">
           {/* Left: tree */}
           {!isShare && (
-            <div className="w-56 min-w-56 border-r border-zinc-800 h-full flex flex-col">
+            <div className="w-56 min-w-56 border-r border-border h-full flex flex-col bg-card">
               {breadcrumb}
               {loadingTree ? (
-                <div className="p-3 text-xs text-zinc-400">Loading tree…</div>
+                <div className="p-3 text-xs text-muted-foreground">Loading tree...</div>
               ) : (
                 <div className="flex-1 overflow-auto text-xs">
                   {dirChildren.dirs.map((d) => (
                     <button
                       key={d}
-                      className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-zinc-900 text-gray-700 dark:text-zinc-200"
+                      className="w-full text-left px-3 py-1.5 hover:bg-accent text-foreground"
                       onClick={() =>
                         setDialogPath(dialogPath ? `${dialogPath}/${d}` : d)
                       }
@@ -494,9 +495,9 @@ export function CodeViewerDialog({
                   {dirChildren.files.map((f) => (
                     <button
                       key={f}
-                      className={`w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-zinc-900 ${selPath === (dialogPath ? `${dialogPath}/${f}` : f)
-                        ? "bg-gray-100 dark:bg-zinc-900 text-gray-900 dark:text-zinc-100"
-                        : "text-gray-700 dark:text-zinc-300"
+                      className={`w-full text-left px-3 py-1.5 hover:bg-accent ${selPath === (dialogPath ? `${dialogPath}/${f}` : f)
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground"
                         }`}
                       onClick={() =>
                         handleSelectFile(dialogPath ? `${dialogPath}/${f}` : f)
@@ -510,7 +511,7 @@ export function CodeViewerDialog({
                     </button>
                   ))}
                   {!dirChildren.dirs.length && !dirChildren.files.length && (
-                    <div className="p-3 text-zinc-500">Empty</div>
+                    <div className="p-3 text-muted-foreground">Empty</div>
                   )}
                 </div>
               )}
@@ -520,11 +521,11 @@ export function CodeViewerDialog({
           {/* Right: code */}
           <div className="flex-1 h-full flex flex-col">
             {/* Toolbar (hiển thị ref + branch gốc nếu là commit) */}
-            <div className="px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
-              <div className="text-xs text-zinc-400 truncate">
+            <div className="px-4 py-2 bg-card border-b border-border flex items-center justify-between">
+              <div className="text-xs text-muted-foreground truncate">
                 {selPath}
                 {viewBranchOfCommit ? (
-                  <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-700 text-zinc-300">
+                  <span className={`ml-2 px-2 py-0.5 rounded ${blockUi.chip}`}>
                     from branch: <b>{viewBranchOfCommit}</b>
                   </span>
                 ) : null}
@@ -591,7 +592,7 @@ export function CodeViewerDialog({
               })()}
             </div>
 
-            <div className="flex-1 border-b border-zinc-800">
+            <div className="flex-1 border-b border-border">
               {loadingFile ? (
                 <div className="p-4 text-xs text-zinc-400">Loading…</div>
               ) : (
@@ -841,22 +842,22 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
 
   return (
     <Dialog open={!!repo} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-[92vw] h-[92vh] p-0 bg-white dark:bg-black text-black dark:text-white border border-zinc-700 overflow-hidden flex flex-col">
-        <DialogHeader className="px-4 py-3 border-b border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
+      <DialogContent className={`w-[calc(100vw-1rem)] max-w-[92vw] h-[92vh] p-0 overflow-hidden flex flex-col rounded-xl ${blockUi.dialog}`}>
+        <DialogHeader className={`px-4 py-3 ${blockUi.dialogHeader}`}>
           <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center h-10 w-10 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-800">
+            <div className={`h-10 w-10 ${blockUi.iconTile}`}>
               <svg
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="h-7 w-7 text-black dark:text-white"
+                className="h-7 w-7 text-foreground"
               >
                 <path d="M12 2C6.477 2 2 6.484 2 12.012c0 4.425 2.867 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.37-1.342-3.37-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.646.35-1.088.636-1.34-2.221-.253-4.555-1.113-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.025 2.747-1.025.546 1.378.202 2.396.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .268.18.579.688.481C19.135 20.19 22 16.437 22 12.012 22 6.484 17.523 2 12 2z" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-base flex items-center gap-2 font-semibold text-black dark:text-white truncate">
+              <DialogTitle className="text-base flex items-center gap-2 font-semibold text-foreground truncate">
                 <span className="truncate">{repo.full_name}</span>
-                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                <span className={`ml-2 px-2 py-0.5 rounded text-xs ${blockUi.chip}`}>
                   {repo.private ? (
                     <span className="inline-flex items-center gap-1">
                       <Lock className="h-3 w-3" /> Private
@@ -867,20 +868,20 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                     </span>
                   )}
                 </span>
-                <span className="ml-2 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                <span className={`ml-2 px-2 py-0.5 rounded text-xs ${blockUi.chip}`}>
                   <span className="inline-flex items-center gap-1">
                     <GitBranch className="h-3 w-3" />{" "}
                     {repo.default_branch || "main"}
                   </span>
                 </span>
               </DialogTitle>
-              <div className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
+              <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
                 <ExternalLink className="h-3.5 w-3.5" />
                 <a
                   href={repo.html_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline text-zinc-300"
+                  className="hover:underline text-foreground/80"
                 >
                   {repo.html_url}
                 </a>
@@ -895,12 +896,12 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
 
         <div className="h-full flex flex-col overflow-y-auto">
           {/* Ref bar */}
-          <div className="px-4 py-2 flex items-center gap-2 border-b border-zinc-900 bg-zinc-50 dark:bg-zinc-950">
+          <div className="px-4 py-2 flex items-center gap-2 border-b border-border bg-card">
             <div className="flex items-center gap-2">
               <GitBranch className="h-4 w-4 text-emerald-400" />
               {mode === "branch" ? (
                 <select
-                  className="bg-white dark:bg-black border border-zinc-700 rounded px-2 py-1 text-sm"
+                  className={`rounded px-2 py-1 text-sm ${blockUi.select}`}
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   disabled={loading}
@@ -916,20 +917,20 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                   )}
                 </select>
               ) : (
-                <div className="text-xs text-zinc-300 flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-700">
+                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded ${blockUi.chip}`}>
                     Commit:{" "}
                     <span className="font-mono">{commitSha.slice(0, 7)}</span>
                   </span>
                   {viewBranchOfCommit && (
-                    <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-700">
+                    <span className={`px-2 py-0.5 rounded ${blockUi.chip}`}>
                       from branch <b>{viewBranchOfCommit}</b>
                     </span>
                   )}
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 text-black"
+                    className={`h-7 ${blockUi.subtleButton}`}
                     onClick={() => {
                       setMode("branch");
                       setPath(""); // về root
@@ -961,14 +962,14 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
             onValueChange={(v) => setTab(v as any)}
             className="flex-1 flex flex-col"
           >
-            <TabsList className="px-4 border-b border-zinc-900 bg-zinc-50 dark:bg-zinc-950 text-zinc-200">
+            <TabsList className="px-4 border-b border-border bg-card text-muted-foreground">
               <TabsTrigger value="code">Source Code</TabsTrigger>
               <TabsTrigger value="commits">Commits</TabsTrigger>
             </TabsList>
 
             {/* CODE */}
             <TabsContent value="code" className="flex-1 p-4 overflow-hidden">
-              <div className="mb-2 text-sm text-zinc-400 flex items-center flex-wrap gap-1">
+              <div className="mb-2 text-sm text-muted-foreground flex items-center flex-wrap gap-1">
                 <button
                   className="hover:underline font-medium"
                   onClick={() => setPath("")}
@@ -991,9 +992,9 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                   ))}
               </div>
 
-              <div className="h-[calc(100%-28px)] overflow-auto border border-zinc-800 rounded">
+              <div className="h-[calc(100%-28px)] overflow-auto rounded border border-border bg-card">
                 {loading ? (
-                  <ul className="divide-y divide-zinc-800 p-4">
+                  <ul className="divide-y divide-border p-4">
                     {Array.from({ length: 6 }).map((_, i) => (
                       <li
                         key={i}
@@ -1012,11 +1013,11 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                     ))}
                   </ul>
                 ) : (
-                  <ul className="divide-y divide-zinc-800">
+                  <ul className="divide-y divide-border">
                     {items.map((c) => (
                       <li
                         key={c.path}
-                        className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-900"
+                        className="flex items-center justify-between px-3 py-2 hover:bg-accent/50"
                       >
                         <button
                           className="flex items-center gap-2 text-left"
@@ -1034,7 +1035,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                           )}
                           <span className="text-sm">{c.name}</span>
                         </button>
-                        <div className="text-xs text-zinc-400 flex items-center gap-2">
+                        <div className="text-xs text-muted-foreground flex items-center gap-2">
                           {c.html_url && (
                             <a
                               href={c.html_url}
@@ -1049,7 +1050,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                       </li>
                     ))}
                     {!items.length && (
-                      <li className="px-3 py-6 text-sm text-zinc-500">
+                      <li className="px-3 py-6 text-sm text-muted-foreground">
                         Empty folder.
                       </li>
                     )}
@@ -1065,13 +1066,13 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                   value={commitSearch}
                   onChange={handleCommitSearch}
                   placeholder="Tìm commit theo message, SHA, tác giả…"
-                  className="w-full px-3 py-2 rounded-md border border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-gray-900  dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className={`w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 ${blockUi.input}`}
                 />
               </div>
 
               {/* Pagination Info & Controls */}
               <div className="mb-3 flex items-center justify-between">
-                <div className="text-xs text-zinc-400">
+                <div className="text-xs text-muted-foreground">
                   {commitSearch.trim()
                     ? `Tìm thấy ${commits.length} commit${commits.length !== 1 ? "s" : ""}`
                     : `Trang ${commitPage}`}
@@ -1084,13 +1085,13 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                       size="sm"
                       onClick={handlePreviousPage}
                       disabled={!hasPrevPage || commitLoading}
-                      className="border-zinc-700 text-white hover:bg-zinc-100 dark:bg-zinc-800"
+                      className={blockUi.subtleButton}
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" />
                       Trang trước
                     </Button>
 
-                    <span className="text-sm text-zinc-400 px-4">
+                    <span className="text-sm text-muted-foreground px-4">
                       Trang {commitPage}
                     </span>
 
@@ -1099,7 +1100,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                       size="sm"
                       onClick={handleNextPage}
                       disabled={!hasNextPage || commitLoading}
-                      className="border-zinc-700 text-white hover:bg-zinc-100 dark:bg-zinc-800"
+                      className={blockUi.subtleButton}
                     >
                       Trang sau
                       <ChevronRight className="h-4 w-4 ml-1" />
@@ -1110,7 +1111,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
 
               <ul
                 ref={commitListRef}
-                className="border border-zinc-800 rounded divide-y divide-zinc-800 max-h-[calc(80vh-120px)] overflow-auto"
+                className="rounded border border-border divide-y divide-border bg-card max-h-[calc(80vh-120px)] overflow-auto"
                 style={{ minHeight: 300 }}
               >
                 {commitLoading
@@ -1130,14 +1131,14 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                     </li>
                   ))
                   : commits.map((c) => (
-                    <li key={c.sha} className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-zinc-900">
+                    <li key={c.sha} className="px-4 py-3 hover:bg-accent/50">
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="min-w-0 flex items-center gap-3">
                           {c.author?.avatar_url && (
                             <img
                               src={c.author.avatar_url}
                               alt={c.author?.login || "avatar"}
-                              className="h-6 w-6 rounded-full border border-zinc-700"
+                              className="h-6 w-6 rounded-full border border-border"
                               loading="lazy"
                             />
                           )}
@@ -1148,13 +1149,13 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                             <div className="text-sm truncate">
                               {c.commit?.message}
                             </div>
-                            <div className="text-xs text-zinc-400 truncate">
+                            <div className="text-xs text-muted-foreground truncate">
                               {c.author?.login && (
                                 <a
                                   href={`https://github.com/${c.author.login}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="hover:underline text-zinc-300"
+                                  className="hover:underline text-foreground/80"
                                 >
                                   @{c.commit?.author?.name || c.author.login}
                                 </a>
@@ -1167,7 +1168,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                             </div>
                           </div>
                         </div>
-                        <div className="text-xs text-zinc-400">
+                        <div className="text-xs text-muted-foreground">
                           {fmt(c.commit?.author?.date)}
                         </div>
                       </div>
@@ -1176,7 +1177,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 border-zinc-700 text-gray-900 dark:text-white bg-white  hover:bg-gray-100 dark:hover:bg-zinc-100 dark:bg-zinc-800"
+                            className={`h-8 ${blockUi.subtleButton}`}
                             onClick={() => {
                               // 👇 mở commit view: nhớ branch hiện tại + reset path về root
                               setMode("commit");
@@ -1212,7 +1213,7 @@ const RepoViewer: React.FC<RepoViewerProps> = ({
                   ))}
 
                 {!commitLoading && !commits.length && (
-                  <li className="px-4 py-6 text-sm text-zinc-500">
+                  <li className="px-4 py-6 text-sm text-muted-foreground">
                     Không có commit nào.
                   </li>
                 )}

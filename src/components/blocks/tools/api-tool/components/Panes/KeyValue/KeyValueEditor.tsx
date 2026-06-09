@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { blockUi } from "@/components/blocks/block-ui";
 
 interface KeyPair {
   id: string;
@@ -54,7 +55,7 @@ export default function KeyValueEditor({
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg mb-2">
+    <div className="flex items-center gap-2 p-2 bg-muted/60 rounded-lg mb-2 border border-border">
       <Checkbox
         checked={keyValue.enabled !== false}
         onCheckedChange={handleEnabledChange}
@@ -65,14 +66,14 @@ export default function KeyValueEditor({
         name="keyItem"
         defaultValue={keyPair.keyItem}
         onChange={handleOnChange}
-        className="flex-1 bg-zinc-200 dark:bg-zinc-700 border-zinc-600 text-black dark:text-white text-sm"
+        className={`flex-1 text-sm ${blockUi.input}`}
       />
       <Input
         placeholder="Value"
         name="valueItem"
         defaultValue={keyPair.valueItem}
         onChange={handleOnChange}
-        className="flex-1 bg-zinc-200 dark:bg-zinc-700 border-zinc-600 text-black dark:text-white text-sm"
+        className={`flex-1 text-sm ${blockUi.input}`}
       />
       <Button
         variant="ghost"

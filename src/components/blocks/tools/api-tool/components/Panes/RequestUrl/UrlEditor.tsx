@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { blockUi } from "@/components/blocks/block-ui";
 
 const requestMethods = [
   {
@@ -66,15 +67,15 @@ export default function UrlEditor({
       <div className="flex gap-2">
         <div >
           <Select value={reqMethod} onValueChange={setReqMethod}>
-            <SelectTrigger className="w-full bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white">
+            <SelectTrigger className={`w-full ${blockUi.select}`}>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-100 dark:bg-zinc-800 border-zinc-700 ">
+            <SelectContent className="border-border bg-popover text-popover-foreground">
               {requestMethods.map((option) => (
                 <SelectItem
                   key={option.slug}
                   value={option.method}
-                  className="text-black dark:text-white hover:bg-zinc-200 dark:bg-zinc-700"
+                  className="text-foreground hover:bg-accent"
                 >
                   <Badge className={cn("font-mono", option.color)}>
                     {option.method}
@@ -90,7 +91,7 @@ export default function UrlEditor({
           placeholder="https://api.example.com/endpoint"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          className="flex-1 w-2/3 bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white placeholder:text-zinc-500"
+          className={`flex-1 w-2/3 ${blockUi.input}`}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !loading) {
               onInputSend(e);

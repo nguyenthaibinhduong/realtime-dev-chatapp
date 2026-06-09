@@ -9,6 +9,7 @@ import { type RequestHistoryItem } from "./utils/requestHistory";
 import { toast } from "@/hooks/useToast";
 import { X, Globe } from "lucide-react"; // <-- Thêm icons
 import { Button } from "@/components/ui/button"; // <-- Thêm Button
+import { blockUi } from "@/components/blocks/block-ui";
 
 type ApiToolProps = {
   initialHistoryItem?: any;
@@ -91,13 +92,12 @@ const ApiTool: React.FC<ApiToolProps> = ({ initialHistoryItem, onClose }) => {
   return (
     <Layout>
       {/* Header với close button */}
-      <div className="flex items-center justify-between px-4 py-3 bg-zinc-50
-dark:bg-zinc-900 border-b border-zinc-800 mb-4">
+      <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border mb-4">
         <div className="flex items-center space-x-2">
           <Globe className="h-5 w-5 text-blue-400" />
-          <span className="text-black dark:text-white font-medium">API Testing Tool</span>
+          <span className="text-foreground font-medium">API Testing Tool</span>
           {initialHistoryItem && (
-            <span className="text-xs bg-green-600 text-black dark:text-white px-2 py-0.5 rounded">
+            <span className="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded">
               Loaded from share
             </span>
           )}
@@ -108,7 +108,7 @@ dark:bg-zinc-900 border-b border-zinc-800 mb-4">
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0 text-gray-400 hover:text-black dark:text-white hover:bg-zinc-100 dark:bg-zinc-800"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent"
             title="Đóng API Tool"
           >
             <X className="h-4 w-4" />
@@ -121,16 +121,16 @@ dark:bg-zinc-900 border-b border-zinc-800 mb-4">
         onValueChange={setSelectedTab}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 bg-zinc-100 dark:bg-zinc-800 px-5">
+        <TabsList className="grid w-full grid-cols-2 bg-muted px-5">
           <TabsTrigger
             value="request"
-            className="data-[state=active]:bg-white data-[state=active]:text-black"
+            className="text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground"
           >
             Request / Response
           </TabsTrigger>
           <TabsTrigger
             value="history"
-            className="data-[state=active]:bg-white data-[state=active]:text-black"
+            className="text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground"
           >
             History
           </TabsTrigger>
@@ -138,8 +138,7 @@ dark:bg-zinc-900 border-b border-zinc-800 mb-4">
 
         <TabsContent value="request" className="space-y-4">
           {/* Request Section */}
-          <Card className="bg-zinc-50
-dark:bg-zinc-900 border-zinc-800">
+          <Card className={blockUi.dialogPanel}>
             <CardContent className="pt-6">
               <Request
                 setResponse={setResponse}
@@ -152,8 +151,7 @@ dark:bg-zinc-900 border-zinc-800">
           </Card>
 
           {/* Response Section */}
-          <Card className="bg-zinc-50
-dark:bg-zinc-900 border-zinc-800">
+          <Card className={blockUi.dialogPanel}>
             <CardContent className="pt-6">
               <Response response={response} loading={loading} />
             </CardContent>
@@ -161,8 +159,7 @@ dark:bg-zinc-900 border-zinc-800">
         </TabsContent>
 
         <TabsContent value="history">
-          <Card className="bg-zinc-50
-dark:bg-zinc-900 border-zinc-800">
+          <Card className={blockUi.dialogPanel}>
             <CardContent className="pt-6 h-[calc(100vh-200px)]">
               <HistoryPanel onSelectHistory={handleSelectHistory} />
             </CardContent>

@@ -280,15 +280,14 @@ export const AttachmentItem: React.FC<AttachmentItemProps> = ({
   if (loading) {
     return (
       <div
-        className={`w-full max-w-[160px] bg-zinc-50
-dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`}
+        className={`w-full max-w-[160px] bg-card border border-border rounded-xl overflow-hidden ${className}`}
       >
-        <div className="aspect-square bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 text-zinc-400 animate-spin" />
+        <div className="aspect-square bg-muted flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
         </div>
         <div className="p-3 space-y-2">
-          <div className="h-3 bg-zinc-100 dark:bg-zinc-800 rounded w-full"></div>
-          <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded w-2/3"></div>
+          <div className="h-3 bg-muted rounded w-full"></div>
+          <div className="h-2 bg-muted rounded w-2/3"></div>
         </div>
       </div>
     );
@@ -321,7 +320,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`
   if (isImage) {
     return (
       <div
-        className={`relative group w-full max-w-[160px] rounded-xl overflow-hidden bg-zinc-50 dark:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all duration-200 ${className}`}
+        className={`relative group w-full max-w-[160px] rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all duration-200 ${className}`}
       >
         <div className="relative aspect-square">
           <img
@@ -334,7 +333,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`
             }}
           />
           {/* Overlay on hover */}
-          <div className="absolute inset-0 bg-white dark:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
             <a
               href={url}
               target="_blank"
@@ -342,7 +341,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`
               className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
               title="Tải xuống"
             >
-              <Download className="w-5 h-5 text-black dark:text-white" />
+              <Download className="w-5 h-5 text-white" />
             </a>
             {showRemove && onRemove && (
               <button
@@ -350,24 +349,23 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden ${className}`
                 className="p-2.5 bg-red-500/20 hover:bg-red-500/30 rounded-lg backdrop-blur-sm transition-colors"
                 title="Xóa"
               >
-                <X className="w-5 h-5 text-black dark:text-white" />
+                <X className="w-5 h-5 text-white" />
               </button>
             )}
           </div>
         </div>
         {/* Filename */}
         <div
-          className="p-3 bg-zinc-50
-dark:bg-zinc-900/90 backdrop-blur-sm"
+          className="p-3 bg-card"
         >
           <p
-            className="text-xs text-black dark:text-white truncate font-medium"
+            className="text-xs text-foreground truncate font-medium"
             title={filename}
           >
             {filename || "Image"}
           </p>
           {fileSize !== undefined && (
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {attachmentService.formatFileSize(fileSize)}
             </p>
           )}
@@ -379,8 +377,7 @@ dark:bg-zinc-900/90 backdrop-blur-sm"
   // Non-image file - Vertical card layout
   return (
     <div
-      className={`relative group w-full max-w-[160px] bg-zinc-50
-dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 hover:shadow-lg transition-all duration-200 ${className}`}
+      className={`relative group w-full max-w-[160px] bg-card border border-border rounded-xl overflow-hidden hover:border-primary/30 hover:shadow-sm transition-all duration-200 ${className}`}
     >
       {/* Icon Section */}
       <div
@@ -390,12 +387,12 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-
           className={`w-16 h-16 bg-gradient-to-br ${fileStyle.gradient} rounded-2xl flex items-center justify-center shadow-lg`}
         >
           {FileIcon && (
-            <FileIcon className="w-8 h-8 text-black dark:text-white" />
+            <FileIcon className="w-8 h-8 text-white" />
           )}
         </div>
 
         {/* Hover Actions */}
-        <div className="absolute inset-0 bg-white dark:bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+        <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
           {/* <a
             href={url}
             target="_blank"
@@ -408,7 +405,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-
             onClick={handlePreview}
             className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
           >
-            <ExternalLink className="w-5 h-5 text-black dark:text-white" />
+            <ExternalLink className="w-5 h-5 text-white" />
           </button>
           <a
             href={url}
@@ -416,7 +413,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-
             className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors"
             title="Tải xuống"
           >
-            <Download className="w-5 h-5 text-black dark:text-white" />
+            <Download className="w-5 h-5 text-white" />
           </a>
         </div>
 
@@ -427,7 +424,7 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-
             className="absolute top-2 right-2 p-1.5 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
             title="Xóa"
           >
-            <X className="w-4 h-4 text-black dark:text-white" />
+            <X className="w-4 h-4 text-white" />
           </button>
         )}
       </div>
@@ -435,20 +432,20 @@ dark:bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-
       {/* File Info Section */}
       <div className="p-3 space-y-1">
         <p
-          className="text-xs font-semibold text-black dark:text-white truncate leading-tight"
+          className="text-xs font-semibold text-foreground truncate leading-tight"
           title={filename}
         >
           {filename || "Unknown file"}
         </p>
         {fileSize !== undefined && (
-          <p className="text-xs text-zinc-400 font-medium">
+          <p className="text-xs text-muted-foreground font-medium">
             {attachmentService.formatFileSize(fileSize)}
           </p>
         )}
       </div>
 
       {/* File type badge */}
-      <div className="absolute top-2 left-2 px-2 py-0.5 bg-white dark:bg-black/50 backdrop-blur-sm rounded-md">
+      <div className="absolute top-2 left-2 px-2 py-0.5 bg-background/90 dark:bg-black/50 backdrop-blur-sm rounded-md border border-border/50">
         <p className={`text-[10px] font-semibold uppercase ${fileStyle.color}`}>
           {filename?.split(".").pop() || "File"}
         </p>

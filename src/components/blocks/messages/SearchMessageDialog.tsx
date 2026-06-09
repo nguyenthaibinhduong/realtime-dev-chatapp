@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import { Search, X, Loader2, MessageSquare, Filter } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Filter, Loader2, Paperclip, Pin, Search, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,26 +16,84 @@ import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { StatusDropDown } from "./StatusDropDown";
-import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
 interface SearchMessageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   channelId: string;
-  channelMessages?: any[]; // Tin nhắn đã load trong kênh
+  channelMessages?: any[];
   onMessageSelect?: (messageId: string) => void;
 }
 
-// Message type configurations
+const TYPE_STYLES: Record<
+  string,
+  { selected: string; badge: string; dot: string }
+> = {
+  zinc: {
+    selected: "border-primary bg-primary text-white shadow-sm",
+    badge: "border-border bg-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
+  },
+  blue: {
+    selected: "border-blue-600 bg-blue-600 text-white shadow-sm",
+    badge:
+      "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/25 dark:bg-blue-500/10 dark:text-blue-300",
+    dot: "bg-blue-500",
+  },
+  violet: {
+    selected: "border-violet-600 bg-violet-600 text-white shadow-sm",
+    badge:
+      "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/25 dark:bg-violet-500/10 dark:text-violet-300",
+    dot: "bg-violet-500",
+  },
+  red: {
+    selected: "border-red-600 bg-red-600 text-white shadow-sm",
+    badge:
+      "border-red-200 bg-red-50 text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300",
+    dot: "bg-red-500",
+  },
+  emerald: {
+    selected: "border-emerald-600 bg-emerald-600 text-white shadow-sm",
+    badge:
+      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300",
+    dot: "bg-emerald-500",
+  },
+  amber: {
+    selected: "border-amber-600 bg-amber-600 text-white shadow-sm",
+    badge:
+      "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300",
+    dot: "bg-amber-500",
+  },
+  rose: {
+    selected: "border-rose-600 bg-rose-600 text-white shadow-sm",
+    badge:
+      "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/25 dark:bg-rose-500/10 dark:text-rose-300",
+    dot: "bg-rose-500",
+  },
+  cyan: {
+    selected: "border-cyan-600 bg-cyan-600 text-white shadow-sm",
+    badge:
+      "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-500/25 dark:bg-cyan-500/10 dark:text-cyan-300",
+    dot: "bg-cyan-500",
+  },
+};
+
+const FILTER_BUTTON_BASE =
+  "inline-flex h-8 items-center gap-2 rounded-md border px-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+const FILTER_BUTTON_UNSELECTED =
+  "border-border/80 bg-background text-muted-foreground hover:border-primary/30 hover:bg-accent hover:text-foreground";
+
 const MESSAGE_TYPES = [
   { value: "all", label: "Tất cả", color: "zinc" },
   { value: "message", label: "Tin nhắn", color: "blue" },
-  { value: "ba-require", label: "BA Require", color: "purple" },
+  { value: "ba-require", label: "BA Require", color: "violet" },
   { value: "tester-report", label: "Tester Report", color: "red" },
-  { value: "code-share", label: "Code Share", color: "green" },
+  { value: "code-share", label: "Code Share", color: "emerald" },
   { value: "code-card", label: "Code Card", color: "emerald" },
-  { value: "tool", label: "Tool", color: "orange" },
-  { value: "file-upload", label: "File Upload", color: "pink" },
+  { value: "tool", label: "Tool", color: "amber" },
+  { value: "file-upload", label: "File Upload", color: "rose" },
   { value: "reply-message", label: "Reply", color: "cyan" },
 ];
 
@@ -54,23 +112,24 @@ export const SearchMessageDialog = ({
   const [totalResults, setTotalResults] = useState(0);
   const [selectedType, setSelectedType] = useState("all");
   const { toast } = useToast();
+  const loadedMessages = channelMessages ?? [];
 
-  // Load tin nhắn từ channel khi mở dialog (nếu chưa search)
   useEffect(() => {
     if (open && !searchKey.trim()) {
-      // Hiển thị tin nhắn đã load trong kênh
-      setResults(channelMessages);
-      setTotalResults(channelMessages.length);
+      const messages = channelMessages ?? [];
+
+      setResults(messages);
+      setTotalResults(messages.length);
       setHasMore(false);
     }
   }, [open, searchKey, channelMessages]);
 
-  // Debounced search
   useEffect(() => {
+    const messages = channelMessages ?? [];
+
     if (!searchKey.trim() || searchKey.trim().length < 2) {
-      // Hiển thị lại tin nhắn trong kênh
-      setResults(channelMessages);
-      setTotalResults(channelMessages.length);
+      setResults(messages);
+      setTotalResults(messages.length);
       setHasMore(false);
       return;
     }
@@ -131,247 +190,292 @@ export const SearchMessageDialog = ({
   };
 
   const handleClear = () => {
+    const messages = channelMessages ?? [];
+
     setSearchKey("");
     setSelectedType("all");
-    setResults(channelMessages);
-    setTotalResults(channelMessages.length);
+    setResults(messages);
+    setTotalResults(messages.length);
     setHasMore(false);
     setPage(1);
   };
 
-  // Filter messages by type (client-side)
   const filteredResults =
     selectedType === "all"
       ? results
       : results.filter((msg) => msg.type === selectedType);
 
-  // Get badge color based on type
-  const getTypeBadgeColor = (type: string) => {
-    const config = MESSAGE_TYPES.find((t) => t.value === type);
-    return config?.color || "zinc";
+  const getTypeConfig = (type?: string) => {
+    const config = MESSAGE_TYPES.find((item) => item.value === type);
+    return config ?? MESSAGE_TYPES[1];
   };
 
+  const getTypeStyle = (type?: string) => {
+    const config = getTypeConfig(type);
+    return TYPE_STYLES[config.color] ?? TYPE_STYLES.zinc;
+  };
+
+  const selectedTypeLabel = getTypeConfig(selectedType).label;
+  const isSearching = searchKey.trim().length >= 2;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] bg-zinc-50 dark:bg-zinc-950 text-black dark:text-white border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-800 -mx-6 -mt-6 px-6 py-6 mb-4">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-black dark:text-white tracking-tight flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <Search className="h-6 w-6 text-blue-500" />
-              </div>
+      <DialogContent className="flex h-[min(86vh,760px)] w-[calc(100vw-1.5rem)] max-w-4xl flex-col gap-0 overflow-hidden rounded-xl border border-border bg-background p-0 text-foreground shadow-xl shadow-black/10 dark:shadow-black/30 sm:w-[min(920px,calc(100vw-2rem))] [&>button]:rounded-md [&>button]:text-muted-foreground [&>button:hover]:bg-accent [&>button:hover]:text-foreground [&>button_svg]:text-muted-foreground">
+        <div className="border-b border-border bg-card px-5 py-5 sm:px-6">
+          <DialogHeader className="space-y-0">
+            <DialogTitle className="flex items-center gap-3 text-xl font-semibold tracking-tight text-foreground">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+                <Search className="h-5 w-5" />
+              </span>
               Tìm kiếm tin nhắn
             </DialogTitle>
           </DialogHeader>
 
-          {/* Search Input */}
-          <div className="mt-4 relative">
-            <Input
-              placeholder="Nhập từ khóa để tìm kiếm (tối thiểu 2 ký tự) hoặc để trống để xem tất cả..."
-              value={searchKey}
-              onChange={(e) => setSearchKey(e.target.value)}
-              className="pl-10 pr-10 h-12 bg-zinc-100 dark:bg-zinc-800 border-zinc-700 text-black dark:text-white placeholder:text-zinc-400 rounded-xl"
-              autoFocus
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
-            {searchKey && (
-              <button
-                onClick={handleClear}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
-              >
-                <X className="h-4 w-4 text-zinc-400" />
-              </button>
-            )}
-          </div>
-
-          {/* Filter by Type */}
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center gap-2 text-sm text-zinc-400">
-              <Filter className="h-4 w-4" />
-              <span>Lọc theo loại tin nhắn:</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {MESSAGE_TYPES.map((type) => (
+          <div className="mt-5">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Nhập từ khóa tối thiểu 2 ký tự, hoặc để trống để xem tin nhắn gần đây"
+                value={searchKey}
+                onChange={(e) => setSearchKey(e.target.value)}
+                className="h-11 rounded-md border-input bg-background pl-9 pr-10 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:ring-primary/25"
+                autoFocus
+              />
+              {searchKey && (
                 <button
-                  key={type.value}
-                  onClick={() => setSelectedType(type.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedType === type.value
-                    ? `bg-${type.color}-500/30 text-${type.color}-300 border border-${type.color}-500/50 shadow-lg`
-                    : "bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-700/50"
-                    }`}
+                  type="button"
+                  onClick={handleClear}
+                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  aria-label="Xóa tìm kiếm"
                 >
-                  {type.label}
-                  {selectedType === type.value && (
-                    <span className="ml-1.5">({filteredResults.length})</span>
-                  )}
+                  <X className="h-4 w-4" />
                 </button>
-              ))}
+              )}
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="mt-3 flex items-center gap-2">
-            {searchKey.trim() ? (
+          <div className="mt-4 space-y-2.5">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <Filter className="h-4 w-4" />
+              <span>Lọc theo loại tin nhắn</span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
+              {MESSAGE_TYPES.map((type) => {
+                const isSelected = selectedType === type.value;
+                const style = TYPE_STYLES[type.color] ?? TYPE_STYLES.zinc;
+
+                return (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => setSelectedType(type.value)}
+                    className={cn(
+                      FILTER_BUTTON_BASE,
+                      isSelected ? style.selected : FILTER_BUTTON_UNSELECTED
+                    )}
+                  >
+                    {type.value !== "all" && (
+                      <span
+                        className={cn(
+                          "h-1.5 w-1.5 rounded-full",
+                          isSelected ? "bg-white/85" : style.dot
+                        )}
+                      />
+                    )}
+                    <span className="whitespace-nowrap">{type.label}</span>
+                    {isSelected && (
+                      <span className="rounded bg-white/15 px-1.5 py-0.5 text-[11px] leading-none">
+                        {filteredResults.length}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {isSearching ? (
               <>
-                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/50">
+                <Badge
+                  variant="outline"
+                  className="border-primary/20 bg-primary/10 text-primary"
+                >
                   {totalResults} kết quả tìm kiếm
                 </Badge>
                 {hasMore && (
-                  <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700">
+                  <Badge
+                    variant="outline"
+                    className="border-border bg-muted text-muted-foreground"
+                  >
                     Còn nhiều kết quả
                   </Badge>
                 )}
               </>
             ) : (
-              <Badge className="bg-zinc-500/20 text-zinc-400 border-zinc-500/50">
-                Hiển thị {filteredResults.length}/{channelMessages.length} tin nhắn
-                trong kênh
+              <Badge
+                variant="outline"
+                className="border-border bg-muted text-muted-foreground"
+              >
+                Hiển thị {filteredResults.length}/{loadedMessages.length} tin
+                nhắn trong kênh
               </Badge>
             )}
             {selectedType !== "all" && (
               <Badge
-                className={`bg-${getTypeBadgeColor(selectedType)}-500/20 text-${getTypeBadgeColor(
-                  selectedType
-                )}-400 border-${getTypeBadgeColor(selectedType)}-500/50`}
+                variant="outline"
+                className={cn("gap-1.5", getTypeStyle(selectedType).badge)}
               >
-                Lọc:{" "}
-                {MESSAGE_TYPES.find((t) => t.value === selectedType)?.label}
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    getTypeStyle(selectedType).dot
+                  )}
+                />
+                Lọc: {selectedTypeLabel}
               </Badge>
             )}
           </div>
         </div>
 
-        {/* Results */}
-        <ScrollArea className="flex-1 px-6">
-          {loading && results.length === 0 ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-            </div>
-          ) : filteredResults.length > 0 ? (
-            <div className="space-y-3 pb-4">
-              {filteredResults.map((msg) => (
-                <div
-                  key={msg.id}
-                  onClick={() => handleMessageClick(msg.id)}
-                  className="p-4 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-xl border border-zinc-800 cursor-pointer transition-all duration-200 group"
-                >
-                  {/* Sender Info */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <AvatarUser user={msg.sender} size={8} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-black dark:text-white truncate">
-                          {msg.sender?.username || "Unknown"}
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="px-5 py-4 sm:px-6">
+            {loading && results.length === 0 ? (
+              <div className="flex min-h-[280px] items-center justify-center">
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
+              </div>
+            ) : filteredResults.length > 0 ? (
+              <div className="space-y-2.5 pb-2">
+                {filteredResults.map((msg) => {
+                  const typeConfig = getTypeConfig(msg.type);
+                  const typeStyle = getTypeStyle(msg.type);
+                  const messageHtml = msg.highlightedText || msg.text;
+
+                  return (
+                    <button
+                      key={msg.id}
+                      type="button"
+                      onClick={() => handleMessageClick(msg.id)}
+                      className="group w-full rounded-lg border border-border/80 bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/25 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    >
+                      <div className="flex items-start gap-3">
+                        <AvatarUser user={msg.sender} size={8} />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="truncate text-sm font-semibold text-foreground">
+                              {msg.sender?.username || "Unknown"}
+                            </p>
+                            {msg.isMine && (
+                              <Badge
+                                variant="outline"
+                                className="border-emerald-200 bg-emerald-50 text-[11px] text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300"
+                              >
+                                Bạn
+                              </Badge>
+                            )}
+                            {msg.type && msg.type !== "message" && (
+                              <Badge
+                                variant="outline"
+                                className={cn("text-[11px]", typeStyle.badge)}
+                              >
+                                {typeConfig.label}
+                              </Badge>
+                            )}
+                            {msg.json_data?.status && (
+                              <StatusDropDown msg={msg} />
+                            )}
+                          </div>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {msg.send_at &&
+                              formatDistanceToNow(new Date(msg.send_at), {
+                                addSuffix: true,
+                                locale: vi,
+                              })}
+                          </p>
+                        </div>
+                      </div>
+
+                      {messageHtml ? (
+                        <div
+                          className="mt-3 line-clamp-3 break-words text-sm leading-6 text-foreground/90 [&_mark]:rounded [&_mark]:bg-yellow-200 [&_mark]:px-0.5 [&_mark]:text-yellow-950 dark:[&_mark]:bg-yellow-400/25 dark:[&_mark]:text-yellow-100"
+                          dangerouslySetInnerHTML={{ __html: messageHtml }}
+                          style={{ wordBreak: "break-word" }}
+                        />
+                      ) : (
+                        <p className="mt-3 text-sm italic text-muted-foreground">
+                          Tin nhắn không có nội dung
                         </p>
-                        {msg.isMine && (
-                          <Badge className="bg-green-500/20 text-green-400 border-green-500/50 text-xs">
-                            Bạn
-                          </Badge>
+                      )}
+
+                      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        {msg.attachments && msg.attachments.length > 0 && (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Paperclip className="h-3.5 w-3.5" />
+                            {msg.attachments.length} tệp đính kèm
+                          </span>
                         )}
-                        {/* Message Type Badge */}
-                        {msg.type && msg.type !== "message" && (
-                          <Badge
-                            className={`bg-${getTypeBadgeColor(msg.type)}-500/20 text-${getTypeBadgeColor(
-                              msg.type
-                            )}-400 border-${getTypeBadgeColor(msg.type)}-500/50 text-xs`}
-                          >
-                            {MESSAGE_TYPES.find((t) => t.value === msg.type)?.label ||
-                              msg.type}
-                          </Badge>
-                        )}
-                        {msg.json_data?.status && (
-                          <StatusDropDown
-                            msg={msg}
-                          />
+                        {msg.isPin && (
+                          <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-300">
+                            <Pin className="h-3.5 w-3.5" />
+                            Đã ghim
+                          </span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-400">
-                        {msg.send_at &&
-                          formatDistanceToNow(new Date(msg.send_at), {
-                            addSuffix: true,
-                            locale: vi,
-                          })}
-                      </p>
-                    </div>
-                  </div>
+                    </button>
+                  );
+                })}
 
-                  {/* Message Content with Highlight */}
-                  <div
-                    className="text-sm text-black dark:text-white break-words line-clamp-3"
-                    dangerouslySetInnerHTML={{
-                      __html: msg.highlightedText || msg.text,
-                    }}
-                    style={{
-                      wordBreak: "break-word",
-                    }}
-                  />
-
-                  {/* Attachments */}
-                  {msg.attachments && msg.attachments.length > 0 && (
-                    <div className="mt-2 flex items-center gap-2 text-xs text-zinc-400">
-                      <MessageSquare className="h-3 w-3" />
-                      {msg.attachments.length} tệp đính kèm
-                    </div>
-                  )}
-
-                  {/* Pinned Indicator */}
-                  {msg.isPin && (
-                    <div className="mt-2 flex items-center gap-1 text-xs text-yellow-400">
-                      <span>📌</span>
-                      <span>Đã ghim</span>
-                    </div>
-                  )}
+                {hasMore && isSearching && (
+                  <Button
+                    type="button"
+                    onClick={handleLoadMore}
+                    disabled={loading}
+                    variant="outline"
+                    className="h-11 w-full rounded-md border-border bg-background text-foreground hover:bg-accent"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Đang tải...
+                      </span>
+                    ) : (
+                      "Tải thêm kết quả"
+                    )}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex min-h-[320px] flex-col items-center justify-center px-4 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
+                  <Search className="h-5 w-5" />
                 </div>
-              ))}
-
-              {/* Load More Button */}
-              {hasMore && searchKey.trim() && (
-                <button
-                  onClick={handleLoadMore}
-                  disabled={loading}
-                  className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Đang tải...
-                    </span>
-                  ) : (
-                    "Tải thêm kết quả"
-                  )}
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
-              <Search className="h-12 w-12 mb-4 opacity-50" />
-              <p className="text-lg font-medium">
-                {searchKey.trim().length >= 2
-                  ? "Không tìm thấy kết quả"
-                  : selectedType !== "all"
-                    ? "Không có tin nhắn loại này"
-                    : "Chưa có tin nhắn nào"}
-              </p>
-              <p className="text-sm">
-                {searchKey.trim().length >= 2
-                  ? "Thử tìm kiếm với từ khóa khác"
-                  : selectedType !== "all"
-                    ? "Thử chọn loại tin nhắn khác"
-                    : "Gửi tin nhắn đầu tiên trong kênh này"}
-              </p>
-              {(searchKey.trim() || selectedType !== "all") && (
-                <Button
-                  onClick={handleClear}
-                  variant="outline"
-                  className="mt-4 bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700"
-                >
-                  Xóa bộ lọc
-                </Button>
-              )}
-            </div>
-          )}
+                <p className="mt-4 text-base font-semibold text-foreground">
+                  {isSearching
+                    ? "Không tìm thấy kết quả"
+                    : selectedType !== "all"
+                      ? "Không có tin nhắn loại này"
+                      : "Chưa có tin nhắn nào"}
+                </p>
+                <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                  {isSearching
+                    ? "Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc hiện tại."
+                    : selectedType !== "all"
+                      ? "Thử chọn loại tin nhắn khác để mở rộng kết quả."
+                      : "Kênh này chưa có tin nhắn để hiển thị."}
+                </p>
+                {(searchKey.trim() || selectedType !== "all") && (
+                  <Button
+                    type="button"
+                    onClick={handleClear}
+                    variant="outline"
+                    className="mt-4 border-border bg-background hover:bg-accent"
+                  >
+                    Xóa bộ lọc
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
         </ScrollArea>
       </DialogContent>
     </Dialog>
