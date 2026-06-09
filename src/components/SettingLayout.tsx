@@ -11,6 +11,7 @@ import CodeEditorJudge0 from "./MonacoEditorLayout";
 import TestNotiLayout from "./TestLayout";
 import ApiTool from "./blocks/tools/api-tool/ApiTool";
 import AILayout from "./AILayout";
+import AppearanceSettings from "./settings/AppearanceSettings";
 
 type SettingItem = {
   id: string;
@@ -41,6 +42,11 @@ export default function SettingLayout() {
     {
       title: "CÀI ĐẶT ỨNG DỤNG",
       items: [
+        {
+          id: "appearance",
+          label: "Giao diện",
+          component: <AppearanceSettings />,
+        },
         {
           id: "github-allowed-apps",
           label: "Liên kết với Github",
@@ -119,13 +125,13 @@ export default function SettingLayout() {
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Tìm kiếm"
             placeholder="Tìm kiếm"
-            className="w-full bg-[#111] text-sm text-sidebar-foreground/90 placeholder:opacity-60 rounded-md py-2 pl-10 pr-9 outline-none border border-sidebar-border"
+            className="w-full rounded-md border border-sidebar-border bg-background py-2 pl-10 pr-9 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-sidebar-ring"
           />
           {query && (
             <button
               aria-label="Clear search"
               onClick={clearQuery}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-[rgba(255,255,255,0.03)]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
               <X className="h-4 w-4 text-sidebar-foreground/60" />
             </button>
@@ -150,9 +156,9 @@ export default function SettingLayout() {
                   key={it.id}
                   onClick={() => onSelect(it)}
                   className={
-                    "text-left w-full rounded-md px-3 py-2 text-sidebar-foreground hover:bg-[#222] transition flex items-center " +
+                    "flex w-full items-center rounded-md px-3 py-2 text-left text-sidebar-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground " +
                     (selected === it.id
-                      ? "bg-[#2b2b2f] font-medium"
+                      ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                       : "font-normal")
                   }
                 >
@@ -176,9 +182,9 @@ export default function SettingLayout() {
                     key={it.id}
                     onClick={() => onSelect(it)}
                     className={
-                      "text-left w-full rounded-md px-3 py-2 text-sidebar-foreground hover:bg-[#222] transition flex items-center " +
+                      "flex w-full items-center rounded-md px-3 py-2 text-left text-sidebar-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground " +
                       (selected === it.id
-                        ? "bg-[#2b2b2f] font-medium"
+                        ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                         : "font-normal")
                     }
                   >
@@ -208,17 +214,17 @@ export default function SettingLayout() {
         className="flex-1 overflow-hidden"
         style={{ height: "100vh", minHeight: "100vh", maxHeight: "100vh" }}
       >
-        <div className="h-full overflow-auto p-6">
+        <div className="h-full overflow-auto bg-background p-6 text-foreground">
           {selectedItem?.component ? (
             // Render component của setting được chọn
             <>{selectedItem.component}</>
           ) : (
             // Default content when no component assigned
             <>
-              <h2 className="text-black dark:text-white text-xl font-semibold mb-4">
+              <h2 className="mb-4 text-xl font-semibold text-foreground">
                 Cài đặt
               </h2>
-              <p className="text-sidebar-foreground/80">
+              <p className="text-muted-foreground">
                 Chưa có Layout cho mục này.
               </p>
             </>

@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useNotificationHandler } from "@/hooks/useNotificationToast";
-import { is } from "date-fns/locale";
 // local lightweight icon fallback to avoid external dependency in layout
 const SimpleIcon = ({ name, className }: { name: string; className?: string }) => {
     // simple glyph fallback; consumers should prefer the project's Icon component if available
@@ -39,7 +38,7 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
     useNotificationHandler();
 
     return (
-        <ResizablePanelGroup direction="horizontal" className="h-screen w-full bg-zinc-50 dark:bg-zinc-950 group">
+        <ResizablePanelGroup direction="horizontal" className="group h-screen w-full bg-background text-foreground">
             {/* Menu (MenubarLayout) */}
             {menu}
 

@@ -1,11 +1,8 @@
 import {
-  Home,
-  Users,
   Settings,
   Bell,
   MessageSquare,
   LogOut,
-  GitBranch,
   GitFork,
   Newspaper,
   Menu,
@@ -24,8 +21,8 @@ import {
 import NotificationBadge from "./blocks/notifications/NotificationBadge";
 import { useEffect, useMemo, useState } from "react";
 import { NotificationAPI } from "@/api/api";
-import { log } from "console";
 import { chatSocketService } from "@/services/chatSocketService";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default function MenubarLayout({
   onSelect,
@@ -132,34 +129,34 @@ export default function MenubarLayout({
 
   return (
     <TooltipProvider>
-      <nav className="main-menubar flex flex-col items-center gap-2 py-4 bg-zinc-50 dark:bg-zinc-950/95 backdrop-blur-md border-r border-zinc-700/50 min-h-screen w-14 shadow-lg">
+      <nav className="main-menubar flex min-h-screen w-14 flex-col items-center gap-2 border-r border-sidebar-border bg-sidebar py-4 text-sidebar-foreground shadow-lg">
         {/* Toggle Sidebar Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-xl hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 transition-all duration-200 mb-2"
+              className="mb-2 rounded-xl border border-transparent text-sidebar-foreground/75 transition-all duration-200 hover:border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               onClick={onToggleSidebar}
               title={showSidebar ? "Ẩn sidebar" : "Hiện sidebar"}
             >
               {showSidebar ? (
-                <X className="h-5 w-5 text-zinc-800 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200" />
+                <X className="h-5 w-5" />
               ) : (
-                <Menu className="h-5 w-5 text-zinc-800 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200" />
+                <Menu className="h-5 w-5" />
               )}
             </Button>
           </TooltipTrigger>
           <TooltipContent
             side="right"
-            className="bg-zinc-50 dark:bg-zinc-900 text-zinc-100 border border-zinc-700/50"
+            className="border border-border bg-popover text-popover-foreground"
           >
             {showSidebar ? "Ẩn sidebar" : "Hiện sidebar"}
           </TooltipContent>
         </Tooltip>
 
         {/* Separator */}
-        <div className="w-6 h-px bg-zinc-200 dark:bg-zinc-700/40 mb-1" />
+        <div className="mb-1 h-px w-6 bg-sidebar-border" />
 
         {items.map((item: any) => (
           <Tooltip key={item.key}>
@@ -170,8 +167,8 @@ export default function MenubarLayout({
                 }
                 size="icon"
                 className={`rounded-xl transition-all duration-200 ${location.pathname === item.link
-                  ? "bg-blue-500/20 border border-blue-400/40 text-blue-400 shadow-lg shadow-blue-500/20"
-                  : "hover:bg-zinc-100 dark:bg-zinc-800/60 border border-transparent hover:border-zinc-600/30 text-zinc-800 dark:text-zinc-400 hover:text-zinc-800"
+                  ? "border border-primary/40 bg-primary/15 text-primary shadow-lg shadow-primary/20"
+                  : "border border-transparent text-sidebar-foreground/75 hover:border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   }`}
                 onClick={() => {
                   onSelect?.(item.key);
@@ -183,7 +180,7 @@ export default function MenubarLayout({
             </TooltipTrigger>
             <TooltipContent
               side="right"
-              className="bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 border border-zinc-700/50"
+              className="border border-border bg-popover text-popover-foreground"
             >
               {item.label}
             </TooltipContent>
@@ -191,14 +188,16 @@ export default function MenubarLayout({
         ))}
         {/* Separator */}
         <div className="flex-1" />
-        <div className="w-6 h-px bg-zinc-200 dark:bg-zinc-700/40 mb-2" />
+        <div className="mb-2 h-px w-6 bg-sidebar-border" />
+
+        <ThemeToggle />
 
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-xl hover:bg-red-500/20 border border-transparent hover:border-red-400/30 text-zinc-400 hover:text-red-400 transition-all duration-200"
+              className="rounded-xl border border-transparent text-sidebar-foreground/70 transition-all duration-200 hover:border-red-400/30 hover:bg-red-500/20 hover:text-red-500"
               onClick={handleLogout}
               title="Đăng xuất"
             >
@@ -207,7 +206,7 @@ export default function MenubarLayout({
           </TooltipTrigger>
           <TooltipContent
             side="right"
-            className="bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 border border-zinc-700/50"
+            className="border border-border bg-popover text-popover-foreground"
           >
             Đăng xuất
           </TooltipContent>

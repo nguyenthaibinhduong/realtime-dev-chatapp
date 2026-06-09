@@ -8,7 +8,7 @@ export function getSocket(token?: string, forceNew = false): Socket {
       socket.disconnect();
     }
 
-    socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:3088", {
+    socket = io(import.meta.env.VITE_SOCKET_URL || "http://180.93.43.146:3088", {
       autoConnect: false, // 👈 chỉ connect khi gọi .connect()
       extraHeaders: {
         Authorization: `Bearer ${token || localStorage.getItem("token") || ""}`,

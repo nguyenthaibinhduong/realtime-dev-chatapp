@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/useToast";
 import { Eye, EyeOff, MessageSquare, Github, AlertCircle, CheckCircle, Code2, Users, Zap, Shield, Mail, ArrowLeft, Clock, KeyRound } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthAPI } from "@/api/api";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -376,6 +377,19 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 bg-gray-50 dark:bg-gray-950">
+      <div className="fixed right-4 top-4 z-50">
+        <ThemeToggle
+          tooltipSide="bottom"
+          className="border-border bg-background/80 text-foreground shadow-sm backdrop-blur hover:bg-accent hover:text-accent-foreground"
+        />
+      </div>
+      <Button
+        asChild
+        variant="outline"
+        className="fixed left-4 top-4 z-50 border-border bg-background/80 shadow-sm backdrop-blur"
+      >
+        <Link to="/landing">Giới thiệu sản phẩm</Link>
+      </Button>
       {/* Background - giữ nguyên */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-indigo-950 dark:via-slate-900 dark:to-violet-950">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNC40MTggMy41ODItOCA4LThzOCAzLjU4MiA4IDgtMy41ODIgOC04IDgtOC0zLjU4Mi04LTh6TTAgMTZjMC00LjQxOCAzLjU4Mi04IDgtOHM4IDMuNTgyIDggOC0zLjU4MiA4LTggOC04LTMuNTgyLTgtOHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-40" />

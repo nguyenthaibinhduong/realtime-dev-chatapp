@@ -62,13 +62,13 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
-    --sidebar-background: 240 6% 12%;
-    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222.2 47.4% 11.2%;
     --sidebar-primary: 214 100% 48%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 214.3 31.8% 91.4%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* Chat specific colors */
@@ -78,6 +78,10 @@ All colors MUST be HSL.
     --chat-selected: 214 100% 48%;
     --online-status: 142 71% 45%;
     --offline-status: 215.4 16.3% 46.9%;
+    --message-outgoing: 217 91% 60%;
+    --message-outgoing-foreground: 210 40% 98%;
+    --message-incoming: 220 13% 91%;
+    --message-incoming-foreground: 222.2 47.4% 11.2%;
 
     /* Code highlighting */
     --code-bg: 240 4% 16%;
@@ -128,6 +132,10 @@ All colors MUST be HSL.
     --chat-selected: 214 100% 48%;
     --online-status: 142 71% 45%;
     --offline-status: 215.4 16.3% 46.9%;
+    --message-outgoing: 217 91% 60%;
+    --message-outgoing-foreground: 210 40% 98%;
+    --message-incoming: 240 3.7% 15.9%;
+    --message-incoming-foreground: 210 40% 98%;
 
     --code-bg: 240 4% 16%;
     --code-border: 240 3.7% 15.9%;
@@ -140,7 +148,13 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: var(--app-font-family), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  #root {
+    min-height: 100vh;
   }
 
   /* Custom scrollbar */
@@ -177,6 +191,24 @@ All colors MUST be HSL.
     animation: highlight-pulse 2s ease-in-out;
     border-left: 3px solid rgb(59, 130, 246);
     padding-left: 8px;
+  }
+
+  .app-surface {
+    @apply border border-border bg-card text-card-foreground shadow-sm;
+  }
+
+  .app-muted-surface {
+    @apply border border-border bg-muted/50 text-foreground;
+  }
+
+  .chat-bubble-outgoing {
+    background-color: hsl(var(--message-outgoing));
+    color: hsl(var(--message-outgoing-foreground));
+  }
+
+  .chat-bubble-incoming {
+    background-color: hsl(var(--message-incoming));
+    color: hsl(var(--message-incoming-foreground));
   }
 }
 

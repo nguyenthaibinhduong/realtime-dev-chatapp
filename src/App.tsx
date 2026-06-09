@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { NotificationProvider } from "@/hooks/useNotificationToast";
+import { ThemeProvider } from "@/components/theme-provider";
+import { AppearanceProvider } from "@/hooks/useAppearance";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -19,38 +21,50 @@ import GitHubPage from "./pages/GitHubPage";
 import Blogs from "./pages/Blogs";
 import Error from "./pages/Error";
 import AdminPage from "./pages/AdminPage";
+import Landing from "./pages/Landing";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <BrowserRouter>
-        <NotificationProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/github/register" element={<GitHubRegister />} />
-              <Route path="/github" element={<GitHubPage />} />
-              <Route path="/auth/github/callback" element={<GitHubCallback />} />
-              <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/blogs" element={<Blogs />} />
-              <Route path="/settings" element={<SettingsPage />} />
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      storageKey="codesync-theme"
+    >
+      <AppearanceProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <NotificationProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/landing" element={<Landing />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth/github/register" element={<GitHubRegister />} />
+                  <Route path="/github" element={<GitHubPage />} />
+                  <Route path="/auth/github/callback" element={<GitHubCallback />} />
+                  <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="*" element={<NotFound />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
+                  <Route path="/blogs" element={<Blogs />} />
+                  <Route path="/settings" element={<SettingsPage />} />
 
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/admin/:section" element={<AdminPage />} />
-              <Route path="/error" element={<Error />} />
-            </Routes>
-          </TooltipProvider>
-        </NotificationProvider>
-      </BrowserRouter>
-    </AuthProvider>
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/admin/:section" element={<AdminPage />} />
+                  <Route path="/error" element={<Error />} />
+                </Routes>
+              </TooltipProvider>
+            </NotificationProvider>
+          </BrowserRouter>
+        </AuthProvider>
+      </AppearanceProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

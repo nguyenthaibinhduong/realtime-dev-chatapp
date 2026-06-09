@@ -9,13 +9,13 @@ import { cn } from "@/lib/utils";
 export const COLORS = {
   // Background colors
   bg: {
-    me: "bg-blue-600 dark:bg-blue-600",
-    meHover: "bg-blue-700 dark:bg-blue-700",
-    other: "bg-gray-200 dark:bg-gray-800",
-    otherHover: "bg-gray-300 dark:bg-gray-700",
-    card: "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800",
-    cardHover: "bg-gray-50 dark:bg-gray-800",
-    overlay: "bg-gray-100/50 dark:bg-gray-950/50",
+    me: "chat-bubble-outgoing",
+    meHover: "brightness-95",
+    other: "chat-bubble-incoming",
+    otherHover: "brightness-95",
+    card: "app-surface",
+    cardHover: "bg-muted/60",
+    overlay: "bg-background/60",
   },
   
   // Text colors
@@ -30,10 +30,10 @@ export const COLORS = {
   
   // Border colors
   border: {
-    default: "border-gray-300 dark:border-gray-700",
-    hover: "border-gray-400 dark:border-gray-600",
-    card: "border-gray-200 dark:border-gray-800",
-    accent: "border-blue-300 dark:border-blue-600/30",
+    default: "border-border",
+    hover: "border-primary/40",
+    card: "border-border",
+    accent: "border-primary/30",
   },
   
   // Status colors
@@ -197,7 +197,6 @@ export const getMessageBubbleClasses = (isMe: boolean, isHovered: boolean, hasOn
     isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
     SPACING.padding.message,
     isMe ? COLORS.bg.me : COLORS.bg.other,
-    isMe ? "text-white" : COLORS.text.secondary,
     isMe ? SHADOWS.sm : cn(SHADOWS.sm, COLORS.border.default, "border"),
     isHovered && (isMe ? cn(SHADOWS.lg, COLORS.bg.meHover) : cn(SHADOWS.md, COLORS.border.hover))
   );

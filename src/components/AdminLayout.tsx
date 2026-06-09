@@ -78,13 +78,13 @@ const AdminSidebar = ({ selected, onSelect }: { selected: string; onSelect: (ite
                         onChange={(e) => setQuery(e.target.value)}
                         aria-label="Tìm kiếm"
                         placeholder="Tìm kiếm chức năng..."
-                        className="w-full bg-[#111] text-sm text-sidebar-foreground/90 placeholder:opacity-60 rounded-md py-2 pl-10 pr-9 outline-none border border-sidebar-border"
+                        className="w-full rounded-md border border-sidebar-border bg-background py-2 pl-10 pr-9 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-sidebar-ring"
                     />
                     {query && (
                         <button
                             aria-label="Clear search"
                             onClick={clearQuery}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-[rgba(255,255,255,0.03)]"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                         >
                             <X className="h-4 w-4 text-sidebar-foreground/60" />
                         </button>
@@ -109,9 +109,9 @@ const AdminSidebar = ({ selected, onSelect }: { selected: string; onSelect: (ite
                                     key={it.id}
                                     onClick={() => { onSelect(it); setQuery(""); }}
                                     className={
-                                        "text-left w-full rounded-md px-3 py-2 text-sidebar-foreground hover:bg-[#222] transition flex items-center " +
+                                        "flex w-full items-center rounded-md px-3 py-2 text-left text-sidebar-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground " +
                                         (selected === it.id
-                                            ? "bg-[#2b2b2f] font-medium"
+                                            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                                             : "font-normal")
                                     }
                                 >
@@ -135,9 +135,9 @@ const AdminSidebar = ({ selected, onSelect }: { selected: string; onSelect: (ite
                                         key={it.id}
                                         onClick={() => onSelect(it)}
                                         className={
-                                            "text-left w-full rounded-md px-3 py-2 text-sidebar-foreground hover:bg-[#222] transition flex items-center " +
+                                            "flex w-full items-center rounded-md px-3 py-2 text-left text-sidebar-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground " +
                                             (selected === it.id
-                                                ? "bg-[#2b2b2f] font-medium"
+                                                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                                                 : "font-normal")
                                         }
                                     >
@@ -202,7 +202,7 @@ function AdminLayout() {
             }
         >
             <div
-                className="flex-1 overflow-auto bg-zinc-950"
+                className="flex-1 overflow-auto bg-background text-foreground"
                 style={{ height: "100vh", minHeight: "100vh", maxHeight: "100vh" }}
             >
                 {renderContent()}

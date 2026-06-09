@@ -216,12 +216,12 @@ const MessageItem = memo(({
                                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                     {message.sender?.username || 'Unknown'}
                                 </span>
-                                <span className="text-[10px] text-gray-500 dark:text-gray-500">
+                                {/* <span className="text-[10px] text-gray-500 dark:text-gray-500">
                                     {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}
-                                </span>
+                                </span> */}
                             </div>
                         )}
 
@@ -269,13 +269,13 @@ const MessageItem = memo(({
                                 <div className={cn(
                                     "relative break-words transition-all duration-200",
                                     isMe ? "rounded-lg rounded-tr-sm" : "rounded-lg rounded-tl-sm",
-                                    !hasOnlyImages && (
-                                        isMe
-                                            ? "bg-blue-600 dark:bg-blue-600 text-white shadow-sm px-2.5 py-1.5"
-                                            : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 shadow-sm px-2.5 py-1.5"
-                                    ),
-                                    isHovered && !isMe && !hasOnlyImages && "shadow-md border-gray-400 dark:border-gray-600",
-                                    isHovered && isMe && !hasOnlyImages && "shadow-lg bg-blue-700 dark:bg-blue-700",
+                                     !hasOnlyImages && (
+                                         isMe
+                                             ? "chat-bubble-outgoing shadow-sm px-2.5 py-1.5"
+                                             : "chat-bubble-incoming border border-border shadow-sm px-2.5 py-1.5"
+                                     ),
+                                     isHovered && !isMe && !hasOnlyImages && "shadow-md border-primary/40 brightness-95",
+                                     isHovered && isMe && !hasOnlyImages && "shadow-lg brightness-95",
                                     hasOnlyImages && "bg-transparent"
                                 )}>
 
@@ -308,11 +308,13 @@ const MessageItem = memo(({
                                         </button>
                                     )}
 
-                                    {message.text && (
-                                        <p className={cn(
-                                            "text-[12px] leading-relaxed whitespace-pre-wrap break-words",
-                                            isMe ? "text-white" : "text-gray-900 dark:text-gray-200"
-                                        )}>
+                                     {message.text && (
+                                         <p className={cn(
+                                             "text-[12px] leading-relaxed whitespace-pre-wrap break-words",
+                                             isMe
+                                                 ? "text-[hsl(var(--message-outgoing-foreground))]"
+                                                 : "text-[hsl(var(--message-incoming-foreground))]"
+                                         )}>
                                             {message.text}
                                         </p>
                                     )}

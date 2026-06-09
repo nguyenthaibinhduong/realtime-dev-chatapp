@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { AuthAPI } from "./api";
 import { chatSocketService } from "@/services/chatSocketService";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3088/v1/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://180.93.43.146:3088/v1/api";
 
 // Tạo instance chung cho axios
 const api = axios.create({
