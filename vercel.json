@@ -5,6 +5,10 @@
       "destination": "http://180.93.43.146:3088/v1/api/:path*"
     },
     {
+      "source": "/socket.io",
+      "destination": "http://180.93.43.146:3088/socket.io"
+    },
+    {
       "source": "/socket.io/:path*",
       "destination": "http://180.93.43.146:3088/socket.io/:path*"
     }

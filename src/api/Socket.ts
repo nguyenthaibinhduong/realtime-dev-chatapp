@@ -34,35 +34,24 @@ export function getSocket(token?: string, forceNew = false): Socket {
     }
 
     const authToken = token || localStorage.getItem("token") || "";
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || "/";
 
-    // socket = io(import.meta.env.VITE_SOCKET_URL || "/", {
-    //   autoConnect: false,
-    //   path: import.meta.env.VITE_SOCKET_PATH || "/socket.io",
-    //   transports: getSocketTransports(),
-    //   withCredentials: true,
-    //   auth: {
-    //     token: authToken,
-    //   },
-    //   query: {
-    //     token: authToken,
-    //   },
-    //   reconnection: true,
-    //   reconnectionAttempts: 10,
-    //   reconnectionDelay: 1000,
-    // });
-    const url = "http://180.93.43.146:3088";
-
-    socket = io(url || "/", {
-    // Không set path → socket.io-client dùng mặc định "/socket.io", khớp với BE.
-    auth: { token: authToken },
-    // BE bật Access-Control-Allow-Credentials: true, cần bật cùng phía client.
-    withCredentials: true,
-    // Chỉ sử dụng websocket để tối ưu hiệu năng và tránh HTTP long-polling liên tục.
-    transports: ["websocket"],
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-  })
+    socket = io(socketUrl, {
+      autoConnect: false,
+      path: import.meta.env.VITE_SOCKET_PATH || "/socket.io",
+      transports: getSocketTransports(),
+      withCredentials: true,
+      auth: {
+        token: authToken,
+      },
+      query: {
+        token: authToken,
+      },
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+    });
 
     socket.on("connect", () => {
       console.log("Socket connected:", socket?.id);

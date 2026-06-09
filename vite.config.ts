@@ -16,8 +16,8 @@ const backendProxy = {
   "/socket.io": {
     target: backendTarget,
     changeOrigin: true,
-    // secure: false,
-    // ws: true,
+    secure: false,
+    ws: true,
   },
 };
 
