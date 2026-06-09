@@ -54,7 +54,7 @@ export function getSocket(token?: string, forceNew = false): Socket {
 
     socket = io(socketUrl, {
       autoConnect: false,
-      path: import.meta.env.VITE_SOCKET_PATH || "/socket.io",
+      path: import.meta.env.VITE_SOCKET_PATH || "/socket.io/",
       transports: getSocketTransports(socketUrl),
       upgrade: false,
       withCredentials: true,
