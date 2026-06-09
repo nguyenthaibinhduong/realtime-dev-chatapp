@@ -56,6 +56,7 @@ export function getSocket(token?: string, forceNew = false): Socket {
       autoConnect: false,
       path: import.meta.env.VITE_SOCKET_PATH || "/socket.io",
       transports: getSocketTransports(socketUrl),
+      upgrade: false,
       withCredentials: true,
       auth: {
         token: authToken,
