@@ -255,13 +255,13 @@ export const BARequirementForm = ({
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange}>
-            <DrawerContent className="bg-[#0f1419] border-gray-800 max-h-[95vh]">
-                <DrawerHeader className="border-b border-gray-800">
-                    <DrawerTitle className="text-2xl font-bold text-black dark:text-white flex items-center gap-2">
+            <DrawerContent className="max-h-[95vh] border-border bg-background text-foreground">
+                <DrawerHeader className="border-b border-border">
+                    <DrawerTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
                         <FileText className="h-6 w-6 text-blue-500" />
                         BA Requirement
                     </DrawerTitle>
-                    <DrawerDescription className="text-gray-400">
+                    <DrawerDescription className="text-muted-foreground">
                         Tạo yêu cầu dự án mới
                     </DrawerDescription>
                 </DrawerHeader>
@@ -270,7 +270,7 @@ export const BARequirementForm = ({
                     <div className="space-y-6">
                         {/* Project Name */}
                         <div className="space-y-2 px-2">
-                            <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
+                            <Label className="text-foreground text-sm font-semibold flex items-center gap-1">
                                 Tên dự án / Khách hàng
                                 <span className="text-red-500">*</span>
                             </Label>
@@ -281,7 +281,7 @@ export const BARequirementForm = ({
                                     setErrors({ ...errors, projectName: "" });
                                 }}
                                 placeholder="Nhập tên dự án hoặc khách hàng..."
-                                className={`bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-blue-500 ${errors.projectName ? "border-red-500" : ""
+                                className={`bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-blue-500 ${errors.projectName ? "border-red-500" : ""
                                     }`}
                             />
                             {errors.projectName && (
@@ -291,7 +291,7 @@ export const BARequirementForm = ({
 
                         {/* Requirements */}
                         <div className="space-y-2">
-                            <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
+                            <Label className="text-foreground text-sm font-semibold flex items-center gap-1">
                                 Danh sách yêu cầu
                                 <span className="text-red-500">*</span>
                             </Label>
@@ -314,7 +314,7 @@ export const BARequirementForm = ({
                                         }
                                     }}
                                     placeholder="Nhập yêu cầu và nhấn Enter... (Tab để chuyển tiếp)"
-                                    className="bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-blue-500 flex-1"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-blue-500 flex-1"
                                 />
                                 <Button
                                     onClick={addRequirement}
@@ -331,14 +331,14 @@ export const BARequirementForm = ({
 
                             {/* Requirements List */}
                             {requirements.filter(r => r).length > 0 && (
-                                <div className="mt-3 space-y-2 bg-gray-900/50 rounded-lg p-3 border border-gray-800">
+                                <div className="mt-3 space-y-2 bg-muted/50 rounded-lg p-3 border border-border">
                                     {requirements.filter(r => r).map((req, idx) => (
                                         <div
                                             key={idx}
-                                            className="flex items-start gap-2 p-2 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors group"
+                                            className="flex items-start gap-2 p-2 bg-background rounded-lg hover:bg-muted transition-colors group"
                                         >
                                             <span className="text-blue-400 font-mono text-sm mt-0.5">{idx + 1}.</span>
-                                            <p className="flex-1 text-sm text-gray-200">{req}</p>
+                                            <p className="flex-1 text-sm text-foreground">{req}</p>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
@@ -355,9 +355,9 @@ export const BARequirementForm = ({
 
                         {/* Attachments */}
                         <div className="space-y-2">
-                            <Label className="text-black dark:text-white text-sm font-semibold">Tài liệu đính kèm</Label>
+                            <Label className="text-foreground text-sm font-semibold">Tài liệu đính kèm</Label>
                             <div
-                                className="flex items-center gap-2 p-4 border-2 border-dashed border-gray-700 rounded-lg hover:border-blue-500 transition-colors"
+                                className="flex items-center gap-2 p-4 border-2 border-dashed border-border rounded-lg hover:border-blue-500 transition-colors"
                                 onDragOver={(e) => {
                                     e.preventDefault();
                                     e.currentTarget.classList.add('border-blue-500', 'bg-blue-950/20');
@@ -390,12 +390,12 @@ export const BARequirementForm = ({
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
                                     variant="outline"
-                                    className="bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-black dark:text-white"
+                                    className="bg-background border-input text-foreground hover:bg-muted"
                                 >
                                     <Upload className="h-4 w-4 mr-2" />
                                     Chọn tệp
                                 </Button>
-                                <span className="text-xs text-gray-500">Kéo thả hoặc chọn: PDF, DOCX, XLSX, JPG, PNG</span>
+                                <span className="text-xs text-muted-foreground">Kéo thả hoặc chọn: PDF, DOCX, XLSX, JPG, PNG</span>
                             </div>
 
                             {/* Attachments Preview */}
@@ -404,14 +404,14 @@ export const BARequirementForm = ({
                                     {attachments.map((file, idx) => (
                                         <div
                                             key={idx}
-                                            className="flex items-center gap-2 p-2 bg-gray-900 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors group"
+                                            className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg border border-border hover:border-primary/50 transition-colors group"
                                         >
-                                            <div className="h-10 w-10 rounded bg-blue-950 flex items-center justify-center flex-shrink-0">
+                                            <div className="h-10 w-10 rounded bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                                                 <FileText className="h-5 w-5 text-blue-400" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm text-gray-200 truncate">{file.name}</p>
-                                                <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
+                                                <p className="text-sm text-foreground truncate">{file.name}</p>
+                                                <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(2)} KB</p>
                                             </div>
                                             <Button
                                                 variant="ghost"
@@ -429,7 +429,7 @@ export const BARequirementForm = ({
 
                         {/* Assignees */}
                         <div className="space-y-2">
-                            <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
+                            <Label className="text-foreground text-sm font-semibold flex items-center gap-1">
                                 Người phụ trách
                                 <span className="text-red-500">*</span>
                             </Label>
@@ -441,7 +441,7 @@ export const BARequirementForm = ({
                                         setShowMemberDropdown(!showMemberDropdown);
                                         setShowMessageDropdown(false);
                                     }}
-                                    className={`w-full justify-start bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 transition-all ${errors.assignees ? "border-red-500" : ""
+                                    className={`w-full justify-start bg-background border-input text-foreground hover:bg-muted transition-all ${errors.assignees ? "border-red-500" : ""
                                         }`}
                                 >
                                     <User className="h-4 w-4 mr-2" />
@@ -451,19 +451,19 @@ export const BARequirementForm = ({
                                 </Button>
 
                                 {showMemberDropdown && (
-                                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-[110] overflow-hidden animate-in slide-in-from-top-2 duration-200">
-                                        <div className="p-2 border-b border-gray-700">
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-popover text-popover-foreground border border-border rounded-lg shadow-xl z-[110] overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                                        <div className="p-2 border-b border-border">
                                             <Input
                                                 value={searchMember}
                                                 onChange={(e) => setSearchMember(e.target.value)}
                                                 placeholder="Tìm kiếm thành viên..."
-                                                className="bg-gray-800 border-gray-600 text-black dark:text-white placeholder:text-gray-500 h-8 text-sm"
+                                                className="bg-background border-input text-foreground placeholder:text-muted-foreground h-8 text-sm"
                                                 autoFocus
                                             />
                                         </div>
                                         <div className="max-h-60 overflow-y-auto">
                                             {filteredMembers.length === 0 ? (
-                                                <div className="p-3 text-sm text-gray-400 text-center">
+                                                <div className="p-3 text-sm text-muted-foreground text-center">
                                                     {searchMember ? 'Không tìm thấy thành viên' : 'Không có thành viên'}
                                                 </div>
                                             ) : (
@@ -474,7 +474,7 @@ export const BARequirementForm = ({
                                                             toggleAssignee(member.id);
                                                             setSearchMember("");
                                                         }}
-                                                        className="flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer transition-colors"
+                                                        className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer transition-colors"
                                                     >
                                                         <input
                                                             type="checkbox"
@@ -484,9 +484,9 @@ export const BARequirementForm = ({
                                                         />
                                                         <AvatarUser user={member} isMe={false} size="sm" />
                                                         <div className="flex-1">
-                                                            <p className="text-sm text-black dark:text-white">{member.name}</p>
+                                                            <p className="text-sm text-foreground">{member.name}</p>
                                                             {member.username && (
-                                                                <p className="text-xs text-gray-500">@{member.username}</p>
+                                                                <p className="text-xs text-muted-foreground">@{member.username}</p>
                                                             )}
                                                             {memberRoles && memberRoles.map(mr => mr.userId).includes(member.id) && (
                                                                 <div className="flex items-center gap-1 mt-1">
@@ -519,7 +519,7 @@ export const BARequirementForm = ({
                                         <Badge
                                             key={member.id}
                                             variant="secondary"
-                                            className="bg-blue-950 text-blue-200 hover:bg-blue-900"
+                                            className="bg-blue-500/10 text-blue-700 hover:bg-blue-500/20 dark:text-blue-200"
                                         >
                                             {member.name}
                                             <X
@@ -534,7 +534,7 @@ export const BARequirementForm = ({
 
                         {/* Related Messages */}
                         <div className="space-y-2">
-                            <Label className="text-black dark:text-white text-sm font-semibold">Tin nhắn liên quan</Label>
+                            <Label className="text-foreground text-sm font-semibold">Tin nhắn liên quan</Label>
                             <div className="relative" ref={messageDropdownRef}>
                                 <Button
                                     type="button"
@@ -543,7 +543,7 @@ export const BARequirementForm = ({
                                         setShowMessageDropdown(!showMessageDropdown);
                                         setShowMemberDropdown(false);
                                     }}
-                                    className="w-full justify-start bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 transition-all"
+                                    className="w-full justify-start bg-background border-input text-foreground hover:bg-muted transition-all"
                                 >
                                     <MessageSquare className="h-4 w-4 mr-2" />
                                     {relatedMessages.length > 0
@@ -552,15 +552,15 @@ export const BARequirementForm = ({
                                 </Button>
 
                                 {showMessageDropdown && (
-                                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-[110] animate-in slide-in-from-top-2 duration-200">
-                                        <div className="p-2 border-b border-gray-800">
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-popover text-popover-foreground border border-border rounded-lg shadow-xl z-[110] animate-in slide-in-from-top-2 duration-200">
+                                        <div className="p-2 border-b border-border">
                                             <div className="relative">
-                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                                 <Input
                                                     value={searchMessage}
                                                     onChange={(e) => setSearchMessage(e.target.value)}
                                                     placeholder="Tìm kiếm tin nhắn..."
-                                                    className="pl-9 bg-gray-800 border-gray-700 text-black dark:text-white"
+                                                    className="pl-9 bg-background border-input text-foreground placeholder:text-muted-foreground"
                                                 />
                                             </div>
                                         </div>
@@ -569,7 +569,7 @@ export const BARequirementForm = ({
                                                 <div
                                                     key={message.id}
                                                     onClick={() => toggleMessage(message.id)}
-                                                    className="flex items-start gap-3 p-3 hover:bg-gray-800 cursor-pointer transition-colors border-b border-gray-800 last:border-0"
+                                                    className="flex items-start gap-3 p-3 hover:bg-muted cursor-pointer transition-colors border-b border-border last:border-0"
                                                 >
                                                     <input
                                                         type="checkbox"
@@ -578,8 +578,8 @@ export const BARequirementForm = ({
                                                         className="mt-1 h-4 w-4 rounded border-gray-600 text-blue-600 focus:ring-blue-500"
                                                     />
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-xs text-gray-500 mb-1">{message.sender.name}</p>
-                                                        <p className="text-sm text-gray-200 line-clamp-2">{message.text}</p>
+                                                        <p className="text-xs text-muted-foreground mb-1">{message.sender.name}</p>
+                                                        <p className="text-sm text-foreground line-clamp-2">{message.text}</p>
                                                     </div>
                                                 </div>
                                             ))}
@@ -594,12 +594,12 @@ export const BARequirementForm = ({
                                     {selectedMessages.map((message) => (
                                         <div
                                             key={message.id}
-                                            className="p-2 bg-gray-900 rounded-lg border border-gray-800 flex items-start gap-2 group"
+                                            className="p-2 bg-muted/50 rounded-lg border border-border flex items-start gap-2 group"
                                         >
                                             <MessageSquare className="h-4 w-4 text-blue-400 mt-1 flex-shrink-0" />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-xs text-gray-500">{message.sender.name}</p>
-                                                <p className="text-sm text-gray-200 line-clamp-1">{message.text}</p>
+                                                <p className="text-xs text-muted-foreground">{message.sender.name}</p>
+                                                <p className="text-sm text-foreground line-clamp-1">{message.text}</p>
                                             </div>
                                             <Button
                                                 variant="ghost"
@@ -617,29 +617,29 @@ export const BARequirementForm = ({
 
                         {/* Notes */}
                         <div className="space-y-2">
-                            <Label className="text-black dark:text-white text-sm font-semibold">Ghi chú</Label>
+                            <Label className="text-foreground text-sm font-semibold">Ghi chú</Label>
                             <Textarea
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
                                 placeholder="Thêm ghi chú (không bắt buộc)..."
-                                className="bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-blue-500 min-h-[100px]"
+                                className="bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-blue-500 min-h-[100px]"
                             />
                         </div>
                     </div>
                 </div>
 
-                <DrawerFooter className="border-t border-gray-800">
+                <DrawerFooter className="border-t border-border">
                     <div className="flex items-center justify-between w-full">
-                        <div className="text-xs text-gray-500">
-                            <kbd className="px-2 py-1 bg-gray-800 rounded text-gray-400 font-mono">ESC</kbd> để đóng •
-                            <kbd className="px-2 py-1 bg-gray-800 rounded text-gray-400 font-mono">Ctrl+Enter</kbd> để gửi
+                        <div className="text-xs text-muted-foreground">
+                            <kbd className="px-2 py-1 bg-muted rounded text-muted-foreground font-mono">ESC</kbd> để đóng •
+                            <kbd className="px-2 py-1 bg-muted rounded text-muted-foreground font-mono">Ctrl+Enter</kbd> để gửi
                         </div>
                         <div className="flex gap-3">
                             <DrawerClose asChild>
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-black dark:text-white transition-all"
+                                    className="bg-transparent border-input text-foreground hover:bg-muted transition-all"
                                 >
                                     Hủy
                                 </Button>
@@ -647,7 +647,7 @@ export const BARequirementForm = ({
                             <Button
                                 type="button"
                                 onClick={handleSubmit}
-                                className="bg-blue-600 hover:bg-blue-700 text-black dark:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-blue-600 hover:bg-blue-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting || (!projectName.trim() && (requirements.filter(r => r).length === 0 && !currentReq.trim()) && assignees.length === 0)}
                             >
                                 {isSubmitting ? (

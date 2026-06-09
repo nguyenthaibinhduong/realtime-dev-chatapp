@@ -620,7 +620,7 @@ export const MessageList: React.FC<Props> = ({
 
   return (
     <ScrollArea
-      className={`flex-1 min-h-0 p-4 overflow-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black ${isInputExpanded ? "max-h-[65vh]" : "max-h-[80vh]"}`}
+      className="flex-1 min-h-0 overflow-hidden p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black"
       style={{ transition: "height 0.3s ease-in-out" }}
       ref={scrollAreaRef}
     >

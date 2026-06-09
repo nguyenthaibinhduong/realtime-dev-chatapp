@@ -1296,7 +1296,7 @@ export default function ChatLayout() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
         {selectedChannel && (
           <ChannelHeader
             channel={selectedChannel}
@@ -1307,7 +1307,7 @@ export default function ChatLayout() {
           />
         )}
 
-        <div className="flex flex-col h-full">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {filteredMessages.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">

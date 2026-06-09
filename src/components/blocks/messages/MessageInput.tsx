@@ -412,7 +412,7 @@ export const MessageInput = ({
         </div>
 
         {/* Input Section - WhatsApp Style */}
-        <div className="p-3">
+        <div className="h-[63px] px-3 flex items-center">
           <div className="w-full flex items-center justify-between gap-2">
             {/* Plus Button with Popup Menu */}
             <div className="relative" ref={menuRef}>

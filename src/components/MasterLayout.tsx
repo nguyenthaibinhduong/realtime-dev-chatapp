@@ -38,7 +38,7 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
     useNotificationHandler();
 
     return (
-        <ResizablePanelGroup direction="horizontal" className="group h-screen w-full bg-background text-foreground">
+        <ResizablePanelGroup direction="horizontal" className="group h-screen w-full overflow-hidden bg-background text-foreground">
             {/* Menu (MenubarLayout) */}
             {menu}
 
@@ -49,7 +49,7 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
                     defaultSize={isNotificationsEnabled ? 45 : 24}
                     minSize={isNotificationsEnabled ? 30 : 22}
                     maxSize={50}
-                    className="flex flex-col"
+                    className="flex min-h-0 flex-col overflow-hidden"
                 >
                     {sidebar ?? <div className="flex-1">No Sidebar</div>}
                 </ResizablePanel>
@@ -62,7 +62,7 @@ export default function MasterLayout({ menu, sidebar, children, children_right, 
             <ResizablePanel
                 minSize={children_right ? 30 : 40}
                 defaultSize={children_right ? 70 : 100}
-                className="flex flex-col"
+                className="flex min-h-0 flex-col overflow-hidden"
             >
                 {children}
             </ResizablePanel>

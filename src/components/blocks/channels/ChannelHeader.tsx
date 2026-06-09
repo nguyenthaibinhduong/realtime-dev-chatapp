@@ -163,7 +163,7 @@ export const ChannelHeader = ({
   }, []);
 
   return (
-    <div className="h-14 border-b border-zinc-700/50 bg-zinc-50 dark:bg-zinc-950/95 backdrop-blur-md px-6 py-0 flex items-center justify-between shadow-sm">
+    <div className="h-14 border-b border-sidebar-border bg-zinc-50 dark:bg-zinc-950/95 backdrop-blur-md px-6 py-0 flex items-center justify-between shadow-sm">
       <div className="flex items-center min-w-0 flex-1">
         <div className="flex items-center gap-3">
           {channel.type === "personal"

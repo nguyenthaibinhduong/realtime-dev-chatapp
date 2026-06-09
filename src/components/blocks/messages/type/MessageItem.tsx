@@ -371,8 +371,8 @@ const MessageItem = memo(({
                                     )}>
                                         <span className={cn(
                                             "text-[9px] font-medium",
-                                            isMe ? "text-blue-100 dark:text-blue-200" : "text-gray-600 dark:text-gray-400"
-                                        )}>
+                                            isMe ? "text-gray-600 dark:text-gray-400" : "text-gray-600 dark:text-gray-400"
+                                            )}>
                                             {new Date(message.created_at || message.send_at).toLocaleTimeString('vi-VN', {
                                                 hour: '2-digit',
                                                 minute: '2-digit'

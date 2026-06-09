@@ -245,20 +245,20 @@ export const TesterDebugForm = ({
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange}>
-            <DrawerContent className="bg-[#0f1419] border-gray-800 max-h-[95vh]">
-                <DrawerHeader className="border-b border-gray-800">
-                    <DrawerTitle className="text-2xl font-bold text-black dark:text-white flex items-center gap-2">
-                        <span className="bg-red-600 text-black dark:text-white px-2 py-1 rounded text-sm">BUG</span>
+            <DrawerContent className="max-h-[95vh] border-border bg-background text-foreground">
+                <DrawerHeader className="border-b border-border">
+                    <DrawerTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
+                        <span className="bg-red-600 text-white px-2 py-1 rounded text-sm">BUG</span>
                         Tester Debug Report
                     </DrawerTitle>
-                    <DrawerDescription className="text-gray-400">
+                    <DrawerDescription className="text-muted-foreground">
                         Báo cáo lỗi và debug
                     </DrawerDescription>
                 </DrawerHeader>
 
                 <div className="flex-1 p-6 overflow-y-auto space-y-6">
                     <div className="space-y-2">
-                        <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
+                        <Label className="text-foreground text-sm font-semibold flex items-center gap-1">
                             Tên dự án hoặc Yêu cầu gốc
                             <span className="text-red-500">*</span>
                         </Label>
@@ -269,12 +269,12 @@ export const TesterDebugForm = ({
                                 setErrors({ ...errors, projectOrMessage: "" });
                             }}
                             placeholder="Nhập tên dự án / khách hàng..."
-                            className={`bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-red-500 ${errors.projectOrMessage ? "border-red-500" : ""
+                            className={`bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-red-500 ${errors.projectOrMessage ? "border-red-500" : ""
                                 }`}
                             disabled={!!relatedMessageId}
                         />
 
-                        <div className="text-center text-gray-500 text-sm py-2">hoặc</div>
+                        <div className="text-center text-muted-foreground text-sm py-2">hoặc</div>
 
                         <div className="relative" ref={messageDropdownRef}>
                             <Button
@@ -284,7 +284,7 @@ export const TesterDebugForm = ({
                                     setShowMessageDropdown(!showMessageDropdown);
                                     setShowMemberDropdown(false);
                                 }}
-                                className={`w-full justify-start bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 transition-all ${errors.projectOrMessage ? "border-red-500" : ""
+                                className={`w-full justify-start bg-background border-input text-foreground hover:bg-muted transition-all ${errors.projectOrMessage ? "border-red-500" : ""
                                     }`}
                                 disabled={!!projectName.trim()}
                             >
@@ -295,15 +295,15 @@ export const TesterDebugForm = ({
                             </Button>
 
                             {showMessageDropdown && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-[110] animate-in slide-in-from-top-2 duration-200">
-                                    <div className="p-2 border-b border-gray-800">
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-popover text-popover-foreground border border-border rounded-lg shadow-xl z-[110] animate-in slide-in-from-top-2 duration-200">
+                                    <div className="p-2 border-b border-border">
                                         <div className="relative">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                             <Input
                                                 value={searchMessage}
                                                 onChange={(e) => setSearchMessage(e.target.value)}
                                                 placeholder="Tìm kiếm tin nhắn..."
-                                                className="pl-9 bg-gray-800 border-gray-700 text-black dark:text-white"
+                                                className="pl-9 bg-background border-input text-foreground placeholder:text-muted-foreground"
                                             />
                                         </div>
                                     </div>
@@ -312,11 +312,11 @@ export const TesterDebugForm = ({
                                             <div
                                                 key={message.id}
                                                 onClick={() => selectMessage(message.id)}
-                                                className="flex items-start gap-3 p-3 hover:bg-gray-800 cursor-pointer transition-colors border-b border-gray-800 last:border-0"
+                                                className="flex items-start gap-3 p-3 hover:bg-muted cursor-pointer transition-colors border-b border-border last:border-0"
                                             >
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-xs text-gray-500 mb-1">{message.sender.name}</p>
-                                                    <p className="text-sm text-gray-200 line-clamp-2">{message.text}</p>
+                                                    <p className="text-xs text-muted-foreground mb-1">{message.sender.name}</p>
+                                                    <p className="text-sm text-foreground line-clamp-2">{message.text}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -331,12 +331,12 @@ export const TesterDebugForm = ({
 
                         {/* Selected Message Display */}
                         {selectedMessage && (
-                            <div className="p-3 bg-gray-900 rounded-lg border border-red-800 flex items-start gap-2">
+                            <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/30 flex items-start gap-2">
                                 <MessageSquare className="h-4 w-4 text-red-400 mt-1 flex-shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs text-red-400 font-semibold mb-1">Yêu cầu gốc</p>
-                                    <p className="text-xs text-gray-500">{selectedMessage.sender.name}</p>
-                                    <p className="text-sm text-gray-200 line-clamp-2 mt-1">{selectedMessage.text}</p>
+                                    <p className="text-xs text-muted-foreground">{selectedMessage.sender.name}</p>
+                                    <p className="text-sm text-foreground line-clamp-2 mt-1">{selectedMessage.text}</p>
                                 </div>
                                 <Button
                                     variant="ghost"
@@ -355,11 +355,11 @@ export const TesterDebugForm = ({
 
                     {/* Content - Rich Text Editor */}
                     <div className="space-y-2">
-                        <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
+                        <Label className="text-foreground text-sm font-semibold flex items-center gap-1">
                             Nội dung
                             <span className="text-red-500">*</span>
                         </Label>
-                        <div className={`bg-gray-900 rounded-lg border ${errors.content ? "border-red-500" : "border-gray-700"}`}>
+                        <div className={`bg-background rounded-lg border ${errors.content ? "border-red-500" : "border-input"}`}>
                             <ReactQuill
                                 theme="snow"
                                 value={content}
@@ -370,20 +370,20 @@ export const TesterDebugForm = ({
                                 modules={quillModules}
                                 formats={quillFormats}
                                 placeholder="Mô tả chi tiết về bug, các bước tái hiện, kết quả mong đợi..."
-                                className="text-black dark:text-white 
+                                className="text-foreground 
                                     [&_.ql-editor]:min-h-[200px] 
-                                    [&_.ql-editor]:text-white 
-                                    [&_.ql-editor.ql-blank::before]:text-gray-500
+                                    [&_.ql-editor]:text-foreground 
+                                    [&_.ql-editor.ql-blank::before]:text-muted-foreground
                                     [&_.ql-editor.ql-blank::before]:opacity-100
-                                    [&_.ql-toolbar]:border-gray-700 
-                                    [&_.ql-container]:border-gray-700
-                                    [&_.ql-toolbar]:bg-gray-800/50
-                                    [&_.ql-stroke]:stroke-gray-400
-                                    [&_.ql-fill]:fill-gray-400
-                                    [&_.ql-picker-label]:text-gray-400
-                                    [&_.ql-picker-options]:bg-gray-800
-                                    [&_.ql-picker-item]:text-gray-300
-                                    [&_.ql-picker-item:hover]:bg-gray-700"
+                                    [&_.ql-toolbar]:border-border 
+                                    [&_.ql-container]:border-border
+                                    [&_.ql-toolbar]:bg-muted/50
+                                    [&_.ql-stroke]:stroke-muted-foreground
+                                    [&_.ql-fill]:fill-muted-foreground
+                                    [&_.ql-picker-label]:text-muted-foreground
+                                    [&_.ql-picker-options]:bg-popover
+                                    [&_.ql-picker-item]:text-popover-foreground
+                                    [&_.ql-picker-item:hover]:bg-muted"
                             />
                         </div>
                         {errors.content && (
@@ -393,19 +393,19 @@ export const TesterDebugForm = ({
 
                     {/* Attachments */}
                     <div className="space-y-2">
-                        <Label className="text-black dark:text-white text-sm font-semibold">Tài liệu đính kèm</Label>
+                        <Label className="text-foreground text-sm font-semibold">Tài liệu đính kèm</Label>
                         <div
-                            className="flex items-center gap-2 p-4 border-2 border-dashed border-gray-700 rounded-lg hover:border-red-500 transition-colors"
+                            className="flex items-center gap-2 p-4 border-2 border-dashed border-border rounded-lg hover:border-red-500 transition-colors"
                             onDragOver={(e) => {
                                 e.preventDefault();
-                                e.currentTarget.classList.add('border-red-500', 'bg-red-950/20');
+                                e.currentTarget.classList.add('border-red-500', 'bg-red-500/10');
                             }}
                             onDragLeave={(e) => {
-                                e.currentTarget.classList.remove('border-red-500', 'bg-red-950/20');
+                                e.currentTarget.classList.remove('border-red-500', 'bg-red-500/10');
                             }}
                             onDrop={(e) => {
                                 e.preventDefault();
-                                e.currentTarget.classList.remove('border-red-500', 'bg-red-950/20');
+                                e.currentTarget.classList.remove('border-red-500', 'bg-red-500/10');
                                 const files = Array.from(e.dataTransfer.files);
                                 const validFiles = files.filter(file => {
                                     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -428,12 +428,12 @@ export const TesterDebugForm = ({
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 variant="outline"
-                                className="bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-black dark:text-white"
+                                className="bg-background border-input text-foreground hover:bg-muted"
                             >
                                 <Upload className="h-4 w-4 mr-2" />
                                 Chọn tệp
                             </Button>
-                            <span className="text-xs text-gray-500">Kéo thả hoặc chọn: Screenshots, logs, documents</span>
+                            <span className="text-xs text-muted-foreground">Kéo thả hoặc chọn: Screenshots, logs, documents</span>
                         </div>
 
                         {attachments.length > 0 && (
@@ -441,7 +441,7 @@ export const TesterDebugForm = ({
                                 {attachments.map((file, idx) => (
                                     <div
                                         key={idx}
-                                        className="flex items-center gap-2 p-2 bg-gray-900 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors group"
+                                        className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg border border-border hover:border-red-500/50 transition-colors group"
                                     >
                                         {file.type.startsWith('image/') ? (
                                             <img
@@ -455,8 +455,8 @@ export const TesterDebugForm = ({
                                             </div>
                                         )}
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm text-gray-200 truncate">{file.name}</p>
-                                            <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
+                                            <p className="text-sm text-foreground truncate">{file.name}</p>
+                                            <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(2)} KB</p>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -474,7 +474,7 @@ export const TesterDebugForm = ({
 
                     {/* Assignees */}
                     <div className="space-y-2">
-                        <Label className="text-black dark:text-white text-sm font-semibold flex items-center gap-1">
+                        <Label className="text-foreground text-sm font-semibold flex items-center gap-1">
                             Người phụ trách
                             <span className="text-red-500">*</span>
                         </Label>
@@ -486,7 +486,7 @@ export const TesterDebugForm = ({
                                     setShowMemberDropdown(!showMemberDropdown);
                                     setShowMessageDropdown(false);
                                 }}
-                                className={`w-full justify-start bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 transition-all ${errors.assignees ? "border-red-500" : ""
+                                className={`w-full justify-start bg-background border-input text-foreground hover:bg-muted transition-all ${errors.assignees ? "border-red-500" : ""
                                     }`}
                             >
                                 <User className="h-4 w-4 mr-2" />
@@ -496,19 +496,19 @@ export const TesterDebugForm = ({
                             </Button>
 
                             {showMemberDropdown && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-[110] overflow-hidden animate-in slide-in-from-top-2 duration-200">
-                                    <div className="p-2 border-b border-gray-700">
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-popover text-popover-foreground border border-border rounded-lg shadow-xl z-[110] overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                                    <div className="p-2 border-b border-border">
                                         <Input
                                             value={searchMember}
                                             onChange={(e) => setSearchMember(e.target.value)}
                                             placeholder="Tìm kiếm thành viên..."
-                                            className="bg-gray-800 border-gray-600 text-black dark:text-white placeholder:text-gray-500 h-8 text-sm"
+                                            className="bg-background border-input text-foreground placeholder:text-muted-foreground h-8 text-sm"
                                             autoFocus
                                         />
                                     </div>
                                     <div className="max-h-60 overflow-y-auto">
                                         {filteredMembers.length === 0 ? (
-                                            <div className="p-3 text-sm text-gray-400 text-center">
+                                            <div className="p-3 text-sm text-muted-foreground text-center">
                                                 {searchMember ? 'Không tìm thấy thành viên' : 'Không có thành viên'}
                                             </div>
                                         ) : (
@@ -519,19 +519,19 @@ export const TesterDebugForm = ({
                                                         toggleAssignee(member.id);
                                                         setSearchMember("");
                                                     }}
-                                                    className="flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer transition-colors"
+                                                    className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer transition-colors"
                                                 >
                                                     <input
                                                         type="checkbox"
                                                         checked={assignees.includes(member.id)}
                                                         onChange={() => { }}
-                                                        className="h-4 w-4 rounded border-gray-600 text-red-600 focus:ring-red-500"
+                                                        className="h-4 w-4 rounded border-input text-red-600 focus:ring-red-500"
                                                     />
                                                     <AvatarUser user={member} isMe={false} size="sm" />
                                                     <div className="flex-1">
-                                                        <p className="text-sm text-black dark:text-white">{member.name}</p>
+                                                        <p className="text-sm text-foreground">{member.name}</p>
                                                         {member.username && (
-                                                            <p className="text-xs text-gray-500">@{member.username}</p>
+                                                            <p className="text-xs text-muted-foreground">@{member.username}</p>
                                                         )}
                                                         {memberRoles && memberRoles.map(mr => mr.userId).includes(member.id) && (
                                                             <div className="flex items-center gap-1 mt-1">
@@ -578,12 +578,12 @@ export const TesterDebugForm = ({
 
                     {/* Notes */}
                     <div className="space-y-2">
-                        <Label className="text-black dark:text-white text-sm font-semibold">Ghi chú</Label>
+                        <Label className="text-foreground text-sm font-semibold">Ghi chú</Label>
                         <Input
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Thêm ghi chú (không bắt buộc)..."
-                            className="bg-gray-900 border-gray-700 text-black dark:text-white placeholder:text-gray-500 focus:border-red-500"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-red-500"
                         />
                     </div>
 
@@ -633,18 +633,18 @@ export const TesterDebugForm = ({
                     </div> */}
                 </div>
 
-                <DrawerFooter className="border-t border-gray-800">
+                <DrawerFooter className="border-t border-border">
                     <div className="flex items-center justify-between w-full">
-                        <div className="text-xs text-gray-500">
-                            <kbd className="px-2 py-1 bg-gray-800 rounded text-gray-400 font-mono">ESC</kbd> để đóng •
-                            <kbd className="px-2 py-1 bg-gray-800 rounded text-gray-400 font-mono">Ctrl+Enter</kbd> để gửi
+                        <div className="text-xs text-muted-foreground">
+                            <kbd className="px-2 py-1 bg-muted rounded text-muted-foreground font-mono">ESC</kbd> để đóng •
+                            <kbd className="px-2 py-1 bg-muted rounded text-muted-foreground font-mono">Ctrl+Enter</kbd> để gửi
                         </div>
                         <div className="flex gap-3">
                             <DrawerClose asChild>
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-black dark:text-white transition-all"
+                                    className="bg-transparent border-input text-foreground hover:bg-muted transition-all"
                                 >
                                     Hủy
                                 </Button>
@@ -652,7 +652,7 @@ export const TesterDebugForm = ({
                             <Button
                                 type="button"
                                 onClick={handleSubmit}
-                                className="bg-red-600 hover:bg-red-700 text-black dark:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-red-600 hover:bg-red-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting || (!projectName.trim() && !relatedMessageId) || !content.trim() || content === '<p><br></p>' || assignees.length === 0}
                             >
                                 {isSubmitting ? (

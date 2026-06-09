@@ -43,7 +43,7 @@ const App = () => (
                 <Sonner />
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/landing" element={<Landing />} />
+                  <Route path="/landing" element={<Landing />} /> 
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/github/register" element={<GitHubRegister />} />
                   <Route path="/github" element={<GitHubPage />} />
