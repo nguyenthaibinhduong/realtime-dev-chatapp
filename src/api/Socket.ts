@@ -2,16 +2,7 @@ import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
 
-const getSocketTransports = () => {
-  const transports = import.meta.env.VITE_SOCKET_TRANSPORTS;
 
-  if (!transports) return ["websocket", "polling"];
-
-  return transports
-    .split(",")
-    .map((transport: string) => transport.trim())
-    .filter(Boolean);
-};
 
 export function getSocket(token?: string, forceNew = false): Socket {
   if (!socket || forceNew) {
@@ -24,7 +15,7 @@ export function getSocket(token?: string, forceNew = false): Socket {
     socket = io(import.meta.env.VITE_SOCKET_URL || "/", {
       autoConnect: false,
       path: import.meta.env.VITE_SOCKET_PATH || "/socket.io",
-      transports: getSocketTransports(),
+      transports: ['websocket'],
       withCredentials: true,
       auth: {
         token: authToken,
