@@ -2,7 +2,30 @@ import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
 
+type SocketTransport = "polling" | "websocket" | "webtransport";
 
+const validTransports = new Set<SocketTransport>([
+  "polling",
+  "websocket",
+  "webtransport",
+]);
+
+const getSocketTransports = (): SocketTransport[] => {
+  const transports = import.meta.env.VITE_SOCKET_TRANSPORTS;
+
+  if (!transports) {
+    return import.meta.env.PROD ? ["polling"] : ["websocket", "polling"];
+  }
+
+  const parsedTransports = transports
+    .split(",")
+    .map((transport: string) => transport.trim().toLowerCase())
+    .filter((transport: string): transport is SocketTransport =>
+      validTransports.has(transport as SocketTransport)
+    );
+
+  return parsedTransports.length > 0 ? parsedTransports : ["polling"];
+};
 
 export function getSocket(token?: string, forceNew = false): Socket {
   if (!socket || forceNew) {
@@ -15,7 +38,7 @@ export function getSocket(token?: string, forceNew = false): Socket {
     socket = io(import.meta.env.VITE_SOCKET_URL || "/", {
       autoConnect: false,
       path: import.meta.env.VITE_SOCKET_PATH || "/socket.io",
-      transports: ['websocket'],
+      transports: getSocketTransports(),
       withCredentials: true,
       auth: {
         token: authToken,
