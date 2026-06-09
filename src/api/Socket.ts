@@ -10,7 +10,23 @@ const validTransports = new Set<SocketTransport>([
   "webtransport",
 ]);
 
-const getSocketTransports = (): SocketTransport[] => {
+const isSameOriginSocketUrl = (socketUrl: string): boolean => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    return new URL(socketUrl, window.location.origin).origin === window.location.origin;
+  } catch {
+    return socketUrl === "/";
+  }
+};
+
+const getSocketTransports = (socketUrl: string): SocketTransport[] => {
+  if (import.meta.env.PROD && isSameOriginSocketUrl(socketUrl)) {
+    return ["polling"];
+  }
+
   const transports = import.meta.env.VITE_SOCKET_TRANSPORTS;
 
   if (!transports) {
@@ -39,7 +55,7 @@ export function getSocket(token?: string, forceNew = false): Socket {
     socket = io(socketUrl, {
       autoConnect: false,
       path: import.meta.env.VITE_SOCKET_PATH || "/socket.io",
-      transports: getSocketTransports(),
+      transports: getSocketTransports(socketUrl),
       withCredentials: true,
       auth: {
         token: authToken,
