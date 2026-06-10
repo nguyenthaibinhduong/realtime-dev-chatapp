@@ -156,7 +156,7 @@ export default function MenubarLayout({
         </Tooltip>
 
         {/* Separator */}
-        <div className="mb-1 h-px w-6 bg-sidebar-border" />
+     
 
         {items.map((item: any) => (
           <Tooltip key={item.key}>
@@ -188,7 +188,6 @@ export default function MenubarLayout({
         ))}
         {/* Separator */}
         <div className="flex-1" />
-        <div className="mb-2 h-px w-6 bg-sidebar-border" />
 
         <ThemeToggle />
 

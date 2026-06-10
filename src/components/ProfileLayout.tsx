@@ -185,7 +185,7 @@ const ProfileLayout: React.FC = () => {
         <CardContent className="w-4/5 mx-auto space-y-3 p-6">
           {/* Username Section */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-cente p-2 gap-2 text-gray-300">
+            <Label className="text-sm font-medium flex items-center gap-2 text-gray-800 dark:text-white">
               <User className="w-4 h-4 text-blue-400" />
               Tên người dùng
             </Label>
@@ -249,7 +249,7 @@ const ProfileLayout: React.FC = () => {
 
           {/* Email Section */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2 text-gray-300">
+            <Label className="text-sm font-medium flex items-center gap-2 text-gray-800 dark:text-white">
               <Mail className="w-4 h-4 text-green-400" />
               Email
             </Label>
@@ -259,8 +259,8 @@ const ProfileLayout: React.FC = () => {
                 variant={user.email_verified ? "default" : "secondary"}
                 className={
                   user.email_verified
-                    ? "bg-green-600/20 text-green-400 border-green-500/30"
-                    : "bg-gray-600/20 text-gray-400 border-gray-500/30"
+                    ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-600/20 dark:text-green-400 dark:border-green-500/30 hover:bg-green-50 dark:hover:bg-green-600/20"
+                    : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-600/20 dark:text-gray-400 dark:border-gray-500/30"
                 }
               >
                 {user?.email_verified ? "Đã xác minh" : "Chưa xác minh"}
@@ -268,11 +268,9 @@ const ProfileLayout: React.FC = () => {
             </div>
           </div>
 
-          <Separator className="bg-gray-700/50" />
-
           {/* GitHub Integration */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2 text-gray-300">
+          {/* <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2 text-gray-800 dark:text-white">
               <Github className="w-4 h-4 text-purple-400" />
               Tích hợp GitHub
             </Label>
@@ -350,7 +348,7 @@ const ProfileLayout: React.FC = () => {
                 </AlertDialog>
               )}
             </div>
-          </div>
+          </div> */}
 
           <Separator className="bg-gray-700/50" />
 

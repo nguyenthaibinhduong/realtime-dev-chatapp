@@ -339,7 +339,7 @@ export const ChannelHeader = ({
                 <div className="flex items-center gap-3 w-full py-1">
                   <span className="text-lg">{tool.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate dark:group-hover:text-zinc-900">{tool.name}</div>
+                    <div className="font-medium truncate text-black dark:text-white dark:group-hover:text-zinc-900">{tool.name}</div>
                     <div className="text-xs text-zinc-400 truncate dark:group-hover:text-zinc-900">
                       {tool.description}
                     </div>
