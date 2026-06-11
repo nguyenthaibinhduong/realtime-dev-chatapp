@@ -411,6 +411,38 @@ export const MessageInput = ({
           )}
         </div>
 
+        {/* File/Image Preview */}
+        {previews.length > 0 && (
+          <div className="px-3 pt-3">
+            <div className="flex max-w-full gap-2 overflow-x-auto rounded-2xl border border-border bg-muted/40 p-2">
+              {previews.map((url, idx) => (
+                <div key={idx} className="relative h-16 w-16 flex-shrink-0">
+                  {files[idx].type.startsWith("image") ? (
+                    <img
+                      src={url}
+                      alt="preview"
+                      className="h-full w-full rounded-xl border border-border object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center rounded-xl border border-border bg-background p-1 text-center text-[10px] text-muted-foreground">
+                      {files[idx].name}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(idx)}
+                    className="absolute -right-1 -top-1 rounded-full bg-red-500 p-1 shadow-lg hover:bg-red-600"
+                    aria-label="Xóa tệp"
+                    title="Xóa tệp"
+                  >
+                    <X className="h-3 w-3 text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Input Section - WhatsApp Style */}
         <div className="h-[63px] px-3 flex items-center">
           <div className="w-full flex items-center justify-between gap-2">
@@ -607,7 +639,7 @@ export const MessageInput = ({
 
           {/* Preview file */}
           {previews.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="hidden">
               {previews.map((url, idx) => (
                 <div key={idx} className="relative">
                   {files[idx].type.startsWith("image") ? (
