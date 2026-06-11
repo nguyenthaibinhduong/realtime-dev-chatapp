@@ -14,12 +14,9 @@ import { chatSocketService } from "@/services/chatSocketService";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (
-    email: string,
-    password: string,
-    captchaToken: string
-  ) => Promise<{ error: string | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signInWithGitHub: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signUp: (
     email: string,
     password: string,
@@ -62,14 +59,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initializeAuth();
   }, []);
 
-  const signIn = async (
-    email: string,
-    password: string,
-    captchaToken: string
-  ) => {
+  const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const response = await authService.login({ email, password, captchaToken });
+      const response = await authService.login({ email, password });
 
       if (response.status && response.data) {
         setUser(response.data.user);
@@ -103,6 +96,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error("Lỗi đăng nhập GitHub:", error);
       toast({
         title: "Đăng nhập GitHub thất bại",
+        description: error.message || "Có lỗi xảy ra",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const { url }: any = await authService.loginWithGoogle();
+      window.location.href = url;
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      toast({
+        title: "Đăng nhập Google thất bại",
         description: error.message || "Có lỗi xảy ra",
         variant: "destructive",
       });
@@ -177,6 +184,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loading,
         signIn,
         signInWithGitHub,
+        signInWithGoogle,
         signUp,
         signOut,
         isAuthenticated,

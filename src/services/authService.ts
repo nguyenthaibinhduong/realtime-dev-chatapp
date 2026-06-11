@@ -127,20 +127,27 @@ class AuthService {
   }
 
   // Đăng nhập với GitHub
-  async loginWithGitHub(): Promise<void> {
+  async loginWithGitHub(): Promise<{ url: string }> {
     return await AuthAPI.goToLoginGithub();
   }
 
-  async loginUpdateWithGitHub(): Promise<void> {
+  async loginWithGoogle(): Promise<{ url: string }> {
+    return await AuthAPI.goToLoginGoogle();
+  }
+
+  async loginUpdateWithGitHub(): Promise<{ url: string }> {
     return await AuthAPI.goToUpdateLoginGithub();
+  }
+
+  async loginUpdateWithGoogle(): Promise<{ url: string }> {
+    return await AuthAPI.goToUpdateLoginGoogle();
   }
 
   async installGitHubApp(): Promise<void> {
     return await AuthAPI.goToInstallGithub();
   }
 
-  // Xử lý callback GitHub
-  async handleGitHubCallback(
+  async handleOAuthCallback(
     access_token: string,
     refresh_token: string
   ): Promise<void> {
@@ -154,6 +161,21 @@ class AuthService {
       console.error("GitHub callback error:", error);
       throw error;
     }
+  }
+
+  // Xử lý callback GitHub
+  async handleGitHubCallback(
+    access_token: string,
+    refresh_token: string
+  ): Promise<void> {
+    return this.handleOAuthCallback(access_token, refresh_token);
+  }
+
+  async handleGoogleCallback(
+    access_token: string,
+    refresh_token: string
+  ): Promise<void> {
+    return this.handleOAuthCallback(access_token, refresh_token);
   }
 
   // Đăng xuất

@@ -1,6 +1,14 @@
 import { Notification } from "@/types/notifications";
 import { get, post, apiget, apipost } from "./Http";
-import { rename, unlink } from "fs";
+
+const getFrontendUrl = () =>
+  typeof window === "undefined" ? undefined : window.location.origin;
+
+const frontendUrlConfig = () => ({
+  params: {
+    frontendUrl: getFrontendUrl(),
+  },
+});
 
 export const AuthAPI = {
   // Không cần auth
@@ -19,10 +27,22 @@ export const AuthAPI = {
     post(`/github-app/callback?${code}`, { code }),
   confirmEmail: async (token: string) =>
     get(`/auth/confirm-email?token=${encodeURIComponent(token)}`),
-  goToLoginGithub: async () => get("/auth/github-oauth/redirect"),
+  goToLoginGithub: async () =>
+    get("/auth/github-oauth/redirect", frontendUrlConfig()),
+  goToLoginGoogle: async () =>
+    get("/auth/google-oauth/redirect", frontendUrlConfig()),
   goToInstallGithub: async () => apipost("/github-app/redirect"),
   goToUpdateLoginGithub: async () =>
-    apipost("/auth/github-oauth/redirect-update"),
+    apipost("/auth/github-oauth/redirect-update", undefined, frontendUrlConfig()),
+  goToUpdateLoginGoogle: async () =>
+    apipost("/auth/google-oauth/redirect-update", undefined, frontendUrlConfig()),
+  googleOAuthCallback: async (code: string, state?: string) =>
+    get("/auth/google-oauth/callback", {
+      params: {
+        code,
+        ...(state ? { state } : {}),
+      },
+    }),
   updatePassword: async (data: any) => apipost("/auth/update-password", data),
   resetPassword: async (data: any) => apipost("/auth/reset-password", data),
 };

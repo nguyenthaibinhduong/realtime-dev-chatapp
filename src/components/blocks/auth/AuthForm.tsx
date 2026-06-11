@@ -1,396 +1,710 @@
-import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import ReCAPTCHA from "react-google-recaptcha";
+import { FormEvent, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Github,
+  KeyRound,
+  Loader2,
+  Lock,
+  Mail,
+  MessageSquare,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { AuthAPI } from "@/api/api";
 import { useToast } from "@/hooks/useToast";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Eye, EyeOff, MessageSquare, Code2, Users, Zap, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const GoogleIcon = () => (
+  <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9C6.71 7.31 9.14 5.38 12 5.38z"
+    />
+  </svg>
+);
+
+type FieldErrors = Partial<Record<"email" | "password" | "username" | "confirmPassword" | "forgotEmail", string>>;
+
+const getPasswordRules = (password: string) => [
+  { label: "Tối thiểu 8 ký tự", valid: password.length >= 8 },
+  { label: "Có chữ hoa", valid: /[A-Z]/.test(password) },
+  { label: "Có chữ thường", valid: /[a-z]/.test(password) },
+  { label: "Có chữ số", valid: /\d/.test(password) },
+];
 
 export default function AuthForm() {
-    const [isLoading, setIsLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-    const recaptchaRef = useRef<ReCAPTCHA>(null);
-    const navigate = useNavigate();
-    const { toast } = useToast();
-    const { signIn, signUp, user } = useAuth();
+  const [activeTab, setActiveTab] = useState("signin");
+  const [isLoading, setIsLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<"google" | "github" | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
 
-    const handleCaptchaChange = (token: string | null) => {
-        setCaptchaToken(token);
-    };
+  const [signin, setSignin] = useState({ email: "", password: "" });
+  const [signup, setSignup] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
 
-    const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsLoading(true);
+  const { toast } = useToast();
+  const { signIn, signUp, signInWithGitHub, signInWithGoogle } = useAuth();
 
-        const formData = new FormData(e.currentTarget);
-        const email = (formData.get("email") as string)?.trim();
-        const password = formData.get("password") as string;
+  const passwordRules = useMemo(() => getPasswordRules(signup.password), [signup.password]);
 
-        if (!email || !password) {
-            toast({
-                title: "Thiếu thông tin",
-                description: "Nhập email và mật khẩu",
-                variant: "destructive"
-            });
-            setIsLoading(false);
-            return;
-        }
+  const passwordStrength = passwordRules.filter((rule) => rule.valid).length;
 
-        if (!captchaToken) {
-            toast({
-                title: "Xác thực reCAPTCHA",
-                description: "Vui lòng xác nhận bạn không phải là robot",
-                variant: "destructive"
-            });
-            setIsLoading(false);
-            return;
-        }
+  const setFieldError = (name: keyof FieldErrors, message?: string) => {
+    setErrors((current) => {
+      const next = { ...current };
+      if (message) next[name] = message;
+      else delete next[name];
+      return next;
+    });
+  };
 
-        const res: any = await signIn(email, password, captchaToken);
+  const validateSignin = () => {
+    const nextErrors: FieldErrors = {};
+    if (!emailRegex.test(signin.email.trim())) nextErrors.email = "Email không hợp lệ.";
+    if (!signin.password) nextErrors.password = "Vui lòng nhập mật khẩu.";
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
 
-        // Reset captcha after attempt
-        recaptchaRef.current?.reset();
-        setCaptchaToken(null);
+  const validateSignup = () => {
+    const nextErrors: FieldErrors = {};
+    if (signup.username.trim().length < 2) nextErrors.username = "Tên hiển thị cần ít nhất 2 ký tự.";
+    if (!emailRegex.test(signup.email.trim())) nextErrors.email = "Email không hợp lệ.";
+    if (passwordStrength < 4) nextErrors.password = "Mật khẩu chưa đủ mạnh.";
+    if (signup.confirmPassword !== signup.password) nextErrors.confirmPassword = "Mật khẩu xác nhận không khớp.";
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
 
-        if (res.error) {
-            toast({
-                title: "Lỗi đăng nhập",
-                description: res.error,
-                variant: "destructive"
-            });
-            setIsLoading(false);
-            return;
-        }
+  const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!validateSignin()) return;
 
-        toast({
-            title: "Đăng nhập thành công",
-            description: "Chào mừng bạn quay trở lại!"
-        });
-        setIsLoading(false);
-    };
+    setIsLoading(true);
+    const result = await signIn(signin.email.trim(), signin.password);
+    setIsLoading(false);
 
-    const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsLoading(true);
-        const formData = new FormData(e.currentTarget);
-        const email = formData.get('email') as string;
-        const password = formData.get('password') as string;
-        const username = formData.get('username') as string;
-        const res = await signUp(email, password, username);
-        if (res.error) {
-            toast({
-                title: "Lỗi đăng ký",
-                description: res.error,
-                variant: "destructive"
-            });
-            setIsLoading(false);
-            return;
-        }
-        toast({
-            title: "Đăng ký thành công",
-            description: "Vui lòng kiểm tra email để xác nhận tài khoản."
-        });
-        setIsLoading(false);
-    };
+    if (result.error) {
+      toast({
+        title: "Đăng nhập thất bại",
+        description: result.error,
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const handleForgotPassword = async () => {
-        // Implementation here
-    };
+    window.location.href = "/";
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4">
-            {/* Background Image with Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-900 to-violet-950">
-                {/* Pattern Overlay */}
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNC40MTggMy41ODItOCA4LThzOCAzLjU4MiA4IDgtMy41ODIgOC04IDgtOC0zLjU4Mi04LTh6TTAgMTZjMC00LjQxOCAzLjU4Mi04IDgtOHM4IDMuNTgyIDggOC0zLjU4MiA4LTggOC04LTMuNTgyLTgtOHptMCA0MGMwLTQuNDE4IDMuNTgyLTggOC04czggMy41ODIgOCA4LTMuNTgyIDgtOCA4LTgtMy41ODItOC04em0zNiAwYzAtNC40MTggMy41ODItOCA4LThzOCAzLjU4MiA4IDgtMy41ODIgOC04IDgtOC0zLjU4Mi04LTh6TTEyIDI4YzAtNC40MTggMy41ODItOCA4LThzOCAzLjU4MiA4IDgtMy41ODIgOC04IDgtOC0zLjU4Mi04LTh6bTI0IDBjMC00LjQxOCAzLjU4Mi04IDgtOHM4IDMuNTgyIDggOC0zLjU4MiA4LTggOC04LTMuNTgyLTgtOHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-40" />
+  const handleSignUp = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!validateSignup()) return;
 
-                {/* Animated Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
+    setIsLoading(true);
+    const result = await signUp(signup.email.trim(), signup.password, signup.username.trim());
+    setIsLoading(false);
 
-                {/* Floating Geometric Shapes */}
-                <div className="absolute top-20 left-10 w-20 h-20 border-2 border-blue-400/20 rounded-lg rotate-45 animate-float" />
-                <div className="absolute top-40 right-20 w-16 h-16 border-2 border-purple-400/20 rounded-full animate-float animation-delay-2000" />
-                <div className="absolute bottom-32 left-1/4 w-12 h-12 border-2 border-cyan-400/20 rotate-12 animate-float animation-delay-4000" />
-                <div className="absolute bottom-20 right-1/3 w-24 h-24 border-2 border-pink-400/20 rounded-full animate-pulse" />
+    if (result.error) {
+      toast({
+        title: "Đăng ký thất bại",
+        description: result.error,
+        variant: "destructive",
+      });
+      return;
+    }
 
-                {/* Glowing Orbs */}
-                <div className="absolute top-0 -left-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob" />
-                <div className="absolute top-0 -right-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob animation-delay-2000" />
-                <div className="absolute -bottom-8 left-20 w-96 h-96 bg-cyan-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob animation-delay-4000" />
+    toast({
+      title: "Đăng ký thành công",
+      description: "Vui lòng kiểm tra email để xác nhận tài khoản.",
+    });
+    setActiveTab("signin");
+    setSignup({ username: "", email: "", password: "", confirmPassword: "" });
+    setErrors({});
+  };
+
+  const handleGoogleLogin = async () => {
+    setOauthLoading("google");
+    try {
+      await signInWithGoogle();
+    } finally {
+      setOauthLoading(null);
+    }
+  };
+
+  const handleGitHubLogin = async () => {
+    setOauthLoading("github");
+    try {
+      await signInWithGitHub();
+    } finally {
+      setOauthLoading(null);
+    }
+  };
+
+  const handleForgotPassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const email = forgotPasswordEmail.trim();
+
+    if (!emailRegex.test(email)) {
+      setFieldError("forgotEmail", "Email không hợp lệ.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response: any = await AuthAPI.resetPassword({ email });
+      toast({
+        title: response?.status === 200 ? "Đã gửi yêu cầu" : "Không thể gửi yêu cầu",
+        description: response?.msg || "Nếu email tồn tại, hệ thống sẽ gửi hướng dẫn đặt lại mật khẩu.",
+        variant: response?.status === 200 ? "default" : "destructive",
+      });
+
+      if (response?.status === 200 || response?.status === true) {
+        setShowForgotPassword(false);
+        setForgotPasswordEmail("");
+        setErrors({});
+      }
+    } catch (error: any) {
+      toast({
+        title: "Không thể đặt lại mật khẩu",
+        description: error?.msg || error?.message || "Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const authDisabled = isLoading || Boolean(oauthLoading);
+
+  return (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-100 p-4 text-slate-950 dark:bg-slate-950 dark:text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(59,130,246,0.18),transparent_28%),radial-gradient(circle_at_85%_20%,rgba(168,85,247,0.16),transparent_24%),linear-gradient(135deg,#eff6ff_0%,#eef2ff_42%,#f8fafc_100%)] dark:bg-[radial-gradient(circle_at_20%_10%,rgba(59,130,246,0.22),transparent_30%),radial-gradient(circle_at_86%_18%,rgba(168,85,247,0.20),transparent_26%),linear-gradient(135deg,#1e1b4b_0%,#0f172a_48%,#2e1065_100%)]" />
+      <div className="absolute inset-0 opacity-[0.22] dark:opacity-30 bg-[linear-gradient(rgba(30,64,175,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(30,64,175,0.22)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      <div className="pointer-events-none absolute left-8 top-20 hidden h-20 w-20 rotate-45 rounded-lg border border-blue-400/30 animate-float lg:block" />
+      <div className="pointer-events-none absolute bottom-20 right-16 hidden h-24 w-24 rounded-full border border-purple-400/30 animate-float animation-delay-2000 lg:block" />
+      <div className="pointer-events-none absolute bottom-1/3 left-1/4 hidden h-12 w-12 rotate-12 rounded-md border border-cyan-400/30 animate-float animation-delay-4000 md:block" />
+
+      <div className="fixed right-4 top-4 z-50">
+        <ThemeToggle
+          tooltipSide="bottom"
+          className="border-white/30 bg-white/75 text-slate-900 shadow-sm backdrop-blur hover:bg-white dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+        />
+      </div>
+
+      <Button
+        asChild
+        variant="outline"
+        className="fixed left-4 top-4 z-50 hidden border-white/30 bg-white/75 text-slate-800 shadow-sm backdrop-blur hover:bg-white dark:bg-white/10 dark:text-white dark:hover:bg-white/20 sm:inline-flex"
+      >
+        <Link to="/landing">Giới thiệu sản phẩm</Link>
+      </Button>
+
+      <div className="relative z-10 grid w-full max-w-6xl items-center gap-8 py-16 lg:grid-cols-[1fr_430px]">
+        <section className="hidden max-w-2xl space-y-7 lg:block">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-white/60 px-3 py-1 text-sm font-medium text-blue-800 shadow-sm backdrop-blur dark:border-blue-300/20 dark:bg-white/10 dark:text-blue-100">
+            <ShieldCheck className="h-4 w-4" />
+            Secure realtime workspace
+          </div>
+
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25">
+                <MessageSquare className="h-6 w-6" />
+              </div>
+              <h1 className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 bg-clip-text text-5xl font-bold tracking-normal text-transparent dark:from-blue-300 dark:via-purple-300 dark:to-cyan-300">
+                CodeSync Chat
+              </h1>
             </div>
+            <p className="max-w-xl text-base leading-7 text-slate-700 dark:text-slate-200">
+              Đăng nhập để tiếp tục trao đổi, chia sẻ code và đồng bộ công việc với team trong cùng một không gian.
+            </p>
+          </div>
 
-            {/* Content Container - Smaller and Compact */}
-            <div className="relative z-10 w-full max-w-5xl flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
-                {/* Left Side - Introduction with Glass Effect */}
-                <div className="flex-1 text-black dark:text-white space-y-5 max-w-lg">
-                    {/* Hero Section with Glass Card */}
-                    <div className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl hover:bg-white/10 transition-all duration-300">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg shadow-blue-500/50">
-                                <MessageSquare className="h-6 w-6 text-black dark:text-white" />
-                            </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                                CodeSync Chat
-                            </h1>
-                        </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              { icon: Sparkles, label: "Code sharing", text: "Snippet, review và syntax highlight" },
+              { icon: Users, label: "Team channels", text: "Phòng chat theo nhóm dự án" },
+              { icon: ShieldCheck, label: "OAuth ready", text: "Google và GitHub OAuth" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="group rounded-lg border border-white/60 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/10 dark:shadow-black/20"
+              >
+                <item.icon className="mb-3 h-5 w-5 text-blue-700 transition group-hover:scale-110 dark:text-cyan-300" />
+                <h2 className="text-sm font-semibold text-slate-950 dark:text-white">{item.label}</h2>
+                <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-                        <p className="text-sm lg:text-base text-gray-300 leading-relaxed mb-3">
-                            Nền tảng giao tiếp thời gian thực cho đội ngũ phát triển
-                        </p>
+        <Card className="auth-card-in w-full overflow-hidden rounded-lg border-white/60 bg-white/85 shadow-2xl shadow-blue-950/10 backdrop-blur-2xl dark:border-white/15 dark:bg-white/[0.08] dark:text-white dark:shadow-black/50">
+          <div className="h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500" />
+          {!showForgotPassword ? (
+            <>
+              <CardHeader className="space-y-2 pb-4">
+                <div className="mb-1 flex items-center justify-between">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 lg:hidden">
+                    <MessageSquare className="h-5 w-5" />
+                  </div>
+                  <span className="rounded-full border border-blue-500/15 bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-200">
+                    OAuth enabled
+                  </span>
+                </div>
+                <CardTitle className="text-2xl text-slate-950 dark:text-white">Đăng nhập</CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-300">
+                  Sử dụng email, Google hoặc GitHub để vào CodeSync Chat.
+                </CardDescription>
+              </CardHeader>
 
-                        <p className="text-xs text-gray-400 leading-relaxed">
-                            Kết hợp chat realtime, chia sẻ code và tích hợp GitHub. Tăng hiệu suất làm việc nhóm.
-                        </p>
-                    </div>
-
-                    {/* Features Grid - Compact */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="group p-3 bg-gradient-to-br from-blue-500/10 to-blue-600/5 backdrop-blur-md rounded-xl border border-blue-400/20 hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300">
-                            <div className="p-2 bg-blue-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
-                                <Code2 className="h-4 w-4 text-blue-400" />
-                            </div>
-                            <h3 className="font-semibold text-xs mb-1 text-blue-300">Code Sharing</h3>
-                            <p className="text-[10px] text-gray-400 leading-tight">Syntax highlighting</p>
-                        </div>
-                        <div className="group p-3 bg-gradient-to-br from-purple-500/10 to-purple-600/5 backdrop-blur-md rounded-xl border border-purple-400/20 hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
-                            <div className="p-2 bg-purple-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
-                                <Users className="h-4 w-4 text-purple-400" />
-                            </div>
-                            <h3 className="font-semibold text-xs mb-1 text-purple-300">Team Work</h3>
-                            <p className="text-[10px] text-gray-400 leading-tight">Channels & threads</p>
-                        </div>
-                        <div className="group p-3 bg-gradient-to-br from-yellow-500/10 to-amber-600/5 backdrop-blur-md rounded-xl border border-yellow-400/20 hover:border-yellow-400/40 hover:shadow-lg hover:shadow-yellow-500/20 transition-all duration-300">
-                            <div className="p-2 bg-yellow-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
-                                <Zap className="h-4 w-4 text-yellow-400" />
-                            </div>
-                            <h3 className="font-semibold text-xs mb-1 text-yellow-300">Real-time</h3>
-                            <p className="text-[10px] text-gray-400 leading-tight">WebSocket sync</p>
-                        </div>
-                        <div className="group p-3 bg-gradient-to-br from-green-500/10 to-emerald-600/5 backdrop-blur-md rounded-xl border border-green-400/20 hover:border-green-400/40 hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300">
-                            <div className="p-2 bg-green-500/20 rounded-lg w-fit mb-2 group-hover:scale-110 transition-transform">
-                                <Shield className="h-4 w-4 text-green-400" />
-                            </div>
-                            <h3 className="font-semibold text-xs mb-1 text-green-300">Secure</h3>
-                            <p className="text-[10px] text-gray-400 leading-tight">Authentication</p>
-                        </div>
-                    </div>
+              <CardContent className="space-y-5">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 gap-2 border-[#dadce0] bg-white text-[#3c4043] shadow-sm transition hover:bg-[#f8fafd] hover:text-[#202124] disabled:opacity-70"
+                    onClick={handleGoogleLogin}
+                    disabled={authDisabled}
+                  >
+                    {oauthLoading === "google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
+                    Google
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 gap-2 border-slate-300 bg-slate-950 text-white shadow-sm transition hover:bg-slate-800 hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                    onClick={handleGitHubLogin}
+                    disabled={authDisabled}
+                  >
+                    {oauthLoading === "github" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Github className="h-4 w-4" />}
+                    GitHub
+                  </Button>
                 </div>
 
-                {/* Right Side - Auth Form with Enhanced Glass Effect */}
-                <Card className="w-full max-w-sm bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 shadow-2xl shadow-black/50 hover:shadow-blue-500/20 transition-all duration-300">
-                    <CardHeader className="text-center pb-3 space-y-1">
-                        <div className="inline-block mx-auto mb-2 p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-lg shadow-blue-500/50">
-                            <MessageSquare className="h-5 w-5 text-black dark:text-white" />
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-slate-200 dark:border-white/15" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white/85 px-3 text-slate-500 dark:bg-transparent dark:text-slate-400">Hoặc</span>
+                  </div>
+                </div>
+
+                <Tabs value={activeTab} onValueChange={(value) => {
+                  setActiveTab(value);
+                  setErrors({});
+                }}>
+                  <TabsList className="grid h-11 w-full grid-cols-2 rounded-lg border border-slate-200 bg-slate-100 p-1 dark:border-white/10 dark:bg-white/10">
+                    <TabsTrigger
+                      value="signin"
+                      className="rounded-md text-slate-600 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm dark:text-slate-300 dark:data-[state=active]:bg-blue-600 dark:data-[state=active]:text-white"
+                    >
+                      Đăng nhập
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="signup"
+                      className="rounded-md text-slate-600 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm dark:text-slate-300 dark:data-[state=active]:bg-blue-600 dark:data-[state=active]:text-white"
+                    >
+                      Đăng ký
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="signin" className="mt-5">
+                    <form className="space-y-4" onSubmit={handleSignIn} noValidate>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-slate-700 dark:text-slate-200">Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            autoComplete="email"
+                            placeholder="you@company.com"
+                            value={signin.email}
+                            onChange={(event) => {
+                              const email = event.target.value;
+                              setSignin((current) => ({ ...current, email }));
+                              if (!email || emailRegex.test(email.trim())) setFieldError("email");
+                            }}
+                            onBlur={() => {
+                              if (signin.email && !emailRegex.test(signin.email.trim())) setFieldError("email", "Email không hợp lệ.");
+                            }}
+                            className={cn(
+                              "h-11 border-slate-200 bg-white pl-10 text-slate-950 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 dark:border-white/15 dark:bg-white/10 dark:text-white",
+                              errors.email && "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+                            )}
+                            aria-invalid={Boolean(errors.email)}
+                          />
                         </div>
-                        <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Chào mừng trở lại</CardTitle>
-                        <CardDescription className="text-xs text-gray-400">
-                            Đăng nhập để tiếp tục
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="px-6 pb-6">
-                        <Tabs defaultValue="signin" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 bg-white/5 backdrop-blur-md border border-white/10 p-1">
-                                <TabsTrigger
-                                    value="signin"
-                                    className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
-                                >
-                                    Đăng nhập
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="signup"
-                                    className="text-xs text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-black dark:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/50 transition-all rounded-md"
-                                >
-                                    Đăng ký
-                                </TabsTrigger>
-                            </TabsList>
+                        {errors.email && <FieldError message={errors.email} />}
+                      </div>
 
-                            <TabsContent value="signin" className="space-y-3 mt-4">
-                                <form onSubmit={handleSignIn} className="space-y-3">
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="email" className="text-xs text-gray-300">
-                                            Email
-                                        </Label>
-                                        <Input
-                                            id="email"
-                                            name="email"
-                                            type="text"
-                                            placeholder="your@email.com"
-                                            className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="password" className="text-xs text-gray-300">
-                                            Mật khẩu
-                                        </Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="password"
-                                                name="password"
-                                                type={showPassword ? "text" : "password"}
-                                                placeholder="••••••••"
-                                                className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 pr-10 transition-all"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className="absolute right-0 top-0 h-9 w-9 px-0 hover:bg-white/10"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                            >
-                                                {showPassword ? (
-                                                    <EyeOff className="h-4 w-4 text-gray-400" />
-                                                ) : (
-                                                    <Eye className="h-4 w-4 text-gray-400" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <Label htmlFor="password" className="text-slate-700 dark:text-slate-200">Mật khẩu</Label>
+                          <button
+                            type="button"
+                            className="text-sm font-medium text-blue-700 transition hover:text-blue-900 dark:text-blue-300 dark:hover:text-cyan-200"
+                            onClick={() => {
+                              setShowForgotPassword(true);
+                              setErrors({});
+                            }}
+                          >
+                            Quên mật khẩu?
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <Input
+                            id="password"
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            autoComplete="current-password"
+                            placeholder="Nhập mật khẩu"
+                            value={signin.password}
+                            onChange={(event) => {
+                              const password = event.target.value;
+                              setSignin((current) => ({ ...current, password }));
+                              if (password) setFieldError("password");
+                            }}
+                            className={cn(
+                              "h-11 border-slate-200 bg-white pl-10 pr-10 text-slate-950 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 dark:border-white/15 dark:bg-white/10 dark:text-white",
+                              errors.password && "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+                            )}
+                            aria-invalid={Boolean(errors.password)}
+                          />
+                          <PasswordToggle
+                            shown={showPassword}
+                            onClick={() => setShowPassword((value) => !value)}
+                          />
+                        </div>
+                        {errors.password && <FieldError message={errors.password} />}
+                      </div>
 
-                                    {/* Google reCAPTCHA */}
-                                    <div className="flex justify-center py-2">
-                                        <ReCAPTCHA
-                                            ref={recaptchaRef}
-                                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                                            onChange={handleCaptchaChange}
-                                            theme="dark"
-                                        />
-                                    </div>
+                      <Button
+                        type="submit"
+                        className="group h-11 w-full gap-2 overflow-hidden bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-500/35"
+                        disabled={authDisabled}
+                      >
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />}
+                        Đăng nhập
+                      </Button>
+                    </form>
+                  </TabsContent>
 
-                                    <Button
-                                        type="button"
-                                        variant="link"
-                                        className="w-full px-0 text-xs text-blue-400 hover:text-blue-300 h-auto py-1"
-                                        onClick={handleForgotPassword}
-                                    >
-                                        Quên mật khẩu?
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
-                                        disabled={isLoading || !captchaToken}
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Đang đăng nhập...
-                                            </>
-                                        ) : (
-                                            "Đăng nhập"
-                                        )}
-                                    </Button>
-                                </form>
-                            </TabsContent>
+                  <TabsContent value="signup" className="mt-5">
+                    <form className="space-y-4" onSubmit={handleSignUp} noValidate>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-username" className="text-slate-700 dark:text-slate-200">Tên hiển thị</Label>
+                        <Input
+                          id="signup-username"
+                          name="username"
+                          autoComplete="name"
+                          placeholder="Nguyen Van A"
+                          value={signup.username}
+                          onChange={(event) => {
+                            const username = event.target.value;
+                            setSignup((current) => ({ ...current, username }));
+                            if (username.trim().length >= 2) setFieldError("username");
+                          }}
+                          className={cn(
+                            "h-11 border-slate-200 bg-white text-slate-950 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 dark:border-white/15 dark:bg-white/10 dark:text-white",
+                            errors.username && "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+                          )}
+                          aria-invalid={Boolean(errors.username)}
+                        />
+                        {errors.username && <FieldError message={errors.username} />}
+                      </div>
 
-                            <TabsContent value="signup" className="space-y-3 mt-4">
-                                <form onSubmit={handleSignUp} className="space-y-3">
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="signup-username" className="text-xs text-gray-300">
-                                            Tên người dùng
-                                        </Label>
-                                        <Input
-                                            id="signup-username"
-                                            name="username"
-                                            type="text"
-                                            placeholder="johndoe"
-                                            className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="signup-email" className="text-xs text-gray-300">
-                                            Email
-                                        </Label>
-                                        <Input
-                                            id="signup-email"
-                                            name="email"
-                                            type="email"
-                                            placeholder="your@email.com"
-                                            className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="signup-password" className="text-xs text-gray-300">
-                                            Mật khẩu
-                                        </Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="signup-password"
-                                                name="password"
-                                                type={showPassword ? "text" : "password"}
-                                                placeholder="••••••••"
-                                                className="bg-white/5 backdrop-blur-md border-white/20 text-black dark:text-white text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 h-9 pr-10 transition-all"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className="absolute right-0 top-0 h-9 w-9 px-0 hover:bg-white/10"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                            >
-                                                {showPassword ? (
-                                                    <EyeOff className="h-4 w-4 text-gray-400" />
-                                                ) : (
-                                                    <Eye className="h-4 w-4 text-gray-400" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <Button
-                                        type="submit"
-                                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-black dark:text-white text-sm h-9 font-medium shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Đang đăng ký...
-                                            </>
-                                        ) : (
-                                            "Đăng ký"
-                                        )}
-                                    </Button>
-                                </form>
-                            </TabsContent>
-                        </Tabs>
-                    </CardContent>
-                </Card>
-            </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email" className="text-slate-700 dark:text-slate-200">Email</Label>
+                        <Input
+                          id="signup-email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          placeholder="you@company.com"
+                          value={signup.email}
+                          onChange={(event) => {
+                            const email = event.target.value;
+                            setSignup((current) => ({ ...current, email }));
+                            if (!email || emailRegex.test(email.trim())) setFieldError("email");
+                          }}
+                          onBlur={() => {
+                            if (signup.email && !emailRegex.test(signup.email.trim())) setFieldError("email", "Email không hợp lệ.");
+                          }}
+                          className={cn(
+                            "h-11 border-slate-200 bg-white text-slate-950 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 dark:border-white/15 dark:bg-white/10 dark:text-white",
+                            errors.email && "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+                          )}
+                          aria-invalid={Boolean(errors.email)}
+                        />
+                        {errors.email && <FieldError message={errors.email} />}
+                      </div>
 
-            {/* CSS Animations */}
-            <style>{`
-                @keyframes blob {
-                    0%, 100% { transform: translate(0px, 0px) scale(1); }
-                    33% { transform: translate(30px, -50px) scale(1.1); }
-                    66% { transform: translate(-20px, 20px) scale(0.9); }
-                }
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px) rotate(0deg); }
-                    50% { transform: translateY(-20px) rotate(10deg); }
-                }
-                @keyframes gradient {
-                    0%, 100% { opacity: 0.5; }
-                    50% { opacity: 0.8; }
-                }
-                .animate-blob {
-                    animation: blob 7s infinite;
-                }
-                .animate-float {
-                    animation: float 6s ease-in-out infinite;
-                }
-                .animate-gradient {
-                    animation: gradient 8s ease-in-out infinite;
-                }
-                .animation-delay-2000 {
-                    animation-delay: 2s;
-                }
-                .animation-delay-4000 {
-                    animation-delay: 4s;
-                }
-            `}</style>
-        </div>
-    );
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password" className="text-slate-700 dark:text-slate-200">Mật khẩu</Label>
+                        <div className="relative">
+                          <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <Input
+                            id="signup-password"
+                            name="password"
+                            type={showSignupPassword ? "text" : "password"}
+                            autoComplete="new-password"
+                            placeholder="Tối thiểu 8 ký tự"
+                            value={signup.password}
+                            onChange={(event) => {
+                              const password = event.target.value;
+                              const nextRules = getPasswordRules(password);
+                              setSignup((current) => ({ ...current, password }));
+                              if (nextRules.every((rule) => rule.valid)) setFieldError("password");
+                              if (signup.confirmPassword && signup.confirmPassword !== password) {
+                                setFieldError("confirmPassword", "Mật khẩu xác nhận không khớp.");
+                              } else {
+                                setFieldError("confirmPassword");
+                              }
+                            }}
+                            className={cn(
+                              "h-11 border-slate-200 bg-white pl-10 pr-10 text-slate-950 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 dark:border-white/15 dark:bg-white/10 dark:text-white",
+                              errors.password && "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+                            )}
+                            aria-invalid={Boolean(errors.password)}
+                          />
+                          <PasswordToggle
+                            shown={showSignupPassword}
+                            onClick={() => setShowSignupPassword((value) => !value)}
+                          />
+                        </div>
+                        <PasswordStrength value={passwordStrength} />
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {passwordRules.map((rule) => (
+                            <div
+                              key={rule.label}
+                              className={cn(
+                                "flex items-center gap-1.5 text-xs",
+                                rule.valid ? "text-green-700 dark:text-green-300" : "text-slate-500 dark:text-slate-400"
+                              )}
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              {rule.label}
+                            </div>
+                          ))}
+                        </div>
+                        {errors.password && <FieldError message={errors.password} />}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-confirm-password" className="text-slate-700 dark:text-slate-200">Xác nhận mật khẩu</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <Input
+                            id="signup-confirm-password"
+                            name="confirmPassword"
+                            type={showSignupConfirmPassword ? "text" : "password"}
+                            autoComplete="new-password"
+                            placeholder="Nhập lại mật khẩu"
+                            value={signup.confirmPassword}
+                            onChange={(event) => {
+                              const confirmPassword = event.target.value;
+                              setSignup((current) => ({ ...current, confirmPassword }));
+                              if (!confirmPassword || confirmPassword === signup.password) setFieldError("confirmPassword");
+                            }}
+                            className={cn(
+                              "h-11 border-slate-200 bg-white pl-10 pr-10 text-slate-950 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 dark:border-white/15 dark:bg-white/10 dark:text-white",
+                              errors.confirmPassword && "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+                            )}
+                            aria-invalid={Boolean(errors.confirmPassword)}
+                          />
+                          <PasswordToggle
+                            shown={showSignupConfirmPassword}
+                            onClick={() => setShowSignupConfirmPassword((value) => !value)}
+                          />
+                        </div>
+                        {errors.confirmPassword && <FieldError message={errors.confirmPassword} />}
+                      </div>
+
+                      <Button
+                        type="submit"
+                        className="group h-11 w-full gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-500/35"
+                        disabled={authDisabled}
+                      >
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />}
+                        Tạo tài khoản
+                      </Button>
+                    </form>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </>
+          ) : (
+            <>
+              <CardHeader className="space-y-2">
+                <CardTitle className="text-2xl text-slate-950 dark:text-white">Đặt lại mật khẩu</CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-300">
+                  Nhập email tài khoản. Nếu hợp lệ, hệ thống sẽ gửi hướng dẫn đặt lại mật khẩu.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-4" onSubmit={handleForgotPassword} noValidate>
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email" className="text-slate-700 dark:text-slate-200">Email</Label>
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      value={forgotPasswordEmail}
+                      onChange={(event) => {
+                        const email = event.target.value;
+                        setForgotPasswordEmail(email);
+                        if (!email || emailRegex.test(email.trim())) setFieldError("forgotEmail");
+                      }}
+                      placeholder="you@company.com"
+                      className={cn(
+                        "h-11 border-slate-200 bg-white text-slate-950 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 dark:border-white/15 dark:bg-white/10 dark:text-white",
+                        errors.forgotEmail && "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+                      )}
+                      aria-invalid={Boolean(errors.forgotEmail)}
+                    />
+                    {errors.forgotEmail && <FieldError message={errors.forgotEmail} />}
+                  </div>
+                  <Button
+                    type="submit"
+                    className="h-11 w-full gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-700 hover:to-cyan-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                    Gửi hướng dẫn
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-11 w-full text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setErrors({});
+                    }}
+                    disabled={isLoading}
+                  >
+                    Quay lại đăng nhập
+                  </Button>
+                </form>
+              </CardContent>
+            </>
+          )}
+        </Card>
+      </div>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-18px) rotate(8deg); }
+        }
+        @keyframes auth-card-in {
+          from { opacity: 0; transform: translateY(18px) scale(0.985); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-float {
+          animation: float 7s ease-in-out infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+        .auth-card-in {
+          animation: auth-card-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        }
+      `}</style>
+    </main>
+  );
+}
+
+function FieldError({ message }: { message: string }) {
+  return (
+    <p className="flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-300">
+      <AlertCircle className="h-3.5 w-3.5" />
+      {message}
+    </p>
+  );
+}
+
+function PasswordToggle({ shown, onClick }: { shown: boolean; onClick: () => void }) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="absolute right-1 top-1 h-9 w-9 text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+      onClick={onClick}
+      aria-label={shown ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+    >
+      {shown ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+    </Button>
+  );
+}
+
+function PasswordStrength({ value }: { value: number }) {
+  const labels = ["", "Yếu", "Trung bình", "Khá", "Mạnh"];
+  const colors = ["bg-transparent", "bg-red-500", "bg-amber-500", "bg-blue-500", "bg-green-500"];
+
+  return (
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-4 gap-1">
+        {[1, 2, 3, 4].map((step) => (
+          <span
+            key={step}
+            className={cn("h-1.5 rounded-full bg-slate-200 dark:bg-white/15", step <= value && colors[value])}
+          />
+        ))}
+      </div>
+      {value > 0 && (
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Độ mạnh: <span className="font-medium text-slate-700 dark:text-slate-200">{labels[value]}</span>
+        </p>
+      )}
+    </div>
+  );
 }

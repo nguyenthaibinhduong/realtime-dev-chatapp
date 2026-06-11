@@ -13,10 +13,11 @@ import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import NotificationsPage from "./pages/NotificationsPage";
 import { GitHubCallback } from "./components/GithubCallback";
+import { GoogleCallback } from "./components/GoogleCallback";
 import ConfirmEmailPage from "./components/ConfirmEmail";
 import GitHubRegister from "./pages/GitHubRegister";
 import SettingsPage from "./pages/Setting";
-import GithubRegisterLayout from "./components/GithubRegisterLayout";
+// import GithubRegisterLayout from "./components/GithubRegisterLayout";
 import GitHubPage from "./pages/GitHubPage";
 import Blogs from "./pages/Blogs";
 import Error from "./pages/Error";
@@ -43,18 +44,18 @@ const App = () => (
                 <Sonner />
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/landing" element={<Landing />} /> 
+                  <Route path="/landing" element={<Landing />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/github/register" element={<GitHubRegister />} />
                   <Route path="/github" element={<GitHubPage />} />
                   <Route path="/auth/github/callback" element={<GitHubCallback />} />
+                  <Route path="/auth/google/callback" element={<GoogleCallback />} />
                   <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="*" element={<NotFound />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/blogs" element={<Blogs />} />
                   <Route path="/settings" element={<SettingsPage />} />
-
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/admin/:section" element={<AdminPage />} />
                   <Route path="/error" element={<Error />} />
