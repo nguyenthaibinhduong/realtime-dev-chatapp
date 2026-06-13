@@ -17,6 +17,10 @@ const backendProxy = {
         return path.replace(/^\/api\/v1\/auth/, "/v1/api/auth");
       }
 
+      if (path.startsWith("/api/v1/git/")) {
+        return path.replace(/^\/api\/v1\/git/, "/v1/api/git");
+      }
+
       return path.replace(/^\/api/, "/v1/api");
     },
   },
