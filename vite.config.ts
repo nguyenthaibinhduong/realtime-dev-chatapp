@@ -4,8 +4,8 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-const backendTarget = "http://180.93.43.146:3088";
-// const backendTarget = "http://localhost:3088";
+// const backendTarget = "http://180.93.43.146:3088";
+const backendTarget = "http://localhost:3088";
 
 const backendProxy = {
   "/api": {
@@ -19,6 +19,11 @@ const backendProxy = {
 
       if (path.startsWith("/api/v1/git/")) {
         return path.replace(/^\/api\/v1\/git/, "/v1/api/git");
+      }
+
+
+      if (path.startsWith("/api/v1/github-app/")) {
+        return path.replace(/^\/api\/v1\/github-app/, "/v1/api/github-app");
       }
 
       return path.replace(/^\/api/, "/v1/api");

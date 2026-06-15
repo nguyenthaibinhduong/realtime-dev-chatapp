@@ -9,6 +9,10 @@
       "destination": "http://180.93.43.146:3088/v1/api/git/:path*"
     },
     {
+      "source": "/api/v1/github-app/:path*",
+      "destination": "http://180.93.43.146:3088/v1/api/github-app/:path*"
+    },
+    {
       "source": "/api/:path*",
       "destination": "http://180.93.43.146:3088/v1/api/:path*"
     },
