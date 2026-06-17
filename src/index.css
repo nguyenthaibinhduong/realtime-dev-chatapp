@@ -6,6 +6,7 @@
 All colors MUST be HSL.
 */
 @keyframes flash-white {
+
   0%,
   100% {
     background: white;
@@ -21,10 +22,12 @@ All colors MUST be HSL.
 }
 
 @keyframes highlight-pulse {
+
   0%,
   100% {
     background-color: transparent;
   }
+
   50% {
     background-color: rgba(59, 130, 246, 0.2);
   }
@@ -153,6 +156,17 @@ All colors MUST be HSL.
     height: 100%;
     overflow: hidden;
   }
+
+  html:has(.landing-page),
+  body:has(.landing-page),
+  #root:has(.landing-page) {
+    overflow: unset !important;
+  }
+
+  /* #root has:.landing-page {
+    height: unset !important;
+    overflow: unset !important;
+  } */
 
   body {
     @apply bg-background text-foreground font-sans antialiased;

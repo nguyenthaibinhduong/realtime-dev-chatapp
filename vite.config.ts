@@ -4,8 +4,8 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// const backendTarget = "http://180.93.43.146:3088";
-const backendTarget = "http://localhost:3088";
+const backendTarget = "http://180.93.43.146:3088";
+// const backendTarget = "http://localhost:3088";
 
 const backendProxy = {
   "/api": {
