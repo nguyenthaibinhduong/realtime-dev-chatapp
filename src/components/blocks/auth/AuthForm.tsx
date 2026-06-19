@@ -219,7 +219,7 @@ export default function AuthForm() {
   const authDisabled = isLoading || Boolean(oauthLoading);
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-100 p-4 text-slate-950 dark:bg-slate-950 dark:text-white">
+    <main className="landing-page relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-100 p-4 text-slate-950 dark:bg-slate-950 dark:text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(59,130,246,0.18),transparent_28%),radial-gradient(circle_at_85%_20%,rgba(168,85,247,0.16),transparent_24%),linear-gradient(135deg,#eff6ff_0%,#eef2ff_42%,#f8fafc_100%)] dark:bg-[radial-gradient(circle_at_20%_10%,rgba(59,130,246,0.22),transparent_30%),radial-gradient(circle_at_86%_18%,rgba(168,85,247,0.20),transparent_26%),linear-gradient(135deg,#1e1b4b_0%,#0f172a_48%,#2e1065_100%)]" />
       <div className="absolute inset-0 opacity-[0.22] dark:opacity-30 bg-[linear-gradient(rgba(30,64,175,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(30,64,175,0.22)_1px,transparent_1px)] bg-[size:44px_44px]" />
       <div className="pointer-events-none absolute left-8 top-20 hidden h-20 w-20 rotate-45 rounded-lg border border-blue-400/30 animate-float lg:block" />
@@ -280,7 +280,7 @@ export default function AuthForm() {
           </div>
         </section>
 
-        <Card className="auth-card-in w-full overflow-hidden rounded-lg border-white/60 bg-white/85 shadow-2xl shadow-blue-950/10 backdrop-blur-2xl dark:border-white/15 dark:bg-white/[0.08] dark:text-white dark:shadow-black/50">
+        <Card className="auth-card-in w-full rounded-lg border-white/60 bg-white/85 shadow-2xl shadow-blue-950/10 backdrop-blur-2xl dark:border-white/15 dark:bg-white/[0.08] dark:text-white dark:shadow-black/50">
           <div className="h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500" />
           {!showForgotPassword ? (
             <>
@@ -289,48 +289,55 @@ export default function AuthForm() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 lg:hidden">
                     <MessageSquare className="h-5 w-5" />
                   </div>
-                  <span className="rounded-full border border-blue-500/15 bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-200">
+                  {/* <span className="rounded-full border border-blue-500/15 bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-200">
                     OAuth enabled
-                  </span>
+                  </span> */}
                 </div>
-                <CardTitle className="text-2xl text-slate-950 dark:text-white">Đăng nhập</CardTitle>
+                <CardTitle className="text-2xl text-slate-950 dark:text-white">{activeTab == 'signin' ? 'Đăng nhập' : 'Đăng ký'}</CardTitle>
+
                 <CardDescription className="text-slate-600 dark:text-slate-300">
                   Sử dụng email, Google hoặc GitHub để vào CodeSync Chat.
                 </CardDescription>
+
               </CardHeader>
 
               <CardContent className="space-y-5">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-11 gap-2 border-[#dadce0] bg-white text-[#3c4043] shadow-sm transition hover:bg-[#f8fafd] hover:text-[#202124] disabled:opacity-70"
-                    onClick={handleGoogleLogin}
-                    disabled={authDisabled}
-                  >
-                    {oauthLoading === "google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
-                    Google
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-11 gap-2 border-slate-300 bg-slate-950 text-white shadow-sm transition hover:bg-slate-800 hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
-                    onClick={handleGitHubLogin}
-                    disabled={authDisabled}
-                  >
-                    {oauthLoading === "github" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Github className="h-4 w-4" />}
-                    GitHub
-                  </Button>
-                </div>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-slate-200 dark:border-white/15" />
+                {
+                  activeTab == 'signin' &&
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 gap-2 border-[#dadce0] bg-white text-[#3c4043] shadow-sm transition hover:bg-[#f8fafd] hover:text-[#202124] disabled:opacity-70"
+                      onClick={handleGoogleLogin}
+                      disabled={authDisabled}
+                    >
+                      {oauthLoading === "google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
+                      Google
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 gap-2 border-slate-300 bg-slate-950 text-white shadow-sm transition hover:bg-slate-800 hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                      onClick={handleGitHubLogin}
+                      disabled={authDisabled}
+                    >
+                      {oauthLoading === "github" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Github className="h-4 w-4" />}
+                      GitHub
+                    </Button>
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white/85 px-3 text-slate-500 dark:bg-transparent dark:text-slate-400">Hoặc</span>
+                }
+                {
+                  activeTab == 'signin' &&
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-slate-200 dark:border-white/15" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white/85 px-3 text-slate-500 dark:bg-transparent dark:text-slate-400">Hoặc</span>
+                    </div>
                   </div>
-                </div>
+                }
 
                 <Tabs value={activeTab} onValueChange={(value) => {
                   setActiveTab(value);
@@ -691,7 +698,7 @@ function PasswordStrength({ value }: { value: number }) {
   const colors = ["bg-transparent", "bg-red-500", "bg-amber-500", "bg-blue-500", "bg-green-500"];
 
   return (
-    <div className="space-y-1.5">
+    <div className="  space-y-1.5">
       <div className="grid grid-cols-4 gap-1">
         {[1, 2, 3, 4].map((step) => (
           <span
